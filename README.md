@@ -28,7 +28,7 @@ rsam-website/
 1. Create a new GitHub repository (e.g. `rsam-website`)
 2. Push all files in this folder to the `main` branch
 3. Go to **Settings → Pages → Source → Deploy from branch → main / root**
-4. Your site will be live at `https://<your-username>.github.io/rsam-website/`
+4. Your site will be live at `https://manas-adept.github.io/rsam-website/`
 
 ## Customisation checklist
 
