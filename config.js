@@ -39,7 +39,7 @@ const CONFIG = {
 
   /* ── Hero section ───────────────────────────────── */
   hero: {
-    badge:       "Accredited by RSFI · Govt. of India",
+    badge:       "Recognised by UPRSA · RSFI - IndiaSkate",
     titleLine1:  "Rolling",      // displayed in handwriting font (Pacifico)
     titleLine2:  "Moradabad",    // displayed in racing font (Racing Sans One)
     description: "Promoting excellence in roller sports across Moradabad since our founding. Affiliated with Roller Sports Federation of India under the Government of India.",
@@ -53,7 +53,7 @@ const CONFIG = {
   /* ── About section ──────────────────────────────── */
   about: {
     paragraphs: [
-      "The <strong>Roller Sports Association Moradabad (RSAM)</strong> is the apex body governing roller sports in Moradabad district, Uttar Pradesh. We are officially accredited by the <strong>Roller Sports Federation of India (RSFI)</strong>, operating under the Ministry of Youth Affairs &amp; Sports, Government of India.",
+      "The <strong>Roller Sports Association Moradabad (RSAM)</strong> is the apex body governing roller sports in Moradabad district, Uttar Pradesh. We are officially recognized by UPRSA (Uttar Pradesh Roller Sports Association) recognized by the <strong>Roller Sports Federation of India (RSFI)</strong>, operating under the Ministry of Youth Affairs &amp; Sports, Government of India.",
       "Our mission is to identify, nurture, and develop talent in disciplines such as inline skating, artistic skating, speed skating, and roller hockey — and to represent Moradabad athletes at state, national, and international competitions.",
     ],
     stats: [
@@ -66,10 +66,10 @@ const CONFIG = {
 
   /* ── Connect / social ───────────────────────────── */
   connect: {
-    youtube:   "https://www.youtube.com/@YourChannelHandle",  // replace with actual URL
-    instagram: "https://www.instagram.com/YourHandle",         // replace with actual URL
+    youtube:   "https://www.youtube.com/@rsam_mbd",  // replace with actual URL
+    instagram: "https://www.instagram.com/rsam_mbd_official",         // replace with actual URL
     email:     "contact@rsam.in",
-    phone:     "+91-XXXXXXXXXX",
+    phone:     "+91-8057781350",
     address:   "[RSAM Office Address, Moradabad, UP]",
   },
 

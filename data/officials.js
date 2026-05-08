@@ -14,7 +14,7 @@ const OFFICIALS = {
   /* ── Executive Committee ─────────────────────────── */
   executive: [
     {
-      name:             "Ashok K. Singhal",
+      name:             "Ashok Singhal",
       designation:      "President",
       designationClass: "president",
       photo:            "images/president.jpg",
@@ -44,8 +44,8 @@ const OFFICIALS = {
     //   photo:            "images/joint_sec.jpg",
     // },
     {
-      name:             "[Technical Director Name]",
-      designation:      "Technical Director",
+      name:             "Manas Garg",
+      designation:      "Technical",
       designationClass: "technical",
       photo:            "images/technical.jpg",
     },

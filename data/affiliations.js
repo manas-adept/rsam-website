@@ -19,18 +19,18 @@ const AFFILIATIONS = [
   },
   {
     image: "images/affil3.jpg",
-    label: "[Organisation 3]",
+    label: "World Skate",
   },
-  {
-    image: "images/affil4.jpg",
-    label: "[Organisation 4]",
-  },
-  {
-    image: "images/affil5.jpg",
-    label: "[Organisation 5]",
-  },
-  {
-    image: "images/affil6.jpg",
-    label: "[Organisation 6]",
-  },
+  // {
+  //   image: "images/affil4.jpg",
+  //   label: "[Organisation 4]",
+  // },
+  // {
+  //   image: "images/affil5.jpg",
+  //   label: "[Organisation 5]",
+  // },
+  // {
+  //   image: "images/affil6.jpg",
+  //   label: "[Organisation 6]",
+  // },
 ];

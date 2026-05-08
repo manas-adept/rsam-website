@@ -38,19 +38,14 @@ function renderNavbar() {
     <nav class="navbar" id="navbar">
       <div class="nav-inner">
         <div class="nav-logo">
-          <div class="logo-wheel">
-            <svg viewBox="0 0 40 40" width="38" height="38">
-              <circle cx="20" cy="20" r="18" fill="none" stroke="#e01c2e" stroke-width="2"/>
-              <circle cx="20" cy="20" r="6" fill="#e01c2e"/>
-              <line x1="20" y1="2"   x2="20" y2="38"  stroke="#e01c2e" stroke-width="1.5"/>
-              <line x1="2"  y1="20"  x2="38" y2="20"  stroke="#e01c2e" stroke-width="1.5"/>
-              <line x1="6.1" y1="6.1" x2="33.9" y2="33.9" stroke="#e01c2e" stroke-width="1.5"/>
-              <line x1="33.9" y1="6.1" x2="6.1" y2="33.9" stroke="#e01c2e" stroke-width="1.5"/>
+          <div class="logo-img-wrap">
+            <img src="images/rsam-logo.PNG" alt="RSAM Logo" class="logo-img"/>
+            <svg class="logo-ring logo-ring--outer" viewBox="0 0 100 100" aria-hidden="true">
+              <circle cx="50" cy="50" r="47" fill="none" stroke="#e01c2e" stroke-width="2.5" stroke-dasharray="74 222" stroke-linecap="round"/>
             </svg>
-          </div>
-          <div class="logo-text">
-            <span class="logo-abbr">${CONFIG.site.name}</span>
-            <span class="logo-full">${CONFIG.site.fullName}</span>
+            <svg class="logo-ring logo-ring--inner" viewBox="0 0 100 100" aria-hidden="true">
+              <circle cx="50" cy="50" r="34" fill="none" stroke="#c9922a" stroke-width="2" stroke-dasharray="40 174" stroke-linecap="round"/>
+            </svg>
           </div>
         </div>
         <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
@@ -217,18 +212,52 @@ function renderOfficials() {
 function renderNews() {
   if (!CONFIG.sections.news.enabled) return;
 
-  const f = NEWS.featured;
+  const events = NEWS.upcomingEvents || (NEWS.featured ? [NEWS.featured] : []);
 
-  const featuredImg = f.image
-    ? `<img src="${f.image}" alt="${f.title}"/>`
-    : `<div class="placeholder-img-inner">
-        <svg viewBox="0 0 80 80" width="60" height="60">
-          <circle cx="40" cy="40" r="36" fill="none" stroke="rgba(224,28,46,0.4)" stroke-width="3"/>
-          <circle cx="40" cy="40" r="16" fill="rgba(224,28,46,0.2)"/>
-          <line x1="40" y1="4" x2="40" y2="76" stroke="rgba(224,28,46,0.3)" stroke-width="2"/>
-          <line x1="4" y1="40" x2="76" y2="40" stroke="rgba(224,28,46,0.3)" stroke-width="2"/>
-        </svg>
+  function eventSlide(ev) {
+    const img = ev.image
+      ? `<img src="${ev.image}" alt="${ev.title}"/>`
+      : `<div class="placeholder-img-inner">
+          <svg viewBox="0 0 80 80" width="60" height="60">
+            <circle cx="40" cy="40" r="36" fill="none" stroke="rgba(224,28,46,0.4)" stroke-width="3"/>
+            <circle cx="40" cy="40" r="16" fill="rgba(224,28,46,0.2)"/>
+            <line x1="40" y1="4" x2="40" y2="76" stroke="rgba(224,28,46,0.3)" stroke-width="2"/>
+            <line x1="4" y1="40" x2="76" y2="40" stroke="rgba(224,28,46,0.3)" stroke-width="2"/>
+          </svg>
+        </div>`;
+    return `
+      <div class="events-slide">
+        <div class="news-card featured">
+          <div class="news-card-img">
+            ${img}
+            <div class="news-cat">${ev.category}</div>
+          </div>
+          <div class="news-card-body">
+            <div class="news-meta">
+              <span class="news-date">📅 ${ev.date}</span>
+              <span class="news-location">📍 ${ev.location}</span>
+            </div>
+            <h3>${ev.title}</h3>
+            <p>${ev.body}</p>
+            <a href="${ev.linkHref}" class="news-link">${ev.linkText} →</a>
+          </div>
+        </div>
       </div>`;
+  }
+
+  const dots = events.length > 1
+    ? `<div class="events-dots">${events.map((_, i) =>
+        `<button class="events-dot${i === 0 ? ' active' : ''}" data-idx="${i}" aria-label="Event ${i + 1}"></button>`
+      ).join("")}</div>`
+    : "";
+
+  const arrows = events.length > 1 ? `
+    <button class="events-arrow events-arrow--prev" aria-label="Previous event">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <button class="events-arrow events-arrow--next" aria-label="Next event">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>` : "";
 
   const newsItems = NEWS.items.map(item => `
     <div class="news-item fade-in">
@@ -253,20 +282,10 @@ function renderNews() {
         </div>
         <div class="news-layout">
           <div class="news-featured fade-in">
-            <div class="news-card featured">
-              <div class="news-card-img">
-                ${featuredImg}
-                <div class="news-cat">${f.category}</div>
-              </div>
-              <div class="news-card-body">
-                <div class="news-meta">
-                  <span class="news-date">📅 ${f.date}</span>
-                  <span class="news-location">📍 ${f.location}</span>
-                </div>
-                <h3>${f.title}</h3>
-                <p>${f.body}</p>
-                <a href="${f.linkHref}" class="news-link">${f.linkText} →</a>
-              </div>
+            <div class="events-carousel" id="eventsCarousel">
+              <div class="events-track">${events.map(eventSlide).join("")}</div>
+              ${arrows}
+              ${dots}
             </div>
           </div>
           <div class="news-list">${newsItems}</div>
@@ -453,14 +472,15 @@ function renderFooter() {
         <div class="footer-inner">
           <div class="footer-brand">
             <div class="footer-logo">
-              <svg viewBox="0 0 40 40" width="32" height="32">
-                <circle cx="20" cy="20" r="18" fill="none" stroke="#e01c2e" stroke-width="2"/>
-                <circle cx="20" cy="20" r="6" fill="#e01c2e"/>
-                <line x1="20" y1="2"   x2="20" y2="38"  stroke="#e01c2e" stroke-width="1.5"/>
-                <line x1="2"  y1="20"  x2="38" y2="20"  stroke="#e01c2e" stroke-width="1.5"/>
-                <line x1="6.1" y1="6.1" x2="33.9" y2="33.9" stroke="#e01c2e" stroke-width="1.5"/>
-                <line x1="33.9" y1="6.1" x2="6.1" y2="33.9" stroke="#e01c2e" stroke-width="1.5"/>
-              </svg>
+              <div class="logo-img-wrap" style="width:36px;height:36px;">
+                <img src="images/rsam-logo.PNG" alt="RSAM Logo" class="logo-img"/>
+                <svg class="logo-ring logo-ring--outer" viewBox="0 0 100 100" aria-hidden="true">
+                  <circle cx="50" cy="50" r="47" fill="none" stroke="#e01c2e" stroke-width="2.5" stroke-dasharray="74 222" stroke-linecap="round"/>
+                </svg>
+                <svg class="logo-ring logo-ring--inner" viewBox="0 0 100 100" aria-hidden="true">
+                  <circle cx="50" cy="50" r="34" fill="none" stroke="#c9922a" stroke-width="2" stroke-dasharray="40 174" stroke-linecap="round"/>
+                </svg>
+              </div>
               <span>${CONFIG.site.name}</span>
             </div>
             <p>${CONFIG.site.fullName}<br/>Affiliated with RSFI · Govt. of India</p>

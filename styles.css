@@ -198,23 +198,40 @@ code {
   flex-shrink: 0;
 }
 
-.logo-wheel { display: flex; align-items: center; }
-.logo-wheel svg { animation: spin-slow 8s linear infinite; display: block; }
 @keyframes spin-slow { to { transform: rotate(360deg); } }
 
-.logo-text { display: flex; flex-direction: column; }
-.logo-abbr {
-  font-family: 'Rajdhani', sans-serif;
-  font-weight: 700;
-  font-size: 1.4rem;
-  color: var(--text);
-  line-height: 1;
+/* ── PNG logo with animated rings ────────────────── */
+.logo-img-wrap {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  flex-shrink: 0;
 }
-.logo-full {
-  font-size: 0.6rem;
-  color: var(--text-muted);
-  letter-spacing: 0.05em;
-  line-height: 1.2;
+
+.logo-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+.logo-ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.logo-ring--outer {
+  animation: spin-slow 6s linear infinite;
+  filter: drop-shadow(0 0 4px rgba(224,28,46,0.7));
+}
+
+.logo-ring--inner {
+  animation: spin-slow 4s linear infinite reverse;
+  filter: drop-shadow(0 0 3px rgba(201,146,42,0.6));
 }
 
 .nav-links {
@@ -719,6 +736,72 @@ code {
   color: var(--orange);
   font-size: 0.9rem;
   font-weight: 500;
+}
+
+/* ── Events Carousel ─────────────────────────────── */
+.events-carousel {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  touch-action: pan-y;
+}
+
+.events-track {
+  display: flex;
+  transition: transform 0.42s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
+.events-slide {
+  flex: 0 0 100%;
+  min-width: 0;
+}
+
+.events-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: rgba(10,10,15,0.75);
+  border: 1px solid var(--border);
+  color: var(--text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--trans);
+  backdrop-filter: blur(6px);
+}
+.events-arrow:hover {
+  background: var(--orange);
+  border-color: var(--orange);
+  color: #fff;
+}
+.events-arrow--prev { left: 0.6rem; }
+.events-arrow--next { right: 0.6rem; }
+
+.events-dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  padding: 0.6rem 0 0.3rem;
+}
+.events-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all var(--trans);
+  padding: 0;
+}
+.events-dot.active {
+  background: var(--orange);
+  border-color: var(--orange);
+  width: 22px;
+  border-radius: 4px;
 }
 
 /* News list */
