@@ -22,7 +22,7 @@ const HIGHLIGHTS = [
   {
     wide:    true,                       // featured card — keep on first item
     date:    "2026-05-10",
-    images:  ["images/row-event.jpg","images/row-event1.jpg","images/row-event2.jpg","images/row-event5.jpg"],   // add more paths to enable swipe
+    images:  ["images/row-event.JPG","images/row-event1.JPG","images/row-event2.jpg","images/row-event5.jpg"],   // add more paths to enable swipe
     trophy:  "🌟",
     event:   "RUN ON WHEELS 4.0 SKATING MARATHON",
     caption: "Moradabad Skaters Shine at Run on Wheels 4.0 Marathon, Agra",
@@ -30,7 +30,7 @@ const HIGHLIGHTS = [
   },
   {
     date:    "2026-05-02",
-    images:  ["images/highlight1.jpg"],
+    images:  ["images/highlight1.JPG"],
     trophy:  "🏆",
     event:   "District Level Roller Skating Championship Spring",
     caption: "Aryans International School won First Prize in roller speed skating!",
@@ -38,7 +38,7 @@ const HIGHLIGHTS = [
   },
   {
     date:    "2026-05-02",
-    images:  ["images/news_main.jpg","images/highlight2.jpg","images/test.jpg"],
+    images:  ["images/news_main.jpg","images/highlight2.JPG","images/test.JPG"],
     trophy:  "🥇",
     event:   "District Level Roller Skating Championship Spring",
     caption: "Chaitanya Garg sweeps gold in speed skating!",
