@@ -1148,16 +1148,13 @@ code {
 
 .lv-embed-wrap {
   flex: 0 0 560px;
-  position: relative;
-  padding-bottom: 56.25%;
-  height: 0;
+  aspect-ratio: 16 / 9;
   overflow: hidden;
 }
 .lv-embed-wrap iframe {
-  position: absolute;
-  inset: 0;
   width: 100%;
   height: 100%;
+  display: block;
 }
 
 .lv-meta {
@@ -1207,7 +1204,7 @@ code {
 
 @media (max-width: 768px) {
   .lv-card { flex-direction: column; }
-  .lv-embed-wrap { flex: none; width: 100%; padding-bottom: 56.25%; }
+  .lv-embed-wrap { flex: none; width: 100%; aspect-ratio: 16 / 9; }
   .lv-meta { padding: 1rem; }
 }
 

@@ -23,7 +23,7 @@ const CONFIG = {
     officials:   { enabled: true  },
     news:        { enabled: true  },
     highlights:  { enabled: true  },
-    latestVideo:  { enabled: true  },
+    latestVideo:  { enabled: false },
     certificate: { enabled: true  },
     connect:     { enabled: true  },
   },

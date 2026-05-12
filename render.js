@@ -486,7 +486,7 @@ function renderLatestVideo() {
       const item = data.items && data.items[0];
       if (!item) throw new Error("no items");
 
-      const videoId = item.link.split("v=")[1];
+      const videoId = new URL(item.link).searchParams.get("v");
       const title   = item.title;
       const pubDate = new Date(item.pubDate).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
 
