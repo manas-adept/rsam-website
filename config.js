@@ -23,6 +23,7 @@ const CONFIG = {
     officials:   { enabled: true  },
     news:        { enabled: true  },
     highlights:  { enabled: true  },
+    latestVideo:  { enabled: true  },
     certificate: { enabled: true  },
     connect:     { enabled: true  },
   },
@@ -34,7 +35,6 @@ const CONFIG = {
     { label: "News",        href: "#news"        },
     { label: "Highlights",  href: "#highlights"  },
     { label: "Certificate", href: "#certificate" },
-    { label: "Connect",     href: "#connect"     },
   ],
 
   /* ── Hero section ───────────────────────────────── */
@@ -64,13 +64,21 @@ const CONFIG = {
     affiliationsHeading: "Affiliated &amp; Accredited By",
   },
 
+  /* ── Latest Video ───────────────────────────────── */
+  /* To find your channel ID: go to your YouTube channel page,
+     view source, and search for "channelId" or "externalId".
+     It starts with "UC…"  */
+  latestVideo: {
+    channelId: "UCnDTfJxx_2QcyQeSCbhZTjw",   // ← paste your UC… channel ID here
+  },
+
   /* ── Connect / social ───────────────────────────── */
   connect: {
     youtube:   "https://www.youtube.com/@rsam_mbd",  // replace with actual URL
     instagram: "https://www.instagram.com/rsam_mbd_official",         // replace with actual URL
     email:     "contact@rsam.in",
     phone:     "+91-8057781350",
-    address:   "[RSAM Office Address, Moradabad, UP]",
+    address:   "139, Rana Bhawan, Near 23 PAC, Kanth Road, Moradabad, Uttar Pradesh, India",
   },
 
 };

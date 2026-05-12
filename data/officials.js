@@ -12,7 +12,7 @@
 const OFFICIALS = {
 
   /* ── Executive Committee ─────────────────────────── */
-  executive: [
+  association: [
     {
       name:             "Ashok Singhal",
       designation:      "President",
@@ -31,23 +31,11 @@ const OFFICIALS = {
       designationClass: "treasurer",
       photo:            "images/treasurer.jpg",
     },
-    // {
-    //   name:             "[Vice President Name]",
-    //   designation:      "Vice President",
-    //   designationClass: "vp",
-    //   photo:            "images/vp.jpg",
-    // },
-    // {
-    //   name:             "[Joint Secretary Name]",
-    //   designation:      "Joint Secretary",
-    //   designationClass: "joint",
-    //   photo:            "images/joint_sec.jpg",
-    // },
     {
       name:             "Manas Garg",
       designation:      "Technical",
       designationClass: "technical",
-      photo:            "images/technical.jpg",
+      photo:            "images/manas.jpeg",
     },
   ],
 

@@ -181,7 +181,7 @@ function renderOfficials() {
     `;
   }
 
-  const execCards = OFFICIALS.executive.map((o, i) => officialCard(o, i)).join("");
+  const execCards = OFFICIALS.association.map((o, i) => officialCard(o, i)).join("");
 
   let committeeHTML = "";
   if (OFFICIALS.committee.enabled) {
@@ -200,12 +200,49 @@ function renderOfficials() {
           <h2>Our <span class="accent">Officials</span></h2>
           <p class="section-desc">The governing body steering roller sports in Moradabad</p>
         </div>
-        <h3 class="sub-heading">Executive Committee</h3>
+        <h3 class="sub-heading">Association Members</h3>
         <div class="officials-grid">${execCards}</div>
         ${committeeHTML}
       </div>
     </section>
   `);
+}
+
+/* ── Image entry normaliser ───────────────────────── */
+/*
+  Each image entry in data files can be either:
+    "images/photo.jpg"                          ← plain string, uses defaults
+    { src: "images/photo.jpg" }                 ← object, uses defaults
+    { src: "images/photo.jpg",
+      fit: "contain",                           ← object-fit: cover|contain|fill
+      position: "top center" }                  ← object-position (any CSS value)
+
+  fit defaults to "cover"  (fills the box, crops excess)
+  position defaults to "center"
+*/
+function normaliseImg(entry) {
+  if (typeof entry === 'string') return { src: entry, fit: 'cover', position: 'center' };
+  return { src: entry.src || '', fit: entry.fit || 'cover', position: entry.position || 'center' };
+}
+
+function imgStyle(entry) {
+  const { fit, position } = normaliseImg(entry);
+  return `object-fit:${fit};object-position:${position};`;
+}
+
+/* ── Event status helper (IST-aware) ──────────────── */
+function getEventStatus(ev) {
+  if (!ev.startDateTime && !ev.endDateTime) {
+    return { label: ev.category, cls: 'status-default' };
+  }
+  /* IST = UTC + 5h 30m */
+  const nowIST = new Date(Date.now() + (5.5 * 60 - new Date().getTimezoneOffset()) * 60000);
+  const start  = ev.startDateTime ? new Date(ev.startDateTime) : null;
+  const end    = ev.endDateTime   ? new Date(ev.endDateTime)   : null;
+
+  if (end && nowIST > end)          return { label: 'Event Ended',    cls: 'status-ended' };
+  if (start && nowIST < start)      return { label: 'Upcoming Event', cls: 'status-upcoming' };
+  return                                   { label: 'Happening Now',  cls: 'status-live' };
 }
 
 /* ── News ─────────────────────────────────────────── */
@@ -215,8 +252,9 @@ function renderNews() {
   const events = NEWS.upcomingEvents || (NEWS.featured ? [NEWS.featured] : []);
 
   function eventSlide(ev) {
-    const img = ev.image
-      ? `<img src="${ev.image}" alt="${ev.title}"/>`
+    const evImg = normaliseImg(ev.image || '');
+    const img = evImg.src
+      ? `<img src="${evImg.src}" alt="${ev.title}" style="${imgStyle(evImg)}"/>`
       : `<div class="placeholder-img-inner">
           <svg viewBox="0 0 80 80" width="60" height="60">
             <circle cx="40" cy="40" r="36" fill="none" stroke="rgba(224,28,46,0.4)" stroke-width="3"/>
@@ -225,12 +263,13 @@ function renderNews() {
             <line x1="4" y1="40" x2="76" y2="40" stroke="rgba(224,28,46,0.3)" stroke-width="2"/>
           </svg>
         </div>`;
+    const status = getEventStatus(ev);
     return `
       <div class="events-slide">
         <div class="news-card featured">
           <div class="news-card-img">
             ${img}
-            <div class="news-cat">${ev.category}</div>
+            <div class="news-cat ${status.cls}">${status.label}</div>
           </div>
           <div class="news-card-body">
             <div class="news-meta">
@@ -239,7 +278,9 @@ function renderNews() {
             </div>
             <h3>${ev.title}</h3>
             <p>${ev.body}</p>
+            <!-- circular link hidden until content is ready
             <a href="${ev.linkHref}" class="news-link">${ev.linkText} →</a>
+            -->
           </div>
         </div>
       </div>`;
@@ -259,7 +300,10 @@ function renderNews() {
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
     </button>` : "";
 
-  const newsItems = NEWS.items.map(item => `
+  const NEWS_LIMIT = 5;
+
+  function newsItemHTML(item) {
+    return `
     <div class="news-item fade-in">
       <div class="news-item-dot"></div>
       <div class="news-item-body">
@@ -267,10 +311,28 @@ function renderNews() {
         <h4>${item.title}</h4>
         <p class="news-item-date">${item.date}${item.location ? " · " + item.location : ""}</p>
         <p>${item.body}</p>
+        <!-- details link hidden until content is ready
         <a href="${item.linkHref}">${item.linkText} →</a>
+        -->
       </div>
+    </div>`;
+  }
+
+  const sorted    = [...NEWS.items].sort((a, b) => new Date(b.date) - new Date(a.date));
+  const recent    = sorted.slice(0, NEWS_LIMIT);
+  const archived  = sorted.slice(NEWS_LIMIT);
+
+  const newsItems        = recent.map(newsItemHTML).join("");
+  const archivedNewsHTML = archived.length ? `
+    <div class="archive-toggle-wrap">
+      <button class="archive-toggle" data-target="newsArchive">
+        Show Archive <span class="archive-count">${archived.length}</span>
+        <svg class="archive-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
     </div>
-  `).join("");
+    <div class="archive-panel" id="newsArchive">
+      ${archived.map(newsItemHTML).join("")}
+    </div>` : "";
 
   mount("app-news", `
     <section class="news section" id="news">
@@ -288,7 +350,10 @@ function renderNews() {
               ${dots}
             </div>
           </div>
-          <div class="news-list">${newsItems}</div>
+          <div class="news-list-wrap">
+            <div class="news-list">${newsItems}</div>
+            ${archivedNewsHTML}
+          </div>
         </div>
       </div>
     </section>
@@ -299,25 +364,75 @@ function renderNews() {
 function renderHighlights() {
   if (!CONFIG.sections.highlights.enabled) return;
 
-  const cards = HIGHLIGHTS.map(h => {
-    const imgHTML = h.image
-      ? `<img src="${h.image}" alt="${h.event}" class="hl-img"/>`
-      : placeholderImg();
+  const HL_LIMIT = 5;
+
+  let hlCarouselIdx = 0;
+
+  function hlCardHTML(h, forceNarrow = false) {
+    /* normalise: support both `image` (string) and `images` (array of strings or objects) */
+    const rawImgs = h.images && h.images.length ? h.images
+                    : h.image ? [h.image] : [];
+    const imgs = rawImgs.map(normaliseImg);
+    const wide = h.wide && !forceNarrow;
+    const id   = `hlc-${hlCarouselIdx++}`;
+
+    let imgSection;
+    if (imgs.length === 0) {
+      imgSection = placeholderImg();
+    } else if (imgs.length === 1) {
+      imgSection = `<img src="${imgs[0].src}" alt="${h.event}" class="hl-img" style="${imgStyle(imgs[0])}"/>`;
+    } else {
+      const slides = imgs.map(img =>
+        `<div class="hl-slide"><img src="${img.src}" alt="${h.event}" class="hl-img" style="${imgStyle(img)}"/></div>`
+      ).join("");
+      const dots = imgs.map((_, i) =>
+        `<button class="hl-dot${i === 0 ? ' active' : ''}" data-idx="${i}"></button>`
+      ).join("");
+      imgSection = `
+        <div class="hl-carousel" id="${id}">
+          <div class="hl-track">${slides}</div>
+          <button class="hl-arrow hl-arrow--prev" aria-label="Previous">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <button class="hl-arrow hl-arrow--next" aria-label="Next">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+          <div class="hl-dots">${dots}</div>
+          <span class="hl-counter">1 / ${imgs.length}</span>
+        </div>`;
+    }
 
     return `
-      <div class="highlight-card fade-in${h.wide ? " highlight-card--wide" : ""}">
+      <div class="highlight-card fade-in${wide ? " highlight-card--wide" : ""}">
         <div class="hl-img-wrap">
-          ${imgHTML}
+          ${imgSection}
           <div class="hl-overlay"><div class="hl-trophy">${h.trophy}</div></div>
         </div>
         <div class="hl-caption">
+          ${h.date ? `<span class="hl-date">${h.date}</span>` : ""}
           <span class="hl-event-tag">${h.event}</span>
           <h3>"${h.caption}"</h3>
           <p>${h.body}</p>
         </div>
-      </div>
-    `;
-  }).join("");
+      </div>`;
+  }
+
+  const visible  = HIGHLIGHTS.slice(0, HL_LIMIT);
+  const archived = HIGHLIGHTS.slice(HL_LIMIT);
+
+  const visibleCards  = visible.map(h => hlCardHTML(h)).join("");
+  const archiveCards  = archived.map(h => hlCardHTML(h, true)).join("");
+
+  const archivedHlHTML = archived.length ? `
+    <div class="archive-toggle-wrap" style="margin-top:2rem;">
+      <button class="archive-toggle" data-target="hlArchive">
+        Show Archive <span class="archive-count">${archived.length}</span>
+        <svg class="archive-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+    </div>
+    <div class="archive-panel" id="hlArchive">
+      <div class="highlights-grid highlights-grid--archive">${archiveCards}</div>
+    </div>` : "";
 
   mount("app-highlights", `
     <section class="highlights section dark-section" id="highlights">
@@ -327,39 +442,109 @@ function renderHighlights() {
           <h2>Hall of <span class="accent">Highlights</span></h2>
           <p class="section-desc">Reliving the glory, grit, and greatness from our championships</p>
         </div>
-        <div class="highlights-grid">${cards}</div>
+        <div class="highlights-grid">${visibleCards}</div>
+        ${archivedHlHTML}
       </div>
     </section>
   `);
+}
+
+/* ── Latest Video ─────────────────────────────────── */
+function renderLatestVideo() {
+  if (!CONFIG.sections.latestVideo.enabled) return;
+  const { channelId } = CONFIG.latestVideo;
+
+  mount("app-latestvideo", `
+    <section class="latestvideo section" id="latestvideo">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag">On YouTube</span>
+          <h2>Latest <span class="accent">Video</span></h2>
+        </div>
+        <div class="lv-wrap" id="lvWrap">
+          <div class="lv-loading">Loading latest video…</div>
+        </div>
+      </div>
+    </section>
+  `);
+
+  if (!channelId) {
+    document.getElementById("lvWrap").innerHTML =
+      `<p class="lv-error">Add your YouTube channel ID to <code>config.js → latestVideo.channelId</code> to enable this section.</p>`;
+    return;
+  }
+
+  const rssUrl = encodeURIComponent(
+    `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`
+  );
+  const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${rssUrl}`;
+
+  fetch(apiUrl)
+    .then(r => r.json())
+    .then(data => {
+      if (data.status !== "ok") throw new Error(data.message || "rss2json error");
+      const item = data.items && data.items[0];
+      if (!item) throw new Error("no items");
+
+      const videoId = item.link.split("v=")[1];
+      const title   = item.title;
+      const pubDate = new Date(item.pubDate).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
+
+      document.getElementById("lvWrap").innerHTML = `
+        <div class="lv-card fade-in">
+          <div class="lv-embed-wrap">
+            <iframe
+              src="https://www.youtube.com/embed/${videoId}"
+              title="${title}"
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen>
+            </iframe>
+          </div>
+          <div class="lv-meta">
+            <p class="lv-date">${pubDate}</p>
+            <h3 class="lv-title">${title}</h3>
+            <a class="lv-channel-link" href="${CONFIG.connect.youtube}" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="#e01c2e"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.75 15.5v-7l6.5 3.5-6.5 3.5z"/></svg>
+              View channel
+            </a>
+          </div>
+        </div>
+      `;
+    })
+    .catch(err => {
+      console.error("Latest video fetch failed:", err);
+      document.getElementById("lvWrap").innerHTML =
+        `<p class="lv-error">Could not load the latest video. <a href="${CONFIG.connect.youtube}" target="_blank" rel="noopener">Visit our YouTube channel →</a></p>`;
+    });
 }
 
 /* ── Certificate ──────────────────────────────────── */
 function renderCertificate() {
   if (!CONFIG.sections.certificate.enabled) return;
 
-  const certContent = CERTIFICATE.image
-    ? `<img src="${CERTIFICATE.image}" alt="RSAM Registration Certificate" class="cert-img"/>`
-    : `<div class="cert-placeholder">
-        <div class="cert-placeholder-inner">
-          <svg viewBox="0 0 80 80" width="64" height="64">
-            <rect x="8" y="4" width="64" height="72" rx="4" fill="none" stroke="#e01c2e" stroke-width="2"/>
-            <circle cx="40" cy="28" r="14" fill="none" stroke="#ff6b6b" stroke-width="2"/>
-            <line x1="22" y1="50" x2="58" y2="50" stroke="#e01c2e" stroke-width="1.5"/>
-            <line x1="22" y1="58" x2="58" y2="58" stroke="#e01c2e" stroke-width="1.5"/>
-            <line x1="22" y1="66" x2="45" y2="66" stroke="#e01c2e" stroke-width="1.5"/>
-            <polygon points="40,20 42.4,26.4 49,26.4 43.8,30.2 45.9,36.6 40,32.8 34.1,36.6 36.2,30.2 31,26.4 37.6,26.4" fill="#ff6b6b"/>
-          </svg>
-          <h3>Certificate of Registration</h3>
-          <div class="cert-details">
-            ${CERTIFICATE.details.map(d => `
-              <div class="cert-detail-row">
-                <span class="cert-label">${d.label}:</span>
-                <span class="cert-value">${d.value}</span>
-              </div>
-            `).join("")}
+  function protectedFrame(src, label) {
+    return `
+      <div class="cert-doc-wrap fade-in">
+        <div class="cert-doc-label">${label}</div>
+        <div class="cert-frame">
+          <!-- corner decorations -->
+          <span class="cert-corner cert-corner--tl"></span>
+          <span class="cert-corner cert-corner--tr"></span>
+          <span class="cert-corner cert-corner--bl"></span>
+          <span class="cert-corner cert-corner--br"></span>
+          <!-- protected image -->
+          <div class="cert-img-shield">
+            <img src="${src}" alt="${label}" class="cert-img"
+                 draggable="false"
+                 oncontextmenu="return false"
+                 onmousedown="return false"/>
+            <div class="cert-watermark">RSAM</div>
+            <div class="cert-shield-overlay"></div>
           </div>
         </div>
       </div>`;
+  }
 
   mount("app-certificate", `
     <section class="certificate section" id="certificate">
@@ -369,94 +554,86 @@ function renderCertificate() {
           <h2>Registration <span class="accent">Certificate</span></h2>
           <p class="section-desc">Official documentation of RSAM's accreditation and registration</p>
         </div>
-        <div class="cert-wrap fade-in">
-          <div class="cert-frame">${certContent}</div>
-          <div class="cert-note"><p>${CERTIFICATE.note}</p></div>
+        <div class="cert-docs-grid">
+          <div class="cert-col cert-col--main">
+            ${protectedFrame(CERTIFICATE.regImage, "Registration Certificate")}
+          </div>
+          <div class="cert-col cert-col--side">
+            ${protectedFrame(CERTIFICATE.panImage, "PAN Card")}
+          </div>
         </div>
+        <p class="cert-note-text fade-in">${CERTIFICATE.note}</p>
       </div>
     </section>
   `);
 }
 
-/* ── Connect ──────────────────────────────────────── */
+/* ── Connect (floating panel) ─────────────────────── */
 function renderConnect() {
   if (!CONFIG.sections.connect.enabled) return;
 
   const { connect } = CONFIG;
 
   mount("app-connect", `
-    <section class="connect section dark-section" id="connect">
-      <div class="container">
-        <div class="section-header">
-          <span class="section-tag">Follow Us</span>
-          <h2>Stay <span class="accent">Connected</span></h2>
-          <p class="section-desc">Follow RSAM on social media for live updates, championship coverage, and more</p>
-        </div>
-        <div class="social-grid">
-          <a href="${connect.youtube}" target="_blank" rel="noopener" class="social-card youtube fade-in">
-            <div class="social-icon">
-              <svg viewBox="0 0 48 48" width="52" height="52">
-                <rect x="2" y="10" width="44" height="28" rx="8" fill="#FF0000"/>
-                <polygon points="20,17 20,31 33,24" fill="white"/>
-              </svg>
-            </div>
-            <div class="social-info">
-              <h3>YouTube</h3>
-              <p>Watch championship videos, highlights, and tutorials on our YouTube channel.</p>
-              <span class="social-cta">Subscribe &amp; Watch →</span>
-            </div>
-          </a>
-          <a href="${connect.instagram}" target="_blank" rel="noopener" class="social-card instagram fade-in">
-            <div class="social-icon">
-              <svg viewBox="0 0 48 48" width="52" height="52">
-                <defs>
-                  <linearGradient id="ig-grad" x1="0%" y1="100%" x2="100%" y2="0%">
-                    <stop offset="0%"   style="stop-color:#f09433"/>
-                    <stop offset="25%"  style="stop-color:#e6683c"/>
-                    <stop offset="50%"  style="stop-color:#dc2743"/>
-                    <stop offset="75%"  style="stop-color:#cc2366"/>
-                    <stop offset="100%" style="stop-color:#bc1888"/>
-                  </linearGradient>
-                </defs>
-                <rect x="4" y="4" width="40" height="40" rx="12" fill="url(#ig-grad)"/>
-                <circle cx="24" cy="24" r="9" fill="none" stroke="white" stroke-width="2.5"/>
-                <circle cx="34.5" cy="13.5" r="2.5" fill="white"/>
-              </svg>
-            </div>
-            <div class="social-info">
-              <h3>Instagram</h3>
-              <p>Follow us for behind-the-scenes, athlete stories, event photos, and daily updates.</p>
-              <span class="social-cta">Follow Us →</span>
-            </div>
-          </a>
-        </div>
-        <div class="contact-strip fade-in">
-          <div class="contact-item">
-            <span class="contact-icon">📧</span>
-            <div>
-              <span class="contact-label">Email</span>
-              <a href="mailto:${connect.email}">${connect.email}</a>
-            </div>
-          </div>
-          <div class="contact-divider"></div>
-          <div class="contact-item">
-            <span class="contact-icon">📍</span>
-            <div>
-              <span class="contact-label">Address</span>
-              <span>${connect.address}</span>
-            </div>
-          </div>
-          <div class="contact-divider"></div>
-          <div class="contact-item">
-            <span class="contact-icon">📞</span>
-            <div>
-              <span class="contact-label">Phone</span>
-              <a href="tel:${connect.phone.replace(/[^+\d]/g,"")}">${connect.phone}</a>
-            </div>
-          </div>
-        </div>
+    <!-- floating trigger tab -->
+    <button class="connect-tab" id="connectTab" aria-label="Toggle connect panel" aria-expanded="false">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+      </svg>
+      <span class="connect-tab__label">Connect</span>
+    </button>
+
+    <!-- sliding panel -->
+    <div class="connect-panel" id="connectPanel" aria-hidden="true">
+      <button class="connect-panel__close" id="connectClose" aria-label="Close">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+
+      <div class="connect-socials">
+        <a href="${connect.youtube}" target="_blank" rel="noopener" class="connect-social-btn youtube" aria-label="YouTube">
+          <svg viewBox="0 0 48 48" width="24" height="24">
+            <rect x="2" y="10" width="44" height="28" rx="8" fill="#FF0000"/>
+            <polygon points="20,17 20,31 33,24" fill="white"/>
+          </svg>
+        </a>
+        <a href="${connect.instagram}" target="_blank" rel="noopener" class="connect-social-btn instagram" aria-label="Instagram">
+          <svg viewBox="0 0 48 48" width="24" height="24">
+            <defs>
+              <linearGradient id="ig2" x1="0%" y1="100%" x2="100%" y2="0%">
+                <stop offset="0%"   style="stop-color:#f09433"/>
+                <stop offset="50%"  style="stop-color:#dc2743"/>
+                <stop offset="100%" style="stop-color:#bc1888"/>
+              </linearGradient>
+            </defs>
+            <rect x="4" y="4" width="40" height="40" rx="12" fill="url(#ig2)"/>
+            <circle cx="24" cy="24" r="9" fill="none" stroke="white" stroke-width="2.5"/>
+            <circle cx="34.5" cy="13.5" r="2.5" fill="white"/>
+          </svg>
+        </a>
       </div>
-    </section>
+
+      <div class="connect-divider"></div>
+
+      <div class="connect-contacts">
+        <a href="mailto:${connect.email}" class="connect-contact-row">
+          <span class="connect-contact-icon">📧</span>
+          <span>${connect.email}</span>
+        </a>
+        <div class="connect-contact-row">
+          <span class="connect-contact-icon">📍</span>
+          <span>${connect.address}</span>
+        </div>
+        <a href="tel:${connect.phone.replace(/[^+\d]/g,"")}" class="connect-contact-row">
+          <span class="connect-contact-icon">📞</span>
+          <span>${connect.phone}</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- backdrop -->
+    <div class="connect-backdrop" id="connectBackdrop"></div>
   `);
 }
 
@@ -483,13 +660,13 @@ function renderFooter() {
               </div>
               <span>${CONFIG.site.name}</span>
             </div>
-            <p>${CONFIG.site.fullName}<br/>Affiliated with RSFI · Govt. of India</p>
+            <p>${CONFIG.site.fullName}<br/>Approved by UPRSA · UPRSA approved by RSFI</p>
           </div>
           <div class="footer-links">${links}</div>
         </div>
         <div class="footer-bottom">
           <span>© <span id="year"></span> ${CONFIG.site.fullName}. All rights reserved.</span>
-          <span>Accredited by <strong>RSFI</strong> · Ministry of Youth Affairs &amp; Sports, Govt. of India</span>
+          <span class="visitor-counter"><span id="visitorCount">—</span> visitors</span>
         </div>
       </div>
     </footer>
@@ -505,6 +682,7 @@ function renderAll() {
   renderOfficials();
   renderNews();
   renderHighlights();
+  renderLatestVideo();
   renderCertificate();
   renderConnect();
   renderFooter();

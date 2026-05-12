@@ -2,47 +2,62 @@
    data/highlights.js  ← ADMIN: add championship moments here
    HOW TO UPDATE:
    • Add a new highlight by adding an object to the array
+   • Keep newest items at the TOP — top 5 show on the page, rest auto-archive
    • The FIRST item is always shown as the wide featured card
-   • Remove old entries by deleting their block
+   • date: "YYYY-MM-DD" — shown in archive, helps readers orient in time
    • trophy: any emoji works (🏆 🥇 🥈 🥉 ⚡ 🌟 🎖️)
-   • Add  wide: true  only to the item you want full-width
+   • Add  wide: true  only to the item you want full-width (first item only)
+   • SINGLE image  →  images: ["images/photo.jpg"]
+   • MULTIPLE images →  images: ["images/a.jpg", "images/b.jpg"]
+     (cards with multiple images become a swipeable gallery)
+   • IMAGE DISPLAY CONTROL — each entry can be a plain string or an object:
+       Plain string  →  "images/photo.jpg"            (default: cover + center)
+       Object        →  { src: "images/photo.jpg", fit: "contain", position: "top" }
+         fit:      "cover"   — fills box, crops excess  (default, good for action shots)
+                   "contain" — shows full image, no cropping (good for group/wide shots)
+         position: any CSS value — "center" "top" "bottom" "50% 20%" etc.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 const HIGHLIGHTS = [
   {
     wide:    true,                       // featured card — keep on first item
-    image:   "images/highlight1.jpg",
+    date:    "2026-05-10",
+    images:  ["images/row-event.jpg","images/row-event1.jpg","images/row-event2.jpg","images/row-event5.jpg"],   // add more paths to enable swipe
+    trophy:  "🌟",
+    event:   "RUN ON WHEELS 4.0 SKATING MARATHON",
+    caption: "Moradabad Skaters Shine at Run on Wheels 4.0 Marathon, Agra",
+    body:    "We are proud to announce that our skaters from Moradabad participated in the highly anticipated Run on Wheels 4.0 Marathon, held in the city of Agra. Every single skater who took to the track gave their absolute best and completed the marathon with great courage and determination. While the thrill of competition drives every athlete, it is the spirit of participation that truly defines a champion. Winning is not mandatory — but showing up, giving your all, and finishing strong always is. Our skaters proved exactly that. Each participant returned not just with memories of a remarkable event, but with invaluable experiences and learnings that no podium finish can replace. The real victory lies in the journey — in every stride, every push, and every moment spent on wheels. We congratulate all our skaters for their bravery and dedication, and look forward to seeing them grow stronger with every event they take part in. <b>Keep skating, keep growing!</b>",
+  },
+  {
+    date:    "2026-05-02",
+    images:  ["images/highlight1.jpg"],
     trophy:  "🏆",
     event:   "District Level Roller Skating Championship Spring",
     caption: "Aryans International School won First Prize in roller speed skating!",
-    body:    "The event took place at Summer Valley School, MORADABAD. and the event was hosted under the presence of UPRSA General Secretary Mr DS Rathor",
+    body:    "The event took place at Summer Valley School, MORADABAD. and the event was hosted under the presence of UPRSA General Secretary Mr DS RathorE",
   },
   {
-    image:   "images/highlight2.jpg",
+    date:    "2026-05-02",
+    images:  ["images/news_main.jpg","images/highlight2.jpg","images/test.jpg"],
     trophy:  "🥇",
-    event:   "District Level Roller Skating Championship Spring | May 2026",
+    event:   "District Level Roller Skating Championship Spring",
     caption: "Chaitanya Garg sweeps gold in speed skating!",
     body:    "Chaitanya Garg from Aryans Internations School sweeps gold in 6-8yrs quad-boys category in speed skating!",
   },
   {
-    image:   "images/highlight3.jpg",
+    date:    "2026-05-02",
+    images:  ["images/highlight3.jpg"],
     trophy:  "⚡",
-    event:   "District Level Roller Skating Championship Spring | May 2026",
+    event:   "District Level Roller Skating Championship Spring",
     caption: "Thrilling Speed Skating at Summer Valley School, Moradabad",
     body:    "Crossing the line at lightning speed and signing off in style — moments like these are what make skating truly electrifying!",
   },
   {
-    image:   "images/highlight4.jpg",
+    date:    "2026-05-02",
+    images:  ["images/highlight4.jpg"],
     trophy:  "🌟",
-    event:   "District Level Roller Skating Championship Spring | May 2026",
-    caption: "[Inspiring caption for this highlight]",
-    body:    "[Brief description of this championship moment.]",
+    event:   "District Level Roller Skating Championship Spring",
+    caption: "The Chase Is On — Speed, Grit, and Determination Define the Race",
+    body:    "There is nothing quite like the sight of skaters in full flight, each one pushing harder than the last, wheels cutting through the track as the crowd roars in anticipation. At the heart of every great race lies one simple truth — only the fastest, the bravest, and the most determined will cross that finish line first. This is what skating is all about — the thrill of the chase, the rush of the race, and the courage to give everything you have until the very end.",
   },
-  // {
-  //   image:   "images/highlight5.jpg",
-  //   trophy:  "🎖️",
-  //   event:   "[Event · Year]",
-  //   caption: "[Inspiring caption for this highlight]",
-  //   body:    "[Brief description of this championship moment.]",
-  // },
 ];

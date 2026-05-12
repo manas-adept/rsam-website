@@ -2,11 +2,18 @@
    data/news.js  ← ADMIN: post new news & circulars here
    HOW TO UPDATE:
    • Add events to `upcomingEvents` — they appear as a swipeable carousel
+   • startDateTime / endDateTime use IST in format "YYYY-MM-DDTHH:MM" (24-hr)
+     - Before startDateTime  → badge shows "Upcoming Event"
+     - Between start & end   → badge shows "Happening Now"
+     - After endDateTime     → badge shows "Event Ended"
+     - Leave both "" to always show the label in `category`
    • Add a new circular/notice by adding an object to `items`
-   • The FIRST item in the list appears at the top
-   • Remove old entries by deleting their block
    • tag options: "circular" | "result" | "notice"
    • Leave location as "" if not applicable
+   • EVENT IMAGE DISPLAY CONTROL:
+       image: "images/photo.jpg"                            (default: cover + center)
+       image: { src: "images/photo.jpg", fit: "contain", position: "top" }
+         fit:  "cover" | "contain"   position: any CSS object-position value
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 const NEWS = {
@@ -14,49 +21,30 @@ const NEWS = {
   /* ── Upcoming Events carousel (left column) ──────── */
   upcomingEvents: [
     {
-      image:    "images/row4.jpg",   // leave "" to show placeholder
-      category: "Upcoming Event",
-      date:     "May 10, 2026",
-      location: "Agra",
-      title:    "Run on Wheels 4.0",
-      body:     "Roll with Passion, Finish with PRIDE! It's The Great Skating Marathon 2026 organized by Agra Roller Skating Welfare Association under the aegis of UPRSA.",
-      linkText: "Read Circular",
-      linkHref: "#",
+      image:         { src: "images/row4.jpg", fit: "contain", position: "top" },   // leave "" to show placeholder
+      category:      "Upcoming Event",    // fallback if no start/end set
+      startDateTime: "2026-05-10T04:30",  // IST: event starts
+      endDateTime:   "2026-05-10T10:30",  // IST: event ends
+      date:          "May 10, 2026",
+      location:      "Agra",
+      title:         "Run on Wheels 4.0",
+      body:          "Roll with Passion, Finish with PRIDE! It's The Great Skating Marathon 2026 organized by Agra Roller Skating Welfare Association under the aegis of UPRSA.",
+      linkText:      "Read Circular",
+      linkHref:      "#",
     },
-    // {
-    //   image:    "images/row4.jpg",   // leave "" to show placeholder
-    //   category: "Upcoming Event",
-    //   date:     "May 10, 2026",
-    //   location: "Agra",
-    //   title:    "Run on Wheels 4.0",
-    //   body:     "The Great Skating Marathon 2026 organized by Agra Roller Skating Welfare Association under the aegis of UPRSA.",
-    //   linkText: "Read Circular",
-    //   linkHref: "#",
-    // }
-    // {
-    //   image:    "",
-    //   category: "District Championship",
-    //   date:     "[Event Date]",
-    //   location: "[Venue, Moradabad]",
-    //   title:    "[District Level Championship]",
-    //   body:     "Second upcoming event details. Add date, venue, eligibility, and any registration information here.",
-    //   linkText: "Read Circular",
-    //   linkHref: "#",
-    // },
-    // {
-    //   image:    "",
-    //   category: "State Selection",
-    //   date:     "[Event Date]",
-    //   location: "[Venue, Moradabad]",
-    //   title:    "[State Selection Trials]",
-    //   body:     "Third upcoming event details. Add date, venue, eligibility, and any registration information here.",
-    //   linkText: "Read Circular",
-    //   linkHref: "#",
-    // },
   ],
 
   /* ── News list (right column) ────────────────────── */
   items: [
+    {
+      tag:      "news",
+      title:    "Moradabad Skaters Shine at Run on Wheels 4.0 Marathon, Agra",
+      date:     "2026-05-10",
+      location: "Agra, Uttar Pradesh",
+      body:     "We are proud to announce that our skaters from Moradabad participated in the highly anticipated Run on Wheels 4.0 Marathon, held in the city of Agra. Every single skater who took to the track gave their absolute best and completed the marathon with great courage and determination. While the thrill of competition drives every athlete, it is the spirit of participation that truly defines a champion. Winning is not mandatory — but showing up, giving your all, and finishing strong always is. Our skaters proved exactly that. Each participant returned not just with memories of a remarkable event, but with invaluable experiences and learnings that no podium finish can replace. The real victory lies in the journey — in every stride, every push, and every moment spent on wheels. We congratulate all our skaters for their bravery and dedication, and look forward to seeing them grow stronger with every event they take part in.<b>Keep skating, keep growing!</b>",
+      linkText: "View Details",
+      linkHref: "#",
+    },
     {
       tag:      "news",
       title:    "District Level  Roller Skating Championship Spring",
