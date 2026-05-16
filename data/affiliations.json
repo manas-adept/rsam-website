@@ -1,7 +1,7 @@
 {
   "items": [
-    { "image": "images/affil1.jpg", "label": "RSFI – India Skates" },
     { "image": "images/affil2.jpg", "label": "UPRSA" },
+    { "image": "images/affil1.jpg", "label": "RSFI – India Skates" },
     { "image": "images/affil3.jpg", "label": "World Skate" }
   ]
 }
