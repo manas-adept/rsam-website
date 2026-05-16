@@ -700,6 +700,7 @@ Promise.all([
   window.OFFICIALS   = officials;
   window.AFFILIATIONS = affiliations.items;
   renderAll();
+  document.dispatchEvent(new Event('rsam:ready'));
 }).catch(err => {
   console.error("Failed to load site data:", err);
 });

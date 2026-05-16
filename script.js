@@ -249,5 +249,5 @@ function initInteractions() {
   })();
 }
 
-/* Run after render.js has finished building the DOM */
-initInteractions();
+/* Run after render.js has finished building the DOM (async fetch) */
+document.addEventListener('rsam:ready', initInteractions);
