@@ -121,7 +121,7 @@ function renderAbout() {
   const affilItems = AFFILIATIONS.map(a => `
     <div class="affil-logo-cell">
       <div class="affil-logo-img-wrap">
-        <img src="${a.image}" alt="${a.label}"
+        <img src="${a.image}" alt="${a.label}" loading="lazy" decoding="async"
              onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"/>
         <div class="affil-logo-fallback">Logo</div>
       </div>
@@ -162,7 +162,7 @@ function renderOfficials() {
       <div class="${cls}">
         <div class="official-photo-wrap">
           <div class="official-photo placeholder-photo${small ? " sm" : ""}">
-            <img src="${o.photo}" alt="${o.name}"
+            <img src="${o.photo}" alt="${o.name}" loading="lazy" decoding="async"
                  onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"/>
             <div class="photo-fallback">
               <svg viewBox="0 0 60 60" width="${imgSize}" height="${imgSize}">
@@ -184,8 +184,8 @@ function renderOfficials() {
   const execCards = OFFICIALS.association.map((o, i) => officialCard(o, i)).join("");
 
   let committeeHTML = "";
-  if (OFFICIALS.committee.enabled) {
-    const memberCards = OFFICIALS.committee.members.map((o, i) => officialCard(o, i, true)).join("");
+  if (OFFICIALS.committeeEnabled) {
+    const memberCards = OFFICIALS.committee.map((o, i) => officialCard(o, i, true)).join("");
     committeeHTML = `
       <h3 class="sub-heading" style="margin-top:3rem;">Committee Members</h3>
       <div class="officials-grid officials-grid--small">${memberCards}</div>
@@ -254,7 +254,7 @@ function renderNews() {
   function eventSlide(ev) {
     const evImg = normaliseImg(ev.image || '');
     const img = evImg.src
-      ? `<img src="${evImg.src}" alt="${ev.title}" style="${imgStyle(evImg)}"/>`
+      ? `<img src="${evImg.src}" alt="${ev.title}" loading="lazy" decoding="async" style="${imgStyle(evImg)}"/>`
       : `<div class="placeholder-img-inner">
           <svg viewBox="0 0 80 80" width="60" height="60">
             <circle cx="40" cy="40" r="36" fill="none" stroke="rgba(224,28,46,0.4)" stroke-width="3"/>
@@ -380,10 +380,10 @@ function renderHighlights() {
     if (imgs.length === 0) {
       imgSection = placeholderImg();
     } else if (imgs.length === 1) {
-      imgSection = `<img src="${imgs[0].src}" alt="${h.event}" class="hl-img" style="${imgStyle(imgs[0])}"/>`;
+      imgSection = `<img src="${imgs[0].src}" alt="${h.event}" class="hl-img" loading="lazy" decoding="async" style="${imgStyle(imgs[0])}"/>`;
     } else {
       const slides = imgs.map(img =>
-        `<div class="hl-slide"><img src="${img.src}" alt="${h.event}" class="hl-img" style="${imgStyle(img)}"/></div>`
+        `<div class="hl-slide"><img src="${img.src}" alt="${h.event}" class="hl-img" loading="lazy" decoding="async" style="${imgStyle(img)}"/></div>`
       ).join("");
       const dots = imgs.map((_, i) =>
         `<button class="hl-dot${i === 0 ? ' active' : ''}" data-idx="${i}"></button>`
@@ -688,4 +688,18 @@ function renderAll() {
   renderFooter();
 }
 
-renderAll();
+Promise.all([
+  fetch("data/news-items.json").then(r => r.json()),
+  fetch("data/upcoming-events.json").then(r => r.json()),
+  fetch("data/highlights.json").then(r => r.json()),
+  fetch("data/officials.json").then(r => r.json()),
+  fetch("data/affiliations.json").then(r => r.json()),
+]).then(([newsItems, upcomingEvents, highlights, officials, affiliations]) => {
+  window.NEWS        = { items: newsItems.items, upcomingEvents: upcomingEvents.events };
+  window.HIGHLIGHTS  = highlights.items;
+  window.OFFICIALS   = officials;
+  window.AFFILIATIONS = affiliations.items;
+  renderAll();
+}).catch(err => {
+  console.error("Failed to load site data:", err);
+});

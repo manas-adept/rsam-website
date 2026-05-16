@@ -1,0 +1,10 @@
+[build]
+  publish = "."
+  command = ""
+
+# Required for Netlify Identity + Git Gateway (Decap CMS auth)
+[[headers]]
+  for = "/admin/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"

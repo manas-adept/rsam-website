@@ -1,0 +1,31 @@
+{
+  "items": [
+    {
+      "tag": "news",
+      "title": "Moradabad Skaters Shine at Run on Wheels 4.0 Marathon, Agra",
+      "date": "2026-05-10",
+      "location": "Agra, Uttar Pradesh",
+      "body": "We are proud to announce that our skaters from Moradabad participated in the highly anticipated Run on Wheels 4.0 Marathon, held in the city of Agra. Every single skater who took to the track gave their absolute best and completed the marathon with great courage and determination. While the thrill of competition drives every athlete, it is the spirit of participation that truly defines a champion. Winning is not mandatory — but showing up, giving your all, and finishing strong always is. Our skaters proved exactly that. Each participant returned not just with memories of a remarkable event, but with invaluable experiences and learnings that no podium finish can replace. The real victory lies in the journey — in every stride, every push, and every moment spent on wheels. We congratulate all our skaters for their bravery and dedication, and look forward to seeing them grow stronger with every event they take part in. <b>Keep skating, keep growing!</b>",
+      "linkText": "View Details",
+      "linkHref": "#"
+    },
+    {
+      "tag": "news",
+      "title": "District Level Roller Skating Championship Spring",
+      "date": "2026-05-02",
+      "location": "Summer Valley School, MORADABAD",
+      "body": "Aryans International School stands at the top in Roller Speed Skating. The event took place at Summer Valley School, Moradabad, and was hosted in the presence of UPRSA Secretary Mr. DS Rathore. The event was graced by Chief Guests Mr. Vishal Upadhyay, Principal of Summer Valley School, and Mr. Devendra Rana, Secretary of the Roller Sports Association, Moradabad.",
+      "linkText": "View Details",
+      "linkHref": "#"
+    },
+    {
+      "tag": "news",
+      "title": "District Level Roller Skating Championship Summer",
+      "date": "2026-04-19",
+      "location": "S.S Children School, MORADABAD",
+      "body": "Aryans International School won First Prize, while Golden Gate Public School and PMS Public School finished 2nd and 3rd respectively.",
+      "linkText": "View Details",
+      "linkHref": "#"
+    }
+  ]
+}

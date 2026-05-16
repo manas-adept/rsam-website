@@ -1,0 +1,16 @@
+{
+  "events": [
+    {
+      "image": "images/row4.jpg",
+      "category": "Upcoming Event",
+      "startDateTime": "2026-05-10T04:30",
+      "endDateTime": "2026-05-10T10:30",
+      "date": "May 10, 2026",
+      "location": "Agra",
+      "title": "Run on Wheels 4.0",
+      "body": "Roll with Passion, Finish with PRIDE! It's The Great Skating Marathon 2026 organized by Agra Roller Skating Welfare Association under the aegis of UPRSA.",
+      "linkText": "Read Circular",
+      "linkHref": "#"
+    }
+  ]
+}

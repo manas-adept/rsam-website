@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="styles.css" />
   <link rel="icon" type="image/png" href="images/rsam-logo.PNG" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Inter:wght@300;400;500;600&family=Racing+Sans+One&family=Pacifico&family=Bebas+Neue&display=swap" rel="stylesheet" />
 </head>
 <body>
@@ -23,19 +24,28 @@
   <div id="app-connect"></div>
   <div id="app-footer"></div>
 
-  <!-- Config & data files (edit these to update content) -->
-  <script src="config.js"></script>
-  <script src="data/affiliations.js"></script>
-  <script src="data/officials.js"></script>
-  <script src="data/news.js"></script>
-  <script src="data/highlights.js"></script>
-  <script src="data/certificate.js"></script>
+  <!-- Site config & static data -->
+  <script src="config.js" defer></script>
+  <script src="data/certificate.js" defer></script>
 
-  <!-- Renderer (do not edit) -->
-  <script src="render.js"></script>
+  <!-- Renderer — fetches content JSON files automatically -->
+  <script src="render.js" defer></script>
 
-  <!-- Animations & interactions (do not edit) -->
-  <script src="script.js"></script>
+  <!-- Animations & interactions -->
+  <script src="script.js" defer></script>
+
+  <!-- Netlify Identity: redirect to admin after login -->
+  <script>
+    if (window.netlifyIdentity) {
+      window.netlifyIdentity.on("init", function(user) {
+        if (!user) {
+          window.netlifyIdentity.on("login", function() {
+            document.location.href = "/admin/";
+          });
+        }
+      });
+    }
+  </script>
 
 </body>
 </html>

@@ -1,0 +1,131 @@
+backend:
+  name: git-gateway
+  branch: main
+
+media_folder: "images"
+public_folder: "images"
+
+collections:
+
+  - name: "news-items"
+    label: "News & Circulars"
+    files:
+      - name: "news_data"
+        label: "News Items"
+        file: "data/news-items.json"
+        format: json
+        fields:
+          - label: "News Items"
+            name: "items"
+            widget: "list"
+            summary: "{{fields.title}}"
+            fields:
+              - label: "Tag"
+                name: "tag"
+                widget: "select"
+                options:
+                  - { label: "News",     value: "news"     }
+                  - { label: "Circular", value: "circular" }
+                  - { label: "Result",   value: "result"   }
+                  - { label: "Notice",   value: "notice"   }
+                default: "news"
+              - { label: "Title",    name: "title",    widget: "string" }
+              - { label: "Date",     name: "date",     widget: "datetime", format: "YYYY-MM-DD", date_format: "YYYY-MM-DD", time_format: false }
+              - { label: "Location", name: "location", widget: "string",   required: false, default: "" }
+              - { label: "Body",     name: "body",     widget: "text",     hint: "Basic HTML like <b>bold</b> is supported." }
+              - { label: "Link Text", name: "linkText", widget: "string",  default: "View Details" }
+              - { label: "Link URL",  name: "linkHref", widget: "string",  default: "#" }
+
+  - name: "upcoming-events"
+    label: "Upcoming Events"
+    files:
+      - name: "events_data"
+        label: "Events Carousel"
+        file: "data/upcoming-events.json"
+        format: json
+        fields:
+          - label: "Events"
+            name: "events"
+            widget: "list"
+            summary: "{{fields.title}}"
+            fields:
+              - { label: "Event Image",  name: "image",         widget: "image",  required: false }
+              - { label: "Category Label (fallback)", name: "category", widget: "string", default: "Upcoming Event", hint: "Shown only when no start/end time is set." }
+              - { label: "Start Date & Time (IST)", name: "startDateTime", widget: "datetime", format: "YYYY-MM-DDTHH:mm", date_format: "YYYY-MM-DD", time_format: "HH:mm", required: false, default: "" }
+              - { label: "End Date & Time (IST)",   name: "endDateTime",   widget: "datetime", format: "YYYY-MM-DDTHH:mm", date_format: "YYYY-MM-DD", time_format: "HH:mm", required: false, default: "" }
+              - { label: "Display Date", name: "date",     widget: "string", hint: "e.g. May 10, 2026" }
+              - { label: "Location",     name: "location", widget: "string", required: false, default: "" }
+              - { label: "Title",        name: "title",    widget: "string" }
+              - { label: "Description",  name: "body",     widget: "text" }
+              - { label: "Link Text",    name: "linkText", widget: "string", default: "Read Circular" }
+              - { label: "Link URL",     name: "linkHref", widget: "string", default: "#" }
+
+  - name: "highlights"
+    label: "Highlights"
+    files:
+      - name: "highlights_data"
+        label: "Highlight Cards"
+        file: "data/highlights.json"
+        format: json
+        fields:
+          - label: "Highlights"
+            name: "items"
+            widget: "list"
+            summary: "{{fields.caption}}"
+            fields:
+              - { label: "Featured Wide Card", name: "wide",   widget: "boolean", default: false, hint: "Only enable on the first item." }
+              - { label: "Date",               name: "date",   widget: "datetime", format: "YYYY-MM-DD", date_format: "YYYY-MM-DD", time_format: false }
+              - label: "Images"
+                name: "images"
+                widget: "list"
+                hint: "Add multiple images to enable a swipeable gallery."
+                field: { label: "Image", name: "image", widget: "image" }
+              - { label: "Trophy Emoji", name: "trophy",  widget: "string", default: "🏆" }
+              - { label: "Event Name",   name: "event",   widget: "string" }
+              - { label: "Caption",      name: "caption", widget: "string" }
+              - { label: "Body",         name: "body",    widget: "text", hint: "Basic HTML like <b>bold</b> is supported." }
+
+  - name: "officials"
+    label: "Officials"
+    files:
+      - name: "officials_data"
+        label: "Association Members"
+        file: "data/officials.json"
+        format: json
+        fields:
+          - label: "Association Members"
+            name: "association"
+            widget: "list"
+            summary: "{{fields.name}}"
+            fields:
+              - { label: "Name",        name: "name",        widget: "string" }
+              - { label: "Designation", name: "designation", widget: "string" }
+              - label: "Badge Colour"
+                name: "designationClass"
+                widget: "select"
+                options:
+                  - { label: "President",       value: "president"  }
+                  - { label: "Secretary",        value: "secretary"  }
+                  - { label: "Treasurer",        value: "treasurer"  }
+                  - { label: "Vice President",   value: "vp"         }
+                  - { label: "Joint Secretary",  value: "joint"      }
+                  - { label: "Technical",        value: "technical"  }
+                  - { label: "Member",           value: "member"     }
+              - { label: "Photo", name: "photo", widget: "image", required: false }
+          - { label: "Show Committee Section", name: "committeeEnabled", widget: "boolean", default: false }
+          - label: "Committee Members"
+            name: "committee"
+            widget: "list"
+            required: false
+            summary: "{{fields.name}}"
+            fields:
+              - { label: "Name",        name: "name",        widget: "string" }
+              - { label: "Designation", name: "designation", widget: "string" }
+              - label: "Badge Colour"
+                name: "designationClass"
+                widget: "select"
+                options:
+                  - { label: "Member",          value: "member"    }
+                  - { label: "Technical",        value: "technical" }
+                  - { label: "Joint Secretary",  value: "joint"     }
+              - { label: "Photo", name: "photo", widget: "image", required: false }
