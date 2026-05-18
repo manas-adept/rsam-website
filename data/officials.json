@@ -85,21 +85,21 @@
       "designation": "Refree",
       "designationClass": "member",
       "degrees": "",
-      "photo": "images/refree_dummy.png"
+      "photo": "images/refree_vikas.jpeg"
     },
     {
       "name": "Siddharth Saxena",
       "designation": "Refree",
       "designationClass": "member",
       "degrees": "",
-      "photo": "images/refree_dummy.png"
+      "photo": "images/refree_sid.jpeg"
     },
     {
-      "name": "Shyam Singh",
+      "name": "Shyam Thakur",
       "designation": "Refree",
       "designationClass": "member",
       "degrees": "",
-      "photo": "images/refree_dummy.png"
+      "photo": "images/refree_shyam.jpeg"
     }
   ]
 }
