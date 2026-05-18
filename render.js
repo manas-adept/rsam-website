@@ -164,6 +164,7 @@ function renderAbout() {
             <div class="about-stats">${stats}</div>
           </div>
         </div>
+
       </div>
     </section>
   `);
@@ -204,7 +205,7 @@ function renderOfficials() {
     const memberCards = OFFICIALS.committee.map(o => officialCard(o, 0)).join("");
     committeeHTML = `
       <div class="oc-referees-wrap">
-        <p class="oc-referees-label">Referees</p>
+        <p class="oc-referees-label">State Referees (UPRSA)</p>
         <div class="officials-roster officials-roster--sm">${memberCards}</div>
       </div>
     `;
@@ -684,12 +685,34 @@ function renderFooter() {
   `);
 }
 
+/* ── About RSFI ───────────────────────────────────── */
+function renderRsfi() {
+  mount("app-rsfi", `
+    <section class="rsfi-section section" id="rsfi">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag">National Federation</span>
+          <h2>About <span class="accent">RSFI</span></h2>
+        </div>
+        <div class="rsfi-body">
+          <p>The Roller Skating Federation of India (INDIA SKATE) registered in 1955, Permanent Head office A695 Shastri Nagar New Delhi India, is affiliated with World Skate (World Parent body of Roller Skating) since 1971. R.S.F.I is founder member of the Asian body World Skate Asia (In 1978). Roller Skating Federation of India was accorded recognition by the Government of India since September 1990 followed by recognition by the Indian Olympic Association.</p>
+          <p>National Championships are conducted for age groups, Cadet, Sub Juniors, Juniors, Seniors &amp; Masters (Men &amp; Women) for disciplines i.e. Skateboarding, Artistic Skating, Speed Skating, Inline Freestyle, Roller Freestyle, Roller Hockey, Inline Hockey, Inline Downhill, Inline Alpine, Roller Derby &amp; Roller Scooter, Skate cross.</p>
+          <p>Roller Skating is a part of All India University Games, SGFI Nationals, CBSE Nationals, KV Nationals and ICSE Nationals.</p>
+          <p>Indian Team is overall <strong>2nd in Asia</strong>. Roller Skating was included in the 1992 Olympic Games as a demonstration event and as a medal event in the 16th Asian Games 2010 in Guangzhou, 3rd Beach Asian Games 2012 in China, World University Games 2017 in Taiwan, 18th Asian Games 2018 in Indonesia, Youth Olympic Games 2018 in Argentina, 2020 Olympic Games &amp; 2024 Olympic Games.</p>
+          <p>India team has achieved <strong>2nd and 3rd position</strong> in Asian Championships. Roller skating is a medal event in National Games, Asian Games, Olympic Games, World University Championships and Youth Olympic Games.</p>
+        </div>
+      </div>
+    </section>
+  `);
+}
+
 /* ── Boot ─────────────────────────────────────────── */
 function renderAll() {
   document.title = CONFIG.site.tabTitle;
   renderNavbar();
   renderHero();
   renderAbout();
+  renderRsfi();
   renderOfficials();
   renderNews();
   renderHighlights();

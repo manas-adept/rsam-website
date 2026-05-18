@@ -632,6 +632,25 @@ code {
 
 .about-affiliation { display: flex; flex-direction: column; gap: 1rem; }
 
+/* ── RSFI section ──────────────────────────────────── */
+.rsfi-body {
+  columns: 2;
+  column-gap: 3rem;
+  margin-top: 0.5rem;
+}
+.rsfi-body p {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.8;
+  margin-bottom: 1rem;
+  break-inside: avoid;
+}
+.rsfi-body strong { color: var(--text); }
+
+@media (max-width: 768px) {
+  .rsfi-body { columns: 1; }
+}
+
 .affil-heading {
   font-size: 0.72rem;
   font-weight: 600;
