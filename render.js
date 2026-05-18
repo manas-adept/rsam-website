@@ -31,7 +31,7 @@ function placeholderImg(classes = "") {
 /* ── Navbar ───────────────────────────────────────── */
 function renderNavbar() {
   const links = CONFIG.nav.map(l =>
-    `<li><a href="${l.href}">${l.label}</a></li>`
+    `<li><a href="${l.href}"${l.cta ? ' class="nav-cta"' : ""}>${l.label}</a></li>`
   ).join("");
 
   mount("app-navbar", `
@@ -40,12 +40,9 @@ function renderNavbar() {
         <div class="nav-logo">
           <div class="logo-img-wrap">
             <img src="images/rsam-logo.PNG" alt="RSAM Logo" class="logo-img"/>
-            <svg class="logo-ring logo-ring--outer" viewBox="0 0 100 100" aria-hidden="true">
-              <circle cx="50" cy="50" r="47" fill="none" stroke="#e01c2e" stroke-width="2.5" stroke-dasharray="74 222" stroke-linecap="round"/>
-            </svg>
-            <svg class="logo-ring logo-ring--inner" viewBox="0 0 100 100" aria-hidden="true">
-              <circle cx="50" cy="50" r="34" fill="none" stroke="#c9922a" stroke-width="2" stroke-dasharray="40 174" stroke-linecap="round"/>
-            </svg>
+          </div>
+          <div class="nav-logo-text">
+            <span class="nav-logo-full">Roller Sports Association Moradabad</span>
           </div>
         </div>
         <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
@@ -66,28 +63,49 @@ function renderHero() {
     `<a href="${b.href}" class="btn-${b.style}">${b.label}</a>`
   ).join("");
 
+  // Collect all images from highlights marked for homepage carousel
+  const carouselImages = (window.HIGHLIGHTS || [])
+    .filter(h => h.homepage_carousel)
+    .flatMap(h => Array.isArray(h.images) ? h.images : [h.images])
+    .filter(Boolean);
+
+  const carouselHTML = carouselImages.length ? `
+    <div class="hero-carousel" id="heroCarousel">
+      <div class="hero-carousel-track" id="heroCarouselTrack">
+        ${carouselImages.map((src, i) => `
+          <div class="hero-carousel-slide${i === 0 ? ' active' : ''}">
+            <img src="${src}" alt="Highlight" loading="${i === 0 ? 'eager' : 'lazy'}" decoding="async"/>
+          </div>`).join("")}
+      </div>
+      <div class="hero-carousel-dots">
+        ${carouselImages.map((_, i) => `<button class="hc-dot${i === 0 ? ' active' : ''}" data-i="${i}" aria-label="Slide ${i+1}"></button>`).join("")}
+      </div>
+    </div>` : `
+    <div class="skater-bg" aria-hidden="true">
+      <img src="${hero.skaterImage}" alt="" class="skater-bg-img"/>
+    </div>`;
+
   mount("app-hero", `
     <section class="hero" id="home">
       <canvas id="wheelCanvas"></canvas>
 
-      <div class="hero-content">
-        <div class="hero-badge">${hero.badge}</div>
-        <h1 class="hero-title">
-          <span class="word-roll">${hero.titleLine1}</span>
-          <br/>
-          <span class="hero-name">${hero.titleLine2}</span>
-        </h1>
-        <p class="hero-desc">${hero.description}</p>
-        <div class="hero-cta">${ctaButtons}</div>
+      <div class="hero-inner">
+        <div class="hero-content">
+          <div class="hero-badge">${hero.badge}</div>
+          <h1 class="hero-title">
+            <span class="word-roll">${hero.titleLine1}</span>
+            <br/>
+            <span class="hero-name">${hero.titleLine2}</span>
+          </h1>
+          <p class="hero-desc">${hero.description}</p>
+          <div class="hero-cta">${ctaButtons}</div>
+        </div>
+        ${carouselHTML}
       </div>
 
       <div class="hero-scroll-hint">
         <div class="scroll-dot"></div>
         <span>Scroll to explore</span>
-      </div>
-
-      <div class="skater-bg" aria-hidden="true">
-        <img src="${hero.skaterImage}" alt="" class="skater-bg-img"/>
       </div>
 
       <div class="deco-wheel deco-wheel--1">
@@ -139,11 +157,11 @@ function renderAbout() {
         <div class="about-grid">
           <div class="about-text fade-in">
             ${paragraphs}
-            <div class="about-stats">${stats}</div>
           </div>
           <div class="about-affiliation fade-in">
             <p class="affil-heading">${about.affiliationsHeading}</p>
             <div class="affil-logo-grid">${affilItems}</div>
+            <div class="about-stats">${stats}</div>
           </div>
         </div>
       </div>
@@ -155,27 +173,25 @@ function renderAbout() {
 function renderOfficials() {
   if (!CONFIG.sections.officials.enabled) return;
 
-  function officialCard(o, idx, small = false) {
-    const cls = small ? "official-card official-card--sm fade-in" : "official-card fade-in";
-    const imgSize = small ? "36" : "48";
+  function officialCard(o, i) {
     return `
-      <div class="${cls}">
-        <div class="official-photo-wrap">
-          <div class="official-photo placeholder-photo${small ? " sm" : ""}">
+      <div class="official-card fade-in">
+        <div class="oc-rhombus-wrap" style="--card-i:${i}">
+          <div class="oc-rhombus ${o.designationClass}">
             <img src="${o.photo}" alt="${o.name}" loading="lazy" decoding="async"
                  onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"/>
             <div class="photo-fallback">
-              <svg viewBox="0 0 60 60" width="${imgSize}" height="${imgSize}">
-                <circle cx="30" cy="22" r="14" fill="rgba(224,28,46,0.4)"/>
-                <path d="M6,60 Q6,40 30,40 Q54,40 54,60" fill="rgba(224,28,46,0.4)"/>
+              <svg viewBox="0 0 60 60" width="40" height="40">
+                <circle cx="30" cy="22" r="14" fill="rgba(255,255,255,0.25)"/>
+                <path d="M6,60 Q6,40 30,40 Q54,40 54,60" fill="rgba(255,255,255,0.25)"/>
               </svg>
             </div>
           </div>
-          ${!small ? `<div class="official-rank">${String(idx + 1).padStart(2,"0")}</div>` : ""}
         </div>
-        <div class="official-info">
-          <h4>${o.name}</h4>
-          <span class="designation ${o.designationClass}">${o.designation}</span>
+        <div class="oc-info">
+          <h4 class="oc-name">${o.name}</h4>
+          ${o.degrees ? `<p class="oc-degrees">${o.degrees}</p>` : ""}
+          <span class="oc-role ${o.designationClass}"><span>${o.designation}</span></span>
         </div>
       </div>
     `;
@@ -185,10 +201,12 @@ function renderOfficials() {
 
   let committeeHTML = "";
   if (OFFICIALS.committeeEnabled) {
-    const memberCards = OFFICIALS.committee.map((o, i) => officialCard(o, i, true)).join("");
+    const memberCards = OFFICIALS.committee.map(o => officialCard(o, 0)).join("");
     committeeHTML = `
-      <h3 class="sub-heading" style="margin-top:3rem;">Committee Members</h3>
-      <div class="officials-grid officials-grid--small">${memberCards}</div>
+      <div class="oc-referees-wrap">
+        <p class="oc-referees-label">Referees</p>
+        <div class="officials-roster officials-roster--sm">${memberCards}</div>
+      </div>
     `;
   }
 
@@ -200,8 +218,7 @@ function renderOfficials() {
           <h2>Our <span class="accent">Officials</span></h2>
           <p class="section-desc">The governing body steering roller sports in Moradabad</p>
         </div>
-        <h3 class="sub-heading">Association Members</h3>
-        <div class="officials-grid">${execCards}</div>
+        <div class="officials-roster">${execCards}</div>
         ${committeeHTML}
       </div>
     </section>
@@ -651,12 +668,6 @@ function renderFooter() {
             <div class="footer-logo">
               <div class="logo-img-wrap" style="width:36px;height:36px;">
                 <img src="images/rsam-logo.PNG" alt="RSAM Logo" class="logo-img"/>
-                <svg class="logo-ring logo-ring--outer" viewBox="0 0 100 100" aria-hidden="true">
-                  <circle cx="50" cy="50" r="47" fill="none" stroke="#e01c2e" stroke-width="2.5" stroke-dasharray="74 222" stroke-linecap="round"/>
-                </svg>
-                <svg class="logo-ring logo-ring--inner" viewBox="0 0 100 100" aria-hidden="true">
-                  <circle cx="50" cy="50" r="34" fill="none" stroke="#c9922a" stroke-width="2" stroke-dasharray="40 174" stroke-linecap="round"/>
-                </svg>
               </div>
               <span>${CONFIG.site.name}</span>
             </div>

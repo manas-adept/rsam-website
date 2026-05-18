@@ -29,7 +29,7 @@ const OFFICIALS = {
       name:             "Pramesh Charan",
       designation:      "Treasurer",
       designationClass: "treasurer",
-      photo:            "images/treasurer.jpg",
+      photo:            "images/treasurer.png",
     },
     {
       name:             "Manas Garg",

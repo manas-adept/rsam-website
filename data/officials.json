@@ -4,34 +4,102 @@
       "name": "Ashok Singhal",
       "designation": "President",
       "designationClass": "president",
+      "degrees": "",
       "photo": "images/president.jpg"
     },
     {
       "name": "Devendra Rana",
       "designation": "General Secretary",
       "designationClass": "secretary",
-      "photo": "images/secretary.jpg"
+      "degrees": "",
+      "photo": "images/gs_devendrarana.jpeg"
     },
     {
-      "name": "Pramesh Charan",
+      "name": "Parmesh Charan",
       "designation": "Treasurer",
       "designationClass": "treasurer",
-      "photo": "images/treasurer.jpg"
-    },
-    {
-      "name": "Manas Garg",
-      "designation": "Technical",
-      "designationClass": "technical",
-      "photo": "images/manas.jpeg"
+      "degrees": "M.Com, M.P.Ed.",
+      "photo": "images/treasurer.png"
     }
   ],
-  "committeeEnabled": false,
+  "committeeEnabled": true,
   "committee": [
     {
-      "name": "[Member Name]",
-      "designation": "Executive Member",
+      "name": "Parmesh Charan",
+      "designation": "State Refree, UPRSA",
       "designationClass": "member",
-      "photo": "images/member1.jpg"
+      "degrees": "",
+      "photo": "images/refree_parmesh.jpeg"
+    },
+    {
+      "name": "Gourav Singh",
+      "designation": "Refree",
+      "designationClass": "member",
+      "degrees": "",
+      "photo": "images/refree_gouravsingh.jpeg"
+    },
+    {
+      "name": "Devendra Rana",
+      "designation": "Refree",
+      "designationClass": "member",
+      "degrees": "",
+      "photo": "images/refree_devrana.jpg"
+    },
+    {
+      "name": "Rohit Hans",
+      "designation": "Refree",
+      "designationClass": "member",
+      "degrees": "",
+      "photo": "images/refree_dummy.png"
+    },
+    {
+      "name": "Vipin Jakhmola",
+      "designation": "Refree",
+      "designationClass": "member",
+      "degrees": "",
+      "photo": "images/refree_dummy.png"
+    },
+    {
+      "name": "Sachin Nainwal",
+      "designation": "Refree",
+      "designationClass": "member",
+      "degrees": "",
+      "photo": "images/refree_sachinnainwal.jpeg"
+    },
+    {
+      "name": "Rupesh Singh",
+      "designation": "Refree",
+      "designationClass": "member",
+      "degrees": "",
+      "photo": "images/refree_rupesh.jpeg"
+    },
+    {
+      "name": "Devanand (Sourav Singh)",
+      "designation": "Refree",
+      "designationClass": "member",
+      "degrees": "",
+      "photo": "images/refree_devanand.jpeg"
+    },
+    {
+      "name": "Vikas Khairwal",
+      "designation": "Refree",
+      "designationClass": "member",
+      "degrees": "",
+      "photo": "images/refree_dummy.png"
+    },
+    {
+      "name": "Siddharth Saxena",
+      "designation": "Refree",
+      "designationClass": "member",
+      "degrees": "",
+      "photo": "images/refree_dummy.png"
+    },
+    {
+      "name": "Shyam Singh",
+      "designation": "Refree",
+      "designationClass": "member",
+      "degrees": "",
+      "photo": "images/refree_dummy.png"
     }
   ]
 }

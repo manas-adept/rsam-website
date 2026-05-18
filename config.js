@@ -35,6 +35,7 @@ const CONFIG = {
     { label: "News",        href: "#news"        },
     { label: "Highlights",  href: "#highlights"  },
     { label: "Certificate", href: "#certificate" },
+    { label: "Register",    href: "register.html", cta: true },
   ],
 
   /* ── Hero section ───────────────────────────────── */

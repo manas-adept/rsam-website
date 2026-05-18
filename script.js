@@ -249,5 +249,30 @@ function initInteractions() {
   })();
 }
 
+/* ── Hero carousel ────────────────────────────────── */
+function initHeroCarousel() {
+  const track = document.getElementById("heroCarouselTrack");
+  if (!track) return;
+  const slides = track.querySelectorAll(".hero-carousel-slide");
+  const dots   = document.querySelectorAll(".hc-dot");
+  if (slides.length <= 1) return;
+
+  let current = 0;
+
+  function goTo(n) {
+    slides[current].classList.remove("active");
+    dots[current].classList.remove("active");
+    current = (n + slides.length) % slides.length;
+    slides[current].classList.add("active");
+    dots[current].classList.add("active");
+  }
+
+  dots.forEach(d => d.addEventListener("click", () => goTo(+d.dataset.i)));
+  setInterval(() => goTo(current + 1), 4000);
+}
+
 /* Run after render.js has finished building the DOM (async fetch) */
-document.addEventListener('rsam:ready', initInteractions);
+document.addEventListener('rsam:ready', () => {
+  initInteractions();
+  initHeroCarousel();
+});

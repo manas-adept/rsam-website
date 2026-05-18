@@ -74,6 +74,7 @@ collections:
             summary: "{{fields.caption}}"
             fields:
               - { label: "Featured Wide Card", name: "wide",   widget: "boolean", default: false, hint: "Only enable on the first item." }
+              - { label: "Show in Homepage Carousel", name: "homepage_carousel", widget: "boolean", default: false, hint: "Show this highlight's images in the hero carousel on the homepage." }
               - { label: "Date",               name: "date",   widget: "datetime", format: "YYYY-MM-DD", date_format: "YYYY-MM-DD", time_format: false }
               - label: "Images"
                 name: "images"
@@ -112,6 +113,7 @@ collections:
                   - { label: "Technical",        value: "technical"  }
                   - { label: "Member",           value: "member"     }
               - { label: "Photo", name: "photo", widget: "image", required: false }
+              - { label: "Degrees / Qualifications", name: "degrees", widget: "string", required: false, default: "", hint: "e.g. B.Tech, MBA — shown below the name on the card" }
           - { label: "Show Committee Section", name: "committeeEnabled", widget: "boolean", default: false }
           - label: "Committee Members"
             name: "committee"

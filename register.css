@@ -1,0 +1,251 @@
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   register.css — styles specific to the registration page
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+.reg-main {
+  padding: 8rem 0 4rem;
+  min-height: 100vh;
+}
+
+/* Always show navbar background on register page — no hero behind it */
+.navbar {
+  background: rgba(10,10,15,0.98) !important;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.06);
+}
+
+/* ── Form shell ────────────────────────────────────── */
+.reg-form {
+  max-width: 820px;
+  margin: 2.5rem auto 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* ── Fieldset ──────────────────────────────────────── */
+.reg-fieldset {
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 1.8rem 2rem;
+  background: rgba(255,255,255,0.02);
+}
+.reg-legend {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent, #e01c2e);
+  padding: 0 0.5rem;
+}
+
+/* ── Row & field ───────────────────────────────────── */
+.reg-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.2rem;
+  margin-top: 1.2rem;
+}
+.reg-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.reg-field--full { margin-top: 1.2rem; }
+.reg-field--sm { max-width: 260px; }
+
+.reg-field label {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted, #aaa);
+}
+.reg-field label small {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 0.7rem;
+}
+.req { color: var(--accent, #e01c2e); }
+
+.reg-field input,
+.reg-field textarea {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+  padding: 0.6rem 0.85rem;
+  color: var(--text, #fff);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s;
+  width: 100%;
+  box-sizing: border-box;
+}
+.reg-field input:focus,
+.reg-field textarea:focus {
+  border-color: var(--accent, #e01c2e);
+}
+.reg-field input.readonly {
+  color: var(--muted, #aaa);
+  cursor: default;
+}
+.reg-field input.invalid,
+.reg-field textarea.invalid {
+  border-color: #e01c2e;
+}
+.reg-field textarea { resize: vertical; }
+
+/* ── File drop zone ────────────────────────────────── */
+.file-drop {
+  position: relative;
+  border: 1.5px dashed rgba(255,255,255,0.15);
+  border-radius: 6px;
+  padding: 1.2rem 1rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  background: rgba(255,255,255,0.02);
+}
+.file-drop:hover { border-color: var(--accent, #e01c2e); background: rgba(224,28,46,0.05); }
+.file-drop input[type="file"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+}
+.file-drop-label {
+  font-size: 0.8rem;
+  color: var(--muted, #aaa);
+  pointer-events: none;
+  line-height: 1.6;
+}
+.file-drop-name {
+  display: block;
+  margin-top: 0.4rem;
+  font-size: 0.75rem;
+  color: #4ade80;
+  font-weight: 600;
+}
+
+/* ── Discipline radio cards ────────────────────────── */
+.reg-discipline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+.disc-option { cursor: pointer; }
+.disc-option input[type="radio"] { display: none; }
+.disc-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 1rem 1.6rem;
+  border: 1.5px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.03);
+  transition: border-color 0.2s, background 0.2s;
+  min-width: 130px;
+}
+.disc-option input:checked + .disc-card {
+  border-color: var(--accent, #e01c2e);
+  background: rgba(224,28,46,0.1);
+}
+.disc-name {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text, #fff);
+}
+.disc-error {
+  font-size: 0.78rem;
+  color: #e01c2e;
+  margin-top: 0.5rem;
+}
+
+/* ── Submit ────────────────────────────────────────── */
+.reg-submit-row { display: flex; justify-content: center; }
+.reg-submit {
+  min-width: 220px;
+  font-size: 1rem;
+  padding: 0.85rem 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.submit-spinner {
+  width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin-slow 0.7s linear infinite;
+}
+
+/* ── Success modal ─────────────────────────────────── */
+.reg-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(6px);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.reg-modal-overlay[hidden] { display: none; }
+
+.reg-modal {
+  background: #13131a;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  padding: 3rem 2.5rem;
+  text-align: center;
+  max-width: 420px;
+  width: 90%;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+  animation: fade-up 0.35s ease;
+}
+.success-icon {
+  font-size: 3.5rem;
+  color: #4ade80;
+  margin-bottom: 1rem;
+  display: block;
+}
+.reg-modal h3 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2rem;
+  letter-spacing: 0.08em;
+  color: #4ade80;
+  margin-bottom: 0.75rem;
+}
+.reg-modal p {
+  font-size: 0.9rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.modal-countdown {
+  margin-top: 1.2rem;
+  font-size: 0.75rem !important;
+  color: rgba(255,255,255,0.3) !important;
+}
+
+/* ── Active nav link ───────────────────────────────── */
+.nav-register-link.active { color: var(--accent, #e01c2e) !important; }
+
+/* ── Responsive ────────────────────────────────────── */
+@media (max-width: 640px) {
+  .reg-row { grid-template-columns: 1fr; }
+  .reg-fieldset { padding: 1.2rem 1rem; }
+  .reg-field--sm { max-width: 100%; }
+  .disc-card { min-width: 100px; padding: 0.8rem 1rem; }
+}
