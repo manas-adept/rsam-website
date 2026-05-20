@@ -20,6 +20,13 @@
       "designationClass": "treasurer",
       "degrees": "M.Com, M.P.Ed.",
       "photo": "images/treasurer.png"
+    },
+    {
+      "name": "Manas Garg",
+      "designation": "Technical/Media Person",
+      "designationClass": "technical",
+      "degrees": "B.Tech",
+      "photo": "images/manas.jpeg"
     }
   ],
   "committeeEnabled": true,
@@ -43,21 +50,21 @@
       "designation": "Refree",
       "designationClass": "member",
       "degrees": "",
-      "photo": "images/refree_devrana.jpg"
+      "photo": "images/refree_devrana.jpeg"
     },
     {
       "name": "Rohit Hans",
       "designation": "Refree",
       "designationClass": "member",
       "degrees": "",
-      "photo": "images/refree_dummy.png"
+      "photo": "images/refree_rohit.jpeg"
     },
     {
       "name": "Vipin Jakhmola",
       "designation": "Refree",
       "designationClass": "member",
       "degrees": "",
-      "photo": "images/refree_dummy.png"
+      "photo": "images/refree_vipin.jpeg"
     },
     {
       "name": "Sachin Nainwal",

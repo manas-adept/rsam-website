@@ -862,11 +862,7 @@ code {
   line-height: 1.2;
 }
 .officials-roster--sm .oc-name { font-size: 0.72rem; }
-.officials-roster--sm .oc-role {
-  background: none !important;
-  padding: 0;
-  font-size: 0.5rem;
-}
+.officials-roster--sm .oc-role { display: none; }
 
 .oc-degrees {
   font-size: 0.65rem;

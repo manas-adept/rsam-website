@@ -205,7 +205,7 @@ function renderOfficials() {
     const memberCards = OFFICIALS.committee.map(o => officialCard(o, 0)).join("");
     committeeHTML = `
       <div class="oc-referees-wrap">
-        <p class="oc-referees-label">State Referees (UPRSA)</p>
+        <p class="oc-referees-label">State Referees (UPRSA Certified)</p>
         <div class="officials-roster officials-roster--sm">${memberCards}</div>
       </div>
     `;
