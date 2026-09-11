@@ -147,15 +147,13 @@ function renderNavbar() {
   if (tickerEvents.length > 0) {
     document.body.classList.add("has-ticker");
     const items = tickerEvents.map(ev => {
-      const isOrganizerPaid = ev.feeType === 'organizer' || ev.payToOrganizer;
       const ctaLabel = ev.isRegistrationActive ? 'Register Online &rarr;' : 'View Event &rarr;';
       const targetHref = ev.isRegistrationActive ? 'event-register.html' : 'index.html#events';
-      const feeNote = isOrganizerPaid ? ' <span style="color:#fbbf24;">(Fee: Paid to Organizer)</span>' : '';
 
       return `
         <a href="${targetHref}" class="ticker-item">
           <span class="ticker-badge">⚡ ANNOUNCEMENT</span>
-          <span><strong>${ev.title}</strong> — ${ev.date} · Venue: <strong>${ev.location}</strong>${feeNote}</span>
+          <span><strong>${ev.title}</strong> — ${ev.date} · Venue: <strong>${ev.location}</strong></span>
           <span class="ticker-link-btn">${ctaLabel}</span>
         </a>
       `;

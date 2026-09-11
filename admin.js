@@ -558,6 +558,17 @@ document.addEventListener("DOMContentLoaded", () => {
   if (itemModalClose) itemModalClose.addEventListener("click", closeModal);
   if (itemModalCancel) itemModalCancel.addEventListener("click", closeModal);
 
+  function formatForDatetimeLocal(str) {
+    if (!str) return '';
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(str)) {
+      return str.slice(0, 16);
+    }
+    const d = new Date(str);
+    if (isNaN(d.getTime())) return '';
+    const pad = n => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+
   // ── Event Modal Form ──
   function getEventModalHTML(ev = {}) {
     const base = ev.baseFee || 500;
@@ -579,13 +590,13 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>
 
       <div class="modal-section-card">
-        <h4 class="modal-sec-title">Dates &amp; Venue (IST Timeline)</h4>
+        <h4 class="modal-sec-title">Dates &amp; Venue Timeline</h4>
         <div class="form-row">
-          <div class="form-group"><label>Start Date &amp; Time (IST YYYY-MM-DDTHH:MM)</label><input type="text" id="mEvStartDT" value="${ev.startDateTime || ''}" placeholder="2026-10-15T08:00" /></div>
-          <div class="form-group"><label>End Date &amp; Time (IST YYYY-MM-DDTHH:MM)</label><input type="text" id="mEvEndDT" value="${ev.endDateTime || ''}" placeholder="2026-10-16T18:00" /></div>
+          <div class="form-group"><label>Start Date &amp; Time</label><input type="datetime-local" id="mEvStartDT" value="${formatForDatetimeLocal(ev.startDateTime)}" /></div>
+          <div class="form-group"><label>End Date &amp; Time</label><input type="datetime-local" id="mEvEndDT" value="${formatForDatetimeLocal(ev.endDateTime)}" /></div>
         </div>
         <div class="form-row">
-          <div class="form-group"><label>Registration Deadline</label><input type="text" id="mEvDeadline" value="${ev.deadline || '2026-10-01T23:59:59+05:30'}" required /></div>
+          <div class="form-group"><label>Registration Deadline</label><input type="datetime-local" id="mEvDeadline" value="${formatForDatetimeLocal(ev.deadline)}" required /></div>
           <div class="form-group"><label>Event Location / Venue</label><input type="text" id="mEvLoc" value="${ev.location || ''}" required /></div>
         </div>
       </div>
@@ -620,7 +631,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <input type="url" id="mEvImageUrl" value="${ev.image || ''}" placeholder="https://res.cloudinary.com/..." />
           <div class="cloudinary-upload-row">
             <input type="file" id="mEvImageFile" accept="image/*" class="cloudinary-file-input" />
-            <button type="button" class="btn-cloudinary-upload" id="btnUploadEvLogo">Upload to Cloudinary</button>
+            <button type="button" class="btn-cloudinary-upload" id="btnUploadEvLogo">Upload</button>
           </div>
         </div>
         <div class="form-group form-group--full"><label>Event Description</label><textarea id="mEvDesc" rows="3">${ev.description || ev.body || ''}</textarea></div>
@@ -631,11 +642,11 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="form-row">
           <label style="display:flex; align-items:center; gap:0.5rem; color:#fff; cursor:pointer;">
             <input type="checkbox" id="mEvShowTicker" ${ev.showOnTicker ? 'checked' : ''} />
-            <span>Display on Top Ticker Marquee Banner</span>
+            <span>Display on banner</span>
           </label>
           <label style="display:flex; align-items:center; gap:0.5rem; color:#fff; cursor:pointer;">
             <input type="checkbox" id="mEvActiveReg" ${ev.isRegistrationActive ? 'checked' : ''} />
-            <span>Active for Online Registration (event-register.html)</span>
+            <span>Enable Registration</span>
           </label>
         </div>
       </div>
@@ -953,7 +964,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <input type="url" id="mOffPhoto" placeholder="https://res.cloudinary.com/..." required />
           <div class="cloudinary-upload-row">
             <input type="file" id="mOffPhotoFile" accept="image/*" class="cloudinary-file-input" />
-            <button type="button" class="btn-cloudinary-upload" id="btnUploadOffPhoto">Upload to Cloudinary</button>
+            <button type="button" class="btn-cloudinary-upload" id="btnUploadOffPhoto">Upload</button>
           </div>
         </div>
       `;
@@ -1002,7 +1013,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <input type="url" id="mOffPhoto" value="${item.photo || ''}" required />
         <div class="cloudinary-upload-row">
           <input type="file" id="mOffPhotoFile" accept="image/*" class="cloudinary-file-input" />
-          <button type="button" class="btn-cloudinary-upload" id="btnUploadOffPhoto">Upload to Cloudinary</button>
+          <button type="button" class="btn-cloudinary-upload" id="btnUploadOffPhoto">Upload</button>
         </div>
       </div>
     `;
@@ -1112,6 +1123,15 @@ document.addEventListener("DOMContentLoaded", () => {
         const isTickerShow = document.getElementById("mEvShowTicker").checked;
         const feeTypeVal = document.getElementById("mEvFeeType").value;
 
+        let deadlineVal = document.getElementById("mEvDeadline").value.trim();
+        if (deadlineVal && !deadlineVal.includes('+') && !deadlineVal.includes('Z')) {
+          if (deadlineVal.length === 16) {
+            deadlineVal = deadlineVal + ':00+05:30';
+          } else if (deadlineVal.length === 19) {
+            deadlineVal = deadlineVal + '+05:30';
+          }
+        }
+
         const newEvent = {
           id: activeModalIdx !== null ? events[activeModalIdx].id : "evt_" + Date.now(),
           title: document.getElementById("mEvTitle").value.trim(),
@@ -1120,7 +1140,7 @@ document.addEventListener("DOMContentLoaded", () => {
           date: document.getElementById("mEvDateText").value.trim(),
           startDateTime: document.getElementById("mEvStartDT").value.trim(),
           endDateTime: document.getElementById("mEvEndDT").value.trim(),
-          deadline: document.getElementById("mEvDeadline").value.trim(),
+          deadline: deadlineVal,
           location: document.getElementById("mEvLoc").value.trim(),
           feeType: feeTypeVal,
           payToOrganizer: feeTypeVal === 'organizer',
