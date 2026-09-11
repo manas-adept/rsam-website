@@ -2,8 +2,16 @@ backend:
   name: git-gateway
   branch: main
 
-media_folder: "images"
-public_folder: "images"
+media_folder: "rsam_website"
+public_folder: "rsam_website"
+
+media_library:
+  name: cloudinary
+  config:
+    cloud_name: "igjmhsju"
+    api_key: "771583964283623"
+    default_transformations: []
+    folder: "rsam_website"
 
 collections:
 
@@ -38,6 +46,8 @@ collections:
 
   - name: "upcoming-events"
     label: "Upcoming Events"
+    media_folder: "rsam_website/events"
+    public_folder: "rsam_website/events"
     files:
       - name: "events_data"
         label: "Events Carousel"
@@ -62,6 +72,8 @@ collections:
 
   - name: "highlights"
     label: "Highlights"
+    media_folder: "rsam_website/highlights"
+    public_folder: "rsam_website/highlights"
     files:
       - name: "highlights_data"
         label: "Highlight Cards"
@@ -88,6 +100,8 @@ collections:
 
   - name: "officials"
     label: "Officials"
+    media_folder: "rsam_website/officials"
+    public_folder: "rsam_website/officials"
     files:
       - name: "officials_data"
         label: "Association Members"
@@ -131,3 +145,55 @@ collections:
                   - { label: "Technical",        value: "technical" }
                   - { label: "Joint Secretary",  value: "joint"     }
               - { label: "Photo", name: "photo", widget: "image", required: false }
+
+  - name: "event-gallery"
+    label: "Event Photo Showcase"
+    media_folder: "rsam_website/events"
+    public_folder: "rsam_website/events"
+    files:
+      - name: "gallery_data"
+        label: "Event Albums & Photos"
+        file: "data/gallery.json"
+        format: json
+        fields:
+          - label: "Event Albums"
+            name: "albums"
+            widget: "list"
+            summary: "{{fields.title}} ({{fields.date}})"
+            fields:
+              - { label: "Album ID", name: "id", widget: "string", hint: "Unique identifier, e.g. state-championship-2026" }
+              - { label: "Event Title", name: "title", widget: "string" }
+              - { label: "Event Date", name: "date", widget: "string", hint: "e.g. May 10, 2026" }
+              - { label: "Location", name: "location", widget: "string" }
+              - { label: "Category Tag", name: "category", widget: "string", default: "State Championship" }
+              - { label: "Description", name: "description", widget: "text" }
+              - label: "Photos"
+                name: "photos"
+                widget: "list"
+                fields:
+                  - { label: "Photo", name: "src", widget: "image" }
+                  - { label: "Caption", name: "caption", widget: "string" }
+                  - { label: "Upload Date & Time", name: "uploadedAt", widget: "datetime", format: "YYYY-MM-DDTHH:mm:ssZ", hint: "Used for 7-day master HQ vs auto-optimization rule" }
+
+      - name: "gallery_config"
+        label: "Gallery Subfolder Config"
+        file: "data/gallery-config.json"
+        format: json
+        fields:
+          - { label: "Cloudinary Base Path", name: "cloudinaryBasePath", widget: "string", default: "rsam_website/gallery" }
+          - { label: "Default Items Per Page", name: "defaultItemsPerPage", widget: "number", default: 20 }
+          - { label: "Auto-Optimize After (Days)", name: "autoOptimizeAfterDays", widget: "number", default: 7 }
+          - label: "Event Subfolders Config"
+            name: "folders"
+            widget: "list"
+            summary: "{{fields.title}} [{{fields.cloudinarySubfolder}}]"
+            fields:
+              - { label: "Folder ID", name: "folderId", widget: "string" }
+              - { label: "Cloudinary Subfolder Path", name: "cloudinarySubfolder", widget: "string", hint: "e.g. rsam_website/gallery/event-name" }
+              - { label: "Title", name: "title", widget: "string" }
+              - { label: "Date", name: "date", widget: "string" }
+              - { label: "Location", name: "location", widget: "string" }
+              - { label: "Category", name: "category", widget: "string" }
+              - { label: "Enabled / Visible", name: "enabled", widget: "boolean", default: true }
+              - { label: "Display Order", name: "displayOrder", widget: "number", default: 1 }
+              - { label: "Description", name: "description", widget: "text" }

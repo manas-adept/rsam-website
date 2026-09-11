@@ -22,7 +22,7 @@ const HIGHLIGHTS = [
   {
     wide:    true,                       // featured card — keep on first item
     date:    "2026-05-10",
-    images:  ["images/row-event.JPG","images/row-event1.JPG","images/row-event2.jpg","images/row-event5.jpg"],   // add more paths to enable swipe
+    images:  ["https://res.cloudinary.com/igjmhsju/image/upload/v1788797458/rsam_website/gallery/felicitaion_ceremony_dmr_2026/row-event.jpg","https://res.cloudinary.com/igjmhsju/image/upload/v1788797458/rsam_website/gallery/felicitaion_ceremony_dmr_2026/row-event1.jpg","https://res.cloudinary.com/igjmhsju/image/upload/v1788797459/rsam_website/gallery/felicitaion_ceremony_dmr_2026/row-event2.jpg","https://res.cloudinary.com/igjmhsju/image/upload/v1788797460/rsam_website/gallery/felicitaion_ceremony_dmr_2026/row-event5.jpg"],   // add more paths to enable swipe
     trophy:  "🌟",
     event:   "RUN ON WHEELS 4.0 SKATING MARATHON",
     caption: "Moradabad Skaters Shine at Run on Wheels 4.0 Marathon, Agra",
@@ -30,7 +30,7 @@ const HIGHLIGHTS = [
   },
   {
     date:    "2026-05-02",
-    images:  ["images/highlight1.JPG"],
+    images:  ["https://res.cloudinary.com/igjmhsju/image/upload/v1788797358/rsam_website/highlights/highlight1.jpg"],
     trophy:  "🏆",
     event:   "District Level Roller Skating Championship Spring",
     caption: "Aryans International School won First Prize in roller speed skating!",
@@ -38,7 +38,7 @@ const HIGHLIGHTS = [
   },
   {
     date:    "2026-05-02",
-    images:  ["images/news_main.jpg","images/highlight2.JPG","images/test.JPG"],
+    images:  ["https://res.cloudinary.com/igjmhsju/image/upload/v1788797446/rsam_website/news/news_main.jpg","https://res.cloudinary.com/igjmhsju/image/upload/v1788797358/rsam_website/highlights/highlight2.jpg","https://res.cloudinary.com/igjmhsju/image/upload/v1788797471/rsam_website/highlights/test.jpg"],
     trophy:  "🥇",
     event:   "District Level Roller Skating Championship Spring",
     caption: "Chaitanya Garg sweeps gold in speed skating!",
@@ -46,7 +46,7 @@ const HIGHLIGHTS = [
   },
   {
     date:    "2026-05-02",
-    images:  ["images/highlight3.jpg"],
+    images:  ["https://res.cloudinary.com/igjmhsju/image/upload/v1788797359/rsam_website/highlights/highlight3.jpg"],
     trophy:  "⚡",
     event:   "District Level Roller Skating Championship Spring",
     caption: "Thrilling Speed Skating at Summer Valley School, Moradabad",
@@ -54,10 +54,35 @@ const HIGHLIGHTS = [
   },
   {
     date:    "2026-05-02",
-    images:  ["images/highlight4.jpg"],
+    images:  ["https://res.cloudinary.com/igjmhsju/image/upload/v1788797360/rsam_website/highlights/highlight4.jpg"],
     trophy:  "🌟",
     event:   "District Level Roller Skating Championship Spring",
     caption: "The Chase Is On — Speed, Grit, and Determination Define the Race",
     body:    "There is nothing quite like the sight of skaters in full flight, each one pushing harder than the last, wheels cutting through the track as the crowd roars in anticipation. At the heart of every great race lies one simple truth — only the fastest, the bravest, and the most determined will cross that finish line first. This is what skating is all about — the thrill of the chase, the rush of the race, and the courage to give everything you have until the very end.",
   },
+  {
+    date:    "2025-11-15",
+    images:  ["https://res.cloudinary.com/igjmhsju/image/upload/v1788797445/rsam_website/news/news_lko.jpg"],
+    trophy:  "📦",
+    event:   "3rd District Roller Skating Championship 2025",
+    caption: "Moradabad Athletes Podium Sweep at 3rd District Meet",
+    body:    "Over 120 speed skaters competed across quad and inline categories in Moradabad, establishing new district records across all age groups.",
+    archived: true,
+    homepage_carousel: false
+  },
+  {
+    date:    "2025-08-20",
+    images:  ["https://res.cloudinary.com/igjmhsju/image/upload/v1788797458/rsam_website/gallery/felicitaion_ceremony_dmr_2026/row-event1.jpg"],
+    trophy:  "📦",
+    event:   "UP State Inter-District Roller Meet 2025",
+    caption: "Moradabad Contingent Wins 8 Medals in State Inter-District",
+    body:    "Official state roller skating championship delegation from Moradabad showcased stellar endurance and tactical prowess on the flat track.",
+    archived: true,
+    homepage_carousel: false
+  }
 ];
+
+if (typeof window !== "undefined") {
+  window.HIGHLIGHTS = HIGHLIGHTS;
+}
+

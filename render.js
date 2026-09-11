@@ -28,23 +28,163 @@ function placeholderImg(classes = "") {
   </div>`;
 }
 
+function getActiveEventsList() {
+  const saved = localStorage.getItem("RSAM_ADMIN_EVENTS");
+  if (saved) {
+    try { return JSON.parse(saved); } catch (e) {}
+  }
+
+  return [
+    {
+      id: "evt_district_2026",
+      title: "4th District Championship 2026",
+      year: "2026",
+      category: "District Championship",
+      date: "15th - 16th October 2026",
+      startDateTime: "2026-10-15T08:00",
+      endDateTime: "2026-10-16T18:00",
+      deadline: "2026-10-01T23:59:59+05:30",
+      location: "Moradabad Sports Complex, Kanth Road",
+      feeType: "online",
+      baseFee: 500.00,
+      gatewayPercent: 2.0,
+      gstPercent: 18.0,
+      image: "https://res.cloudinary.com/igjmhsju/image/upload/v1788797466/rsam_website/branding/rsam-logo.png",
+      body: "Official 4th District Championship for all age groups & disciplines in Moradabad.",
+      showOnTicker: true,
+      isRegistrationActive: true
+    },
+    {
+      id: "evt_up_state_2026",
+      title: "7th UP Open State (Flat Track)",
+      year: "2026",
+      category: "State Championship",
+      date: "July 19, 2026",
+      startDateTime: "2026-05-10T04:30",
+      endDateTime: "2026-05-10T10:30",
+      location: "Central Academy, Lucknow, Uttar Pradesh",
+      feeType: "organizer",
+      baseFee: 0,
+      image: "https://res.cloudinary.com/igjmhsju/image/upload/v1788797445/rsam_website/news/news_lko.jpg",
+      body: "Moradabad speeders won 5 Gold, 8 Silver and 4+ Bronze Medals at 7th UP Open-state Championship at Central Academy, Lucknow. Organized by UPRSA and hosted by LRSA.",
+      showOnTicker: true,
+      isRegistrationActive: false
+    },
+    {
+      id: "evt_marathon_2026",
+      title: "Run on Wheels 4.0 Skating Marathon",
+      year: "2026",
+      category: "Marathon Championship",
+      date: "May 10, 2026",
+      startDateTime: "2026-05-10T06:00",
+      endDateTime: "2026-05-10T12:00",
+      location: "Agra, Uttar Pradesh",
+      feeType: "organizer",
+      baseFee: 0,
+      image: "https://res.cloudinary.com/igjmhsju/image/upload/v1788797458/rsam_website/gallery/felicitaion_ceremony_dmr_2026/row-event.jpg",
+      body: "The Great Skating Marathon 2026 organized by Agra Roller Skating Welfare Association under the aegis of UPRSA.",
+      showOnTicker: true,
+      isRegistrationActive: false
+    }
+  ];
+}
+
+function getActiveEventConfig() {
+  const saved = localStorage.getItem("RSAM_ADMIN_EVENT");
+  if (saved) {
+    try { return JSON.parse(saved); } catch (e) {}
+  }
+  const events = getActiveEventsList();
+  const active = events.find(e => e.isRegistrationActive);
+  if (active) return active;
+  return (window.ADMIN_CONFIG && window.ADMIN_CONFIG.activeEvent) || {
+    title: "4th District Championship 2026",
+    year: "2026",
+    date: "15th - 16th October 2026",
+    location: "Moradabad Sports Complex, Kanth Road",
+    deadline: "2026-10-01T23:59:59+05:30",
+    status: "active"
+  };
+}
+
+function getActiveNewsItems() {
+  const saved = localStorage.getItem("RSAM_ADMIN_NEWS");
+  if (saved) {
+    try { return JSON.parse(saved); } catch (e) {}
+  }
+  return (window.NEWS && window.NEWS.items) || [];
+}
+
+function getActiveHighlights() {
+  const saved = localStorage.getItem("RSAM_ADMIN_HIGHLIGHTS");
+  if (saved) {
+    try { return JSON.parse(saved); } catch (e) {}
+  }
+  return window.HIGHLIGHTS || [];
+}
+
+function getActiveOfficials() {
+  const saved = localStorage.getItem("RSAM_ADMIN_OFFICIALS");
+  if (saved) {
+    try { return JSON.parse(saved); } catch (e) {}
+  }
+  const off = typeof OFFICIALS !== 'undefined' ? OFFICIALS : (window.OFFICIALS || {});
+  const assoc = off.association || [];
+  const comm = (off.committee && (Array.isArray(off.committee) ? off.committee : off.committee.members)) || [];
+  return [...assoc, ...comm];
+}
+
 /* ── Navbar ───────────────────────────────────────── */
 function renderNavbar() {
   const links = CONFIG.nav.map(l =>
     `<li><a href="${l.href}"${l.cta ? ' class="nav-cta"' : ""}>${l.label}</a></li>`
   ).join("");
 
+  const events = getActiveEventsList();
+  const tickerEvents = events.filter(e => e.showOnTicker);
+
+  let tickerHTML = "";
+  if (tickerEvents.length > 0) {
+    document.body.classList.add("has-ticker");
+    const items = tickerEvents.map(ev => {
+      const isOrganizerPaid = ev.feeType === 'organizer' || ev.payToOrganizer;
+      const ctaLabel = ev.isRegistrationActive ? 'Register Online &rarr;' : 'View Event &rarr;';
+      const targetHref = ev.isRegistrationActive ? 'event-register.html' : 'index.html#events';
+      const feeNote = isOrganizerPaid ? ' <span style="color:#fbbf24;">(Fee: Paid to Organizer)</span>' : '';
+
+      return `
+        <a href="${targetHref}" class="ticker-item">
+          <span class="ticker-badge">⚡ ANNOUNCEMENT</span>
+          <span><strong>${ev.title}</strong> — ${ev.date} · Venue: <strong>${ev.location}</strong>${feeNote}</span>
+          <span class="ticker-link-btn">${ctaLabel}</span>
+        </a>
+      `;
+    }).join("");
+
+    tickerHTML = `
+      <div class="top-ticker-bar" id="topTickerBar">
+        <div class="ticker-track">
+          ${items}
+          ${items}
+        </div>
+      </div>`;
+  } else {
+    document.body.classList.remove("has-ticker");
+  }
+
+
   mount("app-navbar", `
-    <nav class="navbar" id="navbar">
+    ${tickerHTML}
+    <nav class="navbar spotlight-nav" id="navbar">
       <div class="nav-inner">
-        <div class="nav-logo">
+        <a href="index.html" class="nav-logo-link" style="text-decoration:none; color:inherit; display:flex; align-items:center; gap:0.8rem;">
           <div class="logo-img-wrap">
-            <img src="images/rsam-logo.PNG" alt="RSAM Logo" class="logo-img"/>
+            <img src="https://res.cloudinary.com/igjmhsju/image/upload/v1788797466/rsam_website/branding/rsam-logo.png" alt="RSAM Logo" class="logo-img"/>
           </div>
           <div class="nav-logo-text">
             <span class="nav-logo-full">Roller Sports Association Moradabad</span>
           </div>
-        </div>
+        </a>
         <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
           <span></span><span></span><span></span>
         </button>
@@ -87,7 +227,12 @@ function renderHero() {
 
   mount("app-hero", `
     <section class="hero" id="home">
-      <canvas id="wheelCanvas"></canvas>
+      <div class="aurora-hero-bg" aria-hidden="true">
+        <div class="aurora-blob aurora-blob--1"></div>
+        <div class="aurora-blob aurora-blob--2"></div>
+        <div class="aurora-blob aurora-blob--3"></div>
+        <div class="aurora-blob aurora-blob--4"></div>
+      </div>
 
       <div class="hero-inner">
         <div class="hero-content">
@@ -107,13 +252,6 @@ function renderHero() {
         <div class="scroll-dot"></div>
         <span>Scroll to explore</span>
       </div>
-
-      <div class="deco-wheel deco-wheel--1">
-        <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="none" stroke="rgba(224,28,46,0.25)" stroke-width="3"/><circle cx="50" cy="50" r="28" fill="none" stroke="rgba(224,28,46,0.15)" stroke-width="2"/><circle cx="50" cy="50" r="10" fill="rgba(224,28,46,0.3)"/><line x1="50" y1="4" x2="50" y2="96" stroke="rgba(224,28,46,0.2)" stroke-width="1.5"/><line x1="4" y1="50" x2="96" y2="50" stroke="rgba(224,28,46,0.2)" stroke-width="1.5"/><line x1="17.6" y1="17.6" x2="82.4" y2="82.4" stroke="rgba(224,28,46,0.2)" stroke-width="1.5"/><line x1="82.4" y1="17.6" x2="17.6" y2="82.4" stroke="rgba(224,28,46,0.2)" stroke-width="1.5"/></svg>
-      </div>
-      <div class="deco-wheel deco-wheel--2">
-        <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="none" stroke="rgba(224,28,46,0.15)" stroke-width="3"/><circle cx="50" cy="50" r="28" fill="none" stroke="rgba(224,28,46,0.1)" stroke-width="2"/><circle cx="50" cy="50" r="10" fill="rgba(224,28,46,0.2)"/><line x1="50" y1="4" x2="50" y2="96" stroke="rgba(224,28,46,0.12)" stroke-width="1.5"/><line x1="4" y1="50" x2="96" y2="50" stroke="rgba(224,28,46,0.12)" stroke-width="1.5"/><line x1="17.6" y1="17.6" x2="82.4" y2="82.4" stroke="rgba(224,28,46,0.12)" stroke-width="1.5"/><line x1="82.4" y1="17.6" x2="17.6" y2="82.4" stroke="rgba(224,28,46,0.12)" stroke-width="1.5"/></svg>
-      </div>
     </section>
   `);
 }
@@ -127,7 +265,8 @@ function renderAbout() {
   const paragraphs = about.paragraphs.map(p => `<p>${p}</p>`).join("");
 
   const stats = about.stats.map(s => `
-    <div class="stat">
+    <div class="veng-stat-card stat">
+      <div class="veng-stat-glow"></div>
       <div class="stat-num-wrap">
         <span class="stat-num" data-target="${s.value}">0</span>
         <span class="stat-unit">${s.unit}</span>
@@ -178,7 +317,7 @@ function renderOfficials() {
     return `
       <div class="official-card fade-in">
         <div class="oc-rhombus-wrap" style="--card-i:${i}">
-          <div class="oc-rhombus ${o.designationClass}">
+          <div class="oc-rhombus ${o.designationClass || 'member'}">
             <img src="${o.photo}" alt="${o.name}" loading="lazy" decoding="async"
                  onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"/>
             <div class="photo-fallback">
@@ -192,21 +331,29 @@ function renderOfficials() {
         <div class="oc-info">
           <h4 class="oc-name">${o.name}</h4>
           ${o.degrees ? `<p class="oc-degrees">${o.degrees}</p>` : ""}
-          <span class="oc-role ${o.designationClass}"><span>${o.designation}</span></span>
+          <span class="oc-role ${o.designationClass || 'member'}"><span>${o.designation}</span></span>
         </div>
       </div>
     `;
   }
 
-  const execCards = OFFICIALS.association.map((o, i) => officialCard(o, i)).join("");
+  const activeOfficialsList = getActiveOfficials();
+  const execMembers = activeOfficialsList.filter(o => o.category === 'executive' || ['president','secretary','treasurer','technical'].includes(o.designationClass));
+  const refMembers = activeOfficialsList.filter(o => !execMembers.includes(o));
 
-  let committeeHTML = "";
-  if (OFFICIALS.committeeEnabled) {
-    const memberCards = OFFICIALS.committee.map(o => officialCard(o, 0)).join("");
-    committeeHTML = `
-      <div class="oc-referees-wrap">
-        <p class="oc-referees-label">State Referees (UPRSA Certified)</p>
-        <div class="officials-roster officials-roster--sm">${memberCards}</div>
+  const execCards = execMembers.map((o, i) => officialCard(o, i)).join("");
+  const refereeCards = refMembers.map((o, i) => officialCard(o, i)).join("");
+
+  let refereesSectionHTML = "";
+  if (refMembers.length > 0) {
+    refereesSectionHTML = `
+      <div class="oc-referees-wrap" style="margin-top: 3.5rem;">
+        <div style="text-align: center; margin-bottom: 2rem;">
+          <span class="section-tag" style="font-size:0.85rem;">Certified Officiating Team</span>
+          <h3 style="font-size: 1.6rem; font-weight: 700; color: #fff; margin-top: 0.3rem;">Technical <span class="accent">Referees &amp; Judges</span></h3>
+          <p style="color: #9ca3af; font-size: 0.95rem;">UPRSA &amp; District Certified Referees supervising official competitions in Moradabad</p>
+        </div>
+        <div class="officials-roster officials-roster--sm">${refereeCards}</div>
       </div>
     `;
   }
@@ -215,16 +362,17 @@ function renderOfficials() {
     <section class="officials section dark-section" id="officials">
       <div class="container">
         <div class="section-header">
-          <span class="section-tag">Leadership</span>
+          <span class="section-tag">Leadership &amp; Officiating</span>
           <h2>Our <span class="accent">Officials</span></h2>
           <p class="section-desc">The governing body steering roller sports in Moradabad</p>
         </div>
         <div class="officials-roster">${execCards}</div>
-        ${committeeHTML}
+        ${refereesSectionHTML}
       </div>
     </section>
   `);
 }
+
 
 /* ── Image entry normaliser ───────────────────────── */
 /*
@@ -238,9 +386,22 @@ function renderOfficials() {
   fit defaults to "cover"  (fills the box, crops excess)
   position defaults to "center"
 */
+function resolveCloudinarySrc(src) {
+  if (!src) return '';
+  if (src.startsWith('images/')) {
+    const filename = src.replace(/^images\//, '').replace(/[^a-zA-Z0-9_.-]/g, '_');
+    const baseName = filename.substring(0, filename.lastIndexOf('.')) || filename;
+    return `https://res.cloudinary.com/igjmhsju/image/upload/v1/rsam_website/${baseName}`;
+  }
+  return src;
+}
+
 function normaliseImg(entry) {
-  if (typeof entry === 'string') return { src: entry, fit: 'cover', position: 'center' };
-  return { src: entry.src || '', fit: entry.fit || 'cover', position: entry.position || 'center' };
+  let src = typeof entry === 'string' ? entry : (entry.src || '');
+  src = resolveCloudinarySrc(src);
+  const fit = (typeof entry === 'object' && entry.fit) || 'cover';
+  const position = (typeof entry === 'object' && entry.position) || 'center';
+  return { src, fit, position };
 }
 
 function imgStyle(entry) {
@@ -267,7 +428,7 @@ function getEventStatus(ev) {
 function renderNews() {
   if (!CONFIG.sections.news.enabled) return;
 
-  const events = NEWS.upcomingEvents || (NEWS.featured ? [NEWS.featured] : []);
+  const events = getActiveEventsList();
 
   function eventSlide(ev) {
     const evImg = normaliseImg(ev.image || '');
@@ -336,7 +497,8 @@ function renderNews() {
     </div>`;
   }
 
-  const sorted    = [...NEWS.items].sort((a, b) => new Date(b.date) - new Date(a.date));
+  const activeNewsItems = getActiveNewsItems();
+  const sorted    = [...activeNewsItems].sort((a, b) => new Date(b.date) - new Date(a.date));
   const recent    = sorted.slice(0, NEWS_LIMIT);
   const archived  = sorted.slice(NEWS_LIMIT);
 
@@ -435,8 +597,11 @@ function renderHighlights() {
       </div>`;
   }
 
-  const visible  = HIGHLIGHTS.slice(0, HL_LIMIT);
-  const archived = HIGHLIGHTS.slice(HL_LIMIT);
+  const activeHlList = getActiveHighlights();
+  const unarchived = activeHlList.filter(h => !h.archived);
+  const explicitArchived = activeHlList.filter(h => h.archived);
+  const visible  = unarchived.slice(0, HL_LIMIT);
+  const archived = [...unarchived.slice(HL_LIMIT), ...explicitArchived];
 
   const visibleCards  = visible.map(h => hlCardHTML(h)).join("");
   const archiveCards  = archived.map(h => hlCardHTML(h, true)).join("");
@@ -460,7 +625,7 @@ function renderHighlights() {
           <h2>Hall of <span class="accent">Highlights</span></h2>
           <p class="section-desc">Reliving the glory, grit, and greatness from our championships</p>
         </div>
-        <div class="highlights-grid">${visibleCards}</div>
+        <div class="highlights-grid cylinder-carousel">${visibleCards}</div>
         ${archivedHlHTML}
       </div>
     </section>
@@ -580,6 +745,41 @@ function renderCertificate() {
             ${protectedFrame(CERTIFICATE.panImage, "PAN Card")}
           </div>
         </div>
+
+        <!-- Official Skater Skinsuit Showcase -->
+        ${(() => {
+          let skinsuitConfig = (OFFICIALS && OFFICIALS.skinsuit) || {};
+          const savedSkinsuit = localStorage.getItem("RSAM_ADMIN_SKINSUIT");
+          if (savedSkinsuit) {
+            try { skinsuitConfig = JSON.parse(savedSkinsuit); } catch (e) {}
+          }
+          const frontImg = skinsuitConfig.frontImage || "https://res.cloudinary.com/igjmhsju/image/upload/v1788797466/rsam_website/branding/rsam-logo.png";
+          const backImg  = skinsuitConfig.backImage || "https://res.cloudinary.com/igjmhsju/image/upload/v1788797469/rsam_website/branding/skater-boy.png";
+
+          return `
+            <div class="skinsuit-showcase-wrap fade-in" style="margin-top: 3rem; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 2rem;">
+              <div style="text-align: center; margin-bottom: 1.8rem;">
+                <span class="section-tag" style="font-size: 0.8rem;">Official Race Uniform</span>
+                <h3 style="font-size: 1.5rem; font-weight: 700; color: #fff; margin-top: 0.4rem;">${skinsuitConfig.title || 'RSAM Official Skater Skinsuit'}</h3>
+                <p style="color: #9ca3af; font-size: 0.92rem; margin-top: 0.2rem;">${skinsuitConfig.subtitle || 'Mandatory official racing uniform design for all RSAM athletes'}</p>
+              </div>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem;">
+                <div class="skinsuit-card" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 1.2rem; text-align: center;">
+                  <h4 style="font-size: 1.05rem; color: #38bdf8; margin-bottom: 0.3rem; font-weight: 600;">Front View Design</h4>
+                  <p style="color: #9ca3af; font-size: 0.85rem; margin-bottom: 1rem;">Official RSAM emblem &amp; chest crest</p>
+                  ${protectedFrame(frontImg, "Skinsuit Front View")}
+                </div>
+                <div class="skinsuit-card" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 1.2rem; text-align: center;">
+                  <h4 style="font-size: 1.05rem; color: #38bdf8; margin-bottom: 0.3rem; font-weight: 600;">Back View Design</h4>
+                  <p style="color: #9ca3af; font-size: 0.85rem; margin-bottom: 1rem;">District title typography &amp; athlete ID area</p>
+                  ${protectedFrame(backImg, "Skinsuit Back View")}
+                </div>
+              </div>
+            </div>
+          `;
+        })()}
+
+
         <p class="cert-note-text fade-in">${CERTIFICATE.note}</p>
       </div>
     </section>
@@ -594,7 +794,7 @@ function renderConnect() {
 
   mount("app-connect", `
     <!-- floating trigger tab -->
-    <button class="connect-tab" id="connectTab" aria-label="Toggle connect panel" aria-expanded="false">
+    <button class="connect-tab creepy-btn" id="connectTab" aria-label="Toggle connect panel" aria-expanded="false">
       <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
       </svg>
@@ -668,7 +868,7 @@ function renderFooter() {
           <div class="footer-brand">
             <div class="footer-logo">
               <div class="logo-img-wrap" style="width:36px;height:36px;">
-                <img src="images/rsam-logo.PNG" alt="RSAM Logo" class="logo-img"/>
+                <img src="https://res.cloudinary.com/igjmhsju/image/upload/v1788797466/rsam_website/branding/rsam-logo.png" alt="RSAM Logo" class="logo-img"/>
               </div>
               <span>${CONFIG.site.name}</span>
             </div>
@@ -706,6 +906,575 @@ function renderRsfi() {
   `);
 }
 
+/* ── Cloudinary Optimization Helper (7-Day Rule) ──── */
+function getOptimizedCloudinaryUrl(url, uploadedAt, mode = 'full') {
+  if (!url || typeof url !== 'string' || !url.includes('res.cloudinary.com')) return url;
+
+  const uploadDate = uploadedAt ? new Date(uploadedAt) : new Date();
+  const ageDays = (Date.now() - uploadDate.getTime()) / (1000 * 60 * 60 * 24);
+  const isRecent = ageDays <= 7;
+
+  let transform = '';
+  if (mode === 'thumb') {
+    transform = 'q_auto,f_auto,w_450,h_320,c_fill,g_auto';
+  } else if (isRecent) {
+    transform = 'q_auto:best,f_auto';
+  } else {
+    transform = 'q_auto:good,f_auto,w_1200';
+  }
+
+  const parts = url.split('/image/upload/');
+  if (parts.length === 2) {
+    const rest = parts[1].replace(/^(q_[^/]+|f_[^/]+|w_[^/]+|h_[^/]+|c_[^/]+|g_[^/]+|,)+\//, '');
+    return `${parts[0]}/image/upload/${transform}/${rest}`;
+  }
+  return url;
+}
+
+/* ── Event Photo Gallery (Config-driven Folder Architecture) ────────── */
+let galleryState = {
+  currentFolderId: null, // null = Folder Overview, string = inside event folder
+  currentPage: 1,
+  itemsPerPage: 20,
+  viewMode: 'grid', // 'grid' | 'list'
+  lightbox: {
+    isOpen: false,
+    albumPhotos: [],
+    currentIndex: 0
+  }
+};
+
+function renderGallery() {
+  if (!CONFIG.sections.gallery || !CONFIG.sections.gallery.enabled) return;
+
+  const rawAlbums = window.GALLERY_ALBUMS || [];
+  const galleryConfig = window.GALLERY_CONFIG || { folders: [] };
+
+  // Enforce 28 compact photo thumbnails per page in inside folder view
+  galleryState.itemsPerPage = 28;
+
+  const cloudMap = window.CLOUDINARY_MEDIA_MAP || {};
+  const liveCache = window.LIVE_GALLERY_CACHE || {};
+  const discoveredFolders = window.LIVE_CLOUDINARY_DISCOVERED_FOLDERS;
+
+  // Render dynamically discovered Cloudinary subfolders first, or fall back to gallery-config.json
+  let albums = [];
+  if (discoveredFolders && Array.isArray(discoveredFolders) && discoveredFolders.length > 0) {
+    albums = discoveredFolders.map(folder => ({
+      id: folder.folderId,
+      title: folder.title,
+      date: folder.date || 'Event Gallery',
+      location: folder.location || 'Moradabad / UP',
+      category: folder.category || 'Championship',
+      description: folder.description || '',
+      cloudinarySubfolder: folder.cloudinarySubfolder,
+      photos: folder.photos || []
+    }));
+  } else if (galleryConfig.folders && galleryConfig.folders.length > 0) {
+    albums = galleryConfig.folders
+      .filter(f => f.enabled !== false)
+      .sort((a, b) => (a.displayOrder || 99) - (b.displayOrder || 99))
+      .map(folder => {
+        const matchingAlbum = rawAlbums.find(a => a.id === folder.folderId) || {};
+        let rawPhotos = matchingAlbum.photos || [];
+        const subfolder = folder.cloudinarySubfolder || '';
+        let albumPhotos = [];
+
+        // 1. Live Cloudinary API cache priority (dynamic update without file edits)
+        if (subfolder && Array.isArray(liveCache[subfolder])) {
+          albumPhotos = liveCache[subfolder];
+        } else {
+          // 2. Fallback to matching photos in gallery.json & media map
+          albumPhotos = [...rawPhotos];
+          if (subfolder) {
+            const subfolderMatches = rawPhotos.filter(p => p.src && p.src.includes(subfolder));
+            if (subfolderMatches.length > 0) {
+              albumPhotos = subfolderMatches;
+            } else {
+              const allSitePhotos = rawAlbums.flatMap(a => a.photos || []);
+              const globalMatches = allSitePhotos.filter(p => p.src && p.src.includes(subfolder));
+              if (globalMatches.length > 0) {
+                albumPhotos = globalMatches;
+              }
+            }
+          }
+
+          const existingSrcs = new Set(albumPhotos.map(p => p.src));
+          for (const [key, url] of Object.entries(cloudMap)) {
+            if (url && url.includes(subfolder) && !existingSrcs.has(url)) {
+              const baseName = key.split('/').pop().split('.')[0];
+              albumPhotos.push({
+                src: url,
+                caption: `Event Showcase Photo (${baseName})`,
+                uploadedAt: new Date().toISOString()
+              });
+              existingSrcs.add(url);
+            }
+          }
+        }
+
+        return {
+          id: folder.folderId,
+          title: folder.title || matchingAlbum.title || 'Event Album',
+          date: folder.date || matchingAlbum.date || '',
+          location: folder.location || matchingAlbum.location || '',
+          category: folder.category || matchingAlbum.category || 'Event',
+          description: folder.description || matchingAlbum.description || '',
+          cloudinarySubfolder: subfolder,
+          photos: albumPhotos
+        };
+      });
+  } else {
+    albums = rawAlbums;
+  }
+
+  // Mode A: Folder Overview (galleryState.currentFolderId === null)
+  if (!galleryState.currentFolderId) {
+    const folderCardsHTML = albums.map(album => {
+      const photos = album.photos || [];
+      const fallbackStack = [
+        'https://res.cloudinary.com/igjmhsju/image/upload/v1788797466/rsam_website/events/state2026/state2026_photo1.jpg',
+        'https://res.cloudinary.com/igjmhsju/image/upload/v1788797466/rsam_website/events/state2026/state2026_photo2.jpg',
+        'https://res.cloudinary.com/igjmhsju/image/upload/v1788797466/rsam_website/events/district2026/district2026_photo1.jpg'
+      ];
+      const p1 = photos[0] ? getOptimizedCloudinaryUrl(photos[0].src, photos[0].uploadedAt, 'thumb') : fallbackStack[0];
+      const p2 = photos[1] ? getOptimizedCloudinaryUrl(photos[1].src, photos[1].uploadedAt, 'thumb') : (photos[0] ? fallbackStack[1] : fallbackStack[1]);
+      const p3 = photos[2] ? getOptimizedCloudinaryUrl(photos[2].src, photos[2].uploadedAt, 'thumb') : (photos[0] ? fallbackStack[2] : fallbackStack[2]);
+      const photoCount = photos.length;
+
+      const stackHTML = `<div class="devi-folder-stack">
+            <img src="${p3}" alt="${album.title}" class="devi-thumb devi-thumb--3" loading="lazy"/>
+            <img src="${p2}" alt="${album.title}" class="devi-thumb devi-thumb--2" loading="lazy"/>
+            <img src="${p1}" alt="${album.title}" class="devi-thumb devi-thumb--1" loading="lazy"/>
+          </div>`;
+
+      return `
+        <div class="g-folder-card devi-folder-card visible" data-folder-id="${album.id}">
+          <div class="devi-folder-header-tab">📂 ${album.category}</div>
+          <div class="g-folder-img-wrap">
+            ${stackHTML}
+            <div class="g-folder-overlay">
+              <span class="g-folder-open-badge">📂 Open Event Folder</span>
+            </div>
+            <span class="g-folder-count-badge">📷 ${photoCount} Photos</span>
+          </div>
+          <div class="g-folder-info">
+            <div class="g-folder-header">
+              <h3 class="g-folder-title">${album.title}</h3>
+            </div>
+            <p class="g-folder-meta">📅 ${album.date} · 📍 ${album.location}</p>
+            <p class="g-folder-desc">${album.description}</p>
+            <div class="g-folder-action-btn">
+              <span>Open Event Folder (${photoCount} Photos)</span>
+              <span class="g-btn-arrow">→</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    mount("app-gallery", `
+      <section class="gallery-section section dark-section" id="gallery">
+        <div class="container">
+          <div class="section-header">
+            <span class="section-tag">Event Showcase</span>
+            <h2>Photo <span class="accent">Gallery</span></h2>
+            <p class="section-desc">Select an event folder to view championship photos and action archives</p>
+          </div>
+
+          <div class="g-folders-grid">
+            ${folderCardsHTML}
+          </div>
+        </div>
+      </section>
+    `);
+
+    // Add folder click listeners
+    document.querySelectorAll('.g-folder-card').forEach(card => {
+      card.onclick = () => {
+        galleryState.currentFolderId = card.dataset.folderId;
+        galleryState.currentPage = 1;
+        renderGallery();
+        document.getElementById('gallery').scrollIntoView({ behavior: 'smooth' });
+      };
+    });
+    return;
+  }
+
+  // Mode B: Inside Event Folder (galleryState.currentFolderId !== null)
+  const currentAlbum = albums.find(a => a.id === galleryState.currentFolderId || a.cloudinarySubfolder === galleryState.currentFolderId)
+    || albums.find(a => a.id === galleryState.currentFolderId)
+    || albums[0]
+    || { id: 'unknown', title: 'Event Album', photos: [] };
+
+  const allPhotos = (currentAlbum.photos || []).map(p => ({
+    ...p,
+    albumId: currentAlbum.id,
+    albumTitle: currentAlbum.title,
+    albumDate: currentAlbum.date,
+    category: currentAlbum.category
+  }));
+
+  const totalPhotos = allPhotos.length;
+  const itemsPerPage = 28; // 28 thumbnails per page
+  const totalPages = Math.max(1, Math.ceil(totalPhotos / itemsPerPage));
+
+  // Sanity check current page
+  if (galleryState.currentPage > totalPages) galleryState.currentPage = totalPages;
+  if (galleryState.currentPage < 1) galleryState.currentPage = 1;
+
+  const startIndex = (galleryState.currentPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, totalPhotos);
+  const pagePhotos = allPhotos.slice(startIndex, endIndex);
+
+  // Pagination HTML Builder
+  let paginationHTML = '';
+  if (totalPages > 1) {
+    let pageButtonsHTML = '';
+    for (let p = 1; p <= totalPages; p++) {
+      pageButtonsHTML += `
+        <button class="g-page-btn${galleryState.currentPage === p ? ' active' : ''}" data-page="${p}">
+          ${p}
+        </button>
+      `;
+    }
+
+    paginationHTML = `
+      <div class="g-pagination-bar">
+        <span class="g-page-info">Showing ${startIndex + 1}–${endIndex} of ${totalPhotos} photos</span>
+        <div class="g-page-controls">
+          <button class="g-page-nav-btn" id="gPrevPage" ${galleryState.currentPage === 1 ? 'disabled' : ''}>
+            ‹ Prev
+          </button>
+          ${pageButtonsHTML}
+          <button class="g-page-nav-btn" id="gNextPage" ${galleryState.currentPage === totalPages ? 'disabled' : ''}>
+            Next ›
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
+  // View Switcher Buttons
+  const viewSwitcherHTML = `
+    <div class="g-view-switcher">
+      <button class="g-view-btn${galleryState.viewMode === 'grid' ? ' active' : ''}" data-view="grid" title="Grid View">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+        <span>Grid</span>
+      </button>
+      <button class="g-view-btn${galleryState.viewMode === 'list' ? ' active' : ''}" data-view="list" title="List View">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        <span>List</span>
+      </button>
+    </div>
+  `;
+
+  // Grid View HTML (Compact 28-Photo Collapsed Grid)
+  const gridCardsHTML = pagePhotos.map((photo, pageIdx) => {
+    const globalIdx = startIndex + pageIdx;
+    const thumbUrl = getOptimizedCloudinaryUrl(photo.src, photo.uploadedAt, 'thumb');
+
+    return `
+      <div class="g-grid-card visible" data-global-photo-idx="${globalIdx}">
+        <div class="g-card-img-wrap">
+          <img src="${thumbUrl}" alt="Photo ${globalIdx + 1}" loading="lazy" decoding="async"/>
+          <div class="g-card-overlay">
+            <span class="g-zoom-icon">🔍</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // List View HTML
+  const listCardsHTML = pagePhotos.map((photo, pageIdx) => {
+    const globalIdx = startIndex + pageIdx;
+    const thumbUrl = getOptimizedCloudinaryUrl(photo.src, photo.uploadedAt, 'thumb');
+    const ageDays = photo.uploadedAt ? (Date.now() - new Date(photo.uploadedAt).getTime()) / (1000 * 60 * 60 * 24) : 999;
+    const isRecent = ageDays <= (galleryConfig.autoOptimizeAfterDays || 7);
+    const qualityLabel = isRecent ? `✨ Master High Quality (< ${galleryConfig.autoOptimizeAfterDays || 7} days)` : `⚡ Cloudinary Auto-Optimized (> ${galleryConfig.autoOptimizeAfterDays || 7} days)`;
+
+    return `
+      <div class="g-list-item visible" data-global-photo-idx="${globalIdx}">
+        <div class="g-list-cover">
+          <img src="${thumbUrl}" alt="${photo.caption}" loading="lazy"/>
+        </div>
+        <div class="g-list-content">
+          <div class="g-list-meta">
+            <span class="g-list-cat">${currentAlbum.category}</span>
+            <span class="g-list-date">Photo #${globalIdx + 1}</span>
+            <span class="g-quality-note">${qualityLabel}</span>
+          </div>
+          <h3 class="g-list-title">${photo.caption}</h3>
+          <p class="g-list-desc">Album: <strong>${currentAlbum.title}</strong> · ${currentAlbum.date}</p>
+          <div class="g-list-footer">
+            <button class="btn-primary btn-sm g-view-photo-btn" data-global-photo-idx="${globalIdx}">View Fullscreen Showcase →</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  const cylinderCardsHTML = allPhotos.map((photo, pIdx) => {
+    const thumbUrl = getOptimizedCloudinaryUrl(photo.src, photo.uploadedAt, 'thumb');
+    return `
+      <div class="g-cylinder-card${pIdx === 0 ? ' center' : ''}" data-cyl-idx="${pIdx}" data-global-photo-idx="${pIdx}">
+        <img src="${thumbUrl}" alt="${photo.caption}" loading="lazy"/>
+        <div class="g-cyl-overlay">
+          <p class="g-cyl-caption">${photo.caption || 'Event Showcase Photo'}</p>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  const cylinderShowcaseHTML = totalPhotos > 0 ? `
+    <div class="g-cylinder-showcase" id="gCylinderShowcase">
+      <div class="g-cylinder-viewport" id="gCylinderViewport">
+        ${cylinderCardsHTML}
+      </div>
+      <div class="g-cylinder-controls">
+        <button class="g-cyl-btn" id="gCylPrev">‹ Prev Photo</button>
+        <span class="g-cyl-counter" id="gCylCounter">1 / ${totalPhotos}</span>
+        <button class="g-cyl-btn" id="gCylNext">Next Photo ›</button>
+      </div>
+    </div>
+  ` : '';
+
+  let bodyHTML = '';
+  if (totalPhotos === 0) {
+    bodyHTML = `
+      <div class="g-empty-folder-state" style="text-align: center; padding: 60px 20px; background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.12); border-radius: 16px; margin: 25px 0;">
+        <div style="font-size: 52px; margin-bottom: 12px; opacity: 0.8;">📷</div>
+        <h3 style="font-size: 22px; font-weight: 700; color: #f3f4f6; margin-bottom: 8px;">0 Photos Available</h3>
+        <p style="color: #9ca3af; max-width: 520px; margin: 0 auto; line-height: 1.6;">There are currently 0 photos in this event folder (<code>${currentAlbum.cloudinarySubfolder || currentAlbum.id}</code>). Upload photos directly to Cloudinary and they will appear here automatically.</p>
+      </div>
+    `;
+  } else {
+    bodyHTML = `<div class="g-grid-container">${gridCardsHTML}</div>`;
+  }
+
+  mount("app-gallery", `
+    <section class="gallery-section section dark-section" id="gallery">
+      <div class="container">
+        <!-- Breadcrumb Header -->
+        <div class="g-breadcrumb-bar">
+          <button class="g-back-btn" id="gBackToFolders">
+            ← Back to All Event Folders
+          </button>
+          <div class="g-breadcrumb-path">
+            <span class="g-bc-root">📁 Gallery</span>
+            <span class="g-bc-sep">/</span>
+            <span class="g-bc-current">${currentAlbum.title}</span>
+          </div>
+        </div>
+
+        <div class="g-album-header-banner">
+          <div>
+            <h2>${currentAlbum.title}</h2>
+            <p class="g-album-meta-text">📅 ${currentAlbum.date} · 📍 ${currentAlbum.location} · 📷 Total ${totalPhotos} Photos</p>
+            <p class="g-album-desc-text">${currentAlbum.description}</p>
+          </div>
+          ${viewSwitcherHTML}
+        </div>
+
+        ${cylinderShowcaseHTML}
+        ${bodyHTML}
+        ${paginationHTML}
+      </div>
+
+      <!-- Lightbox Showcase Modal -->
+      <div class="g-lightbox-modal" id="gLightboxModal" aria-hidden="true">
+        <div class="g-lightbox-backdrop" id="gLightboxBackdrop"></div>
+        <div class="g-lightbox-dialog">
+          <button class="g-lightbox-close" id="gLightboxClose" aria-label="Close Showcase">✕</button>
+
+          <div class="g-lightbox-header">
+            <div class="g-lh-info">
+              <span class="g-lh-album" id="gLhAlbumTitle">${currentAlbum.title}</span>
+              <span class="g-lh-counter" id="gLhCounter">1 / ${totalPhotos}</span>
+            </div>
+            <div id="gLhQualityBadge"></div>
+          </div>
+
+          <div class="g-lightbox-viewport">
+            <button class="g-lh-nav g-lh-nav--prev" id="gLhPrev" aria-label="Previous Photo">❮</button>
+            <div class="g-lh-img-wrap">
+              <img src="" id="gLhImage" alt="Gallery Photo" />
+            </div>
+            <button class="g-lh-nav g-lh-nav--next" id="gLhNext" aria-label="Next Photo">❯</button>
+          </div>
+
+          <div class="g-lightbox-caption-wrap">
+            <p class="g-lh-caption" id="gLhCaption">Photo Caption</p>
+          </div>
+
+          <div class="g-lightbox-strip" id="gLhStrip"></div>
+        </div>
+      </div>
+    </section>
+  `);
+
+  setupInsideFolderListeners(allPhotos, totalPages);
+}
+
+function setupInsideFolderListeners(allPhotos, totalPages) {
+  // Back to Folders button
+  const backBtn = document.getElementById('gBackToFolders');
+  if (backBtn) {
+    backBtn.onclick = () => {
+      galleryState.currentFolderId = null;
+      galleryState.currentPage = 1;
+      renderGallery();
+      document.getElementById('gallery').scrollIntoView({ behavior: 'smooth' });
+    };
+  }
+
+  // View switcher
+  document.querySelectorAll('.g-view-btn').forEach(btn => {
+    btn.onclick = () => {
+      galleryState.viewMode = btn.dataset.view;
+      renderGallery();
+    };
+  });
+
+  // Page numbers
+  document.querySelectorAll('.g-page-btn').forEach(btn => {
+    btn.onclick = () => {
+      galleryState.currentPage = parseInt(btn.dataset.page, 10);
+      renderGallery();
+      document.getElementById('gallery').scrollIntoView({ behavior: 'smooth' });
+    };
+  });
+
+  // Prev / Next page buttons
+  const prevPageBtn = document.getElementById('gPrevPage');
+  const nextPageBtn = document.getElementById('gNextPage');
+  if (prevPageBtn) {
+    prevPageBtn.onclick = () => {
+      if (galleryState.currentPage > 1) {
+        galleryState.currentPage--;
+        renderGallery();
+        document.getElementById('gallery').scrollIntoView({ behavior: 'smooth' });
+      }
+    };
+  }
+  if (nextPageBtn) {
+    nextPageBtn.onclick = () => {
+      if (galleryState.currentPage < totalPages) {
+        galleryState.currentPage++;
+        renderGallery();
+        document.getElementById('gallery').scrollIntoView({ behavior: 'smooth' });
+      }
+    };
+  }
+
+  // Photo Cards / Buttons -> Open Lightbox
+  document.querySelectorAll('[data-global-photo-idx]').forEach(el => {
+    el.onclick = () => {
+      const idx = parseInt(el.dataset.globalPhotoIdx, 10);
+      openLightbox(allPhotos, idx);
+    };
+  });
+
+  // Lightbox Close
+  const closeBtn = document.getElementById('gLightboxClose');
+  const backdrop = document.getElementById('gLightboxBackdrop');
+  if (closeBtn) closeBtn.onclick = closeLightbox;
+  if (backdrop) backdrop.onclick = closeLightbox;
+
+  // Lightbox Nav
+  const prevBtn = document.getElementById('gLhPrev');
+  const nextBtn = document.getElementById('gLhNext');
+  if (prevBtn) prevBtn.onclick = () => navigateLightbox(-1);
+  if (nextBtn) nextBtn.onclick = () => navigateLightbox(1);
+
+  if (typeof window.initCylinderGalleryCarousel === 'function') {
+    window.initCylinderGalleryCarousel();
+  }
+}
+
+function openLightbox(photos, startIndex = 0) {
+  if (!photos || photos.length === 0) return;
+  galleryState.lightbox.isOpen = true;
+  galleryState.lightbox.albumPhotos = photos;
+  galleryState.lightbox.currentIndex = startIndex;
+
+  const modal = document.getElementById('gLightboxModal');
+  if (modal) {
+    modal.classList.add('active');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+  updateLightboxContent();
+}
+
+function closeLightbox() {
+  galleryState.lightbox.isOpen = false;
+  const modal = document.getElementById('gLightboxModal');
+  if (modal) {
+    modal.classList.remove('active');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+}
+
+function navigateLightbox(direction) {
+  const { albumPhotos, currentIndex } = galleryState.lightbox;
+  if (!albumPhotos || !albumPhotos.length) return;
+  let newIdx = currentIndex + direction;
+  if (newIdx < 0) newIdx = albumPhotos.length - 1;
+  if (newIdx >= albumPhotos.length) newIdx = 0;
+  galleryState.lightbox.currentIndex = newIdx;
+  updateLightboxContent();
+}
+
+function updateLightboxContent() {
+  const { albumPhotos, currentIndex } = galleryState.lightbox;
+  const photo = albumPhotos[currentIndex];
+  if (!photo) return;
+
+  const imgEl = document.getElementById('gLhImage');
+  const captionEl = document.getElementById('gLhCaption');
+  const albumTitleEl = document.getElementById('gLhAlbumTitle');
+  const counterEl = document.getElementById('gLhCounter');
+  const qualityBadgeEl = document.getElementById('gLhQualityBadge');
+  const stripEl = document.getElementById('gLhStrip');
+
+  const fullUrl = getOptimizedCloudinaryUrl(photo.src, photo.uploadedAt, 'full');
+  if (imgEl) imgEl.src = fullUrl;
+  if (captionEl) captionEl.textContent = photo.caption || '';
+  if (albumTitleEl) albumTitleEl.textContent = photo.albumTitle || 'Event Showcase';
+  if (counterEl) counterEl.textContent = `${currentIndex + 1} / ${albumPhotos.length}`;
+
+  const ageDays = photo.uploadedAt ? (Date.now() - new Date(photo.uploadedAt).getTime()) / (1000 * 60 * 60 * 24) : 999;
+  const isRecent = ageDays <= 7;
+  if (qualityBadgeEl) {
+    qualityBadgeEl.innerHTML = isRecent
+      ? `<span class="g-lh-badge hq">✨ Master High Quality (&lt;7 days)</span>`
+      : `<span class="g-lh-badge opt">⚡ Cloudinary Auto-Optimized (&gt;7 days)</span>`;
+  }
+
+  if (stripEl) {
+    stripEl.innerHTML = albumPhotos.map((p, i) => `
+      <img src="${getOptimizedCloudinaryUrl(p.src, p.uploadedAt, 'thumb')}" class="g-lh-strip-thumb${i === currentIndex ? ' active' : ''}" data-idx="${i}" alt=""/>
+    `).join('');
+
+    stripEl.querySelectorAll('.g-lh-strip-thumb').forEach(t => {
+      t.onclick = () => {
+        galleryState.lightbox.currentIndex = parseInt(t.dataset.idx, 10);
+        updateLightboxContent();
+      };
+    });
+  }
+}
+
+document.addEventListener('keydown', (e) => {
+  if (!galleryState.lightbox || !galleryState.lightbox.isOpen) return;
+  if (e.key === 'Escape') closeLightbox();
+  if (e.key === 'ArrowLeft') navigateLightbox(-1);
+  if (e.key === 'ArrowRight') navigateLightbox(1);
+});
+
 /* ── Boot ─────────────────────────────────────────── */
 function renderAll() {
   document.title = CONFIG.site.tabTitle;
@@ -716,10 +1485,57 @@ function renderAll() {
   renderOfficials();
   renderNews();
   renderHighlights();
+  renderGallery();
   renderLatestVideo();
   renderCertificate();
   renderConnect();
   renderFooter();
+}
+
+async function loadLiveCloudinaryGalleries() {
+  window.LIVE_GALLERY_CACHE = window.LIVE_GALLERY_CACHE || {};
+  window.LIVE_CLOUDINARY_DISCOVERED_FOLDERS = null;
+
+  try {
+    const apiPort = window.location.port === '8080' || window.location.hostname === 'localhost' ? '3001' : '';
+    const baseUrl = apiPort ? `http://${window.location.hostname}:${apiPort}` : '';
+    const res = await fetch(`${baseUrl}/api/cloudinary-gallery-folders`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success && Array.isArray(data.folders) && data.folders.length > 0) {
+        window.LIVE_CLOUDINARY_DISCOVERED_FOLDERS = data.folders;
+        for (const f of data.folders) {
+          if (f.cloudinarySubfolder && f.photos) {
+            window.LIVE_GALLERY_CACHE[f.cloudinarySubfolder] = f.photos;
+          }
+        }
+        return;
+      }
+    }
+  } catch (e) {
+    // API server offline fallback
+  }
+
+  // Fallback if dynamic folder discovery API fails
+  const galleryConfig = window.GALLERY_CONFIG || { folders: [] };
+  if (galleryConfig.folders && galleryConfig.folders.length > 0) {
+    const fetchPromises = galleryConfig.folders
+      .filter(f => f.enabled !== false && f.cloudinarySubfolder)
+      .map(async (folder) => {
+        try {
+          const apiPort = window.location.port === '8080' || window.location.hostname === 'localhost' ? '3001' : '';
+          const baseUrl = apiPort ? `http://${window.location.hostname}:${apiPort}` : '';
+          const res = await fetch(`${baseUrl}/api/cloudinary-gallery?subfolder=${encodeURIComponent(folder.cloudinarySubfolder)}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.success && Array.isArray(data.photos)) {
+              window.LIVE_GALLERY_CACHE[folder.cloudinarySubfolder] = data.photos;
+            }
+          }
+        } catch (e) {}
+      });
+    await Promise.all(fetchPromises);
+  }
 }
 
 Promise.all([
@@ -728,11 +1544,20 @@ Promise.all([
   fetch("data/highlights.json").then(r => r.json()),
   fetch("data/officials.json").then(r => r.json()),
   fetch("data/affiliations.json").then(r => r.json()),
-]).then(([newsItems, upcomingEvents, highlights, officials, affiliations]) => {
-  window.NEWS        = { items: newsItems.items, upcomingEvents: upcomingEvents.events };
-  window.HIGHLIGHTS  = highlights.items;
-  window.OFFICIALS   = officials;
-  window.AFFILIATIONS = affiliations.items;
+  fetch("data/gallery.json").then(r => r.json()),
+  fetch("data/gallery-config.json").then(r => r.json()).catch(() => null),
+  fetch("data/cloudinary-media-map.json").then(r => r.json()).catch(() => null),
+]).then(async ([newsItems, upcomingEvents, highlights, officials, affiliations, galleryData, galleryConfig, cloudMap]) => {
+  window.NEWS                 = { items: newsItems.items, upcomingEvents: upcomingEvents.events };
+  window.HIGHLIGHTS           = highlights.items;
+  window.OFFICIALS            = officials;
+  window.AFFILIATIONS          = affiliations.items;
+  window.GALLERY_ALBUMS       = galleryData ? galleryData.albums : [];
+  window.GALLERY_CONFIG       = galleryConfig;
+  window.CLOUDINARY_MEDIA_MAP = cloudMap || {};
+
+  await loadLiveCloudinaryGalleries();
+
   renderAll();
   document.dispatchEvent(new Event('rsam:ready'));
 }).catch(err => {

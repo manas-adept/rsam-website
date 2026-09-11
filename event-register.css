@@ -1,0 +1,238 @@
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   event-register.css
+   Event Registration styling for 4th District Championship 2026
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* ── Strict Hidden State ─────────────────────────── */
+[hidden], .evt-form[hidden] {
+  display: none !important;
+}
+
+.evt-main {
+  padding-top: calc(38px + 6rem);
+}
+
+/* ── Lookup Card (Stage 1) ───────────────────────── */
+.lookup-card {
+  background: var(--bg-card, #111118);
+  border: 1px solid var(--border, rgba(224,28,46,0.25));
+  border-radius: var(--radius-lg, 16px);
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  transition: all 0.3s ease;
+}
+
+.lookup-header {
+  margin-bottom: 1.25rem;
+}
+.lookup-header h3 {
+  font-size: 1.4rem;
+  color: #fff;
+  margin-bottom: 0.3rem;
+}
+.lookup-header p {
+  color: var(--text-muted, #9ca3af);
+  font-size: 0.9rem;
+}
+.lookup-header code {
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.lookup-form-row {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+@media (max-width: 640px) {
+  .lookup-form-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.lookup-input-wrap {
+  flex: 1;
+}
+.lookup-input-wrap input {
+  width: 100%;
+  padding: 0.85rem 1.2rem;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  transition: border-color 0.2s, background 0.2s;
+  text-transform: uppercase;
+}
+.lookup-input-wrap input:focus {
+  outline: none;
+  border-color: var(--orange, #e01c2e);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.lookup-btn {
+  min-width: 220px;
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.lookup-spinner {
+  width: 18px; height: 18px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin-slow 0.7s linear infinite;
+}
+
+.lookup-error {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  border-radius: 8px;
+  color: #fca5a5;
+  font-size: 0.88rem;
+}
+
+/* ── Verified Skater Card (Stage 2) ──────────────── */
+.evt-skater-card {
+  border-color: rgba(16, 185, 129, 0.35) !important;
+  background: rgba(16, 185, 129, 0.02) !important;
+}
+
+.evt-skater-grid {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+}
+@media (max-width: 640px) {
+  .evt-skater-grid {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+.evt-photo-col {
+  width: 110px;
+  height: 135px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid #10b981;
+  background: rgba(255,255,255,0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+.evt-skater-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.evt-photo-placeholder {
+  font-size: 2.5rem;
+}
+
+.evt-info-col {
+  flex: 1;
+  width: 100%;
+}
+
+.evt-name-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.8rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.evt-name-row h3 {
+  font-size: 1.5rem;
+  color: #fff;
+  margin: 0;
+}
+
+.verified-badge {
+  background: rgba(16, 185, 129, 0.2);
+  border: 1px solid rgba(16, 185, 129, 0.5);
+  color: #34d399;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+.evt-details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.6rem 1.2rem;
+  font-size: 0.88rem;
+  color: #d1d5db;
+}
+@media (max-width: 500px) {
+  .evt-details-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.evt-details-grid .lbl {
+  color: #9ca3af;
+  margin-right: 0.3rem;
+}
+.accent-gold {
+  color: #f59e0b;
+}
+
+/* ── Unregistered Modal ──────────────────────────── */
+.unreg-modal {
+  text-align: center;
+  max-width: 460px;
+}
+.unreg-icon {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+}
+.unreg-modal h3 {
+  font-size: 1.4rem;
+  color: #f59e0b;
+  margin-bottom: 0.5rem;
+}
+.unreg-modal p {
+  color: #e5e7eb;
+  font-size: 0.92rem;
+  margin-bottom: 0.4rem;
+}
+.unreg-sub {
+  color: #9ca3af !important;
+  font-size: 0.85rem !important;
+  margin-bottom: 1.5rem !important;
+}
+
+.unreg-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.unreg-actions a,
+.unreg-actions button {
+  width: 100%;
+  text-align: center;
+  justify-content: center;
+}

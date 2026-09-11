@@ -23,6 +23,7 @@ const CONFIG = {
     officials:   { enabled: true  },
     news:        { enabled: true  },
     highlights:  { enabled: true  },
+    gallery:     { enabled: true  },
     latestVideo:  { enabled: false },
     certificate: { enabled: true  },
     connect:     { enabled: true  },
@@ -34,6 +35,7 @@ const CONFIG = {
     { label: "Officials",   href: "#officials"   },
     { label: "News",        href: "#news"        },
     { label: "Highlights",  href: "#highlights"  },
+    { label: "Gallery",     href: "#gallery"     },
     { label: "Certificate", href: "#certificate" },
     { label: "Register",    href: "register.html", cta: true },
   ],
@@ -44,7 +46,7 @@ const CONFIG = {
     titleLine1:  "Rolling",      // displayed in handwriting font (Pacifico)
     titleLine2:  "Moradabad",    // displayed in racing font (Racing Sans One)
     description: "Promoting excellence in roller sports across Moradabad since our founding. Affiliated with Roller Sports Federation of India under the Government of India.",
-    skaterImage: "images/skater-boy.png",
+    skaterImage: "https://res.cloudinary.com/igjmhsju/image/upload/v1788797469/rsam_website/branding/skater-boy.png",
     cta: [
       { label: "Latest News",     href: "#news",       style: "primary" },
       { label: "View Highlights", href: "#highlights", style: "ghost"   },

@@ -5,28 +5,28 @@
       "designation": "President",
       "designationClass": "president",
       "degrees": "",
-      "photo": "images/president.jpg"
+      "photo": ""
     },
     {
       "name": "Devendra Rana",
       "designation": "General Secretary",
       "designationClass": "secretary",
       "degrees": "",
-      "photo": "images/gs_devendrarana.jpeg"
+      "photo": "https://res.cloudinary.com/igjmhsju/image/upload/v1788797357/rsam_website/officials/gs_devendrarana.jpg"
     },
     {
       "name": "Parmesh Charan",
       "designation": "Treasurer",
       "designationClass": "treasurer",
       "degrees": "M.Com, M.P.Ed.",
-      "photo": "images/treasurer.png"
+      "photo": "https://res.cloudinary.com/igjmhsju/image/upload/v1788797473/rsam_website/officials/treasurer.png"
     },
     {
       "name": "Manas Garg",
       "designation": "Technical/Media Person",
       "designationClass": "technical",
       "degrees": "B.Tech",
-      "photo": "images/manas.jpeg"
+      "photo": "https://res.cloudinary.com/igjmhsju/image/upload/v1788797435/rsam_website/officials/manas.jpg"
     }
   ],
   "committeeEnabled": true,
@@ -36,77 +36,77 @@
       "designation": "State Refree, UPRSA",
       "designationClass": "member",
       "degrees": "",
-      "photo": "images/refree_parmesh.jpeg"
+      "photo": "https://res.cloudinary.com/igjmhsju/image/upload/v1788797452/rsam_website/officials/refree_parmesh.jpg"
     },
     {
       "name": "Gourav Singh",
       "designation": "Refree",
       "designationClass": "member",
       "degrees": "",
-      "photo": "images/refree_gouravsingh.jpeg"
+      "photo": "https://res.cloudinary.com/igjmhsju/image/upload/v1788797451/rsam_website/officials/refree_gouravsingh.jpg"
     },
     {
       "name": "Devendra Rana",
       "designation": "Refree",
       "designationClass": "member",
       "degrees": "",
-      "photo": "images/refree_devrana.jpeg"
+      "photo": "https://res.cloudinary.com/igjmhsju/image/upload/v1788797449/rsam_website/officials/refree_devrana.jpg"
     },
     {
       "name": "Rohit Hans",
       "designation": "Refree",
       "designationClass": "member",
       "degrees": "",
-      "photo": "images/refree_rohit.jpeg"
+      "photo": "https://res.cloudinary.com/igjmhsju/image/upload/v1788797453/rsam_website/officials/refree_rohit.jpg"
     },
     {
       "name": "Vipin Jakhmola",
       "designation": "Refree",
       "designationClass": "member",
       "degrees": "",
-      "photo": "images/refree_vipin.jpeg"
+      "photo": "https://res.cloudinary.com/igjmhsju/image/upload/v1788797457/rsam_website/officials/refree_vipin.jpg"
     },
     {
       "name": "Sachin Nainwal",
       "designation": "Refree",
       "designationClass": "member",
       "degrees": "",
-      "photo": "images/refree_sachinnainwal.jpeg"
+      "photo": "https://res.cloudinary.com/igjmhsju/image/upload/v1788797454/rsam_website/officials/refree_sachinnainwal.jpg"
     },
     {
       "name": "Rupesh Singh",
       "designation": "Refree",
       "designationClass": "member",
       "degrees": "",
-      "photo": "images/refree_rupesh.jpeg"
+      "photo": "https://res.cloudinary.com/igjmhsju/image/upload/v1788797453/rsam_website/officials/refree_rupesh.jpg"
     },
     {
       "name": "Devanand (Sourav Singh)",
       "designation": "Refree",
       "designationClass": "member",
       "degrees": "",
-      "photo": "images/refree_devanand.jpeg"
+      "photo": "https://res.cloudinary.com/igjmhsju/image/upload/v1788797448/rsam_website/officials/refree_devanand.jpg"
     },
     {
       "name": "Vikas Khairwal",
       "designation": "Refree",
       "designationClass": "member",
       "degrees": "",
-      "photo": "images/refree_vikas.jpeg"
+      "photo": "https://res.cloudinary.com/igjmhsju/image/upload/v1788797456/rsam_website/officials/refree_vikas.jpg"
     },
     {
       "name": "Siddharth Saxena",
       "designation": "Refree",
       "designationClass": "member",
       "degrees": "",
-      "photo": "images/refree_sid.jpeg"
+      "photo": "https://res.cloudinary.com/igjmhsju/image/upload/v1788797456/rsam_website/officials/refree_sid.jpg"
     },
     {
       "name": "Shyam Thakur",
       "designation": "Refree",
       "designationClass": "member",
       "degrees": "",
-      "photo": "images/refree_shyam.jpg"
+      "photo": "https://res.cloudinary.com/igjmhsju/image/upload/v1788797455/rsam_website/officials/refree_shyam.jpg"
     }
   ]
 }

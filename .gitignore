@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+whatsapp-server/node_modules/
+
+# WhatsApp Web.js Runtime Session & Cache (DO NOT COMMIT)
+.wwebjs_auth/
+.wwebjs_cache/
+whatsapp-server/.wwebjs_auth/
+whatsapp-server/.wwebjs_cache/
+whatsapp-server/_IGNORE_RSAM_SESSION/
+whatsapp-server/*_SESSION*/
+whatsapp-server/certificates_2026/
+
+# Environment Secrets
+.env
+whatsapp-server/.env
+
+# Temporary / Scratch files
+scratch/
+*.log
+npm-debug.log*

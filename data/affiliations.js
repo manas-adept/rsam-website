@@ -10,15 +10,15 @@
 
 const AFFILIATIONS = [
   {
-    image: "images/affil1.jpg",
+    image: "https://res.cloudinary.com/igjmhsju/image/upload/v1788797351/rsam_website/affiliations/affil1.jpg",
     label: "RSFI – India Skates",
   },
   {
-    image: "images/affil2.jpg",
+    image: "https://res.cloudinary.com/igjmhsju/image/upload/v1788797352/rsam_website/affiliations/affil2.jpg",
     label: "UPRSA",
   },
   {
-    image: "images/affil3.jpg",
+    image: "https://res.cloudinary.com/igjmhsju/image/upload/v1788797353/rsam_website/affiliations/affil3.jpg",
     label: "World Skate",
   }
 ];

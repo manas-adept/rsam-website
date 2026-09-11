@@ -212,3 +212,19 @@ After editing `config.js`, commit and push the change to GitHub — Netlify will
 4. Commit and push — Netlify will update the site automatically within ~1 minute
 
 > The filenames must stay exactly the same. Do not rename them.
+
+---
+
+## 11. Year-End Google Sheet Archiving & Event Tabs
+
+### Google Sheet Structure
+- **Annual Skater Registrations**: Recorded in tab `Registrations 2026`.
+- **4th District Championship 2026**: Recorded in tab `District Championship 2026`.
+
+### How to Archive at Year-End (December 31)
+1. Open your linked RSAM Google Sheet.
+2. Right-click the `Registrations 2026` tab -> Select **Duplicate** or **Rename** to `Registrations 2026 Archived`.
+3. Create a new tab named `Registrations 2027` and add the 19 standard column headers:
+   `Timestamp | RSAM Reg No | Year | Skater Name | Date of Birth | Age | Father Name | Mother Name | Address | Mobile Number | Email | Aadhaar Number | Discipline | Razorpay Payment ID | Payment Status | Amount Paid | Skater Photo URL | Address Proof URL | DOB Proof URL`
+4. Update `Year` filter in `google-apps-script.js` to `2027` for the new registration cycle.
+

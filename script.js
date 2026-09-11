@@ -187,66 +187,7 @@ function initInteractions() {
     if (slides.length > 1) setInterval(() => goTo(current + 1), 5000);
   }
 
-  /* ── Hero canvas wheel animation ─────────────── */
-  const canvas = document.getElementById('wheelCanvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
 
-  function resize() { canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; }
-  resize();
-  window.addEventListener('resize', resize);
-
-  const wheels = Array.from({ length: 7 }, () => ({
-    x:      Math.random() * canvas.width,
-    y:      Math.random() * canvas.height,
-    r:      30 + Math.random() * 90,
-    speed:  (0.002 + Math.random() * 0.006) * (Math.random() > 0.5 ? 1 : -1),
-    angle:  Math.random() * Math.PI * 2,
-    alpha:  0.04 + Math.random() * 0.08,
-    dx:     (Math.random() - 0.5) * 0.3,
-    dy:     (Math.random() - 0.5) * 0.3,
-    spokes: 8,
-  }));
-
-  function drawWheel(w) {
-    ctx.save();
-    ctx.translate(w.x, w.y);
-    ctx.rotate(w.angle);
-    ctx.strokeStyle = '#e01c2e';
-    ctx.lineWidth = 1.2;
-
-    ctx.globalAlpha = w.alpha;
-    ctx.beginPath(); ctx.arc(0, 0, w.r, 0, Math.PI * 2); ctx.stroke();
-    ctx.beginPath(); ctx.arc(0, 0, w.r * 0.55, 0, Math.PI * 2); ctx.stroke();
-
-    ctx.globalAlpha = w.alpha * 1.6;
-    ctx.fillStyle = '#e01c2e';
-    ctx.beginPath(); ctx.arc(0, 0, w.r * 0.12, 0, Math.PI * 2); ctx.fill();
-
-    ctx.globalAlpha = w.alpha * 0.9;
-    ctx.lineWidth = 0.8;
-    for (let s = 0; s < w.spokes; s++) {
-      const a = (s / w.spokes) * Math.PI * 2;
-      ctx.beginPath();
-      ctx.moveTo(Math.cos(a) * w.r * 0.12, Math.sin(a) * w.r * 0.12);
-      ctx.lineTo(Math.cos(a) * w.r, Math.sin(a) * w.r);
-      ctx.stroke();
-    }
-    ctx.restore();
-  }
-
-  (function tick() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    wheels.forEach(w => {
-      w.angle += w.speed; w.x += w.dx; w.y += w.dy;
-      if (w.x < -w.r)               w.x = canvas.width + w.r;
-      if (w.x > canvas.width + w.r)  w.x = -w.r;
-      if (w.y < -w.r)               w.y = canvas.height + w.r;
-      if (w.y > canvas.height + w.r) w.y = -w.r;
-      drawWheel(w);
-    });
-    requestAnimationFrame(tick);
-  })();
 }
 
 /* ── Hero carousel ────────────────────────────────── */
@@ -271,8 +212,200 @@ function initHeroCarousel() {
   setInterval(() => goTo(current + 1), 4000);
 }
 
+/* ── Skiper UI: Skate Motion Trail Particle Effect ── */
+function initSkateTrail() {
+  let lastX = 0, lastY = 0;
+  window.addEventListener('mousemove', e => {
+    const dist = Math.hypot(e.clientX - lastX, e.clientY - lastY);
+    if (dist > 25) {
+      lastX = e.clientX;
+      lastY = e.clientY;
+      const p = document.createElement('div');
+      p.className = 'skate-cursor-particle';
+      p.style.left = `${e.clientX}px`;
+      p.style.top = `${e.clientY}px`;
+      document.body.appendChild(p);
+      setTimeout(() => {
+        p.style.transform = 'translate(-50%, -50%) scale(0.2)';
+        p.style.opacity = '0';
+      }, 50);
+      setTimeout(() => { p.remove(); }, 450);
+    }
+  });
+}
+
+/* ── 3D Cylinder Gallery Carousel (Vengeance UI Cylinder Carousel) ──── */
+function initCylinderGalleryCarousel() {
+  const container = document.getElementById('gCylinderShowcase');
+  if (!container) return;
+  const viewport = document.getElementById('gCylinderViewport');
+  const cards = Array.from(container.querySelectorAll('.g-cylinder-card'));
+  if (!cards.length) return;
+
+  let curIdx = 0;
+  const total = cards.length;
+  let isDragging = false;
+  let startX = 0;
+  let currentDragOffset = 0;
+
+  function render3DCylinder(dragOffsetPx = 0) {
+    const radius = Math.min(window.innerWidth * 0.35, 440);
+    const dragAngleOffset = (dragOffsetPx / (window.innerWidth * 0.4)) * 360;
+
+    cards.forEach((card, idx) => {
+      let offset = idx - curIdx;
+      // Wrap around math for smooth cylinder loop
+      if (offset > total / 2) offset -= total;
+      if (offset < -total / 2) offset += total;
+
+      const absOffset = Math.abs(offset);
+
+      if (absOffset > 4 && dragOffsetPx === 0) {
+        card.style.opacity = '0';
+        card.style.pointerEvents = 'none';
+        card.style.transform = `translate3d(0, 0, -600px) scale(0)`;
+        card.classList.remove('center');
+        return;
+      }
+
+      const angle = offset * 25 + dragAngleOffset;
+      const rad = (angle * Math.PI) / 180;
+      const translateX = Math.sin(rad) * radius;
+      const translateZ = Math.cos(rad) * radius - radius;
+      const rotateY = -angle;
+
+      const normOffset = Math.abs(angle / 25);
+      const isCenter = Math.abs(angle) < 12;
+
+      card.style.opacity = isCenter ? '1' : Math.max(0.2, 1 - normOffset * 0.25);
+      card.style.pointerEvents = 'auto';
+      card.style.transform = `translate3d(${translateX.toFixed(2)}px, 0, ${translateZ.toFixed(2)}px) rotateY(${rotateY.toFixed(2)}deg) scale(${isCenter ? 1.08 : 0.84})`;
+      card.style.zIndex = `${Math.round(100 - normOffset * 10)}`;
+
+      if (isCenter) {
+        card.classList.add('center');
+      } else {
+        card.classList.remove('center');
+      }
+    });
+
+    const counter = document.getElementById('gCylCounter');
+    if (counter) counter.textContent = `${curIdx + 1} / ${total}`;
+  }
+
+  render3DCylinder();
+
+  const prevBtn = document.getElementById('gCylPrev');
+  const nextBtn = document.getElementById('gCylNext');
+
+  if (prevBtn) prevBtn.onclick = (e) => { e.stopPropagation(); curIdx = (curIdx - 1 + total) % total; render3DCylinder(); };
+  if (nextBtn) nextBtn.onclick = (e) => { e.stopPropagation(); curIdx = (curIdx + 1) % total; render3DCylinder(); };
+
+  // Card click interaction
+  cards.forEach((card, i) => {
+    card.onclick = (e) => {
+      if (Math.abs(currentDragOffset) > 10) return; // Ignore clicks if dragging
+      if (i === curIdx) {
+        const globalBtn = document.querySelector(`[data-global-photo-idx="${i}"]`);
+        if (globalBtn) globalBtn.click();
+      } else {
+        curIdx = i;
+        render3DCylinder();
+      }
+    };
+  });
+
+  // Touch / Drag Controls (Vengeance UI Interactive Fluid 3D Spin)
+  const targetEl = viewport || container;
+  if (targetEl) {
+    const handleStart = (x) => {
+      isDragging = true;
+      startX = x;
+      currentDragOffset = 0;
+      targetEl.style.cursor = 'grabbing';
+    };
+
+    const handleMove = (x) => {
+      if (!isDragging) return;
+      currentDragOffset = x - startX;
+      render3DCylinder(currentDragOffset);
+    };
+
+    const handleEnd = () => {
+      if (!isDragging) return;
+      isDragging = false;
+      targetEl.style.cursor = 'grab';
+
+      const threshold = 45;
+      if (currentDragOffset < -threshold) {
+        curIdx = (curIdx + 1) % total;
+      } else if (currentDragOffset > threshold) {
+        curIdx = (curIdx - 1 + total) % total;
+      }
+      currentDragOffset = 0;
+      render3DCylinder(0);
+    };
+
+    targetEl.style.cursor = 'grab';
+
+    targetEl.addEventListener('mousedown', (e) => handleStart(e.clientX));
+    window.addEventListener('mousemove', (e) => handleMove(e.clientX));
+    window.addEventListener('mouseup', handleEnd);
+
+    targetEl.addEventListener('touchstart', (e) => handleStart(e.touches[0].clientX), { passive: true });
+    window.addEventListener('touchmove', (e) => {
+      if (isDragging && e.touches[0]) handleMove(e.touches[0].clientX);
+    }, { passive: true });
+    window.addEventListener('touchend', handleEnd);
+
+    // Mouse Wheel 3D Cylinder Rotation
+    targetEl.addEventListener('wheel', (e) => {
+      if (Math.abs(e.deltaX) > 15 || Math.abs(e.deltaY) > 15) {
+        const delta = e.deltaX || e.deltaY;
+        if (delta > 0) curIdx = (curIdx + 1) % total;
+        else curIdx = (curIdx - 1 + total) % total;
+        render3DCylinder();
+      }
+    }, { passive: true });
+  }
+
+  // Keyboard Navigation Support
+  window.addEventListener('keydown', (e) => {
+    if (!document.getElementById('gCylinderShowcase')) return;
+    if (e.key === 'ArrowRight') {
+      curIdx = (curIdx + 1) % total;
+      render3DCylinder();
+    } else if (e.key === 'ArrowLeft') {
+      curIdx = (curIdx - 1 + total) % total;
+      render3DCylinder();
+    }
+  });
+}
+
+window.initCylinderGalleryCarousel = initCylinderGalleryCarousel;
+
+/* ── Spotlight Navbar Interaction ─────────────────── */
+function initSpotlightNavbar() {
+  const nav = document.getElementById('navbar');
+  if (!nav) return;
+  const updateSpotlight = (e) => {
+    const rect = nav.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    nav.style.setProperty('--spotlight-x', `${x}px`);
+    nav.style.setProperty('--spotlight-y', `${y}px`);
+  };
+  nav.addEventListener('mousemove', updateSpotlight);
+  window.addEventListener('mousemove', (e) => {
+    if (e.clientY < 120) updateSpotlight(e);
+  });
+}
+
 /* Run after render.js has finished building the DOM (async fetch) */
 document.addEventListener('rsam:ready', () => {
   initInteractions();
   initHeroCarousel();
+  initSkateTrail();
+  initSpotlightNavbar();
+  initCylinderGalleryCarousel();
 });

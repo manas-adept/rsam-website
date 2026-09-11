@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>4th District Championship 2026 — Event Registration | RSAM</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" type="image/png" href="https://res.cloudinary.com/igjmhsju/image/upload/v1788797466/rsam_website/branding/rsam-logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Inter:wght@300;400;500;600&family=Bebas+Neue&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="register.css" />
+  <link rel="stylesheet" href="event-register.css" />
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body>
+
+  <div class="page-watermark" aria-hidden="true">EVENT 2026</div>
+
+  <!-- Navbar -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-inner">
+      <div class="nav-logo">
+        <div class="logo-img-wrap">
+          <img src="https://res.cloudinary.com/igjmhsju/image/upload/v1788797466/rsam_website/branding/rsam-logo.png" alt="RSAM Logo" class="logo-img"/>
+        </div>
+        <div class="nav-logo-text">
+          <span class="nav-logo-full">Roller Sports Association Moradabad</span>
+        </div>
+      </div>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="index.html#about">About</a></li>
+        <li><a href="index.html#officials">Officials</a></li>
+        <li><a href="index.html#news">News</a></li>
+        <li><a href="index.html#highlights">Highlights</a></li>
+        <li><a href="register.html">Annual Registration</a></li>
+        <li><a href="event-register.html" class="nav-register-link active">4th District Championship</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Event Registration Main -->
+  <main class="reg-main evt-main">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Event Registration</span>
+        <h2>4th District <span class="accent">Championship 2026</span></h2>
+        <p class="section-desc">Enter your 2026 RSAM Registration Number to verify and auto-fill your details.</p>
+      </div>
+
+      <!-- Stage 1: RSAM Reg No Lookup -->
+      <div class="lookup-card" id="lookupCard">
+        <div class="lookup-header">
+          <h3>Verify RSAM Registration</h3>
+          <p>Please provide your generated 2026 RSAM Registration Number (e.g. <code>R260908001</code>).</p>
+        </div>
+        <div class="lookup-form-row">
+          <div class="lookup-input-wrap">
+            <input type="text" id="lookupRegNo" placeholder="Enter RSAM Reg No (e.g. R260908001)" autocomplete="off" />
+          </div>
+          <button type="button" class="btn-primary lookup-btn" id="verifyBtn">
+            <span class="lookup-btn-text">Verify &amp; Fetch Details</span>
+            <span class="lookup-spinner" id="lookupSpinner" hidden></span>
+          </button>
+        </div>
+        <div class="lookup-error" id="lookupError" hidden></div>
+      </div>
+
+      <!-- Stage 2: Verified Skater Details & Event Options -->
+      <form class="reg-form evt-form" id="evtForm" novalidate hidden>
+
+        <!-- Auto-Populated Skater Summary Card -->
+        <fieldset class="reg-fieldset evt-skater-card">
+          <legend class="reg-legend">Verified Skater Details</legend>
+          
+          <div class="evt-skater-grid">
+            <div class="evt-photo-col" id="evtPhotoCol">
+              <div class="evt-photo-placeholder" id="evtPhotoPlaceholder">📸</div>
+              <img id="evtSkaterPhoto" class="evt-skater-photo" src="" alt="Skater Photo" hidden />
+            </div>
+            
+            <div class="evt-info-col">
+              <div class="evt-name-row">
+                <h3 id="displaySkaterName">Skater Name</h3>
+                <span class="verified-badge">✓ RSAM Verified 2026</span>
+              </div>
+              <div class="evt-details-grid">
+                <div><span class="lbl">RSAM Reg No:</span> <strong id="displayRegNo" class="accent-gold">—</strong></div>
+                <div><span class="lbl">Date of Birth:</span> <span id="displayDob">—</span></div>
+                <div><span class="lbl">Age (as of 31 Dec):</span> <span id="displayAge">—</span></div>
+                <div><span class="lbl">Father's Name:</span> <span id="displayFather">—</span></div>
+                <div><span class="lbl">Mother's Name:</span> <span id="displayMother">—</span></div>
+                <div><span class="lbl">Mobile:</span> <span id="displayMobile">—</span></div>
+                <div><span class="lbl">Email:</span> <span id="displayEmail">—</span></div>
+                <div><span class="lbl">Aadhaar:</span> <span id="displayAadhaar">—</span></div>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- Discipline Selection -->
+        <fieldset class="reg-fieldset">
+          <legend class="reg-legend">Championship Discipline <span class="req">*</span></legend>
+          <div class="reg-discipline">
+            <label class="disc-option">
+              <input type="radio" name="discipline" value="Adjustable" required />
+              <span class="disc-card"><span class="disc-name">Adjustable</span></span>
+            </label>
+            <label class="disc-option">
+              <input type="radio" name="discipline" value="Quads" />
+              <span class="disc-card"><span class="disc-name">Quads</span></span>
+            </label>
+            <label class="disc-option">
+              <input type="radio" name="discipline" value="Toys Inline" />
+              <span class="disc-card"><span class="disc-name">Toys Inline</span></span>
+            </label>
+            <label class="disc-option">
+              <input type="radio" name="discipline" value="Professional Inline" />
+              <span class="disc-card"><span class="disc-name">Professional Inline</span></span>
+            </label>
+          </div>
+          <p class="disc-error" id="discError" hidden>Please select a discipline for the championship.</p>
+        </fieldset>
+
+        <!-- Submit & Fee Banner -->
+        <div class="reg-fee-banner">
+          💳 Championship Entry Fee: <strong>₹500.00</strong> <small>(+ 2% gateway charge &amp; 18% GST = ₹511.80 Total)</small>
+        </div>
+        <div class="reg-submit-row">
+          <button type="submit" class="btn-primary reg-submit" id="evtSubmitBtn">
+            <span class="submit-text">Confirm &amp; Pay ₹511.80</span>
+            <span class="submit-spinner" hidden></span>
+          </button>
+        </div>
+
+      </form>
+
+      <!-- Confirmation Modal -->
+      <div class="reg-modal-overlay" id="confirmModal" hidden>
+        <div class="reg-modal confirm-modal-card">
+          <div class="confirm-header">
+            <span class="confirm-tag">4th District Championship 2026</span>
+            <h3>Review Event Registration</h3>
+            <p class="confirm-subtitle">Please verify your event details before proceeding to payment.</p>
+          </div>
+          <div class="confirm-body" id="confirmSummaryBody">
+            <!-- Dynamic summary -->
+          </div>
+          <div class="confirm-actions">
+            <button type="button" class="btn-modal-secondary" id="confirmEditBtn">✏️ Edit Details</button>
+            <button type="button" class="btn-modal-primary" id="confirmProceedBtn">💳 Pay ₹511.80 &amp; Register</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Unregistered Skater Modal -->
+      <div class="reg-modal-overlay" id="unregisteredModal" hidden>
+        <div class="reg-modal unreg-modal">
+          <div class="unreg-icon">⚠️</div>
+          <h3>RSAM Registration Not Found</h3>
+          <p id="unregModalMessage">Your RSAM Registration Number could not be found for 2026.</p>
+          <p class="unreg-sub">To participate in the <strong>4th District Championship 2026</strong>, skaters must have an active annual RSAM registration.</p>
+          <div class="unreg-actions">
+            <button type="button" class="btn-modal-secondary" id="unregCloseBtn">Try Different Number</button>
+            <a href="register.html" class="btn-modal-primary">📝 Complete RSAM Registration First</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Success modal -->
+      <div class="reg-modal-overlay" id="evtSuccess" hidden>
+        <div class="reg-modal">
+          <div class="success-icon">✓</div>
+          <h3>Event Registration Successful!</h3>
+          <p>You are officially registered for the <strong>4th District Championship 2026</strong> powered by RSAM.</p>
+          <p class="modal-countdown">Page will refresh in <span id="countdownNum">6</span> seconds…</p>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="admin-config.js" defer></script>
+  <script src="config.js" defer></script>
+  <script src="event-register.js" defer></script>
+
+</body>
+</html>

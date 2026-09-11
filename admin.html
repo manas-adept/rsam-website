@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Portal — Roller Sports Association Moradabad</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" type="image/png" href="https://res.cloudinary.com/igjmhsju/image/upload/v1788797466/rsam_website/branding/rsam-logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo-link" style="text-decoration:none; color:inherit; display:flex; align-items:center; gap:0.8rem;">
+        <div class="logo-img-wrap">
+          <img src="https://res.cloudinary.com/igjmhsju/image/upload/v1788797466/rsam_website/branding/rsam-logo.png" alt="RSAM Logo" class="logo-img"/>
+        </div>
+        <div class="nav-logo-text">
+          <span class="nav-logo-full">Roller Sports Association Moradabad</span>
+        </div>
+      </a>
+      <div class="admin-top-right">
+        <span class="admin-badge-tag" id="adminUserBadge" hidden>🔒 Logged in as Admin</span>
+        <button type="button" class="btn-admin-logout" id="logoutBtn" hidden>Logout</button>
+        <a href="index.html" class="nav-home-link">&larr; Back to Website</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="admin-main">
+    <div class="container">
+
+      <!-- Login Section -->
+      <div class="admin-auth-card" id="loginCard">
+        <div class="auth-header">
+          <div class="auth-icon">🛡️</div>
+          <h2>RSAM Admin Portal</h2>
+          <p>Login to manage events, registration fees, news, highlights, and officials.</p>
+        </div>
+        <form class="auth-form" id="loginForm">
+          <div class="auth-field">
+            <label for="adminUser">Username</label>
+            <input type="text" id="adminUser" placeholder="Enter admin username" required autocomplete="username" />
+          </div>
+          <div class="auth-field">
+            <label for="adminPass">Password</label>
+            <input type="password" id="adminPass" placeholder="Enter admin password" required autocomplete="current-password" />
+          </div>
+          <div class="auth-error" id="loginError" hidden>Invalid username or password.</div>
+          <button type="submit" class="btn-primary auth-submit-btn">
+            <span>Login to Admin Panel</span>
+          </button>
+        </form>
+        <div class="auth-footer-note">
+          <span>Need to change admin credentials? Update <code>admin-config.js</code> in the codebase.</span>
+        </div>
+      </div>
+
+      <!-- Admin Dashboard Section (Hidden until logged in) -->
+      <div class="admin-dashboard" id="adminDashboard" hidden>
+
+        <div class="admin-dash-header">
+          <div>
+            <span class="section-tag">Management Control Panel</span>
+            <h2>RSAM Admin <span class="accent">Dashboard</span></h2>
+          </div>
+          <div class="dash-quick-actions">
+            <button type="button" class="btn-dash-action" id="exportConfigBtn">📥 Export JSON Config</button>
+            <button type="button" class="btn-dash-action btn-dash-action--danger" id="resetDefaultsBtn" title="Revert unsaved changes made during this editing session">↺ Revert Session Changes</button>
+          </div>
+        </div>
+
+        <!-- Dashboard Navigation Tabs -->
+        <div class="admin-tabs">
+          <button type="button" class="admin-tab-btn active" data-tab="tabEvent">🎟️ Events &amp; Fee Control</button>
+          <button type="button" class="admin-tab-btn" data-tab="tabNews">📰 News &amp; Circulars</button>
+          <button type="button" class="admin-tab-btn" data-tab="tabHighlights">🏆 Hall of Highlights</button>
+          <button type="button" class="admin-tab-btn" data-tab="tabOfficials">👔 Officials Roster</button>
+        </div>
+
+        <!-- Notification Banner -->
+        <div class="admin-notify-banner" id="adminNotify" hidden></div>
+
+        <!-- Tab 1: Multi-Event & Fee Management -->
+        <div class="tab-pane active" id="tabEvent">
+          <div class="dash-card">
+            <div class="card-title-row">
+              <h3>Championship Events &amp; Registration Control</h3>
+              <button type="button" class="btn-primary btn-sm" id="addNewEventBtn">+ Add New Event</button>
+            </div>
+            <p class="card-desc">Manage posted championships, view auto-calculated IST status badges (Ended, Happening Now, Upcoming), toggle navbar ticker display, select active event for online registration, and set registration fees.</p>
+
+            <div class="events-admin-list" id="eventsAdminList">
+              <!-- Dynamically populated event cards -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 2: News & Circulars Management -->
+        <div class="tab-pane" id="tabNews">
+          <div class="dash-card">
+            <div class="card-title-row">
+              <h3>Manage News &amp; Circulars</h3>
+              <button type="button" class="btn-primary btn-sm" id="addNewsBtn">+ Add New Circular</button>
+            </div>
+
+            <div class="news-admin-list" id="newsAdminList">
+              <!-- Dynamically populated news cards -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 3: Hall of Highlights -->
+        <div class="tab-pane" id="tabHighlights">
+          <div class="dash-card">
+            <div class="card-title-row">
+              <h3>Manage Hall of Highlights</h3>
+              <button type="button" class="btn-primary btn-sm" id="addHlBtn">+ Add New Highlight</button>
+            </div>
+
+            <div class="hl-admin-list" id="hlAdminList">
+              <!-- Dynamically populated highlight cards -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 4: Officials & Skinsuit Roster -->
+        <div class="tab-pane" id="tabOfficials">
+          <div class="dash-card">
+            <div class="card-title-row">
+              <h3>Manage Association Officials, Referees &amp; Skinsuit Design</h3>
+              <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                <button type="button" class="btn-dash-action" id="editSkinsuitBtn">🎽 Edit Skinsuit Design</button>
+                <button type="button" class="btn-primary btn-sm" id="addOfficialBtn">+ Add Official / Referee</button>
+              </div>
+            </div>
+
+            <div class="officials-admin-list" id="officialsAdminList">
+              <!-- Dynamically populated officials cards -->
+            </div>
+          </div>
+        </div>
+
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Generic Item Modal (for Add/Edit Events, News, Highlights, Officials) -->
+  <div class="admin-modal-overlay" id="itemModal" hidden>
+    <div class="admin-modal">
+      <div class="admin-modal-header">
+        <h3 id="itemModalTitle">Manage Content Item</h3>
+        <button type="button" class="admin-modal-close" id="itemModalClose">&times;</button>
+      </div>
+      <form id="itemModalForm" class="dash-form">
+        <div id="itemModalFields">
+          <!-- Dynamic form fields injected by JS -->
+        </div>
+        <div class="dash-btn-row" style="margin-top:1.5rem;">
+          <button type="button" class="btn-dash-action" id="itemModalCancel">Cancel</button>
+          <button type="submit" class="btn-primary" id="itemModalSave">Save Item</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="admin-config.js"></script>
+  <script src="data/news.js"></script>
+  <script src="data/highlights.js"></script>
+  <script src="data/officials.js"></script>
+  <script src="admin.js"></script>
+
+</body>
+</html>

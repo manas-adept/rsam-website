@@ -1,7 +1,31 @@
 {
   "events": [
     {
-      "image": "images/event-lko.png",
+      "image": "https://res.cloudinary.com/igjmhsju/image/upload/v1788797446/rsam_website/news/news_main.jpg",
+      "category": "Selection Trial",
+      "startDateTime": "2026-10-04T07:00",
+      "endDateTime": "2026-10-04T18:00",
+      "date": "October 4, 2026",
+      "location": "Location TBD, Moradabad",
+      "title": "4th District / State Selection Trial 2026",
+      "body": "Official selection trial for district skaters competing for qualification in the 12th UP State Roller Skating Championship.",
+      "linkText": "View Trial Circular",
+      "linkHref": "#"
+    },
+    {
+      "image": "https://res.cloudinary.com/igjmhsju/image/upload/v1788797458/rsam_website/gallery/felicitaion_ceremony_dmr_2026/row-event.jpg",
+      "category": "State Championship",
+      "startDateTime": "2026-10-23T06:00",
+      "endDateTime": "2026-10-26T20:00",
+      "date": "October 23–26, 2026",
+      "location": "Devaswom Skating Track, GB Nagar",
+      "title": "12th UP State Roller Skating Championship 2026",
+      "body": "The 12th UP State Championship hosted at Devaswom Skating Track, GB Nagar from 23rd October to 26th October 2026. Top athletes from across Uttar Pradesh will compete for state titles.",
+      "linkText": "Download Event Details",
+      "linkHref": "#"
+    },
+{
+      "image": "https://res.cloudinary.com/igjmhsju/image/upload/v1788797356/rsam_website/events/event-lko.png",
       "category": "Upcoming Event",
       "startDateTime": "2026-07-18T04:30",
       "endDateTime": "2026-07-19T09:30",
