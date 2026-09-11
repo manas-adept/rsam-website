@@ -172,11 +172,29 @@
 
       <!-- Success modal -->
       <div class="reg-modal-overlay" id="evtSuccess" hidden>
-        <div class="reg-modal">
-          <div class="success-icon">✓</div>
-          <h3>Event Registration Successful!</h3>
-          <p>You are officially registered for the <strong>4th District Championship 2026</strong> powered by RSAM.</p>
-          <p class="modal-countdown">Page will refresh in <span id="countdownNum">6</span> seconds…</p>
+        <div class="reg-modal success-card-modal">
+          <div class="success-icon-badge">✓</div>
+          <h2 class="success-title">Event Entry Confirmed!</h2>
+          <p class="success-subtitle">4th District Championship 2026 Entry Completed</p>
+
+          <div class="success-reg-box" id="evtSuccessRegBox">
+            <span class="reg-label">RSAM Athlete Registration Number</span>
+            <span class="reg-number-val" id="evtSuccessRegNoText">R260912001</span>
+            <div class="reg-payment-row">
+              <span class="pay-tag">✓ Championship Fee Paid</span>
+              <span class="pay-id" id="evtSuccessPaymentIdText">(Razorpay ID: Verified)</span>
+            </div>
+          </div>
+
+          <div class="success-status-badges">
+            <span class="status-badge-pill">💬 WhatsApp Entry Pass Sent</span>
+            <span class="status-badge-pill">📧 Confirmation Emailed</span>
+          </div>
+
+          <p class="modal-countdown">Redirecting in <span id="countdownNum">6</span>s…</p>
+          <div style="margin-top:1rem;">
+            <a href="index.html#events" class="btn-modal-primary" style="display:inline-block; padding:0.65rem 1.6rem; text-decoration:none; font-size:0.92rem; border-radius:8px;">View Event Calendar</a>
+          </div>
         </div>
       </div>
 

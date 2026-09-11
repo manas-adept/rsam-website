@@ -698,13 +698,13 @@ const TOTAL_AMOUNT_PAISE = 5118; // 51.18 INR in paise
         form.hidden = true;
         
         const successModal = document.getElementById("regSuccess");
-        if (assignedRegNo) {
-          const titleEl = successModal.querySelector("h3");
-          if (titleEl) {
-            titleEl.innerHTML = `Registration Successful!<br/><span style="color:#f59e0b;font-size:1rem;display:block;margin-top:0.3rem;">RSAM Reg. No: ${assignedRegNo}</span><small style="color:#10b981;font-size:0.85rem;display:block;margin-top:0.2rem;">Razorpay Payment ID: ${payloadData.paymentId || 'Verified'}</small>`;
-          }
+        if (successModal) {
+          const regNoEl = document.getElementById("successRegNoText");
+          const payIdEl = document.getElementById("successPaymentIdText");
+          if (regNoEl) regNoEl.textContent = assignedRegNo || 'R260912001';
+          if (payIdEl) payIdEl.textContent = `(Razorpay ID: ${payloadData.paymentId || 'Verified'})`;
+          successModal.hidden = false;
         }
-        successModal.hidden = false;
 
         let secs = 6;
         const tick = setInterval(() => {

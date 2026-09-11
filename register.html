@@ -257,11 +257,29 @@
 
       <!-- Success modal -->
       <div class="reg-modal-overlay" id="regSuccess" hidden>
-        <div class="reg-modal">
-          <div class="success-icon">✓</div>
-          <h3>Registration Successful!</h3>
-          <p>Your registration has been received. We will review your details and get in touch on your mobile number.</p>
-          <p class="modal-countdown">Page will refresh in <span id="countdownNum">6</span> seconds…</p>
+        <div class="reg-modal success-card-modal">
+          <div class="success-icon-badge">✓</div>
+          <h2 class="success-title">Registration Successful!</h2>
+          <p class="success-subtitle">Official RSAM Athlete Annual Registration Completed</p>
+
+          <div class="success-reg-box" id="successRegBox">
+            <span class="reg-label">Assigned RSAM Registration Number</span>
+            <span class="reg-number-val" id="successRegNoText">R260912001</span>
+            <div class="reg-payment-row">
+              <span class="pay-tag">✓ Payment Verified</span>
+              <span class="pay-id" id="successPaymentIdText">(Razorpay ID: Verified)</span>
+            </div>
+          </div>
+
+          <div class="success-status-badges">
+            <span class="status-badge-pill">💬 WhatsApp Notice Sent</span>
+            <span class="status-badge-pill">📄 PDF Certificate Emailed</span>
+          </div>
+
+          <p class="modal-countdown">Redirecting to homepage in <span id="countdownNum">6</span>s…</p>
+          <div style="margin-top:1rem;">
+            <a href="index.html" class="btn-modal-primary" style="display:inline-block; padding:0.65rem 1.6rem; text-decoration:none; font-size:0.92rem; border-radius:8px;">Return to Homepage</a>
+          </div>
         </div>
       </div>
 

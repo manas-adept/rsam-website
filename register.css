@@ -732,3 +732,109 @@
   .confirm-grid { grid-template-columns: 1fr; }
   .confirm-item--full { grid-column: span 1; }
 }
+
+/* ── Professional Success Modal Styling ────────────────── */
+.success-card-modal {
+  background: linear-gradient(145deg, #131722, #0b0f19) !important;
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
+  border-radius: 20px !important;
+  padding: 2.5rem 2rem !important;
+  max-width: 450px !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 35px rgba(16, 185, 129, 0.15) !important;
+}
+
+.success-icon-badge {
+  width: 68px;
+  height: 68px;
+  background: rgba(16, 185, 129, 0.12);
+  border: 2px solid #10b981;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  color: #10b981;
+  margin: 0 auto 1.2rem auto;
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.25);
+}
+
+.success-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1.8rem !important;
+  font-weight: 700 !important;
+  color: #ffffff !important;
+  margin-bottom: 0.2rem !important;
+  letter-spacing: 0.02em;
+}
+
+.success-subtitle {
+  color: #9ca3af !important;
+  font-size: 0.88rem !important;
+  margin-bottom: 1.2rem !important;
+}
+
+.success-reg-box {
+  background: rgba(245, 158, 11, 0.08);
+  border: 1.5px solid rgba(245, 158, 11, 0.3);
+  border-radius: 14px;
+  padding: 1.1rem 1rem;
+  margin-bottom: 1.2rem;
+  text-align: center;
+}
+
+.reg-label {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #f59e0b;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 0.3rem;
+}
+
+.reg-number-val {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1.85rem;
+  font-weight: 700;
+  color: #fbbf24;
+  letter-spacing: 0.05em;
+  display: block;
+}
+
+.reg-payment-row {
+  margin-top: 0.6rem;
+  padding-top: 0.6rem;
+  border-top: 1px dashed rgba(245, 158, 11, 0.25);
+  font-size: 0.83rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.pay-tag {
+  color: #34d399;
+  font-weight: 600;
+}
+
+.pay-id {
+  color: #9ca3af;
+}
+
+.success-status-badges {
+  display: flex;
+  justify-content: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.2rem;
+}
+
+.status-badge-pill {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.8rem;
+  color: #e5e7eb;
+}

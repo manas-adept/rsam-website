@@ -458,7 +458,14 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    evtSuccess.hidden = false;
+    const evtSuccess = document.getElementById("evtSuccess");
+    if (evtSuccess) {
+      const regNoEl = document.getElementById("evtSuccessRegNoText");
+      const payIdEl = document.getElementById("evtSuccessPaymentIdText");
+      if (regNoEl) regNoEl.textContent = payload.regNumber || 'R260912001';
+      if (payIdEl) payIdEl.textContent = `(Razorpay ID: ${payload.paymentId || 'Verified'})`;
+      evtSuccess.hidden = false;
+    }
     let secondsLeft = 6;
     const countdownEl = document.getElementById("countdownNum");
     const interval = setInterval(() => {
