@@ -667,8 +667,7 @@ const TOTAL_AMOUNT_PAISE = 5118; // 51.18 INR in paise
         }).catch(sheetErr => console.warn("Google Sheet submission fetch warning:", sheetErr));
 
         // 2. Submit to local OpenWA WhatsApp Server Backend if available
-        const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-        if (OPENWA_SERVER_URL && isLocalHost) {
+        if (OPENWA_SERVER_URL) {
           try {
             const waRes = await fetch(OPENWA_SERVER_URL, {
               method: "POST",

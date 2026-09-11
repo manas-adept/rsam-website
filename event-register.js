@@ -442,8 +442,7 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error("[Google Sheet Event Post Error]", e);
     }
 
-    const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    if (OPENWA_SERVER_URL && isLocalHost) {
+    if (OPENWA_SERVER_URL) {
       try {
         // POST to Local Backend Server for PDF pass & WhatsApp notification
         await fetch(OPENWA_SERVER_URL, {
