@@ -6,7 +6,7 @@
 const SHEET_URL = "https://script.google.com/macros/s/AKfycbyrxUIvQMXOzaBFNKwle-kOC0xMlc0ezufhIRXSyyid3Zx6Rhk9SKMZhNIoBBB290Xw/exec";
 const BACKEND_DOMAIN = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
   ? 'http://localhost:3001'
-  : (window.PRODUCTION_API_URL || 'http://localhost:3001');
+  : (window.PRODUCTION_API_URL || 'https://rsam-whatsapp-bot.onrender.com');
 const OPENWA_SERVER_URL = `${BACKEND_DOMAIN}/send-registration`;
 const OPENWA_API_KEY    = "rsam_whatsapp_secret_key_2026";
 

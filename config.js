@@ -6,6 +6,8 @@
    highlights etc.) edit the files in data/ instead.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
+window.PRODUCTION_API_URL = "https://rsam-whatsapp-bot.onrender.com";
+
 const CONFIG = {
 
   /* ── Site meta ─────────────────────────────────── */
