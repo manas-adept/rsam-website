@@ -1496,13 +1496,17 @@ async function loadLiveCloudinaryGalleries() {
   window.LIVE_GALLERY_CACHE = window.LIVE_GALLERY_CACHE || {};
   window.LIVE_CLOUDINARY_DISCOVERED_FOLDERS = null;
 
+  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  const baseUrl = isLocal ? 'http://localhost:3001' : (window.PRODUCTION_API_URL || 'https://rsam-whatsapp-bot.onrender.com');
+
   try {
-    const apiPort = window.location.port === '8080' || window.location.hostname === 'localhost' ? '3001' : '';
-    const baseUrl = apiPort ? `http://${window.location.hostname}:${apiPort}` : '';
-    const res = await fetch(`${baseUrl}/api/cloudinary-gallery-folders`);
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 4000);
+    const res = await fetch(`${baseUrl}/api/cloudinary-gallery-folders`, { signal: controller.signal });
+    clearTimeout(timer);
     if (res.ok) {
       const data = await res.json();
-      if (data.success && Array.isArray(data.folders) && data.folders.length > 0) {
+      if (data && data.success && Array.isArray(data.folders) && data.folders.length > 0) {
         window.LIVE_CLOUDINARY_DISCOVERED_FOLDERS = data.folders;
         for (const f of data.folders) {
           if (f.cloudinarySubfolder && f.photos) {
@@ -1513,7 +1517,7 @@ async function loadLiveCloudinaryGalleries() {
       }
     }
   } catch (e) {
-    // API server offline fallback
+    // API server offline or sleeping fallback
   }
 
   // Fallback if dynamic folder discovery API fails
@@ -1523,12 +1527,13 @@ async function loadLiveCloudinaryGalleries() {
       .filter(f => f.enabled !== false && f.cloudinarySubfolder)
       .map(async (folder) => {
         try {
-          const apiPort = window.location.port === '8080' || window.location.hostname === 'localhost' ? '3001' : '';
-          const baseUrl = apiPort ? `http://${window.location.hostname}:${apiPort}` : '';
-          const res = await fetch(`${baseUrl}/api/cloudinary-gallery?subfolder=${encodeURIComponent(folder.cloudinarySubfolder)}`);
+          const controller = new AbortController();
+          const timer = setTimeout(() => controller.abort(), 3000);
+          const res = await fetch(`${baseUrl}/api/cloudinary-gallery?subfolder=${encodeURIComponent(folder.cloudinarySubfolder)}`, { signal: controller.signal });
+          clearTimeout(timer);
           if (res.ok) {
             const data = await res.json();
-            if (data.success && Array.isArray(data.photos)) {
+            if (data && data.success && Array.isArray(data.photos)) {
               window.LIVE_GALLERY_CACHE[folder.cloudinarySubfolder] = data.photos;
             }
           }
@@ -1539,27 +1544,50 @@ async function loadLiveCloudinaryGalleries() {
 }
 
 Promise.all([
-  fetch("data/news-items.json").then(r => r.json()),
-  fetch("data/upcoming-events.json").then(r => r.json()),
-  fetch("data/highlights.json").then(r => r.json()),
-  fetch("data/officials.json").then(r => r.json()),
-  fetch("data/affiliations.json").then(r => r.json()),
-  fetch("data/gallery.json").then(r => r.json()),
-  fetch("data/gallery-config.json").then(r => r.json()).catch(() => null),
-  fetch("data/cloudinary-media-map.json").then(r => r.json()).catch(() => null),
+  fetch("data/news-items.json").then(r => r.ok ? r.json() : null).catch(() => null),
+  fetch("data/upcoming-events.json").then(r => r.ok ? r.json() : null).catch(() => null),
+  fetch("data/highlights.json").then(r => r.ok ? r.json() : null).catch(() => null),
+  fetch("data/officials.json").then(r => r.ok ? r.json() : null).catch(() => null),
+  fetch("data/affiliations.json").then(r => r.ok ? r.json() : null).catch(() => null),
+  fetch("data/gallery.json").then(r => r.ok ? r.json() : null).catch(() => null),
+  fetch("data/gallery-config.json").then(r => r.ok ? r.json() : null).catch(() => null),
+  fetch("data/cloudinary-media-map.json").then(r => r.ok ? r.json() : null).catch(() => null),
 ]).then(async ([newsItems, upcomingEvents, highlights, officials, affiliations, galleryData, galleryConfig, cloudMap]) => {
-  window.NEWS                 = { items: newsItems.items, upcomingEvents: upcomingEvents.events };
-  window.HIGHLIGHTS           = highlights.items;
-  window.OFFICIALS            = officials;
-  window.AFFILIATIONS          = affiliations.items;
-  window.GALLERY_ALBUMS       = galleryData ? galleryData.albums : [];
-  window.GALLERY_CONFIG       = galleryConfig;
-  window.CLOUDINARY_MEDIA_MAP = cloudMap || {};
+  if (newsItems && newsItems.items) {
+    window.NEWS = {
+      items: newsItems.items,
+      upcomingEvents: (upcomingEvents && upcomingEvents.events) || (window.NEWS && window.NEWS.upcomingEvents) || []
+    };
+  }
+  if (highlights && highlights.items) {
+    window.HIGHLIGHTS = highlights.items;
+  }
+  if (officials) {
+    window.OFFICIALS = officials;
+  }
+  if (affiliations && affiliations.items) {
+    window.AFFILIATIONS = affiliations.items;
+  }
+  if (galleryData && galleryData.albums) {
+    window.GALLERY_ALBUMS = galleryData.albums;
+  }
+  if (galleryConfig) {
+    window.GALLERY_CONFIG = galleryConfig;
+  }
+  if (cloudMap) {
+    window.CLOUDINARY_MEDIA_MAP = cloudMap;
+  }
 
-  await loadLiveCloudinaryGalleries();
+  try {
+    await loadLiveCloudinaryGalleries();
+  } catch (e) {
+    console.warn("Live gallery loading skipped:", e);
+  }
 
   renderAll();
   document.dispatchEvent(new Event('rsam:ready'));
 }).catch(err => {
-  console.error("Failed to load site data:", err);
+  console.error("Data fetch warning, rendering with default data:", err);
+  renderAll();
+  document.dispatchEvent(new Event('rsam:ready'));
 });
