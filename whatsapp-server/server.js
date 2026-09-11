@@ -3,7 +3,13 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const fs = require('fs');
 const path = require('path');
-const { Client, LocalAuth } = require('whatsapp-web.js');
+const {
+  default: makeWASocket,
+  useMultiFileAuthState,
+  DisconnectReason,
+  fetchLatestBaileysVersion
+} = require('@whiskeysockets/baileys');
+const pino = require('pino');
 const qrcodeTerminal = require('qrcode-terminal');
 const QRCode = require('qrcode');
 const PDFDocument = require('pdfkit');
@@ -242,74 +248,67 @@ async function sendRegistrationEmail(data, regNumber, pdfBuffer) {
   return { success: true, messageId: info.messageId };
 }
 
-// Initialize WhatsApp Web Client
-const client = new Client({
-  authStrategy: new LocalAuth({
-    clientId: 'RSAM_SESSION'
-  }),
-  puppeteer: {
-    headless: true,
-    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-accelerated-2d-canvas',
-      '--no-first-run',
-      '--no-zygote',
-      '--disable-gpu',
-      '--disable-software-rasterizer',
-      '--disable-extensions',
-      '--disable-background-networking',
-      '--disable-background-timer-throttling',
-      '--disable-backgrounding-occluded-windows',
-      '--disable-breakpad',
-      '--disable-client-side-phishing-detection',
-      '--disable-component-extensions-with-background-pages',
-      '--disable-default-apps',
-      '--disable-features=TranslateUI,BlinkGenPropertyTrees',
-      '--disable-ipc-flooding-protection',
-      '--disable-renderer-backgrounding',
-      '--js-flags="--max-old-space-size=180"'
-    ]
-  }
-});
+const AUTH_FOLDER = path.join(__dirname, 'baileys_auth_info');
+let sock = null;
 
-client.on('qr', async (qr) => {
-  console.log('\n==============================================');
-  console.log('📱 SCAN THIS WHATSAPP QR CODE IN TERMINAL OR BROWSER:');
-  console.log('==============================================');
-  qrcodeTerminal.generate(qr, { small: true });
-
+async function startWhatsAppBot() {
   try {
-    latestQrDataUrl = await QRCode.toDataURL(qr);
-    console.log('🌐 Web QR Code updated! Visit http://localhost:3001 to view and scan in browser.\n');
+    const { state, saveCreds } = await useMultiFileAuthState(AUTH_FOLDER);
+    const { version } = await fetchLatestBaileysVersion();
+
+    sock = makeWASocket({
+      version,
+      auth: state,
+      printQRInTerminal: false,
+      logger: pino({ level: 'silent' }),
+      browser: ['RSAM Moradabad', 'Chrome', '1.0.0']
+    });
+
+    sock.ev.on('creds.update', saveCreds);
+
+    sock.ev.on('connection.update', async (update) => {
+      const { connection, lastDisconnect, qr } = update;
+
+      if (qr) {
+        console.log('\n==============================================');
+        console.log('📱 SCAN THIS WHATSAPP QR CODE IN TERMINAL OR BROWSER:');
+        console.log('==============================================');
+        qrcodeTerminal.generate(qr, { small: true });
+
+        try {
+          latestQrDataUrl = await QRCode.toDataURL(qr);
+          console.log('🌐 Web QR Code updated! Visit your bot URL to view & scan.\n');
+        } catch (err) {
+          console.error('Error generating QR image data URL:', err);
+        }
+      }
+
+      if (connection === 'close') {
+        const statusCode = lastDisconnect?.error?.output?.statusCode;
+        const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
+        console.log(`⚠️ Connection closed (code: ${statusCode}). Reconnecting: ${shouldReconnect}`);
+        isConnected = false;
+        latestQrDataUrl = null;
+        if (shouldReconnect) {
+          setTimeout(startWhatsAppBot, 3000);
+        } else {
+          console.log('❌ Logged out from WhatsApp. Clear baileys_auth_info folder to scan new QR code.');
+        }
+      } else if (connection === 'open') {
+        isConnected = true;
+        latestQrDataUrl = null;
+        console.log('\n==============================================');
+        console.log('✅ WhatsApp Bot is Ready & Connected via Baileys WebSockets!');
+        console.log('==============================================\n');
+      }
+    });
   } catch (err) {
-    console.error('Error generating QR image data URL:', err);
+    console.error('Error starting WhatsApp socket:', err);
+    setTimeout(startWhatsAppBot, 5000);
   }
-});
+}
 
-client.on('ready', () => {
-  isConnected = true;
-  latestQrDataUrl = null;
-  console.log('\n==============================================');
-  console.log('✅ WhatsApp Bot is Ready & Connected to WhatsApp Web!');
-  console.log('==============================================\n');
-});
-
-client.on('auth_failure', (msg) => {
-  console.error('❌ WhatsApp Authentication Failed:', msg);
-  isConnected = false;
-});
-
-client.on('disconnected', (reason) => {
-  console.warn('⚠️ WhatsApp Bot Disconnected:', reason);
-  isConnected = false;
-  latestQrDataUrl = null;
-  client.initialize();
-});
-
-function formatWhatsAppId(phoneStr) {
+function formatWhatsAppJid(phoneStr) {
   let cleaned = String(phoneStr || '').replace(/\D/g, '');
   if (!cleaned) return null;
   
@@ -317,7 +316,7 @@ function formatWhatsAppId(phoneStr) {
     cleaned = '91' + cleaned;
   }
   
-  return `${cleaned}@c.us`;
+  return `${cleaned}@s.whatsapp.net`;
 }
 
 /**
@@ -493,34 +492,29 @@ app.post('/send-registration', authorizeRequest, async (req, res) => {
     const regNumber = payload.regNumber || getNextRegistrationNumber(payload.year || '2026');
     console.log(`[RegistrationNumber] Assigned ${regNumber} to ${payload.skaterName}`);
 
-    // 2. Format WhatsApp recipient ID
-    let chatId = formatWhatsAppId(payload.mobile);
-    if (!chatId) {
+    // 2. Format WhatsApp recipient JID
+    const jid = formatWhatsAppJid(payload.mobile);
+    if (!jid) {
       return res.status(400).json({
         success: false,
         error: 'Invalid mobile number format.'
       });
     }
 
-    try {
-      const numberInfo = await client.getNumberId(chatId.replace('@c.us', ''));
-      if (numberInfo && numberInfo._serialized) {
-        chatId = numberInfo._serialized;
-      }
-    } catch (e) {
-      console.warn(`[WhatsApp] Could not verify number via getNumberId, using default ${chatId}`);
-    }
-
     // 3. Send WhatsApp Notification
     let msgId = 'pending';
     try {
-      const messageText = buildRegistrationMessage(payload, regNumber);
-      console.log(`[WhatsApp] Sending notification to ${chatId} for ${payload.skaterName} (${regNumber})...`);
-      const sendResult = await client.sendMessage(chatId, messageText);
-      msgId = sendResult?.id?.id || sendResult?.id?._serialized || 'sent';
-      console.log(`[WhatsApp] Successfully sent message to ${payload.skaterName}! Message ID: ${msgId}`);
+      if (sock && isConnected) {
+        const messageText = buildRegistrationMessage(payload, regNumber);
+        console.log(`[WhatsApp] Sending notification to ${jid} for ${payload.skaterName} (${regNumber})...`);
+        const sendResult = await sock.sendMessage(jid, { text: messageText });
+        msgId = sendResult?.key?.id || 'sent';
+        console.log(`[WhatsApp] Successfully sent message to ${payload.skaterName}! Message ID: ${msgId}`);
+      } else {
+        console.warn(`[WhatsApp] Bot is not connected yet. Skipping live WhatsApp message.`);
+      }
     } catch (waErr) {
-      console.warn(`[WhatsApp] Could not send WhatsApp message to ${payload.skaterName} (${chatId}):`, waErr.message);
+      console.warn(`[WhatsApp] Could not send WhatsApp message to ${payload.skaterName} (${jid}):`, waErr.message);
     }
 
     // 4. Generate Registration Certificate PDF
@@ -770,6 +764,6 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`📡 Registration Endpoint: POST http://localhost:${PORT}/send-registration`);
   console.log('----------------------------------------------------');
   
-  console.log('🚀 Initializing WhatsApp Web Client...');
-  client.initialize();
+  console.log('🚀 Initializing WhatsApp Web Client (Baileys WebSockets)...');
+  startWhatsAppBot();
 });
