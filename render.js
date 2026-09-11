@@ -1505,12 +1505,24 @@ async function loadLiveCloudinaryGalleries() {
     if (res.ok) {
       const data = await res.json();
       if (data && data.success && Array.isArray(data.folders) && data.folders.length > 0) {
-        window.LIVE_CLOUDINARY_DISCOVERED_FOLDERS = data.folders;
+        const galleryConfig = window.GALLERY_CONFIG || { folders: [] };
+        const configFolders = galleryConfig.folders || [];
+
         for (const f of data.folders) {
+          const matchedConfig = configFolders.find(c => c.cloudinarySubfolder === f.cloudinarySubfolder || c.folderId === f.folderId || c.folderId === f.name) || {};
+          if (matchedConfig.title) f.title = matchedConfig.title;
+          if (matchedConfig.category) f.category = matchedConfig.category;
+          if (matchedConfig.date) f.date = matchedConfig.date;
+          if (matchedConfig.location) f.location = matchedConfig.location;
+          if (matchedConfig.description) f.description = matchedConfig.description;
+          if (matchedConfig.displayOrder) f.displayOrder = matchedConfig.displayOrder;
+
           if (f.cloudinarySubfolder && f.photos) {
             window.LIVE_GALLERY_CACHE[f.cloudinarySubfolder] = f.photos;
           }
         }
+        data.folders.sort((a, b) => (a.displayOrder || 99) - (b.displayOrder || 99));
+        window.LIVE_CLOUDINARY_DISCOVERED_FOLDERS = data.folders;
         return;
       }
     }

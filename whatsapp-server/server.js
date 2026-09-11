@@ -682,7 +682,9 @@ app.get('/api/cloudinary-gallery-folders', async (req, res) => {
     const sub = await cloudinary.api.sub_folders(baseFolder);
     
     // Read local gallery-config for rich metadata (title, date, location, description) if matched
-    const configPath = path.join(__dirname, '../data/gallery-config.json');
+    const configPath = fs.existsSync(path.join(__dirname, 'data/gallery-config.json'))
+      ? path.join(__dirname, 'data/gallery-config.json')
+      : path.join(__dirname, '../data/gallery-config.json');
     let configFolders = [];
     if (fs.existsSync(configPath)) {
       try {

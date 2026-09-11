@@ -311,7 +311,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="admin-item-sub">
               Date: ${ev.date} · Venue: ${ev.location} · Base Fee: <strong>₹${base.toFixed(2)}</strong> ${ev.feeType === 'organizer' ? '<span style="color:#fbbf24;">(Pay to Organizer)</span>' : `(Total Payable: <strong style="color:#f59e0b;">₹${total.toFixed(2)}</strong>)`}
             </div>
-            ${ev.description ? `<div style="font-size:0.85rem; color:#d1d5db; margin-top:0.3rem;">${ev.description.slice(0, 120)}...</div>` : ''}
+            ${(ev.description || ev.body) ? `<div style="font-size:0.85rem; color:#d1d5db; margin-top:0.3rem;">${(ev.description || ev.body).slice(0, 120)}...</div>` : ''}
           </div>
           <div class="admin-item-actions">
             <button type="button" class="btn-item-edit" onclick="toggleEventTicker(${idx})">${ev.showOnTicker ? 'Hide Ticker' : 'Show Ticker'}</button>

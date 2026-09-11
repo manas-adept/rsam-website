@@ -21,13 +21,8 @@ const NEWS = {
   /* ── Upcoming Events carousel (left column) ──────── */
   upcomingEvents: [
     {
-<<<<<<< Updated upstream
-      image:         { src: "images/row4.jpg", fit: "contain", position: "top" },   // leave "" to show placeholder
-      category:      "Upcoming Event",    // fallback if no start/end set
-=======
-      image:         { src: "https://res.cloudinary.com/igjmhsju/image/upload/v1788797445/rsam_website/news/news_lko.jpg", fit: "contain", position: "top" },   // leave "" to show placeholder
-      category:      "Completed",    // fallback if no start/end set
->>>>>>> Stashed changes
+      image:         { src: "https://res.cloudinary.com/igjmhsju/image/upload/v1788797445/rsam_website/news/news_lko.jpg", fit: "contain", position: "top" },
+      category:      "Completed",
       startDateTime: "2026-05-10T04:30",  // IST: event starts
       endDateTime:   "2026-05-10T10:30",  // IST: event ends
       date:          "May 10, 2026",
