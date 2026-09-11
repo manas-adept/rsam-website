@@ -261,7 +261,17 @@ const client = new Client({
       '--disable-gpu',
       '--disable-software-rasterizer',
       '--disable-extensions',
-      '--js-flags="--max-old-space-size=256"'
+      '--disable-background-networking',
+      '--disable-background-timer-throttling',
+      '--disable-backgrounding-occluded-windows',
+      '--disable-breakpad',
+      '--disable-client-side-phishing-detection',
+      '--disable-component-extensions-with-background-pages',
+      '--disable-default-apps',
+      '--disable-features=TranslateUI,BlinkGenPropertyTrees',
+      '--disable-ipc-flooding-protection',
+      '--disable-renderer-backgrounding',
+      '--js-flags="--max-old-space-size=180"'
     ]
   }
 });
