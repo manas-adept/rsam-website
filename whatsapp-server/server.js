@@ -257,7 +257,11 @@ const client = new Client({
       '--disable-accelerated-2d-canvas',
       '--no-first-run',
       '--no-zygote',
-      '--disable-gpu'
+      '--single-process',
+      '--disable-gpu',
+      '--disable-software-rasterizer',
+      '--disable-extensions',
+      '--js-flags="--max-old-space-size=256"'
     ]
   }
 });
@@ -749,7 +753,7 @@ app.get('/health', (req, res) => {
   });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log('----------------------------------------------------');
   console.log(`🌐 OpenWA Server running on http://localhost:${PORT}`);
   console.log(`📱 QR Code Webpage: http://localhost:${PORT}`);
