@@ -488,62 +488,53 @@ app.post('/send-registration', authorizeRequest, async (req, res) => {
     const regNumber = payload.regNumber || getNextRegistrationNumber(payload.year || '2026');
     console.log(`[RegistrationNumber] Assigned ${regNumber} to ${payload.skaterName}`);
 
-    let waResult = { sent: false, error: null };
-    let emailResult = { sent: false, error: null };
-
-    // 2. ISOLATED CHANNEL 1: WhatsApp Notification
-    try {
-      const jid = formatWhatsAppJid(payload.mobile);
-      if (!jid) {
-        waResult.error = 'Invalid mobile number format';
-        console.warn(`[WhatsApp] Skipping: Invalid mobile number ${payload.mobile}`);
-      } else if (!sock || !isConnected) {
-        waResult.error = 'WhatsApp Bot disconnected or offline on server';
-        console.warn(`[WhatsApp] Skipping: Bot not connected yet on server.`);
-      } else {
-        const messageText = buildRegistrationMessage(payload, regNumber);
-        console.log(`[WhatsApp] Sending notification to ${jid} for ${payload.skaterName} (${regNumber})...`);
-        const sendResult = await sock.sendMessage(jid, { text: messageText });
-        waResult.sent = true;
-        waResult.messageId = sendResult?.key?.id || 'sent';
-        console.log(`[WhatsApp] Successfully sent message to ${payload.skaterName}! Message ID: ${waResult.messageId}`);
-      }
-    } catch (waErr) {
-      waResult.error = waErr.message;
-      console.error(`[WhatsApp Error] Could not send message to ${payload.skaterName}:`, waErr.message);
-    }
-
-    // 3. ISOLATED CHANNEL 2: PDF Generation & Email Delivery
-    if (payload.email) {
-      let pdfBuffer = null;
-      try {
-        pdfBuffer = await generateRegistrationPDF(payload, regNumber);
-        const pdfDir = path.join(__dirname, 'certificates_2026');
-        if (!fs.existsSync(pdfDir)) fs.mkdirSync(pdfDir, { recursive: true });
-        const pdfPath = path.join(pdfDir, `${regNumber}_${payload.skaterName.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`);
-        fs.writeFileSync(pdfPath, pdfBuffer);
-        console.log(`[PDF] Certificate saved locally at ${pdfPath}`);
-      } catch (pdfErr) {
-        console.error('[PDF Error] Could not generate PDF certificate:', pdfErr.message);
-      }
-
-      try {
-        console.log(`[Email] Attempting email delivery to ${payload.email}...`);
-        const mailRes = await sendRegistrationEmail(payload, regNumber, pdfBuffer);
-        emailResult = { sent: true, details: mailRes };
-      } catch (emailErr) {
-        emailResult = { sent: false, error: emailErr.message };
-        console.error(`[Email Error] Could not send email to ${payload.email}:`, emailErr.message);
-      }
-    } else {
-      emailResult = { sent: false, reason: 'No email address provided' };
-    }
-
-    return res.json({
+    // Respond immediately to browser for instant UI feedback
+    res.json({
       success: true,
       regNumber,
-      whatsapp: waResult,
-      email: emailResult
+      message: 'Registration accepted. Dispatched WhatsApp and email notifications in background.'
+    });
+
+    // Process notification channels asynchronously in background
+    setImmediate(async () => {
+      // 2. ISOLATED CHANNEL 1: WhatsApp Notification
+      try {
+        const jid = formatWhatsAppJid(payload.mobile);
+        if (!jid) {
+          console.warn(`[WhatsApp] Skipping: Invalid mobile number ${payload.mobile}`);
+        } else if (!sock || !isConnected) {
+          console.warn(`[WhatsApp] Skipping: Bot not connected yet on server.`);
+        } else {
+          const messageText = buildRegistrationMessage(payload, regNumber);
+          console.log(`[WhatsApp] Sending notification to ${jid} for ${payload.skaterName} (${regNumber})...`);
+          const sendResult = await sock.sendMessage(jid, { text: messageText });
+          console.log(`[WhatsApp] Successfully sent message to ${payload.skaterName}! Message ID: ${sendResult?.key?.id || 'sent'}`);
+        }
+      } catch (waErr) {
+        console.error(`[WhatsApp Error] Could not send message to ${payload.skaterName}:`, waErr.message);
+      }
+
+      // 3. ISOLATED CHANNEL 2: PDF Generation & Email Delivery
+      if (payload.email) {
+        let pdfBuffer = null;
+        try {
+          pdfBuffer = await generateRegistrationPDF(payload, regNumber);
+          const pdfDir = path.join(__dirname, 'certificates_2026');
+          if (!fs.existsSync(pdfDir)) fs.mkdirSync(pdfDir, { recursive: true });
+          const pdfPath = path.join(pdfDir, `${regNumber}_${payload.skaterName.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`);
+          fs.writeFileSync(pdfPath, pdfBuffer);
+          console.log(`[PDF] Certificate saved locally at ${pdfPath}`);
+        } catch (pdfErr) {
+          console.error('[PDF Error] Could not generate PDF certificate:', pdfErr.message);
+        }
+
+        try {
+          console.log(`[Email] Attempting email delivery to ${payload.email}...`);
+          await sendRegistrationEmail(payload, regNumber, pdfBuffer);
+        } catch (emailErr) {
+          console.error(`[Email Error] Could not send email to ${payload.email}:`, emailErr.message);
+        }
+      }
     });
   } catch (err) {
     console.error('[Send Registration Error]:', err);
