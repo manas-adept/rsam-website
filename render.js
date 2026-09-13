@@ -1592,6 +1592,19 @@ async function loadLiveCloudinaryGalleries() {
   }
 }
 
+// Immediate initial render so page paints instantly with defaults/localStorage
+function initialBoot() {
+  renderAll();
+  document.dispatchEvent(new Event('rsam:ready'));
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initialBoot);
+} else {
+  initialBoot();
+}
+
+// Background async data hydration & live gallery sync (non-blocking)
 Promise.all([
   fetch("data/news-items.json").then(r => r.ok ? r.json() : null).catch(() => null),
   fetch("data/upcoming-events.json").then(r => r.ok ? r.json() : null).catch(() => null),
@@ -1627,16 +1640,15 @@ Promise.all([
     window.CLOUDINARY_MEDIA_MAP = cloudMap;
   }
 
-  try {
-    await loadLiveCloudinaryGalleries();
-  } catch (e) {
-    console.warn("Live gallery loading skipped:", e);
-  }
-
   renderAll();
-  document.dispatchEvent(new Event('rsam:ready'));
+
+  // Load live Cloudinary galleries asynchronously in background without blocking page render
+  loadLiveCloudinaryGalleries().then(() => {
+    renderGallery();
+  }).catch(e => {
+    console.warn("Live gallery loading skipped:", e);
+  });
 }).catch(err => {
   console.error("Data fetch warning, rendering with default data:", err);
   renderAll();
-  document.dispatchEvent(new Event('rsam:ready'));
 });
