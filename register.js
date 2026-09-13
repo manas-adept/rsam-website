@@ -553,13 +553,27 @@ document.getElementById("regForm").addEventListener("submit", async (e) => {
         dobProof:     dobFile,
       };
 
-// Razorpay Gateway Configuration & Fee Calculations (₹10 base + 2% transaction fee + 18% GST on fee = ₹10.24)
+// Razorpay Gateway Configuration & Fee Calculations (Dynamic from Admin Config or default ₹10 base)
+let baseFeeVal = 10.00;
+let gwPctVal = 2.0;
+let gstPctVal = 18.0;
+
+const savedFeeCfg = localStorage.getItem("RSAM_ADMIN_FEE_CONFIG");
+if (savedFeeCfg) {
+  try {
+    const parsedCfg = JSON.parse(savedFeeCfg);
+    if (parsedCfg.baseFee !== undefined) baseFeeVal = parseFloat(parsedCfg.baseFee);
+    if (parsedCfg.gatewayPercent !== undefined) gwPctVal = parseFloat(parsedCfg.gatewayPercent);
+    if (parsedCfg.gstPercent !== undefined) gstPctVal = parseFloat(parsedCfg.gstPercent);
+  } catch (e) {}
+}
+
 const RAZORPAY_KEY_ID = "rzp_test_TZa1vfjhrPJobv"; // Test Razorpay Key ID
-const BASE_REGISTRATION_FEE = 10.00;
-const GATEWAY_FEE = 0.20;  // 2% of ₹10.00
-const GST_FEE = 0.04;      // 18% GST on ₹0.20
-const TOTAL_AMOUNT = 10.24; // Total payable
-const TOTAL_AMOUNT_PAISE = 1024; // 10.24 INR in paise
+const BASE_REGISTRATION_FEE = baseFeeVal;
+const GATEWAY_FEE = parseFloat(((BASE_REGISTRATION_FEE * gwPctVal) / 100).toFixed(2));
+const GST_FEE = parseFloat(((GATEWAY_FEE * gstPctVal) / 100).toFixed(2));
+const TOTAL_AMOUNT = parseFloat((BASE_REGISTRATION_FEE + GATEWAY_FEE + GST_FEE).toFixed(2));
+const TOTAL_AMOUNT_PAISE = Math.round(TOTAL_AMOUNT * 100);
 
       // Populate Pre-Submission Confirmation Modal Summary
       const confirmModal = document.getElementById("confirmModal");
@@ -631,19 +645,19 @@ const TOTAL_AMOUNT_PAISE = 1024; // 10.24 INR in paise
           <div class="confirm-fee-breakdown" style="grid-column: span 2; background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 10px; padding: 1rem; margin-top: 0.5rem;">
             <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #d1d5db; margin-bottom: 0.3rem;">
               <span>Base Registration Fee:</span>
-              <strong>₹10.00</strong>
+              <strong>₹${BASE_REGISTRATION_FEE.toFixed(2)}</strong>
             </div>
             <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #d1d5db; margin-bottom: 0.3rem;">
-              <span>Gateway Transaction Charge (2%):</span>
-              <span>+ ₹0.20</span>
+              <span>Gateway Transaction Charge (${gwPctVal}%):</span>
+              <span>+ ₹${GATEWAY_FEE.toFixed(2)}</span>
             </div>
             <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #d1d5db; margin-bottom: 0.6rem;">
-              <span>GST on Transaction Fee (18%):</span>
-              <span>+ ₹0.04</span>
+              <span>GST on Transaction Fee (${gstPctVal}%):</span>
+              <span>+ ₹${GST_FEE.toFixed(2)}</span>
             </div>
             <div style="display: flex; justify-content: space-between; font-size: 1.05rem; font-weight: 700; color: #f59e0b; border-top: 1px dashed rgba(245, 158, 11, 0.3); padding-top: 0.5rem;">
               <span>Total Payable Amount (Razorpay):</span>
-              <span style="font-size: 1.2rem;">₹10.24</span>
+              <span style="font-size: 1.2rem;">₹${TOTAL_AMOUNT.toFixed(2)}</span>
             </div>
           </div>
         </div>
@@ -687,14 +701,14 @@ const TOTAL_AMOUNT_PAISE = 1024; // 10.24 INR in paise
             console.log("[Razorpay] Payment Success! Payment ID:", response.razorpay_payment_id);
             payload.paymentId = response.razorpay_payment_id || ("pay_test_" + Date.now());
             payload.paymentStatus = "SUCCESS";
-            payload.amountPaid = "10.24";
+            payload.amountPaid = TOTAL_AMOUNT.toFixed(2);
 
             // Execute registration submission only AFTER successful payment
             await processRegistrationSubmission(payload);
           },
           modal: {
             ondismiss: function () {
-              alert("⚠️ Payment Cancelled: Skater registration requires a successful payment of ₹10.24.\n\nYour registration was not submitted.");
+              alert(`⚠️ Payment Cancelled: Skater registration requires a successful payment of ₹${TOTAL_AMOUNT.toFixed(2)}.\n\nYour registration was not submitted.`);
               submitBtn.disabled = false;
               submitBtn.querySelector(".submit-text").hidden = false;
               submitBtn.querySelector(".submit-spinner").hidden = true;

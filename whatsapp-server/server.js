@@ -630,6 +630,70 @@ app.post('/send-registration', authorizeRequest, async (req, res) => {
 });
 
 /**
+ * Endpoint: POST /api/send-custom-whatsapp
+ * Dispatches a custom WhatsApp message & optional media image attachment to any mobile number
+ */
+app.post('/api/send-custom-whatsapp', authorizeRequest, async (req, res) => {
+  try {
+    const { mobile, message, imageUrl } = req.body;
+    if (!mobile || !message) {
+      return res.status(400).json({ success: false, error: 'Mobile number and message text are required.' });
+    }
+
+    const jid = formatWhatsAppJid(mobile);
+    if (!jid) {
+      return res.status(400).json({ success: false, error: `Invalid mobile number: ${mobile}` });
+    }
+
+    if (!sock || !isConnected) {
+      return res.status(503).json({ success: false, error: 'WhatsApp bot is not connected. Please scan QR code in admin.' });
+    }
+
+    console.log(`[WhatsApp Broadcast] Dispatched custom message to ${jid}...`);
+
+    let msgPayload = { text: message };
+    if (imageUrl && imageUrl.startsWith('http')) {
+      msgPayload = {
+        image: { url: imageUrl },
+        caption: message
+      };
+    }
+
+    const result = await sock.sendMessage(jid, msgPayload);
+    return res.json({
+      success: true,
+      mobile,
+      jid,
+      messageId: result?.key?.id || 'sent'
+    });
+  } catch (err) {
+    console.error('[WhatsApp Custom Send Error]:', err.message);
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
+ * Endpoint: GET /api/fetch-contacts
+ * Proxy endpoint to fetch all registration contacts from Google Sheet
+ */
+app.get('/api/fetch-contacts', async (req, res) => {
+  const sheetUrl = process.env.GOOGLE_SHEET_SCRIPT_URL || "https://script.google.com/macros/s/AKfycbyrxUIvQMXOzaBFNKwle-kOC0xMlc0ezufhIRXSyyid3Zx6Rhk9SKMZhNIoBBB290Xw/exec";
+  try {
+    const fetchRes = await fetch(`${sheetUrl}?action=fetch_all_contacts`, { redirect: 'follow' });
+    const text = await fetchRes.text();
+    try {
+      const data = JSON.parse(text);
+      if (data && data.status === 'ok') {
+        return res.json(data);
+      }
+    } catch (parseErr) {}
+  } catch (err) {
+    console.warn('[Proxy Fetch Contacts Error]:', err.message);
+  }
+  return res.json({ status: 'error', message: 'Could not fetch contact records from Google Sheet.' });
+});
+
+/**
  * RSAM Skater Reg Number Lookup API Endpoint
  */
 app.get('/api/lookup-skater', async (req, res) => {

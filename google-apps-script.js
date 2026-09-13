@@ -170,6 +170,41 @@ function doGet(e) {
         .setMimeType(ContentService.MimeType.JSON);
     }
 
+    // 3. BULK BROADCAST LOOKUP — Fetches all contacts grouped by sheet tab name
+    if (action === "fetch_all_contacts") {
+      const allSheets = ss.getSheets();
+      const sheetData = [];
+
+      for (let sheet of allSheets) {
+        const sName = sheet.getName();
+        const data = sheet.getDataRange().getValues();
+        if (data.length <= 1) continue;
+
+        const headers = data[0].map(h => String(h).trim().toLowerCase());
+        const records = [];
+
+        for (let i = 1; i < data.length; i++) {
+          const row = data[i];
+          if (!row || !row.some(cell => cell !== "")) continue;
+          records.push(parseSkaterRow(data, i, headers, ""));
+        }
+
+        if (records.length > 0) {
+          sheetData.push({
+            sheetName: sName,
+            count: records.length,
+            records: records
+          });
+        }
+      }
+
+      return ContentService.createTextOutput(JSON.stringify({
+        status: "ok",
+        count: sheetData.reduce((acc, curr) => acc + curr.count, 0),
+        sheets: sheetData
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+
     return ContentService.createTextOutput(JSON.stringify({ status: "ok", service: "RSAM API 2026" }))
       .setMimeType(ContentService.MimeType.JSON);
   } catch (err) {

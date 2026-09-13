@@ -290,13 +290,77 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
+  // ── Annual Athlete Registration Fee Control ──
+  function getAnnualFeeConfig() {
+    const saved = localStorage.getItem("RSAM_ADMIN_FEE_CONFIG");
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) {}
+    }
+    return {
+      baseFee: 10.00,
+      gatewayPercent: 2.0,
+      gstPercent: 18.0,
+      totalPayable: 10.24
+    };
+  }
+
+  function initAnnualFeeForm() {
+    const form = document.getElementById("annualFeeForm");
+    const baseInput = document.getElementById("mAnnBaseFee");
+    const gwInput = document.getElementById("mAnnGwPct");
+    const gstInput = document.getElementById("mAnnGstPct");
+    const previewEl = document.getElementById("annFeeTotalPreview");
+    if (!form || !baseInput || !gwInput || !gstInput || !previewEl) return;
+
+    const currentCfg = getAnnualFeeConfig();
+    baseInput.value = currentCfg.baseFee;
+    gwInput.value = currentCfg.gatewayPercent;
+    gstInput.value = currentCfg.gstPercent;
+
+    function updatePreview() {
+      const base = parseFloat(baseInput.value) || 0;
+      const gwPct = parseFloat(gwInput.value) || 0;
+      const gstPct = parseFloat(gstInput.value) || 0;
+
+      const gwFee = parseFloat(((base * gwPct) / 100).toFixed(2));
+      const gstFee = parseFloat(((gwFee * gstPct) / 100).toFixed(2));
+      const total = parseFloat((base + gwFee + gstFee).toFixed(2));
+
+      previewEl.textContent = `₹${total.toFixed(2)}`;
+      return { base, gwPct, gstPct, gwFee, gstFee, total };
+    }
+
+    baseInput.oninput = updatePreview;
+    gwInput.oninput = updatePreview;
+    gstInput.oninput = updatePreview;
+    updatePreview();
+
+    form.onsubmit = (e) => {
+      e.preventDefault();
+      const calc = updatePreview();
+      const cfg = {
+        baseFee: calc.base,
+        gatewayPercent: calc.gwPct,
+        gstPercent: calc.gstPct,
+        gatewayFee: calc.gwFee,
+        gstFee: calc.gstFee,
+        totalPayable: calc.total
+      };
+      localStorage.setItem("RSAM_ADMIN_FEE_CONFIG", JSON.stringify(cfg));
+      notify("✓ Annual Athlete Registration Fee updated!");
+    };
+  }
+
   // 7. Initialize Dashboard Renderers
   function initDashboard() {
     snapshotSessionBaseline();
+    initAnnualFeeForm();
     renderAdminEvents();
     renderAdminNews();
     renderAdminHighlights();
     renderAdminOfficials();
+    initBroadcastControls();
+    renderAdminGalleryFolders();
   }
 
   // ── Render Events Tab Cards ──
@@ -607,6 +671,371 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.setItem("RSAM_ADMIN_OFFICIALS", JSON.stringify(items));
     renderAdminOfficials();
     notify("Official deleted.");
+  };
+
+  // ── Annual Registration Fee Control ──
+  function getAnnualFeeConfig() {
+    const saved = localStorage.getItem("RSAM_ADMIN_FEE_CONFIG");
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) {}
+    }
+    return { baseFee: 10.00, gatewayPercent: 2.0, gstPercent: 18.0 };
+  }
+
+  function initAnnualFeeForm() {
+    const feeConfig = getAnnualFeeConfig();
+    const baseInput = document.getElementById("mAnnBaseFee");
+    const gwInput   = document.getElementById("mAnnGwPct");
+    const gstInput  = document.getElementById("mAnnGstPct");
+    const previewEl = document.getElementById("annFeeTotalPreview");
+    const form      = document.getElementById("annualFeeForm");
+
+    if (!baseInput || !form) return;
+
+    baseInput.value = feeConfig.baseFee || 10;
+    gwInput.value   = feeConfig.gatewayPercent || 2.0;
+    gstInput.value  = feeConfig.gstPercent || 18.0;
+
+    function updatePreview() {
+      const base = parseFloat(baseInput.value) || 0;
+      const gw   = parseFloat(((base * (parseFloat(gwInput.value) || 2.0)) / 100).toFixed(2));
+      const gst  = parseFloat(((gw * (parseFloat(gstInput.value) || 18.0)) / 100).toFixed(2));
+      const total = parseFloat((base + gw + gst).toFixed(2));
+      if (previewEl) previewEl.textContent = `₹${total.toFixed(2)}`;
+    }
+
+    baseInput.oninput = updatePreview;
+    gwInput.oninput   = updatePreview;
+    gstInput.oninput  = updatePreview;
+    updatePreview();
+
+    form.onsubmit = (e) => {
+      e.preventDefault();
+      const newConfig = {
+        baseFee: parseFloat(baseInput.value) || 10,
+        gatewayPercent: parseFloat(gwInput.value) || 2.0,
+        gstPercent: parseFloat(gstInput.value) || 18.0
+      };
+      localStorage.setItem("RSAM_ADMIN_FEE_CONFIG", JSON.stringify(newConfig));
+      notify("✓ Annual athlete registration fee settings saved!");
+    };
+  }
+
+  // ── Bulk WhatsApp Broadcast Center ──
+  let fetchedBroadcastData = null;
+
+  async function fetchBroadcastContacts() {
+    const listEl = document.getElementById("bcRecipientList");
+    const countEl = document.getElementById("bcSelectedCount");
+    const btn = document.getElementById("fetchRecipientsBtn");
+
+    if (btn) btn.disabled = true;
+    if (listEl) listEl.innerHTML = `<p style="color:#60a5fa; text-align:center; padding:1rem;">⏳ Fetching records from Google Sheet...</p>`;
+
+    const baseUrl = getAdminApiBaseUrl();
+    try {
+      const res = await fetch(`${baseUrl}/api/fetch-contacts`);
+      const data = await res.json();
+
+      if (data && data.status === "ok" && data.sheets) {
+        fetchedBroadcastData = data.sheets;
+        notify("✓ Contact records loaded from Google Sheet successfully!");
+      } else {
+        notify("⚠️ Could not fetch live records. Falling back to local data.", "error");
+      }
+    } catch (e) {
+      console.warn("Contact fetch error:", e);
+    } finally {
+      if (btn) btn.disabled = false;
+      renderRecipientPreviewList();
+    }
+  }
+
+  function getFilteredRecipients() {
+    if (!fetchedBroadcastData) return [];
+
+    const sourceSelect = document.getElementById("bcSourceSelect");
+    const source = sourceSelect ? sourceSelect.value : "annual";
+    const includeSkaters = document.getElementById("bcFilterSkaters") ? document.getElementById("bcFilterSkaters").checked : true;
+    const includeCoaches = document.getElementById("bcFilterCoaches") ? document.getElementById("bcFilterCoaches").checked : true;
+
+    let records = [];
+
+    if (source === "annual") {
+      const annSheet = fetchedBroadcastData.find(s => s.sheetName.toLowerCase().includes("registrations")) || fetchedBroadcastData[0];
+      if (annSheet) records = annSheet.records || [];
+    } else if (source === "event") {
+      const evtSheet = fetchedBroadcastData.find(s => !s.sheetName.toLowerCase().includes("registrations")) || fetchedBroadcastData[0];
+      if (evtSheet) records = evtSheet.records || [];
+    } else {
+      fetchedBroadcastData.forEach(s => {
+        records = records.concat(s.records || []);
+      });
+    }
+
+    const recipients = [];
+    const seenMobiles = new Set();
+
+    records.forEach(r => {
+      if (includeSkaters && r.mobile && r.mobile.length === 10) {
+        if (!seenMobiles.has(r.mobile)) {
+          seenMobiles.add(r.mobile);
+          recipients.push({
+            role: "Skater",
+            name: r.skaterName || "Athlete",
+            mobile: r.mobile,
+            data: r
+          });
+        }
+      }
+
+      if (includeCoaches && r.coachMobile && r.coachMobile.length === 10) {
+        if (!seenMobiles.has(r.coachMobile)) {
+          seenMobiles.add(r.coachMobile);
+          recipients.push({
+            role: "Coach",
+            name: r.coachName || "Coach",
+            mobile: r.coachMobile,
+            data: r
+          });
+        }
+      }
+    });
+
+    return recipients;
+  }
+
+  function renderRecipientPreviewList() {
+    const listEl = document.getElementById("bcRecipientList");
+    const countEl = document.getElementById("bcSelectedCount");
+    if (!listEl) return;
+
+    const recipients = getFilteredRecipients();
+    if (countEl) countEl.textContent = recipients.length;
+
+    if (!recipients.length) {
+      listEl.innerHTML = `<p style="color:#9ca3af; text-align:center; padding:1rem;">Click "Fetch &amp; Preview Recipient List" to load recipient contacts from Google Sheet.</p>`;
+      return;
+    }
+
+    listEl.innerHTML = `
+      <table style="width:100%; border-collapse:collapse; text-align:left;">
+        <thead>
+          <tr style="border-bottom:1px solid rgba(255,255,255,0.15); color:#9ca3af; font-size:0.8rem;">
+            <th style="padding:0.4rem;">Role</th>
+            <th style="padding:0.4rem;">Name</th>
+            <th style="padding:0.4rem;">Mobile</th>
+            <th style="padding:0.4rem;">Reg No</th>
+            <th style="padding:0.4rem;">Discipline</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${recipients.map(r => `
+            <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+              <td style="padding:0.35rem;"><span style="background:${r.role === 'Coach' ? 'rgba(245,158,11,0.2)' : 'rgba(59,130,246,0.2)'}; color:${r.role === 'Coach' ? '#fbbf24' : '#60a5fa'}; padding:2px 6px; border-radius:4px; font-size:0.75rem;">${r.role}</span></td>
+              <td style="padding:0.35rem;"><strong>${r.name}</strong></td>
+              <td style="padding:0.35rem;"><code>${r.mobile}</code></td>
+              <td style="padding:0.35rem; color:#f59e0b;">${r.data.regNumber || '—'}</td>
+              <td style="padding:0.35rem;">${r.data.discipline || '—'}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  }
+
+  function initBroadcastControls() {
+    const fetchBtn = document.getElementById("fetchRecipientsBtn");
+    const sourceSelect = document.getElementById("bcSourceSelect");
+    const filterSkaters = document.getElementById("bcFilterSkaters");
+    const filterCoaches = document.getElementById("bcFilterCoaches");
+    const varButtons = document.querySelectorAll("#bcVarButtons .btn-var-tag");
+    const msgText = document.getElementById("bcMessageText");
+    const sendBtn = document.getElementById("sendBroadcastBtn");
+
+    if (fetchBtn) fetchBtn.onclick = fetchBroadcastContacts;
+    if (sourceSelect) sourceSelect.onchange = renderRecipientPreviewList;
+    if (filterSkaters) filterSkaters.onchange = renderRecipientPreviewList;
+    if (filterCoaches) filterCoaches.onchange = renderRecipientPreviewList;
+
+    varButtons.forEach(btn => {
+      btn.onclick = () => {
+        const varName = btn.dataset.var;
+        if (!msgText) return;
+        const start = msgText.selectionStart;
+        const end = msgText.selectionEnd;
+        const text = msgText.value;
+        msgText.value = text.substring(0, start) + varName + text.substring(end);
+        msgText.focus();
+        msgText.selectionStart = msgText.selectionEnd = start + varName.length;
+      };
+    });
+
+    if (sendBtn) {
+      sendBtn.onclick = async () => {
+        const recipients = getFilteredRecipients();
+        const rawTemplate = (msgText ? msgText.value : "").trim();
+        const imageUrl = (document.getElementById("bcImageUrl") ? document.getElementById("bcImageUrl").value : "").trim();
+
+        if (!recipients.length) {
+          alert("Please fetch and select at least one recipient.");
+          return;
+        }
+        if (!rawTemplate) {
+          alert("Please compose a broadcast message.");
+          return;
+        }
+
+        if (!confirm(`Are you sure you want to send this WhatsApp broadcast to ${recipients.length} recipients?`)) {
+          return;
+        }
+
+        sendBtn.disabled = true;
+        const progressBox = document.getElementById("bcProgressBox");
+        const progressStatus = document.getElementById("bcProgressStatus");
+        const progressBar = document.getElementById("bcProgressBar");
+
+        if (progressBox) progressBox.hidden = false;
+
+        let sentCount = 0;
+        let failCount = 0;
+        const baseUrl = getAdminApiBaseUrl();
+
+        for (let i = 0; i < recipients.length; i++) {
+          const r = recipients[i];
+          const pct = Math.round(((i + 1) / recipients.length) * 100);
+
+          if (progressStatus) progressStatus.textContent = `Sending ${i + 1} of ${recipients.length}: ${r.name} (${r.mobile})...`;
+          if (progressBar) progressBar.style.width = `${pct}%`;
+
+          let parsedMsg = rawTemplate
+            .replace(/{skaterName}/g, r.data.skaterName || r.name)
+            .replace(/{regNumber}/g, r.data.regNumber || 'N/A')
+            .replace(/{discipline}/g, r.data.discipline || 'N/A')
+            .replace(/{coachName}/g, r.data.coachName || 'N/A')
+            .replace(/{coachMobile}/g, r.data.coachMobile || 'N/A')
+            .replace(/{dob}/g, r.data.dob || 'N/A')
+            .replace(/{ageGroup}/g, r.data.ageGroup || 'N/A')
+            .replace(/{schoolClub}/g, r.data.schoolClub || 'N/A')
+            .replace(/{mobile}/g, r.mobile)
+            .replace(/{email}/g, r.data.email || 'N/A')
+            .replace(/{aadhaar}/g, r.data.aadhaar || 'N/A');
+
+          try {
+            const res = await fetch(`${baseUrl}/api/send-custom-whatsapp`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "x-api-key": "rsam_whatsapp_secret_key_2026"
+              },
+              body: JSON.stringify({
+                mobile: r.mobile,
+                message: parsedMsg,
+                imageUrl: imageUrl
+              })
+            });
+            const resData = await res.json();
+            if (resData && resData.success) {
+              sentCount++;
+            } else {
+              failCount++;
+            }
+          } catch (err) {
+            failCount++;
+          }
+
+          await new Promise(res => setTimeout(res, 800));
+        }
+
+        if (progressStatus) progressStatus.textContent = `✓ Broadcast complete! ${sentCount} sent, ${failCount} failed.`;
+        notify(`🚀 WhatsApp Broadcast finished! ${sentCount} messages delivered.`);
+        sendBtn.disabled = false;
+      };
+    }
+  }
+
+  // ── Photo Gallery Folders Metadata Control ──
+  function getAdminGalleryFolders() {
+    const saved = localStorage.getItem("RSAM_ADMIN_GALLERY_FOLDERS");
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) {}
+    }
+    return [
+      {
+        folderId: "district_championship_2026",
+        title: "4th District Roller Skating Championship 2026",
+        date: "Sept 12, 2026",
+        location: "Moradabad Sports Complex",
+        category: "District Championship",
+        description: "Official photo archive of 4th District Championship trials and prize ceremony."
+      },
+      {
+        folderId: "up_open_state_lko_2026",
+        title: "7th UP Open State Championship",
+        date: "July 19, 2026",
+        location: "Central Academy, Lucknow",
+        category: "State Championship",
+        description: "Speed skaters from Moradabad claiming 5 Gold and 8 Silver medals."
+      },
+      {
+        folderId: "felicitation_ceremony_2026",
+        title: "DMR Felicitation Ceremony",
+        date: "August 2026",
+        location: "Moradabad",
+        category: "Felicitation",
+        description: "District Magistrate felicitation ceremony honoring outstanding RSAM athletes."
+      }
+    ];
+  }
+
+  function renderAdminGalleryFolders() {
+    const folders = getAdminGalleryFolders();
+    const container = document.getElementById("galleryAdminList");
+    if (!container) return;
+
+    container.innerHTML = folders.map((f, idx) => `
+      <div class="admin-item-card" style="margin-bottom:1rem;">
+        <div class="admin-item-info">
+          <div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:0.4rem;">
+            <span class="admin-item-title">${f.title}</span>
+            <span class="badge-status status-live">${f.category || 'Gallery'}</span>
+          </div>
+          <div class="admin-item-sub">📅 ${f.date} · 📍 ${f.location} · Folder ID: <code>${f.folderId}</code></div>
+          <div style="font-size:0.85rem; color:#d1d5db; margin-top:0.3rem;">${f.description}</div>
+        </div>
+        <div class="admin-item-actions">
+          <button type="button" class="btn-item-edit" onclick="editGalleryFolderItem(${idx})">✏️ Edit Metadata</button>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  const refreshGalleryBtn = document.getElementById("refreshGalleryFoldersBtn");
+  if (refreshGalleryBtn) {
+    refreshGalleryBtn.onclick = () => {
+      renderAdminGalleryFolders();
+      notify("✓ Gallery folders refreshed.");
+    };
+  }
+
+  window.editGalleryFolderItem = function(idx) {
+    const folders = getAdminGalleryFolders();
+    const f = folders[idx];
+    if (!f) return;
+
+    activeModalType = "galleryFolder";
+    activeModalIdx = idx;
+    itemModalTitle.textContent = "Edit Photo Gallery Folder Metadata";
+    itemModalFields.innerHTML = `
+      <div class="form-group"><label>Folder Title</label><input type="text" id="mGalTitle" value="${f.title || ''}" required /></div>
+      <div class="form-row">
+        <div class="form-group"><label>Category</label><input type="text" id="mGalCat" value="${f.category || 'Championship'}" required /></div>
+        <div class="form-group"><label>Event Date</label><input type="text" id="mGalDate" value="${f.date || ''}" required /></div>
+      </div>
+      <div class="form-group"><label>Location</label><input type="text" id="mGalLoc" value="${f.location || ''}" required /></div>
+      <div class="form-group"><label>Description</label><textarea id="mGalDesc" rows="3" required>${f.description || ''}</textarea></div>
+    `;
+    itemModal.hidden = false;
   };
 
 
@@ -1326,6 +1755,24 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.setItem("RSAM_ADMIN_SKINSUIT", skinStr);
         updateSessionBaselineKey("skinsuit", skinStr);
         notify("✓ Official Skinsuit design updated!");
+      } else if (activeModalType === "galleryFolder") {
+        const folders = getAdminGalleryFolders();
+        const updatedFolder = {
+          folderId: (activeModalIdx !== null && folders[activeModalIdx]) ? folders[activeModalIdx].folderId : "folder_" + Date.now(),
+          title: document.getElementById("mGalTitle").value.trim(),
+          category: document.getElementById("mGalCat").value.trim(),
+          date: document.getElementById("mGalDate").value.trim(),
+          location: document.getElementById("mGalLoc").value.trim(),
+          description: document.getElementById("mGalDesc").value.trim()
+        };
+        if (activeModalIdx !== null && folders[activeModalIdx]) {
+          folders[activeModalIdx] = updatedFolder;
+        } else {
+          folders.unshift(updatedFolder);
+        }
+        localStorage.setItem("RSAM_ADMIN_GALLERY_FOLDERS", JSON.stringify(folders));
+        renderAdminGalleryFolders();
+        notify("✓ Photo Gallery Folder metadata updated.");
       }
 
       closeModal();

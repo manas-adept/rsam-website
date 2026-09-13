@@ -776,23 +776,40 @@ function renderCertificate() {
                 <span class="section-tag" style="font-size: 0.8rem;">Official Race Uniform</span>
                 <h3 style="font-size: 1.5rem; font-weight: 700; color: #fff; margin-top: 0.4rem;">${skinsuitConfig.title || 'RSAM Official Skater Skinsuit'}</h3>
                 <p style="color: #9ca3af; font-size: 0.92rem; margin-top: 0.2rem;">${skinsuitConfig.subtitle || 'Mandatory official racing uniform design for all RSAM athletes'}</p>
+              </div>
               <div class="skinsuit-unified-container">
                 <div class="skinsuit-view-col">
-                  <div class="skinsuit-view-header">
-                    <h4 style="font-size: 1.05rem; color: #38bdf8; font-weight: 600;">Front View Design</h4>
-                    <p style="color: #9ca3af; font-size: 0.85rem;">Official RSAM emblem &amp; chest crest</p>
+                  <div class="cert-doc-wrap" style="margin:0;">
+                    <div class="cert-frame">
+                      <span class="cert-corner cert-corner--tl"></span>
+                      <span class="cert-corner cert-corner--tr"></span>
+                      <span class="cert-corner cert-corner--bl"></span>
+                      <span class="cert-corner cert-corner--br"></span>
+                      <div class="cert-img-shield">
+                        <img src="${frontImg}" alt="Front View" class="cert-img" draggable="false" oncontextmenu="return false" onmousedown="return false"/>
+                        <div class="cert-watermark">RSAM</div>
+                        <div class="cert-shield-overlay"></div>
+                      </div>
+                    </div>
                   </div>
-                  ${protectedFrame(frontImg, "Skinsuit Front View")}
                 </div>
 
                 <div class="skinsuit-divider"></div>
 
                 <div class="skinsuit-view-col">
-                  <div class="skinsuit-view-header">
-                    <h4 style="font-size: 1.05rem; color: #38bdf8; font-weight: 600;">Back View Design</h4>
-                    <p style="color: #9ca3af; font-size: 0.85rem;">District title typography &amp; athlete ID area</p>
+                  <div class="cert-doc-wrap" style="margin:0;">
+                    <div class="cert-frame">
+                      <span class="cert-corner cert-corner--tl"></span>
+                      <span class="cert-corner cert-corner--tr"></span>
+                      <span class="cert-corner cert-corner--bl"></span>
+                      <span class="cert-corner cert-corner--br"></span>
+                      <div class="cert-img-shield">
+                        <img src="${backImg}" alt="Back View" class="cert-img" draggable="false" oncontextmenu="return false" onmousedown="return false"/>
+                        <div class="cert-watermark">RSAM</div>
+                        <div class="cert-shield-overlay"></div>
+                      </div>
+                    </div>
                   </div>
-                  ${protectedFrame(backImg, "Skinsuit Back View")}
                 </div>
               </div>
             </div>

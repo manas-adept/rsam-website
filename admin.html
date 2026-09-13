@@ -78,6 +78,8 @@
         <!-- Dashboard Navigation Tabs -->
         <div class="admin-tabs">
           <button type="button" class="admin-tab-btn active" data-tab="tabEvent">🎟️ Events &amp; Fee Control</button>
+          <button type="button" class="admin-tab-btn" data-tab="tabBroadcast">💬 Bulk WhatsApp Broadcast</button>
+          <button type="button" class="admin-tab-btn" data-tab="tabGallery">🖼️ Photo Gallery Control</button>
           <button type="button" class="admin-tab-btn" data-tab="tabNews">📰 News &amp; Circulars</button>
           <button type="button" class="admin-tab-btn" data-tab="tabHighlights">🏆 Hall of Highlights</button>
           <button type="button" class="admin-tab-btn" data-tab="tabOfficials">👔 Officials Roster</button>
@@ -88,6 +90,41 @@
 
         <!-- Tab 1: Multi-Event & Fee Management -->
         <div class="tab-pane active" id="tabEvent">
+
+          <!-- Card A: Annual Registration Fee Control -->
+          <div class="dash-card" style="margin-bottom:1.5rem;">
+            <div class="card-title-row">
+              <h3>💳 Annual Athlete Registration Fee Control</h3>
+              <span class="badge-status status-live">Active Fee Settings</span>
+            </div>
+            <p class="card-desc">Set annual athlete membership base fee, gateway transaction charge %, and GST %. Updates here immediately take effect on <code>register.html</code>.</p>
+            
+            <form id="annualFeeForm" style="margin-top:1rem;">
+              <div class="form-row">
+                <div class="form-group"><label>Base Annual Fee (₹)</label><input type="number" step="1" id="mAnnBaseFee" value="10" required /></div>
+                <div class="form-group"><label>Gateway Charge (%)</label><input type="number" step="0.1" id="mAnnGwPct" value="2.0" required /></div>
+                <div class="form-group"><label>GST Charge (%)</label><input type="number" step="0.1" id="mAnnGstPct" value="18.0" required /></div>
+              </div>
+              <div style="background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.25); border-radius:10px; padding:0.9rem 1.2rem; margin:1rem 0; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; color:#d1d5db; font-size:0.92rem;">
+                <span>Total Payable Amount by Athlete (Razorpay):</span>
+                <strong style="color:#f59e0b; font-size:1.15rem;" id="annFeeTotalPreview">₹10.24</strong>
+              </div>
+              <div style="display:flex; justify-content:flex-end;">
+                <button type="submit" class="btn-primary">Save Annual Fee Settings</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Card B: Registration Data Google Sheet Direct Link -->
+          <div class="dash-card" style="margin-bottom:1.5rem;">
+            <div class="card-title-row">
+              <h3>📊 RSAM Registration Data (Live Google Sheet)</h3>
+              <a href="https://docs.google.com/spreadsheets/d/1ze7Ao6ZCXPVKXAjiLfYt6uzjVP2XgfSn5VZeot7rdrs/edit" target="_blank" rel="noopener" class="btn-primary btn-sm" style="text-decoration:none;">📊 Open Live Google Sheet &rarr;</a>
+            </div>
+            <p class="card-desc">Access live Google Sheet spreadsheet containing all annual athlete registrations (<code>Registrations 2026</code>) and event entries (<code>District Championship 2026</code>).</p>
+          </div>
+
+          <!-- Card C: Championship Events & Registration Control -->
           <div class="dash-card">
             <div class="card-title-row">
               <h3>Championship Events &amp; Registration Control</h3>
@@ -97,6 +134,119 @@
 
             <div class="events-admin-list" id="eventsAdminList">
               <!-- Dynamically populated event cards -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 2: Bulk WhatsApp Broadcast -->
+        <div class="tab-pane" id="tabBroadcast">
+          <div class="dash-card">
+            <div class="card-title-row">
+              <h3>💬 Bulk WhatsApp Broadcast Center</h3>
+              <span class="badge-status status-live" id="waBotStatusBadge">📱 Bot Ready</span>
+            </div>
+            <p class="card-desc">Send targeted WhatsApp broadcast updates directly to registered skaters and coaches. Select contact source (Annual, Event Specific, or General All Unique), choose target roles, customize your message with dynamic placeholders, and attach media images.</p>
+
+            <!-- Broadcast Source & Recipient Filter Control -->
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 1.2rem; margin-bottom: 1.5rem;">
+              <h4 style="color:#60a5fa; font-size:1.05rem; margin-bottom:0.8rem;">1. Select Recipient Contact Source &amp; Target Roles</h4>
+              
+              <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+                <div>
+                  <label style="display:block; color:#9ca3af; font-size:0.85rem; margin-bottom:0.4rem; font-weight:600;">Contact Source Sheet</label>
+                  <select id="bcSourceSelect" style="width:100%; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.15); color:#fff; padding:0.65rem; border-radius:8px; font-size:0.92rem;">
+                    <option value="annual">🔄 Annual Skater Registrations (Registrations 2026)</option>
+                    <option value="event">🎟️ Event Specific Registrations (District Championship 2026)</option>
+                    <option value="general">📢 General Broadcast (All Unique Contacts across all sheets)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label style="display:block; color:#9ca3af; font-size:0.85rem; margin-bottom:0.4rem; font-weight:600;">Target Role Filters</label>
+                  <div style="display:flex; gap:1.2rem; padding-top:0.4rem;">
+                    <label style="display:flex; align-items:center; gap:0.5rem; color:#fff; cursor:pointer;">
+                      <input type="checkbox" id="bcFilterSkaters" checked />
+                      <span>🏃 Skaters</span>
+                    </label>
+                    <label style="display:flex; align-items:center; gap:0.5rem; color:#fff; cursor:pointer;">
+                      <input type="checkbox" id="bcFilterCoaches" checked />
+                      <span>👔 Coaches</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div style="margin-top: 1rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+                <button type="button" class="btn-dash-action" id="fetchRecipientsBtn">🔄 Fetch &amp; Preview Recipient List</button>
+                <div style="color:#d1d5db; font-size:0.9rem;">
+                  Selected Recipients: <strong id="bcSelectedCount" style="color:#f59e0b; font-size:1.1rem;">0</strong>
+                </div>
+              </div>
+            </div>
+
+            <!-- Recipient List Preview Box -->
+            <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 1rem; margin-bottom: 1.5rem;">
+              <h4 style="color:#34d399; font-size:0.95rem; margin-bottom:0.6rem;">📋 Recipient Preview List</h4>
+              <div id="bcRecipientList" style="max-height:180px; overflow-y:auto; font-size:0.85rem; color:#d1d5db;">
+                <p style="color:#9ca3af; text-align:center; padding:1rem;">Click "Fetch &amp; Preview Recipient List" to load recipient contacts from Google Sheet.</p>
+              </div>
+            </div>
+
+            <!-- Message Composer Box -->
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 1.2rem;">
+              <h4 style="color:#60a5fa; font-size:1.05rem; margin-bottom:0.8rem;">2. Compose Broadcast Message &amp; Media</h4>
+              
+              <div style="margin-bottom:0.8rem;">
+                <span style="color:#9ca3af; font-size:0.8rem; display:block; margin-bottom:0.4rem;">Click to Insert Variables:</span>
+                <div style="display:flex; gap:0.4rem; flex-wrap:wrap;" id="bcVarButtons">
+                  <button type="button" class="btn-dash-action btn-sm btn-var-tag" data-var="{skaterName}">{skaterName}</button>
+                  <button type="button" class="btn-dash-action btn-sm btn-var-tag" data-var="{regNumber}">{regNumber}</button>
+                  <button type="button" class="btn-dash-action btn-sm btn-var-tag" data-var="{discipline}">{discipline}</button>
+                  <button type="button" class="btn-dash-action btn-sm btn-var-tag" data-var="{coachName}">{coachName}</button>
+                  <button type="button" class="btn-dash-action btn-sm btn-var-tag" data-var="{coachMobile}">{coachMobile}</button>
+                  <button type="button" class="btn-dash-action btn-sm btn-var-tag" data-var="{ageGroup}">{ageGroup}</button>
+                  <button type="button" class="btn-dash-action btn-sm btn-var-tag" data-var="{schoolClub}">{schoolClub}</button>
+                  <button type="button" class="btn-dash-action btn-sm btn-var-tag" data-var="{mobile}">{mobile}</button>
+                </div>
+              </div>
+
+              <div style="margin-bottom:1rem;">
+                <label style="display:block; color:#9ca3af; font-size:0.85rem; margin-bottom:0.4rem; font-weight:600;">Message Content</label>
+                <textarea id="bcMessageText" rows="6" style="width:100%; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.15); color:#fff; padding:0.8rem; border-radius:8px; font-size:0.92rem;" placeholder="Dear {skaterName},&#10;&#10;Important update regarding RSAM upcoming event..."></textarea>
+              </div>
+
+              <div style="margin-bottom:1.2rem;">
+                <label style="display:block; color:#9ca3af; font-size:0.85rem; margin-bottom:0.4rem; font-weight:600;">Attach Image / Poster URL (Optional)</label>
+                <input type="url" id="bcImageUrl" placeholder="https://res.cloudinary.com/igjmhsju/image/upload/..." style="width:100%; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.15); color:#fff; padding:0.65rem; border-radius:8px; font-size:0.9rem;" />
+              </div>
+
+              <!-- Dispatch Button & Progress Bar -->
+              <div id="bcProgressBox" hidden style="margin-bottom:1rem; background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.3); border-radius:8px; padding:0.8rem; text-align:center;">
+                <div id="bcProgressStatus" style="color:#60a5fa; font-weight:600; font-size:0.92rem; margin-bottom:0.4rem;">Dispatching broadcast...</div>
+                <div style="width:100%; background:rgba(255,255,255,0.1); height:8px; border-radius:4px; overflow:hidden;">
+                  <div id="bcProgressBar" style="width:0%; height:100%; background:#3b82f6; transition:width 0.3s ease;"></div>
+                </div>
+              </div>
+
+              <div style="display:flex; justify-content:flex-end;">
+                <button type="button" class="btn-primary" id="sendBroadcastBtn" style="padding:0.75rem 2rem; font-size:1rem;">🚀 Launch WhatsApp Broadcast</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Tab 3: Photo Gallery Control -->
+        <div class="tab-pane" id="tabGallery">
+          <div class="dash-card">
+            <div class="card-title-row">
+              <h3>🖼️ Manage Photo Gallery Folders</h3>
+              <button type="button" class="btn-dash-action" id="refreshGalleryFoldersBtn">🔄 Refresh Folders</button>
+            </div>
+            <p class="card-desc">Configure title, event date, location, category, and description for photo gallery albums and Cloudinary event subfolders.</p>
+
+            <div class="gallery-admin-list" id="galleryAdminList">
+              <!-- Dynamically populated gallery folder cards -->
             </div>
           </div>
         </div>
