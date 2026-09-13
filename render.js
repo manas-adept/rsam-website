@@ -763,14 +763,22 @@ function renderCertificate() {
                 <span class="section-tag" style="font-size: 0.8rem;">Official Race Uniform</span>
                 <h3 style="font-size: 1.5rem; font-weight: 700; color: #fff; margin-top: 0.4rem;">${skinsuitConfig.title || 'RSAM Official Skater Skinsuit'}</h3>
                 <p style="color: #9ca3af; font-size: 0.92rem; margin-top: 0.2rem;">${skinsuitConfig.subtitle || 'Mandatory official racing uniform design for all RSAM athletes'}</p>
-              <div class="skinsuit-showcase-grid">
-                <div class="skinsuit-card">
-                  <h4 style="font-size: 1.05rem; color: #38bdf8; margin-bottom: 0.3rem; font-weight: 600;">Front View Design</h4>
-                  <p style="color: #9ca3af; font-size: 0.85rem; margin-bottom: 1rem;">Official RSAM emblem &amp; chest crest</p>
+              <div class="skinsuit-unified-container">
+                <div class="skinsuit-view-col">
+                  <div class="skinsuit-view-header">
+                    <h4 style="font-size: 1.05rem; color: #38bdf8; font-weight: 600;">Front View Design</h4>
+                    <p style="color: #9ca3af; font-size: 0.85rem;">Official RSAM emblem &amp; chest crest</p>
+                  </div>
                   ${protectedFrame(frontImg, "Skinsuit Front View")}
-                <div class="skinsuit-card">
-                  <h4 style="font-size: 1.05rem; color: #38bdf8; margin-bottom: 0.3rem; font-weight: 600;">Back View Design</h4>
-                  <p style="color: #9ca3af; font-size: 0.85rem; margin-bottom: 1rem;">District title typography &amp; athlete ID area</p>
+                </div>
+
+                <div class="skinsuit-divider"></div>
+
+                <div class="skinsuit-view-col">
+                  <div class="skinsuit-view-header">
+                    <h4 style="font-size: 1.05rem; color: #38bdf8; font-weight: 600;">Back View Design</h4>
+                    <p style="color: #9ca3af; font-size: 0.85rem;">District title typography &amp; athlete ID area</p>
+                  </div>
                   ${protectedFrame(backImg, "Skinsuit Back View")}
                 </div>
               </div>
