@@ -37,6 +37,12 @@ function getAgeGroup(age) {
 const dobInput      = document.getElementById("dob");
 const ageInput      = document.getElementById("age");
 const ageGroupInput = document.getElementById("ageGroup");
+const ageCutoffLabel = document.getElementById("ageCutoffLabel");
+
+const currentCutoffYear = new Date().getFullYear();
+if (ageCutoffLabel) {
+  ageCutoffLabel.textContent = `(as on 31 Dec ${currentCutoffYear})`;
+}
 
 dobInput.addEventListener("change", () => {
   const dob = new Date(dobInput.value);
@@ -45,7 +51,7 @@ dobInput.addEventListener("change", () => {
     if (ageGroupInput) ageGroupInput.value = "";
     return;
   }
-  const cutoff = new Date("2026-12-31");
+  const cutoff = new Date(currentCutoffYear, 11, 31, 23, 59, 59);
   let age = cutoff.getFullYear() - dob.getFullYear();
   const m = cutoff.getMonth() - dob.getMonth();
   if (m < 0 || (m === 0 && cutoff.getDate() < dob.getDate())) age--;

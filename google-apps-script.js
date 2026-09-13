@@ -21,7 +21,7 @@ const API_SECRET_KEY    = "rsam_whatsapp_secret_key_2026";
 function doGet(e) {
   try {
     const action = e ? e.parameter.action : "";
-    const currentYear = "2026";
+    const currentYear = new Date().getFullYear().toString();
     const ss = getSpreadsheet();
     if (!ss) {
       return ContentService.createTextOutput(JSON.stringify({ status: "error", message: "Could not access spreadsheet." }))
