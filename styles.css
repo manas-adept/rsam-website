@@ -1569,6 +1569,56 @@ body.has-ticker .navbar {
   pointer-events: none;
 }
 
+/* Uniform Height & Width for Skinsuit Showcase Cards */
+.skinsuit-showcase-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  align-items: stretch;
+}
+
+.skinsuit-card {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 1.2rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.skinsuit-card .cert-doc-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.skinsuit-card .cert-frame {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.skinsuit-card .cert-img-shield {
+  flex: 1;
+  height: 380px;
+  min-height: 320px;
+  max-height: 420px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: calc(var(--radius-lg) - 8px);
+}
+
+.skinsuit-card .cert-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
 /* transparent overlay — sits on top of img, blocks all interaction */
 .cert-shield-overlay {
   position: absolute;

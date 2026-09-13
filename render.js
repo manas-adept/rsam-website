@@ -760,14 +760,12 @@ function renderCertificate() {
                 <span class="section-tag" style="font-size: 0.8rem;">Official Race Uniform</span>
                 <h3 style="font-size: 1.5rem; font-weight: 700; color: #fff; margin-top: 0.4rem;">${skinsuitConfig.title || 'RSAM Official Skater Skinsuit'}</h3>
                 <p style="color: #9ca3af; font-size: 0.92rem; margin-top: 0.2rem;">${skinsuitConfig.subtitle || 'Mandatory official racing uniform design for all RSAM athletes'}</p>
-              </div>
-              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem;">
-                <div class="skinsuit-card" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 1.2rem; text-align: center;">
+              <div class="skinsuit-showcase-grid">
+                <div class="skinsuit-card">
                   <h4 style="font-size: 1.05rem; color: #38bdf8; margin-bottom: 0.3rem; font-weight: 600;">Front View Design</h4>
                   <p style="color: #9ca3af; font-size: 0.85rem; margin-bottom: 1rem;">Official RSAM emblem &amp; chest crest</p>
                   ${protectedFrame(frontImg, "Skinsuit Front View")}
-                </div>
-                <div class="skinsuit-card" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 1.2rem; text-align: center;">
+                <div class="skinsuit-card">
                   <h4 style="font-size: 1.05rem; color: #38bdf8; margin-bottom: 0.3rem; font-weight: 600;">Back View Design</h4>
                   <p style="color: #9ca3af; font-size: 0.85rem; margin-bottom: 1rem;">District title typography &amp; athlete ID area</p>
                   ${protectedFrame(backImg, "Skinsuit Back View")}
