@@ -109,10 +109,13 @@ function getActiveEventConfig() {
 
 function getActiveNewsItems() {
   const saved = localStorage.getItem("RSAM_ADMIN_NEWS");
+  let items = [];
   if (saved) {
-    try { return JSON.parse(saved); } catch (e) {}
+    try { items = JSON.parse(saved); } catch (e) {}
+  } else {
+    items = (window.NEWS && window.NEWS.items) || [];
   }
-  return (window.NEWS && window.NEWS.items) || [];
+  return items.filter(n => !n.archived);
 }
 
 function getActiveHighlights() {

@@ -388,26 +388,63 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    container.innerHTML = items.map((item, idx) => `
-      <div class="admin-item-card">
-        <div class="admin-item-info">
-          <div class="admin-item-title">${item.title}</div>
-          <div class="admin-item-sub">📅 ${item.date} ${item.location ? '· 📍 ' + item.location : ''} · Tag: <span style="color:#f59e0b;">${item.tag}</span></div>
-          <div style="font-size:0.85rem; color:#d1d5db; margin-top:0.3rem;">${(item.body || '').replace(/<[^>]*>?/gm, '').slice(0, 100)}...</div>
-        </div>
-        <div class="admin-item-actions">
-          <button type="button" class="btn-item-edit" onclick="editNewsItem(${idx})">✏️ Edit</button>
-          <button type="button" class="btn-item-delete" onclick="deleteNewsItem(${idx})">🗑️ Delete</button>
-        </div>
+    const activeCount = items.filter(n => !n.archived).length;
+    const archivedCount = items.filter(n => n.archived).length;
+
+    const summaryHTML = `
+      <div class="news-summary-bar" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:0.7rem 1.2rem; margin-bottom:1.2rem; display:flex; gap:1.5rem; color:#d1d5db; font-size:0.92rem; align-items:center;">
+        <span>Active Circulars: <strong style="color:#34d399; font-size:1rem;">${activeCount}</strong></span>
+        <span style="color:rgba(255,255,255,0.2);">|</span>
+        <span>Archived Circulars: <strong style="color:#f59e0b; font-size:1rem;">${archivedCount}</strong></span>
       </div>
-    `).join("");
+    `;
+
+    const cardsHTML = items.map((item, idx) => {
+      const isArchived = !!item.archived;
+      const statusBadge = isArchived
+        ? `<span class="badge-status" style="background:rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.3); color:#fbbf24;">📦 Archived</span>`
+        : `<span class="badge-status status-live">🟢 Active</span>`;
+
+      return `
+        <div class="admin-item-card">
+          <div class="admin-item-info">
+            <div style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap; margin-bottom:0.4rem;">
+              <span class="admin-item-title" style="margin:0;">${item.title}</span>
+              ${statusBadge}
+            </div>
+            <div class="admin-item-sub">📅 ${item.date} ${item.location ? '· 📍 ' + item.location : ''} · Tag: <span style="color:#f59e0b;">${item.tag}</span></div>
+            <div style="font-size:0.85rem; color:#d1d5db; margin-top:0.3rem;">${(item.body || '').replace(/<[^>]*>?/gm, '').slice(0, 120)}...</div>
+          </div>
+          <div class="admin-item-actions">
+            <button type="button" class="btn-dash-action" onclick="toggleArchiveNews(${idx})">${isArchived ? '🔄 Enable' : '📦 Archive'}</button>
+            <button type="button" class="btn-item-edit" onclick="editNewsItem(${idx})">✏️ Edit</button>
+            <button type="button" class="btn-item-delete" onclick="deleteNewsItem(${idx})">🗑️ Delete</button>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    container.innerHTML = summaryHTML + cardsHTML;
   }
+
+  window.toggleArchiveNews = function(idx) {
+    const items = getAdminNews();
+    if (!items[idx]) return;
+    items[idx].archived = !items[idx].archived;
+    const newsStr = JSON.stringify(items);
+    localStorage.setItem("RSAM_ADMIN_NEWS", newsStr);
+    updateSessionBaselineKey("news", newsStr);
+    renderAdminNews();
+    notify(items[idx].archived ? "📦 Circular archived (hidden from website)." : "🟢 Circular re-activated!");
+  };
 
   window.deleteNewsItem = function(idx) {
     if (!confirm("Are you sure you want to delete this circular?")) return;
     const items = getAdminNews();
     items.splice(idx, 1);
-    localStorage.setItem("RSAM_ADMIN_NEWS", JSON.stringify(items));
+    const newsStr = JSON.stringify(items);
+    localStorage.setItem("RSAM_ADMIN_NEWS", newsStr);
+    updateSessionBaselineKey("news", newsStr);
     renderAdminNews();
     notify("Circular deleted.");
   };
@@ -735,6 +772,12 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
         <div class="form-group"><label>Location (Optional)</label><input type="text" id="mNewsLoc" placeholder="e.g. Moradabad" /></div>
         <div class="form-group"><label>Body Text</label><textarea id="mNewsBody" rows="4" required></textarea></div>
+        <div class="form-group" style="margin-top:0.8rem;">
+          <label style="display:flex; align-items:center; gap:0.5rem; color:#fff; cursor:pointer;">
+            <input type="checkbox" id="mNewsArchived" />
+            <span>Archive / Disable this circular (Hide from live website)</span>
+          </label>
+        </div>
       `;
       itemModal.hidden = false;
     });
@@ -764,6 +807,12 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>
       <div class="form-group"><label>Location (Optional)</label><input type="text" id="mNewsLoc" value="${item.location || ''}" /></div>
       <div class="form-group"><label>Body Text</label><textarea id="mNewsBody" rows="4" required>${(item.body || '').replace(/<[^>]*>?/gm, '')}</textarea></div>
+      <div class="form-group" style="margin-top:0.8rem;">
+        <label style="display:flex; align-items:center; gap:0.5rem; color:#fff; cursor:pointer;">
+          <input type="checkbox" id="mNewsArchived" ${item.archived ? 'checked' : ''} />
+          <span>Archive / Disable this circular (Hide from live website)</span>
+        </label>
+      </div>
     `;
     itemModal.hidden = false;
   };
@@ -1200,7 +1249,8 @@ document.addEventListener("DOMContentLoaded", () => {
           tag: document.getElementById("mNewsTag").value,
           date: document.getElementById("mNewsDate").value.trim(),
           location: document.getElementById("mNewsLoc").value.trim(),
-          body: document.getElementById("mNewsBody").value.trim()
+          body: document.getElementById("mNewsBody").value.trim(),
+          archived: document.getElementById("mNewsArchived") ? document.getElementById("mNewsArchived").checked : false
         };
         if (activeModalIdx !== null) items[activeModalIdx] = newItem;
         else items.unshift(newItem);
