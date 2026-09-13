@@ -29,64 +29,69 @@ function placeholderImg(classes = "") {
 }
 
 function getActiveEventsList() {
+  let events = [];
   const saved = localStorage.getItem("RSAM_ADMIN_EVENTS");
   if (saved) {
-    try { return JSON.parse(saved); } catch (e) {}
+    try { events = JSON.parse(saved); } catch (e) {}
+  } else {
+    events = [
+      {
+        id: "evt_district_2026",
+        title: "4th District Championship 2026",
+        year: "2026",
+        category: "District Championship",
+        date: "15th - 16th October 2026",
+        startDateTime: "2026-10-15T08:00",
+        endDateTime: "2026-10-16T18:00",
+        deadline: "2026-10-01T23:59:59+05:30",
+        location: "Moradabad Sports Complex, Kanth Road",
+        feeType: "online",
+        baseFee: 500.00,
+        gatewayPercent: 2.0,
+        gstPercent: 18.0,
+        image: "https://res.cloudinary.com/igjmhsju/image/upload/v1788797466/rsam_website/branding/rsam-logo.png",
+        description: "Official 4th District Championship for all age groups & disciplines in Moradabad.",
+        body: "Official 4th District Championship for all age groups & disciplines in Moradabad.",
+        showOnTicker: true,
+        isRegistrationActive: true
+      },
+      {
+        id: "evt_up_state_2026",
+        title: "7th UP Open State (Flat Track)",
+        year: "2026",
+        category: "State Championship",
+        date: "July 19, 2026",
+        startDateTime: "2026-05-10T04:30",
+        endDateTime: "2026-05-10T10:30",
+        location: "Central Academy, Lucknow, Uttar Pradesh",
+        feeType: "organizer",
+        baseFee: 0,
+        image: "https://res.cloudinary.com/igjmhsju/image/upload/v1788797445/rsam_website/news/news_lko.jpg",
+        description: "Moradabad speeders won 5 Gold, 8 Silver and 4+ Bronze Medals at 7th UP Open-state Championship at Central Academy, Lucknow. Organized by UPRSA and hosted by LRSA.",
+        body: "Moradabad speeders won 5 Gold, 8 Silver and 4+ Bronze Medals at 7th UP Open-state Championship at Central Academy, Lucknow. Organized by UPRSA and hosted by LRSA.",
+        showOnTicker: true,
+        isRegistrationActive: false
+      },
+      {
+        id: "evt_marathon_2026",
+        title: "Run on Wheels 4.0 Skating Marathon",
+        year: "2026",
+        category: "Marathon Championship",
+        date: "May 10, 2026",
+        startDateTime: "2026-05-10T06:00",
+        endDateTime: "2026-05-10T12:00",
+        location: "Agra, Uttar Pradesh",
+        feeType: "organizer",
+        baseFee: 0,
+        image: "https://res.cloudinary.com/igjmhsju/image/upload/v1788797458/rsam_website/gallery/felicitaion_ceremony_dmr_2026/row-event.jpg",
+        description: "The Great Skating Marathon 2026 organized by Agra Roller Skating Welfare Association under the aegis of UPRSA.",
+        body: "The Great Skating Marathon 2026 organized by Agra Roller Skating Welfare Association under the aegis of UPRSA.",
+        showOnTicker: true,
+        isRegistrationActive: false
+      }
+    ];
   }
-
-  return [
-    {
-      id: "evt_district_2026",
-      title: "4th District Championship 2026",
-      year: "2026",
-      category: "District Championship",
-      date: "15th - 16th October 2026",
-      startDateTime: "2026-10-15T08:00",
-      endDateTime: "2026-10-16T18:00",
-      deadline: "2026-10-01T23:59:59+05:30",
-      location: "Moradabad Sports Complex, Kanth Road",
-      feeType: "online",
-      baseFee: 500.00,
-      gatewayPercent: 2.0,
-      gstPercent: 18.0,
-      image: "https://res.cloudinary.com/igjmhsju/image/upload/v1788797466/rsam_website/branding/rsam-logo.png",
-      body: "Official 4th District Championship for all age groups & disciplines in Moradabad.",
-      showOnTicker: true,
-      isRegistrationActive: true
-    },
-    {
-      id: "evt_up_state_2026",
-      title: "7th UP Open State (Flat Track)",
-      year: "2026",
-      category: "State Championship",
-      date: "July 19, 2026",
-      startDateTime: "2026-05-10T04:30",
-      endDateTime: "2026-05-10T10:30",
-      location: "Central Academy, Lucknow, Uttar Pradesh",
-      feeType: "organizer",
-      baseFee: 0,
-      image: "https://res.cloudinary.com/igjmhsju/image/upload/v1788797445/rsam_website/news/news_lko.jpg",
-      body: "Moradabad speeders won 5 Gold, 8 Silver and 4+ Bronze Medals at 7th UP Open-state Championship at Central Academy, Lucknow. Organized by UPRSA and hosted by LRSA.",
-      showOnTicker: true,
-      isRegistrationActive: false
-    },
-    {
-      id: "evt_marathon_2026",
-      title: "Run on Wheels 4.0 Skating Marathon",
-      year: "2026",
-      category: "Marathon Championship",
-      date: "May 10, 2026",
-      startDateTime: "2026-05-10T06:00",
-      endDateTime: "2026-05-10T12:00",
-      location: "Agra, Uttar Pradesh",
-      feeType: "organizer",
-      baseFee: 0,
-      image: "https://res.cloudinary.com/igjmhsju/image/upload/v1788797458/rsam_website/gallery/felicitaion_ceremony_dmr_2026/row-event.jpg",
-      body: "The Great Skating Marathon 2026 organized by Agra Roller Skating Welfare Association under the aegis of UPRSA.",
-      showOnTicker: true,
-      isRegistrationActive: false
-    }
-  ];
+  return events.filter(e => !e.archived);
 }
 
 function getActiveEventConfig() {
@@ -151,10 +156,13 @@ function renderNavbar() {
     document.body.classList.add("has-ticker");
     const items = tickerEvents.map(ev => {
       const ctaLabel = ev.isRegistrationActive ? 'Register Online &rarr;' : 'View Event &rarr;';
-      const targetHref = ev.isRegistrationActive ? 'event-register.html' : 'index.html#events';
+      const evImgSrc = ev.image || 'https://res.cloudinary.com/igjmhsju/image/upload/v1788797466/rsam_website/branding/rsam-logo.png';
+      const clickHandler = ev.isRegistrationActive
+        ? `href="event-register.html"`
+        : `href="index.html#events" onclick="openImageLightbox('${evImgSrc}', '${escapeHTML(ev.title)}')"`;
 
       return `
-        <a href="${targetHref}" class="ticker-item">
+        <a ${clickHandler} class="ticker-item">
           <span class="ticker-badge">⚡ ANNOUNCEMENT</span>
           <span><strong>${ev.title}</strong> — ${ev.date} · Venue: <strong>${ev.location}</strong></span>
           <span class="ticker-link-btn">${ctaLabel}</span>
@@ -444,10 +452,17 @@ function renderNews() {
           </svg>
         </div>`;
     const status = getEventStatus(ev);
+    const descText = ev.description || ev.body || '';
+    const isRegActive = !!ev.isRegistrationActive;
+
+    const actionBtn = isRegActive
+      ? `<a href="event-register.html?eventId=${ev.id}" class="btn-primary" style="display:inline-flex; align-items:center; gap:0.5rem; padding:0.6rem 1.4rem; font-size:0.9rem; margin-top:1rem; text-decoration:none;">📝 Register for Event &rarr;</a>`
+      : `<button type="button" class="btn-primary view-event-poster-btn" onclick="openImageLightbox('${evImg.src}', '${escapeHTML(ev.title)}')" style="display:inline-flex; align-items:center; gap:0.5rem; padding:0.6rem 1.4rem; font-size:0.9rem; margin-top:1rem; border:none; cursor:pointer;">🔍 View Event Poster</button>`;
+
     return `
       <div class="events-slide">
         <div class="news-card featured">
-          <div class="news-card-img">
+          <div class="news-card-img" style="cursor:pointer;" onclick="openImageLightbox('${evImg.src}', '${escapeHTML(ev.title)}')">
             ${img}
             <div class="news-cat ${status.cls}">${status.label}</div>
           </div>
@@ -457,10 +472,8 @@ function renderNews() {
               <span class="news-location">📍 ${ev.location}</span>
             </div>
             <h3>${ev.title}</h3>
-            <p>${ev.body}</p>
-            <!-- circular link hidden until content is ready
-            <a href="${ev.linkHref}" class="news-link">${ev.linkText} →</a>
-            -->
+            <p>${descText}</p>
+            <div>${actionBtn}</div>
           </div>
         </div>
       </div>`;

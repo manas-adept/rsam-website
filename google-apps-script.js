@@ -43,14 +43,16 @@ function doGet(e) {
       const ageIdx        = findHeaderIndex(["age"], 5);
       const ageGroupIdx   = findHeaderIndex(["age group", "agegroup"], 6);
       const schoolClubIdx = findHeaderIndex(["school", "club", "institution"], 7);
-      const fatherIdx     = findHeaderIndex(["father"], 8);
-      const motherIdx     = findHeaderIndex(["mother"], 9);
-      const addressIdx    = findHeaderIndex(["address"], 10);
-      const mobileIdx     = findHeaderIndex(["mobile", "phone", "contact"], 11);
-      const emailIdx      = findHeaderIndex(["email"], 12);
-      const aadhaarIdx    = findHeaderIndex(["aadhaar", "adhar"], 13);
-      const discIdx       = findHeaderIndex(["discipline", "category"], 14);
-      const photoIdx      = findHeaderIndex(["photo", "picture", "avatar"], 18);
+      const coachNameIdx   = findHeaderIndex(["coach name", "coach's name"], 8);
+      const coachMobileIdx = findHeaderIndex(["coach mobile", "coach contact", "coach phone"], 9);
+      const fatherIdx     = findHeaderIndex(["father"], 10);
+      const motherIdx     = findHeaderIndex(["mother"], 11);
+      const addressIdx    = findHeaderIndex(["address"], 12);
+      const mobileIdx     = findHeaderIndex(["mobile", "phone", "contact"], 13);
+      const emailIdx      = findHeaderIndex(["email"], 14);
+      const aadhaarIdx    = findHeaderIndex(["aadhaar", "adhar"], 15);
+      const discIdx       = findHeaderIndex(["discipline", "category"], 16);
+      const photoIdx      = findHeaderIndex(["photo", "picture", "avatar"], 20);
 
       return {
         regNumber: String(data[i][regIdx] || regNumber),
@@ -59,6 +61,8 @@ function doGet(e) {
         age: String(data[i][ageIdx] || ""),
         ageGroup: String(data[i][ageGroupIdx] || ""),
         schoolClub: String(data[i][schoolClubIdx] || ""),
+        coachName: String(data[i][coachNameIdx] || ""),
+        coachMobile: String(data[i][coachMobileIdx] || "").replace(/^'/, ""),
         fatherName: String(data[i][fatherIdx] || ""),
         motherName: String(data[i][motherIdx] || ""),
         address: String(data[i][addressIdx] || ""),
@@ -221,6 +225,8 @@ function doPost(e) {
           "Age",
           "Age Group",
           "School / Club Name",
+          "Coach Name",
+          "Coach Contact Number",
           "Father Name",
           "Mother Name",
           "Address",
@@ -247,6 +253,8 @@ function doPost(e) {
         data.age,
         data.ageGroup || "N/A",
         data.schoolClub || "N/A",
+        data.coachName || "N/A",
+        "'" + (data.coachMobile || "N/A"),
         data.fatherName,
         data.motherName,
         data.address,
@@ -291,6 +299,8 @@ function doPost(e) {
         "Age",
         "Age Group",
         "School / Club Name",
+        "Coach Name",
+        "Coach Contact Number",
         "Father Name",
         "Mother Name",
         "Address",
@@ -337,6 +347,8 @@ function doPost(e) {
       data.age,
       data.ageGroup || "N/A",
       data.schoolClub || "N/A",
+      data.coachName || "N/A",
+      "'" + (data.coachMobile || "N/A"),
       data.fatherName,
       data.motherName,
       data.address,
@@ -346,7 +358,7 @@ function doPost(e) {
       data.discipline,
       data.paymentId || "pay_verified",
       data.paymentStatus || "SUCCESS",
-      "₹" + (data.amountPaid || "51.18"),
+      "₹" + (data.amountPaid || "10.24"),
       photoUrl,
       aadhaarUrl,
       dobUrl
@@ -361,7 +373,7 @@ function doPost(e) {
       status: "ok",
       regNumber: regNumber,
       paymentId: data.paymentId || "pay_verified",
-      amountPaid: data.amountPaid || "51.18",
+      amountPaid: data.amountPaid || "10.24",
       photoUrl: photoUrl,
       aadhaarUrl: aadhaarUrl,
       dobUrl: dobUrl

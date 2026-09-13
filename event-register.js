@@ -262,6 +262,10 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("displaySchoolClub").textContent = skater.schoolClub || "N/A";
     document.getElementById("displayFather").textContent     = skater.fatherName || "N/A";
     document.getElementById("displayMother").textContent     = skater.motherName || "N/A";
+    const displayCoachName = document.getElementById("displayCoachName");
+    const displayCoachMobile = document.getElementById("displayCoachMobile");
+    if (displayCoachName) displayCoachName.textContent = skater.coachName || "N/A";
+    if (displayCoachMobile) displayCoachMobile.textContent = skater.coachMobile || "N/A";
     document.getElementById("displayMobile").textContent     = skater.mobile || "N/A";
     document.getElementById("displayEmail").textContent      = skater.email || "N/A";
     document.getElementById("displayAadhaar").textContent    = skater.aadhaar || "N/A";
@@ -288,6 +292,18 @@ document.addEventListener("DOMContentLoaded", () => {
       if (radio) radio.checked = true;
     }
   }
+
+  // Global ESC key listener to dismiss open modals
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" || e.key === "Esc") {
+      const confirmModal = document.getElementById("confirmModal");
+      const unregisteredModal = document.getElementById("unregisteredModal");
+      const evtSuccess = document.getElementById("evtSuccess");
+      if (confirmModal && !confirmModal.hidden) confirmModal.hidden = true;
+      if (unregisteredModal && !unregisteredModal.hidden) unregisteredModal.hidden = true;
+      if (evtSuccess && !evtSuccess.hidden) evtSuccess.hidden = true;
+    }
+  });
 
   // 2. Handle Event Registration Form Submission
   evtForm.addEventListener("submit", (e) => {
@@ -319,6 +335,8 @@ document.addEventListener("DOMContentLoaded", () => {
       schoolClub: verifiedSkater.schoolClub || "N/A",
       fatherName: verifiedSkater.fatherName,
       motherName: verifiedSkater.motherName,
+      coachName: verifiedSkater.coachName || "N/A",
+      coachMobile: verifiedSkater.coachMobile || "N/A",
       address: verifiedSkater.address,
       mobile: verifiedSkater.mobile,
       email: verifiedSkater.email,
@@ -348,6 +366,12 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
         <div class="confirm-item">
           <span class="confirm-label">Mobile Number</span>
+          <span class="confirm-value">${payload.mobile}</span>
+        </div>
+        <div class="confirm-item">
+          <span class="confirm-label">Coach Name &amp; Contact</span>
+          <span class="confirm-value">${payload.coachName || 'N/A'} (${payload.coachMobile || 'N/A'})</span>
+        </div>
           <span class="confirm-value">${payload.mobile}</span>
         </div>
         <div class="confirm-item">

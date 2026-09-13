@@ -317,6 +317,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const gstVal = parseFloat(((gwVal * (parseFloat(ev.gstPercent) || 18.0)) / 100).toFixed(2));
       const total = parseFloat((base + gwVal + gstVal).toFixed(2));
       const imgSrc = ev.image || 'https://res.cloudinary.com/igjmhsju/image/upload/v1788797466/rsam_website/branding/rsam-logo.png';
+      const isArchived = !!ev.archived;
+      const statusBadge = isArchived
+        ? `<span class="badge-status" style="background:rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.3); color:#fbbf24;">📦 Archived</span>`
+        : `<span class="badge-status ${status.cls}">${status.label}</span>`;
 
       return `
         <div class="admin-item-card" style="display:flex; align-items:center; gap:1rem;">
@@ -324,7 +328,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="admin-item-info" style="flex:1;">
             <div style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap; margin-bottom:0.4rem;">
               <span class="admin-item-title" style="margin:0;">${ev.title}</span>
-              <span class="badge-status ${status.cls}">${status.label}</span>
+              ${statusBadge}
               ${ev.showOnTicker ? `<span class="badge-ticker">Show on Ticker</span>` : ''}
               ${ev.isRegistrationActive ? `<span class="badge-active-reg">Active Online Reg</span>` : ''}
             </div>
@@ -334,6 +338,7 @@ document.addEventListener("DOMContentLoaded", () => {
             ${(ev.description || ev.body) ? `<div style="font-size:0.85rem; color:#d1d5db; margin-top:0.3rem;">${(ev.description || ev.body).slice(0, 120)}...</div>` : ''}
           </div>
           <div class="admin-item-actions">
+            <button type="button" class="btn-dash-action" onclick="toggleArchiveEvent(${idx})">${isArchived ? '🔄 Enable' : '📦 Archive'}</button>
             <button type="button" class="btn-item-edit" onclick="toggleEventTicker(${idx})">${ev.showOnTicker ? 'Hide Ticker' : 'Show Ticker'}</button>
             <button type="button" class="btn-item-edit" onclick="setEventActiveReg(${idx})">Set Active Reg</button>
             <button type="button" class="btn-item-edit" onclick="editEventItem(${idx})">Edit</button>
@@ -343,6 +348,16 @@ document.addEventListener("DOMContentLoaded", () => {
       `;
     }).join("");
   }
+
+  window.toggleArchiveEvent = function(idx) {
+    const events = getAdminEvents();
+    if (events[idx]) {
+      events[idx].archived = !events[idx].archived;
+      localStorage.setItem("RSAM_ADMIN_EVENTS", JSON.stringify(events));
+      renderAdminEvents();
+      notify(events[idx].archived ? `📦 ${events[idx].title} archived (hidden from website).` : `🟢 ${events[idx].title} re-activated!`);
+    }
+  };
 
   window.toggleEventTicker = function(idx) {
     const events = getAdminEvents();
@@ -704,6 +719,10 @@ document.addEventListener("DOMContentLoaded", () => {
           <label style="display:flex; align-items:center; gap:0.5rem; color:#fff; cursor:pointer;">
             <input type="checkbox" id="mEvActiveReg" ${ev.isRegistrationActive ? 'checked' : ''} />
             <span>Enable Registration</span>
+          </label>
+          <label style="display:flex; align-items:center; gap:0.5rem; color:#fff; cursor:pointer;">
+            <input type="checkbox" id="mEvArchived" ${ev.archived ? 'checked' : ''} />
+            <span>Archive / Disable this event (Hide from website)</span>
           </label>
         </div>
       </div>
@@ -1220,7 +1239,8 @@ document.addEventListener("DOMContentLoaded", () => {
           description: document.getElementById("mEvDesc").value.trim(),
           body: document.getElementById("mEvDesc").value.trim(),
           showOnTicker: isTickerShow,
-          isRegistrationActive: isRegActive
+          isRegistrationActive: isRegActive,
+          archived: document.getElementById("mEvArchived") ? document.getElementById("mEvArchived").checked : false
         };
 
         if (isRegActive) {
@@ -1383,4 +1403,12 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
+
+  // Global ESC key listener to dismiss open modal
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" || e.key === "Esc") {
+      const itemModal = document.getElementById("itemModal");
+      if (itemModal && !itemModal.hidden) closeModal();
+    }
+  });
 });

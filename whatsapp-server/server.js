@@ -128,9 +128,10 @@ function generateRegistrationPDF(data, regNumber) {
         ['Date of Birth:', `${data.dob || 'N/A'}  (Age: ${data.age || 'N/A'} yrs · ${data.ageGroup || 'N/A'})`],
         ['Age Group:', data.ageGroup || 'N/A'],
         ['School / Club Name:', data.schoolClub || 'N/A'],
+        ['Coach Name:', data.coachName ? `${data.coachName} (${data.coachMobile || 'N/A'})` : 'N/A'],
         ['Discipline:', data.discipline || 'N/A'],
         ['Registration Year:', data.year || '2026'],
-        ['Razorpay Payment ID:', data.paymentId || 'Verified (₹51.18)'],
+        ['Razorpay Payment ID:', data.paymentId || 'Verified (₹10.24)'],
         ['Mobile Number:', data.mobile || 'N/A'],
         ['Email:', data.email || 'N/A'],
         ["Father's Name:", data.fatherName || 'N/A'],
@@ -348,6 +349,7 @@ You have successfully registered for the *${data.eventName || '4th District Cham
 • *Discipline:* ${data.discipline || 'N/A'}
 • *Age Group:* ${data.ageGroup || 'N/A'}
 • *School / Club:* ${data.schoolClub || 'N/A'}
+• *Coach Name:* ${data.coachName || 'N/A'} (${data.coachMobile || 'N/A'})
 • *Razorpay Payment ID:* ${data.paymentId || 'Verified'}
 • *Amount Paid:* ₹${data.amountPaid || '511.80'}
 • *Date of Birth:* ${data.dob} (Age: ${data.age || 'N/A'})
@@ -380,8 +382,9 @@ Thank you for registering with *${ORG_NAME}*! Your registration details have bee
 • *Age Group:* ${data.ageGroup || 'N/A'}
 • *School / Club:* ${data.schoolClub || 'N/A'}
 • *Discipline:* ${data.discipline || 'N/A'}
+• *Coach Name:* ${data.coachName || 'N/A'} (${data.coachMobile || 'N/A'})
 • *Razorpay Payment ID:* ${data.paymentId || 'Verified'}
-• *Amount Paid:* ₹${data.amountPaid || '51.18'}
+• *Amount Paid:* ₹${data.amountPaid || '10.24'}
 • *Mobile Number:* ${data.mobile}
 • *Father's Name:* ${data.fatherName || 'N/A'}
 • *Mother's Name:* ${data.motherName || 'N/A'}
@@ -393,6 +396,70 @@ ${data.email ? '📧 *PDF Certificate:* Your PDF Registration Certificate with y
 ✅ Your submitted documents & passport photo are under verification by RSAM admins.
 
 If you have any questions or corrections, please reply directly to this message or contact our officials.
+
+Best regards,
+*${ORG_NAME}* 🛼🏆`;
+}
+
+/**
+ * Build Coach WhatsApp Message Text
+ */
+function buildCoachRegistrationMessage(data, regNumber) {
+  const dateStr = new Date().toLocaleDateString('en-IN', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric'
+  });
+
+  if (data.type === 'event_registration') {
+    return `🏆 *CHAMPIONSHIP ATHLETE ENTRY NOTICE* 🏆
+__________________________________
+
+Dear Coach *${data.coachName || 'Coach'}*,
+
+Your athlete *${data.skaterName}* has successfully registered for the *${data.eventName || '4th District Championship 2026'}*!
+
+🎽 *ATHLETE RSAM REGISTRATION NUMBER:* *${regNumber}*
+
+📋 *Athlete Championship Summary:*
+• *Event:* ${data.eventName || '4th District Championship 2026'}
+• *Athlete Name:* ${data.skaterName}
+• *RSAM Reg. No.:* ${regNumber}
+• *Discipline:* ${data.discipline || 'N/A'}
+• *Age Group:* ${data.ageGroup || 'N/A'}
+• *School / Club:* ${data.schoolClub || 'N/A'}
+• *Father's Name:* ${data.fatherName || 'N/A'}
+• *Athlete Mobile:* ${data.mobile}
+• *Submission Date:* ${dateStr}
+
+Thank you for guiding and mentoring athletes under *${ORG_NAME}*!
+
+Best regards,
+*${ORG_NAME}* 🛼🏆`;
+  }
+
+  return `🎉 *ATHLETE ANNUAL REGISTRATION NOTICE* 🎉
+__________________________________
+
+Dear Coach *${data.coachName || 'Coach'}*,
+
+Your athlete *${data.skaterName}* has completed annual registration with *${ORG_NAME}* for ${data.year || '2026'}.
+
+🎽 *ATHLETE RSAM REGISTRATION NUMBER:* *${regNumber}*
+
+📋 *Athlete Summary:*
+• *Athlete Name:* ${data.skaterName}
+• *RSAM Reg. No.:* ${regNumber}
+• *Date of Birth:* ${data.dob} (Age: ${data.age || 'N/A'})
+• *Age Group:* ${data.ageGroup || 'N/A'}
+• *School / Club:* ${data.schoolClub || 'N/A'}
+• *Discipline:* ${data.discipline || 'N/A'}
+• *Father's Name:* ${data.fatherName || 'N/A'}
+• *Mother's Name:* ${data.motherName || 'N/A'}
+• *Athlete Mobile:* ${data.mobile}
+• *Submitted Date:* ${dateStr}
+
+Thank you for your continuous mentorship and support for RSAM athletes.
 
 Best regards,
 *${ORG_NAME}* 🛼🏆`;
@@ -503,18 +570,32 @@ app.post('/send-registration', authorizeRequest, async (req, res) => {
 
     // Process notification channels asynchronously in background
     setImmediate(async () => {
-      // 2. ISOLATED CHANNEL 1: WhatsApp Notification
+      // 2. ISOLATED CHANNEL 1: WhatsApp Notifications (Skater + Coach)
       try {
-        const jid = formatWhatsAppJid(payload.mobile);
-        if (!jid) {
-          console.warn(`[WhatsApp] Skipping: Invalid mobile number ${payload.mobile}`);
-        } else if (!sock || !isConnected) {
+        if (!sock || !isConnected) {
           console.warn(`[WhatsApp] Skipping: Bot not connected yet on server.`);
         } else {
-          const messageText = buildRegistrationMessage(payload, regNumber);
-          console.log(`[WhatsApp] Sending notification to ${jid} for ${payload.skaterName} (${regNumber})...`);
-          const sendResult = await sock.sendMessage(jid, { text: messageText });
-          console.log(`[WhatsApp] Successfully sent message to ${payload.skaterName}! Message ID: ${sendResult?.key?.id || 'sent'}`);
+          // A. Send Skater Notification
+          const skaterJid = formatWhatsAppJid(payload.mobile);
+          if (skaterJid) {
+            const skaterMsg = buildRegistrationMessage(payload, regNumber);
+            console.log(`[WhatsApp] Sending athlete notification to ${skaterJid} for ${payload.skaterName}...`);
+            await sock.sendMessage(skaterJid, { text: skaterMsg });
+            console.log(`[WhatsApp] Sent athlete notification to ${payload.skaterName}!`);
+          } else {
+            console.warn(`[WhatsApp] Skipping skater message: Invalid mobile ${payload.mobile}`);
+          }
+
+          // B. Send Coach Notification (if coachMobile provided)
+          if (payload.coachMobile && String(payload.coachMobile).replace(/\D/g, "").length === 10) {
+            const coachJid = formatWhatsAppJid(payload.coachMobile);
+            if (coachJid && coachJid !== skaterJid) {
+              const coachMsg = buildCoachRegistrationMessage(payload, regNumber);
+              console.log(`[WhatsApp] Sending coach notification to ${coachJid} for Coach ${payload.coachName || 'Coach'}...`);
+              await sock.sendMessage(coachJid, { text: coachMsg });
+              console.log(`[WhatsApp] Sent coach notification for athlete ${payload.skaterName}!`);
+            }
+          }
         }
       } catch (waErr) {
         console.error(`[WhatsApp Error] Could not send message to ${payload.skaterName}:`, waErr.message);

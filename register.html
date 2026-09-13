@@ -178,11 +178,22 @@
               <input type="email" id="email" name="email" placeholder="email@example.com" />
             </div>
           </div>
+
+          <div class="reg-row">
+            <div class="reg-field">
+              <label for="coachName">Coach's Name <span class="req">*</span></label>
+              <input type="text" id="coachName" name="coachName" placeholder="Full name of skating coach" required />
+            </div>
+            <div class="reg-field">
+              <label for="coachMobile">Coach's Contact Number <span class="req">*</span></label>
+              <input type="tel" id="coachMobile" name="coachMobile" placeholder="10-digit coach mobile number" maxlength="10" required />
+            </div>
+          </div>
         </fieldset>
 
         <!-- Aadhaar Details -->
         <fieldset class="reg-fieldset">
-          <legend class="reg-legend">Identity & Proof</legend>
+          <legend class="reg-legend">Identity &amp; Proof</legend>
 
           <div class="reg-row">
             <div class="reg-field reg-field--full">
@@ -237,7 +248,7 @@
 
         <!-- Submit -->
         <div class="reg-fee-banner">
-          💳 Registration Fee: <strong>₹50.00</strong> <small>(+ 2% gateway charge &amp; 18% GST = ₹51.18 Total)</small>
+          💳 Registration Fee: <strong>₹10.00</strong> <small>(+ 2% gateway charge &amp; 18% GST = ₹10.24 Total)</small>
         </div>
         <div class="reg-submit-row">
           <button type="submit" class="btn-primary reg-submit" id="submitBtn">
@@ -261,7 +272,7 @@
           </div>
           <div class="confirm-actions">
             <button type="button" class="btn-modal-secondary" id="confirmEditBtn">✏️ Edit Details</button>
-            <button type="button" class="btn-modal-primary" id="confirmProceedBtn">💳 Pay ₹51.18 &amp; Register</button>
+            <button type="button" class="btn-modal-primary" id="confirmProceedBtn">💳 Pay ₹10.24 &amp; Register</button>
           </div>
         </div>
       </div>

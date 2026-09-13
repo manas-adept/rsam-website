@@ -401,6 +401,33 @@ function initSpotlightNavbar() {
   });
 }
 
+/* ── Image Lightbox Modal Interaction ─────────────── */
+window.openImageLightbox = function(src, title) {
+  const modal = document.getElementById("imgLightboxModal");
+  const imgTag = document.getElementById("imgLightboxTag");
+  const titleTag = document.getElementById("imgLightboxTitle");
+  if (!modal || !imgTag) return;
+  imgTag.src = src || 'https://res.cloudinary.com/igjmhsju/image/upload/v1788797466/rsam_website/branding/rsam-logo.png';
+  if (titleTag) titleTag.textContent = title || '';
+  modal.hidden = false;
+};
+
+function initImageLightbox() {
+  const imgLightboxModal = document.getElementById("imgLightboxModal");
+  const imgLightboxClose = document.getElementById("imgLightboxClose");
+  if (imgLightboxClose && imgLightboxModal) {
+    imgLightboxClose.addEventListener("click", () => { imgLightboxModal.hidden = true; });
+    imgLightboxModal.addEventListener("click", (e) => {
+      if (e.target === imgLightboxModal) imgLightboxModal.hidden = true;
+    });
+  }
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" || e.key === "Esc") {
+      if (imgLightboxModal && !imgLightboxModal.hidden) imgLightboxModal.hidden = true;
+    }
+  });
+}
+
 /* Run after render.js has finished building the DOM (async fetch) */
 document.addEventListener('rsam:ready', () => {
   initInteractions();
@@ -408,4 +435,5 @@ document.addEventListener('rsam:ready', () => {
   initSkateTrail();
   initSpotlightNavbar();
   initCylinderGalleryCarousel();
+  initImageLightbox();
 });

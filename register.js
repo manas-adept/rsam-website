@@ -71,8 +71,29 @@ aadhaarInput.addEventListener("input", () => {
 
 /* ── Mobile: digits only ───────────────────────────── */
 const mobileInput = document.getElementById("mobile");
-mobileInput.addEventListener("input", () => {
-  mobileInput.value = mobileInput.value.replace(/\D/g, "").slice(0, 10);
+if (mobileInput) {
+  mobileInput.addEventListener("input", () => {
+    mobileInput.value = mobileInput.value.replace(/\D/g, "").slice(0, 10);
+  });
+}
+
+const coachMobileInput = document.getElementById("coachMobile");
+if (coachMobileInput) {
+  coachMobileInput.addEventListener("input", () => {
+    coachMobileInput.value = coachMobileInput.value.replace(/\D/g, "").slice(0, 10);
+  });
+}
+
+/* ── Global ESC Key Modal Dismiss ───────────────────── */
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" || e.key === "Esc") {
+    const confirmModal = document.getElementById("confirmModal");
+    const cropModal = document.getElementById("cropModal");
+    const regSuccess = document.getElementById("regSuccess");
+    if (confirmModal && !confirmModal.hidden) confirmModal.hidden = true;
+    if (cropModal && !cropModal.hidden) cropModal.hidden = true;
+    if (regSuccess && !regSuccess.hidden) regSuccess.hidden = true;
+  }
 });
 
 /* ── File drop labels ──────────────────────────────── */
@@ -442,239 +463,263 @@ document.getElementById("regForm").addEventListener("submit", async (e) => {
     aadhaarInput.classList.remove("invalid");
   }
 
-  // Form error feedback banner
-  let formErrorAlert = document.getElementById("formErrorAlert");
-  if (!formErrorAlert) {
-    formErrorAlert = document.createElement("div");
-    formErrorAlert.id = "formErrorAlert";
-    formErrorAlert.style.cssText = "background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #fca5a5; padding: 0.85rem 1.2rem; border-radius: 8px; margin-bottom: 1.2rem; font-size: 0.95rem; text-align: center; font-weight: 500;";
-    const submitRow = document.querySelector(".reg-submit-row");
-    if (submitRow) submitRow.parentNode.insertBefore(formErrorAlert, submitRow);
-  }
+    // 8. Coach's Name & Contact validation
+    const coachNameVal = form.coachName ? form.coachName.value.trim() : "";
+    if (!coachNameVal) {
+      if (form.coachName) form.coachName.classList.add("invalid");
+      valid = false;
+    } else if (form.coachName) {
+      form.coachName.classList.remove("invalid");
+    }
 
-  if (!valid) {
-    formErrorAlert.innerHTML = `⚠️ <strong>Incomplete Form Details</strong><br/><span style="font-size:0.85rem; color:#d1d5db;">Please fill in all required fields highlighted in red, upload passport photo &amp; required document proofs, and select a discipline.</span>`;
-    formErrorAlert.hidden = false;
+    const coachMobileInput = document.getElementById("coachMobile");
+    const coachMobileVal = coachMobileInput ? coachMobileInput.value.replace(/\D/g, "") : "";
+    if (coachMobileVal.length !== 10) {
+      if (coachMobileInput) coachMobileInput.classList.add("invalid");
+      valid = false;
+    } else if (coachMobileInput) {
+      coachMobileInput.classList.remove("invalid");
+    }
 
-    const firstInvalid = form.querySelector(".invalid, #discError:not([hidden]), .thin-photo-selector.invalid, .file-drop.invalid");
-    if (firstInvalid) {
-      firstInvalid.scrollIntoView({ behavior: "smooth", block: "center" });
-      if (typeof firstInvalid.focus === "function") {
-        try { firstInvalid.focus(); } catch (err) {}
+    // Form error feedback banner
+    let formErrorAlert = document.getElementById("formErrorAlert");
+    if (!formErrorAlert) {
+      formErrorAlert = document.createElement("div");
+      formErrorAlert.id = "formErrorAlert";
+      formErrorAlert.style.cssText = "background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #fca5a5; padding: 0.85rem 1.2rem; border-radius: 8px; margin-bottom: 1.2rem; font-size: 0.95rem; text-align: center; font-weight: 500;";
+      const submitRow = document.querySelector(".reg-submit-row");
+      if (submitRow) submitRow.parentNode.insertBefore(formErrorAlert, submitRow);
+    }
+
+    if (!valid) {
+      formErrorAlert.innerHTML = `⚠️ <strong>Incomplete Form Details</strong><br/><span style="font-size:0.85rem; color:#d1d5db;">Please fill in all required fields highlighted in red (including coach details), upload passport photo &amp; required document proofs, and select a discipline.</span>`;
+      formErrorAlert.hidden = false;
+
+      const firstInvalid = form.querySelector(".invalid, #discError:not([hidden]), .thin-photo-selector.invalid, .file-drop.invalid");
+      if (firstInvalid) {
+        firstInvalid.scrollIntoView({ behavior: "smooth", block: "center" });
+        if (typeof firstInvalid.focus === "function") {
+          try { firstInvalid.focus(); } catch (err) {}
+        }
       }
+      return;
     }
-    return;
-  }
 
-  if (formErrorAlert) formErrorAlert.hidden = true;
+    if (formErrorAlert) formErrorAlert.hidden = true;
 
-  try {
-    const toBase64 = file => new Promise((res, rej) => {
-      if (!file) return res(null);
-      const r = new FileReader();
-      r.onload  = () => res({ name: file.name, type: file.type, data: r.result.split(",")[1] });
-      r.onerror = rej;
-      r.readAsDataURL(file);
-    });
+    try {
+      const toBase64 = file => new Promise((res, rej) => {
+        if (!file) return res(null);
+        const r = new FileReader();
+        r.onload  = () => res({ name: file.name, type: file.type, data: r.result.split(",")[1] });
+        r.onerror = rej;
+        r.readAsDataURL(file);
+      });
 
-    let photoPayload = null;
-    if (croppedPhotoDataUrl) {
-      photoPayload = {
-        name: "passport_photo.jpg",
-        type: "image/jpeg",
-        data: croppedPhotoDataUrl.split(",")[1]
+      let photoPayload = null;
+      if (croppedPhotoDataUrl) {
+        photoPayload = {
+          name: "passport_photo.jpg",
+          type: "image/jpeg",
+          data: croppedPhotoDataUrl.split(",")[1]
+        };
+      } else if (form.skaterPhoto && form.skaterPhoto.files[0]) {
+        photoPayload = await toBase64(form.skaterPhoto.files[0]);
+      }
+
+      const [aadhaarFile, dobFile] = await Promise.all([
+        toBase64(form.aadhaarProof.files[0]),
+        toBase64(form.dobProof.files[0]),
+      ]);
+
+      const payload = {
+        year:         "2026",
+        skaterName:   form.skaterName.value.trim(),
+        dob:          form.dob.value,
+        age:          ageInput.value,
+        ageGroup:     ageGroupInput ? ageGroupInput.value : getAgeGroup(ageInput.value),
+        schoolClub:   form.schoolClub ? form.schoolClub.value.trim() : "",
+        coachName:    coachNameVal,
+        coachMobile:  coachMobileVal,
+        fatherName:   form.fatherName.value.trim(),
+        motherName:   form.motherName.value.trim(),
+        address:      form.address.value.trim(),
+        mobile,
+        email:        form.email.value.trim(),
+        aadhaar:      aadhaarRaw,
+        discipline:   discipline.value,
+        skaterPhoto:  photoPayload,
+        aadhaarProof: aadhaarFile,
+        dobProof:     dobFile,
       };
-    } else if (form.skaterPhoto && form.skaterPhoto.files[0]) {
-      photoPayload = await toBase64(form.skaterPhoto.files[0]);
-    }
 
-    const [aadhaarFile, dobFile] = await Promise.all([
-      toBase64(form.aadhaarProof.files[0]),
-      toBase64(form.dobProof.files[0]),
-    ]);
-
-    const payload = {
-      year:         "2026",
-      skaterName:   form.skaterName.value.trim(),
-      dob:          form.dob.value,
-      age:          ageInput.value,
-      ageGroup:     ageGroupInput ? ageGroupInput.value : getAgeGroup(ageInput.value),
-      schoolClub:   form.schoolClub ? form.schoolClub.value.trim() : "",
-      fatherName:   form.fatherName.value.trim(),
-      motherName:   form.motherName.value.trim(),
-      address:      form.address.value.trim(),
-      mobile,
-      email:        form.email.value.trim(),
-      aadhaar:      aadhaarRaw,
-      discipline:   discipline.value,
-      skaterPhoto:  photoPayload,
-      aadhaarProof: aadhaarFile,
-      dobProof:     dobFile,
-    };
-
-// Razorpay Gateway Configuration & Fee Calculations (₹50 base + 2% transaction fee + 18% GST on fee = ₹51.18)
+// Razorpay Gateway Configuration & Fee Calculations (₹10 base + 2% transaction fee + 18% GST on fee = ₹10.24)
 const RAZORPAY_KEY_ID = "rzp_test_TZa1vfjhrPJobv"; // Test Razorpay Key ID
-const BASE_REGISTRATION_FEE = 50.00;
-const GATEWAY_FEE = 1.00;  // 2% of ₹50.00
-const GST_FEE = 0.18;      // 18% GST on ₹1.00
-const TOTAL_AMOUNT = 51.18; // Total payable
-const TOTAL_AMOUNT_PAISE = 5118; // 51.18 INR in paise
+const BASE_REGISTRATION_FEE = 10.00;
+const GATEWAY_FEE = 0.20;  // 2% of ₹10.00
+const GST_FEE = 0.04;      // 18% GST on ₹0.20
+const TOTAL_AMOUNT = 10.24; // Total payable
+const TOTAL_AMOUNT_PAISE = 1024; // 10.24 INR in paise
 
-    // Populate Pre-Submission Confirmation Modal Summary
-    const confirmModal = document.getElementById("confirmModal");
-    const confirmSummaryBody = document.getElementById("confirmSummaryBody");
-    const confirmEditBtn = document.getElementById("confirmEditBtn");
-    const confirmProceedBtn = document.getElementById("confirmProceedBtn");
+      // Populate Pre-Submission Confirmation Modal Summary
+      const confirmModal = document.getElementById("confirmModal");
+      const confirmSummaryBody = document.getElementById("confirmSummaryBody");
+      const confirmEditBtn = document.getElementById("confirmEditBtn");
+      const confirmProceedBtn = document.getElementById("confirmProceedBtn");
 
-    const photoSrc = croppedPhotoDataUrl || (photoPreview.src ? photoPreview.src : "");
-    const aadhaarFileName = form.aadhaarProof.files[0] ? form.aadhaarProof.files[0].name : "Attached File";
-    const dobFileName = form.dobProof.files[0] ? form.dobProof.files[0].name : "Attached File";
+      const photoSrc = croppedPhotoDataUrl || (photoPreview.src ? photoPreview.src : "");
+      const aadhaarFileName = form.aadhaarProof.files[0] ? form.aadhaarProof.files[0].name : "Attached File";
+      const dobFileName = form.dobProof.files[0] ? form.dobProof.files[0].name : "Attached File";
 
-    confirmSummaryBody.innerHTML = `
-      <div class="confirm-photo-header">
-        ${photoSrc ? `<img src="${photoSrc}" class="confirm-photo-thumb" alt="Skater Photo"/>` : `<div style="font-size:30px;">📸</div>`}
-        <div class="confirm-photo-info">
-          <h4>${payload.skaterName}</h4>
-          <p>Discipline: <strong style="color:#fff;">${payload.discipline}</strong> · Age: ${payload.age} yrs (${payload.ageGroup || 'N/A'})</p>
-        </div>
-      </div>
-      <div class="confirm-grid">
-        <div class="confirm-item">
-          <span class="confirm-label">Date of Birth</span>
-          <span class="confirm-value">${payload.dob}</span>
-        </div>
-        <div class="confirm-item">
-          <span class="confirm-label">Age Group</span>
-          <span class="confirm-value">${payload.ageGroup || 'N/A'}</span>
-        </div>
-        <div class="confirm-item confirm-item--full">
-          <span class="confirm-label">School / Club Name</span>
-          <span class="confirm-value">${payload.schoolClub || 'N/A'}</span>
-        </div>
-        <div class="confirm-item">
-          <span class="confirm-label">Mobile Number</span>
-          <span class="confirm-value">${payload.mobile}</span>
-        </div>
-        <div class="confirm-item">
-          <span class="confirm-label">Father's Name</span>
-          <span class="confirm-value">${payload.fatherName}</span>
-        </div>
-        <div class="confirm-item">
-          <span class="confirm-label">Mother's Name</span>
-          <span class="confirm-value">${payload.motherName}</span>
-        </div>
-        <div class="confirm-item confirm-item--full">
-          <span class="confirm-label">Aadhaar Card Number</span>
-          <span class="confirm-value">${payload.aadhaar.replace(/(\d{4})(?=\d)/g, "$1 ")}</span>
-        </div>
-        <div class="confirm-item confirm-item--full">
-          <span class="confirm-label">Residential Address</span>
-          <span class="confirm-value">${payload.address}</span>
-        </div>
-        <div class="confirm-item">
-          <span class="confirm-label">Email Address</span>
-          <span class="confirm-value">${payload.email || 'N/A'}</span>
-        </div>
-        <div class="confirm-item confirm-item--full">
-          <span class="confirm-label">Uploaded Document Proofs</span>
-          <span class="confirm-file-badge">✓ Passport Photo</span>
-          <span class="confirm-file-badge">✓ Address Proof (${aadhaarFileName})</span>
-          <span class="confirm-file-badge">✓ DOB Proof (${dobFileName})</span>
-        </div>
-        
-        <!-- Fee & Razorpay Payment Breakdown -->
-        <div class="confirm-fee-breakdown" style="grid-column: span 2; background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 10px; padding: 1rem; margin-top: 0.5rem;">
-          <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #d1d5db; margin-bottom: 0.3rem;">
-            <span>Base Registration Fee:</span>
-            <strong>₹50.00</strong>
-          </div>
-          <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #d1d5db; margin-bottom: 0.3rem;">
-            <span>Gateway Transaction Charge (2%):</span>
-            <span>+ ₹1.00</span>
-          </div>
-          <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #d1d5db; margin-bottom: 0.6rem;">
-            <span>GST on Transaction Fee (18%):</span>
-            <span>+ ₹0.18</span>
-          </div>
-          <div style="display: flex; justify-content: space-between; font-size: 1.05rem; font-weight: 700; color: #f59e0b; border-top: 1px dashed rgba(245, 158, 11, 0.3); padding-top: 0.5rem;">
-            <span>Total Payable Amount (Razorpay):</span>
-            <span style="font-size: 1.2rem;">₹51.18</span>
+      confirmSummaryBody.innerHTML = `
+        <div class="confirm-photo-header">
+          ${photoSrc ? `<img src="${photoSrc}" class="confirm-photo-thumb" alt="Skater Photo"/>` : `<div style="font-size:30px;">📸</div>`}
+          <div class="confirm-photo-info">
+            <h4>${payload.skaterName}</h4>
+            <p>Discipline: <strong style="color:#fff;">${payload.discipline}</strong> · Age: ${payload.age} yrs (${payload.ageGroup || 'N/A'})</p>
           </div>
         </div>
-      </div>
-    `;
+        <div class="confirm-grid">
+          <div class="confirm-item">
+            <span class="confirm-label">Date of Birth</span>
+            <span class="confirm-value">${payload.dob}</span>
+          </div>
+          <div class="confirm-item">
+            <span class="confirm-label">Age Group</span>
+            <span class="confirm-value">${payload.ageGroup || 'N/A'}</span>
+          </div>
+          <div class="confirm-item confirm-item--full">
+            <span class="confirm-label">School / Club Name</span>
+            <span class="confirm-value">${payload.schoolClub || 'N/A'}</span>
+          </div>
+          <div class="confirm-item">
+            <span class="confirm-label">Mobile Number</span>
+            <span class="confirm-value">${payload.mobile}</span>
+          </div>
+          <div class="confirm-item">
+            <span class="confirm-label">Coach Name &amp; Contact</span>
+            <span class="confirm-value">${payload.coachName} (${payload.coachMobile})</span>
+          </div>
+          <div class="confirm-item">
+            <span class="confirm-label">Father's Name</span>
+            <span class="confirm-value">${payload.fatherName}</span>
+          </div>
+          <div class="confirm-item">
+            <span class="confirm-label">Mother's Name</span>
+            <span class="confirm-value">${payload.motherName}</span>
+          </div>
+          <div class="confirm-item confirm-item--full">
+            <span class="confirm-label">Aadhaar Card Number</span>
+            <span class="confirm-value">${payload.aadhaar.replace(/(\d{4})(?=\d)/g, "$1 ")}</span>
+          </div>
+          <div class="confirm-item confirm-item--full">
+            <span class="confirm-label">Residential Address</span>
+            <span class="confirm-value">${payload.address}</span>
+          </div>
+          <div class="confirm-item">
+            <span class="confirm-label">Email Address</span>
+            <span class="confirm-value">${payload.email || 'N/A'}</span>
+          </div>
+          <div class="confirm-item confirm-item--full">
+            <span class="confirm-label">Uploaded Document Proofs</span>
+            <span class="confirm-file-badge">✓ Passport Photo</span>
+            <span class="confirm-file-badge">✓ Address Proof (${aadhaarFileName})</span>
+            <span class="confirm-file-badge">✓ DOB Proof (${dobFileName})</span>
+          </div>
+          
+          <!-- Fee & Razorpay Payment Breakdown -->
+          <div class="confirm-fee-breakdown" style="grid-column: span 2; background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 10px; padding: 1rem; margin-top: 0.5rem;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #d1d5db; margin-bottom: 0.3rem;">
+              <span>Base Registration Fee:</span>
+              <strong>₹10.00</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #d1d5db; margin-bottom: 0.3rem;">
+              <span>Gateway Transaction Charge (2%):</span>
+              <span>+ ₹0.20</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #d1d5db; margin-bottom: 0.6rem;">
+              <span>GST on Transaction Fee (18%):</span>
+              <span>+ ₹0.04</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 1.05rem; font-weight: 700; color: #f59e0b; border-top: 1px dashed rgba(245, 158, 11, 0.3); padding-top: 0.5rem;">
+              <span>Total Payable Amount (Razorpay):</span>
+              <span style="font-size: 1.2rem;">₹10.24</span>
+            </div>
+          </div>
+        </div>
+      `;
 
-    confirmModal.hidden = false;
+      confirmModal.hidden = false;
 
-    // Handle Edit button click
-    confirmEditBtn.onclick = () => {
-      confirmModal.hidden = true;
-    };
+      // Handle Edit button click
+      confirmEditBtn.onclick = () => {
+        confirmModal.hidden = true;
+      };
 
-    // Handle Proceed to Razorpay Payment
-    confirmProceedBtn.onclick = () => {
-      confirmModal.hidden = true;
+      // Handle Proceed to Razorpay Payment
+      confirmProceedBtn.onclick = () => {
+        confirmModal.hidden = true;
 
-      // Razorpay Checkout Options
-      const rzpOptions = {
-        key: window.RAZORPAY_KEY_ID || RAZORPAY_KEY_ID,
-        amount: TOTAL_AMOUNT_PAISE,
-        currency: "INR",
-        payment_capture: 1, // Auto-capture payment immediately
-        name: "Roller Sports Association Moradabad",
-        description: `Annual Registration 2026 – ${payload.skaterName}`,
-        image: "https://res.cloudinary.com/igjmhsju/image/upload/v1788797466/rsam_website/branding/rsam-logo.png",
-        prefill: {
-          name: payload.skaterName,
-          email: payload.email,
-          contact: payload.mobile
-        },
-        notes: {
-          skaterName: payload.skaterName,
-          discipline: payload.discipline,
-          aadhaar: payload.aadhaar
-        },
-        theme: {
-          color: "#e01c2e"
-        },
-        handler: async function (response) {
-          // PAYMENT SUCCESSFUL GATE: Attach Payment ID to payload
-          console.log("[Razorpay] Payment Success! Payment ID:", response.razorpay_payment_id);
-          payload.paymentId = response.razorpay_payment_id || ("pay_test_" + Date.now());
-          payload.paymentStatus = "SUCCESS";
-          payload.amountPaid = "51.18";
+        // Razorpay Checkout Options
+        const rzpOptions = {
+          key: window.RAZORPAY_KEY_ID || RAZORPAY_KEY_ID,
+          amount: TOTAL_AMOUNT_PAISE,
+          currency: "INR",
+          payment_capture: 1, // Auto-capture payment immediately
+          name: "Roller Sports Association Moradabad",
+          description: `Annual Registration 2026 – ${payload.skaterName}`,
+          image: "https://res.cloudinary.com/igjmhsju/image/upload/v1788797466/rsam_website/branding/rsam-logo.png",
+          prefill: {
+            name: payload.skaterName,
+            email: payload.email,
+            contact: payload.mobile
+          },
+          notes: {
+            skaterName: payload.skaterName,
+            discipline: payload.discipline,
+            aadhaar: payload.aadhaar
+          },
+          theme: {
+            color: "#e01c2e"
+          },
+          handler: async function (response) {
+            // PAYMENT SUCCESSFUL GATE: Attach Payment ID to payload
+            console.log("[Razorpay] Payment Success! Payment ID:", response.razorpay_payment_id);
+            payload.paymentId = response.razorpay_payment_id || ("pay_test_" + Date.now());
+            payload.paymentStatus = "SUCCESS";
+            payload.amountPaid = "10.24";
 
-          // Execute registration submission only AFTER successful payment
-          await processRegistrationSubmission(payload);
-        },
-        modal: {
-          ondismiss: function () {
-            alert("⚠️ Payment Cancelled: Skater registration requires a successful payment of ₹51.18.\n\nYour registration was not submitted.");
+            // Execute registration submission only AFTER successful payment
+            await processRegistrationSubmission(payload);
+          },
+          modal: {
+            ondismiss: function () {
+              alert("⚠️ Payment Cancelled: Skater registration requires a successful payment of ₹10.24.\n\nYour registration was not submitted.");
+              submitBtn.disabled = false;
+              submitBtn.querySelector(".submit-text").hidden = false;
+              submitBtn.querySelector(".submit-spinner").hidden = true;
+            }
+          }
+        };
+
+        if (typeof Razorpay !== "undefined") {
+          const rzp = new Razorpay(rzpOptions);
+          rzp.on('payment.failed', function (resp) {
+            alert("❌ Payment Failed: " + (resp.error.description || "Transaction failed") + "\n\nRegistration was not completed.");
             submitBtn.disabled = false;
             submitBtn.querySelector(".submit-text").hidden = false;
             submitBtn.querySelector(".submit-spinner").hidden = true;
-          }
+          });
+          rzp.open();
+        } else {
+          // Fallback demo mode if Razorpay script is blocked
+          console.warn("Razorpay script not available. Simulating test payment for registration...");
+          payload.paymentId = "pay_demo_" + Date.now();
+          payload.paymentStatus = "SUCCESS";
+          payload.amountPaid = "10.24";
+          processRegistrationSubmission(payload);
         }
       };
-
-      if (typeof Razorpay !== "undefined") {
-        const rzp = new Razorpay(rzpOptions);
-        rzp.on('payment.failed', function (resp) {
-          alert("❌ Payment Failed: " + (resp.error.description || "Transaction failed") + "\n\nRegistration was not completed.");
-          submitBtn.disabled = false;
-          submitBtn.querySelector(".submit-text").hidden = false;
-          submitBtn.querySelector(".submit-spinner").hidden = true;
-        });
-        rzp.open();
-      } else {
-        // Fallback demo mode if Razorpay script is blocked
-        console.warn("Razorpay script not available. Simulating test payment for registration...");
-        payload.paymentId = "pay_demo_" + Date.now();
-        payload.paymentStatus = "SUCCESS";
-        payload.amountPaid = "51.18";
-        processRegistrationSubmission(payload);
-      }
-    };
 
     // Registration Submission Processor (Called strictly AFTER successful payment)
     async function processRegistrationSubmission(payloadData) {
