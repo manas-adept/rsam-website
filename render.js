@@ -349,7 +349,7 @@ function renderOfficials() {
         <div style="text-align: center; margin-bottom: 2rem;">
           <span class="section-tag" style="font-size:0.85rem;">Certified Officiating Team</span>
           <h3 style="font-size: 1.6rem; font-weight: 700; color: #fff; margin-top: 0.3rem;">Technical <span class="accent">Referees &amp; Judges</span></h3>
-          <p style="color: #9ca3af; font-size: 0.95rem;">UPRSA &amp; District Certified Referees supervising official competitions in Moradabad</p>
+          <p style="color: #9ca3af; font-size: 0.95rem;">UPRSA &amp; State Certified Referees supervising official competitions in Moradabad</p>
         </div>
         <div class="officials-roster officials-roster--sm">${refereeCards}</div>
       </div>
