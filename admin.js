@@ -125,47 +125,67 @@ document.addEventListener("DOMContentLoaded", () => {
     return                                   { label: "Happening Now",  cls: "status-live",     icon: "🟢" };
   }
 
-  // 5. Cloudinary Image Upload Helper
-  async function uploadToCloudinary(fileInputEl, targetUrlInputEl, folder = "rsam_website/events") {
-    const file = fileInputEl.files[0];
-    if (!file) {
-      alert("Please select an image file first.");
-      return;
+  function getAdminApiBaseUrl() {
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    if (isLocal) {
+      const port = (window.location.port === '8080' || !window.location.port) ? '3001' : window.location.port;
+      return `http://${window.location.hostname}:${port}`;
     }
+    return window.PRODUCTION_API_URL || 'https://rsam-whatsapp-bot.onrender.com';
+  }
 
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const base64Data = e.target.result;
-      const apiPort = window.location.port === '8080' || window.location.hostname === 'localhost' ? '3001' : '';
-      const baseUrl = apiPort ? `http://${window.location.hostname}:${apiPort}` : '';
-      const uploadUrl = `${baseUrl}/api/upload-cloudinary`;
-
-      notify("⏳ Uploading image to Cloudinary...", "info");
-
-      try {
-        const res = await fetch(uploadUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            image: base64Data,
-            folder: folder,
-            fileName: file.name
-          })
-        });
-
-        const data = await res.json();
-        if (data.success && data.url) {
-          targetUrlInputEl.value = data.url;
-          notify("✓ Image uploaded to Cloudinary successfully!", "success");
-        } else {
-          alert("Cloudinary upload failed: " + (data.error || "Unknown error"));
-        }
-      } catch (err) {
-        console.error("Cloudinary upload fetch error:", err);
-        alert("Could not connect to Cloudinary upload server: " + err.message);
+  // 5. Cloudinary Image Upload Helper
+  function uploadToCloudinary(fileInputEl, targetUrlInputEl, folder = "rsam_website/events") {
+    return new Promise((resolve) => {
+      const file = (fileInputEl && fileInputEl.files && fileInputEl.files[0]) ? fileInputEl.files[0] : (fileInputEl instanceof File ? fileInputEl : null);
+      if (!file) {
+        alert("Please select an image file first.");
+        return resolve(false);
       }
-    };
-    reader.readAsDataURL(file);
+
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const base64Data = e.target.result;
+        const baseUrl = getAdminApiBaseUrl();
+        const uploadUrl = `${baseUrl}/api/upload-cloudinary`;
+
+        notify("⏳ Uploading image to Cloudinary...", "info");
+
+        try {
+          const res = await fetch(uploadUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              image: base64Data,
+              folder: folder,
+              fileName: file.name
+            })
+          });
+
+          const rawText = await res.text();
+          let data = null;
+          try {
+            data = JSON.parse(rawText);
+          } catch (parseErr) {
+            throw new Error(`Server returned non-JSON response (${res.status}). The upload server may be starting up on Render, please try again in a few seconds.`);
+          }
+
+          if (data && data.success && data.url) {
+            if (targetUrlInputEl) targetUrlInputEl.value = data.url;
+            notify("✓ Image uploaded to Cloudinary successfully!", "success");
+            resolve(true);
+          } else {
+            alert("Cloudinary upload failed: " + ((data && data.error) || "Unknown error"));
+            resolve(false);
+          }
+        } catch (err) {
+          console.error("Cloudinary upload fetch error:", err);
+          alert("Could not connect to Cloudinary upload server: " + err.message);
+          resolve(false);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
   }
 
   // 6. Data Loaders (Merging Static Pre-Filled Data with Local Storage Overrides)
@@ -821,17 +841,17 @@ document.addEventListener("DOMContentLoaded", () => {
           await new Promise(resolve => {
             const reader = new FileReader();
             reader.onload = async (ev) => {
-              const base64Data = ev.target.result;
-              const apiPort = window.location.port === '8080' || window.location.hostname === 'localhost' ? '3001' : '';
-              const baseUrl = apiPort ? `http://${window.location.hostname}:${apiPort}` : '';
+              const baseUrl = getAdminApiBaseUrl();
               try {
                 const res = await fetch(`${baseUrl}/api/upload-cloudinary`, {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({ image: base64Data, folder: "rsam_website/highlights", fileName: file.name })
                 });
-                const data = await res.json();
-                if (data.success && data.url) {
+                const rawText = await res.text();
+                let data = null;
+                try { data = JSON.parse(rawText); } catch (e) {}
+                if (data && data.success && data.url) {
                   currentHlPhotos.push(data.url);
                 } else {
                   currentHlPhotos.push(base64Data);
