@@ -37,24 +37,28 @@ function doGet(e) {
         }
         return fallbackIdx;
       }
-      const regIdx     = findHeaderIndex(["rsam reg", "reg no", "reg. no", "reg number", "registration no"], 1);
-      const nameIdx    = findHeaderIndex(["skater name", "name"], 3);
-      const dobIdx     = findHeaderIndex(["date of birth", "dob"], 4);
-      const ageIdx     = findHeaderIndex(["age"], 5);
-      const fatherIdx  = findHeaderIndex(["father"], 6);
-      const motherIdx  = findHeaderIndex(["mother"], 7);
-      const addressIdx = findHeaderIndex(["address"], 8);
-      const mobileIdx  = findHeaderIndex(["mobile", "phone", "contact"], 9);
-      const emailIdx   = findHeaderIndex(["email"], 10);
-      const aadhaarIdx = findHeaderIndex(["aadhaar", "adhar"], 11);
-      const discIdx    = findHeaderIndex(["discipline", "category"], 12);
-      const photoIdx   = findHeaderIndex(["photo", "picture", "avatar"], 16);
+      const regIdx        = findHeaderIndex(["rsam reg", "reg no", "reg. no", "reg number", "registration no"], 1);
+      const nameIdx       = findHeaderIndex(["skater name", "name"], 3);
+      const dobIdx        = findHeaderIndex(["date of birth", "dob"], 4);
+      const ageIdx        = findHeaderIndex(["age"], 5);
+      const ageGroupIdx   = findHeaderIndex(["age group", "agegroup"], 6);
+      const schoolClubIdx = findHeaderIndex(["school", "club", "institution"], 7);
+      const fatherIdx     = findHeaderIndex(["father"], 8);
+      const motherIdx     = findHeaderIndex(["mother"], 9);
+      const addressIdx    = findHeaderIndex(["address"], 10);
+      const mobileIdx     = findHeaderIndex(["mobile", "phone", "contact"], 11);
+      const emailIdx      = findHeaderIndex(["email"], 12);
+      const aadhaarIdx    = findHeaderIndex(["aadhaar", "adhar"], 13);
+      const discIdx       = findHeaderIndex(["discipline", "category"], 14);
+      const photoIdx      = findHeaderIndex(["photo", "picture", "avatar"], 18);
 
       return {
         regNumber: String(data[i][regIdx] || regNumber),
         skaterName: String(data[i][nameIdx] || ""),
         dob: String(data[i][dobIdx] || ""),
         age: String(data[i][ageIdx] || ""),
+        ageGroup: String(data[i][ageGroupIdx] || ""),
+        schoolClub: String(data[i][schoolClubIdx] || ""),
         fatherName: String(data[i][fatherIdx] || ""),
         motherName: String(data[i][motherIdx] || ""),
         address: String(data[i][addressIdx] || ""),
@@ -215,6 +219,8 @@ function doPost(e) {
           "Skater Name",
           "Date of Birth",
           "Age",
+          "Age Group",
+          "School / Club Name",
           "Father Name",
           "Mother Name",
           "Address",
@@ -239,6 +245,8 @@ function doPost(e) {
         data.skaterName,
         data.dob,
         data.age,
+        data.ageGroup || "N/A",
+        data.schoolClub || "N/A",
         data.fatherName,
         data.motherName,
         data.address,
@@ -281,6 +289,8 @@ function doPost(e) {
         "Skater Name",
         "Date of Birth",
         "Age",
+        "Age Group",
+        "School / Club Name",
         "Father Name",
         "Mother Name",
         "Address",
@@ -325,6 +335,8 @@ function doPost(e) {
       data.skaterName,
       data.dob,
       data.age,
+      data.ageGroup || "N/A",
+      data.schoolClub || "N/A",
       data.fatherName,
       data.motherName,
       data.address,

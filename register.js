@@ -21,18 +21,39 @@ function escapeHTML(str) {
   }[match]));
 }
 
-/* ── Age auto-calculate ────────────────────────────── */
-const dobInput    = document.getElementById("dob");
-const ageInput    = document.getElementById("age");
+/* ── Age & Age Group auto-calculate ────────────────────── */
+function getAgeGroup(age) {
+  if (age === null || age === undefined || age === "" || isNaN(age)) return "";
+  const num = Number(age);
+  if (num < 6) return "Under 6";
+  if (num < 8) return "6-8";
+  if (num < 10) return "8-10";
+  if (num < 12) return "10-12";
+  if (num < 15) return "12-15";
+  if (num < 18) return "15-18";
+  return "Above-18";
+}
+
+const dobInput      = document.getElementById("dob");
+const ageInput      = document.getElementById("age");
+const ageGroupInput = document.getElementById("ageGroup");
 
 dobInput.addEventListener("change", () => {
   const dob = new Date(dobInput.value);
-  if (isNaN(dob)) { ageInput.value = ""; return; }
+  if (isNaN(dob)) {
+    ageInput.value = "";
+    if (ageGroupInput) ageGroupInput.value = "";
+    return;
+  }
   const cutoff = new Date("2026-12-31");
   let age = cutoff.getFullYear() - dob.getFullYear();
   const m = cutoff.getMonth() - dob.getMonth();
   if (m < 0 || (m === 0 && cutoff.getDate() < dob.getDate())) age--;
-  ageInput.value = age >= 0 ? age : "";
+  const calcAge = age >= 0 ? age : "";
+  ageInput.value = calcAge;
+  if (ageGroupInput) {
+    ageGroupInput.value = calcAge !== "" ? getAgeGroup(calcAge) : "";
+  }
 });
 
 /* ── Aadhaar number formatting (XXXX XXXX XXXX) ────── */
@@ -471,6 +492,8 @@ document.getElementById("regForm").addEventListener("submit", async (e) => {
       skaterName:   form.skaterName.value.trim(),
       dob:          form.dob.value,
       age:          ageInput.value,
+      ageGroup:     ageGroupInput ? ageGroupInput.value : getAgeGroup(ageInput.value),
+      schoolClub:   form.schoolClub ? form.schoolClub.value.trim() : "",
       fatherName:   form.fatherName.value.trim(),
       motherName:   form.motherName.value.trim(),
       address:      form.address.value.trim(),
@@ -506,13 +529,21 @@ const TOTAL_AMOUNT_PAISE = 5118; // 51.18 INR in paise
         ${photoSrc ? `<img src="${photoSrc}" class="confirm-photo-thumb" alt="Skater Photo"/>` : `<div style="font-size:30px;">📸</div>`}
         <div class="confirm-photo-info">
           <h4>${payload.skaterName}</h4>
-          <p>Discipline: <strong style="color:#fff;">${payload.discipline}</strong> · Age: ${payload.age} years</p>
+          <p>Discipline: <strong style="color:#fff;">${payload.discipline}</strong> · Age: ${payload.age} yrs (${payload.ageGroup || 'N/A'})</p>
         </div>
       </div>
       <div class="confirm-grid">
         <div class="confirm-item">
           <span class="confirm-label">Date of Birth</span>
           <span class="confirm-value">${payload.dob}</span>
+        </div>
+        <div class="confirm-item">
+          <span class="confirm-label">Age Group</span>
+          <span class="confirm-value">${payload.ageGroup || 'N/A'}</span>
+        </div>
+        <div class="confirm-item confirm-item--full">
+          <span class="confirm-label">School / Club Name</span>
+          <span class="confirm-value">${payload.schoolClub || 'N/A'}</span>
         </div>
         <div class="confirm-item">
           <span class="confirm-label">Mobile Number</span>

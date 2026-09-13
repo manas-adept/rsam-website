@@ -125,7 +125,9 @@ function generateRegistrationPDF(data, regNumber) {
       const details = [
         ['RSAM Reg. No.:', regNumber],
         ['Full Name:', data.skaterName || 'N/A'],
-        ['Date of Birth:', `${data.dob || 'N/A'}  (Age: ${data.age || 'N/A'} years)`],
+        ['Date of Birth:', `${data.dob || 'N/A'}  (Age: ${data.age || 'N/A'} yrs · ${data.ageGroup || 'N/A'})`],
+        ['Age Group:', data.ageGroup || 'N/A'],
+        ['School / Club Name:', data.schoolClub || 'N/A'],
         ['Discipline:', data.discipline || 'N/A'],
         ['Registration Year:', data.year || '2026'],
         ['Razorpay Payment ID:', data.paymentId || 'Verified (₹51.18)'],
@@ -344,6 +346,8 @@ You have successfully registered for the *${data.eventName || '4th District Cham
 • *RSAM Reg. No.:* ${regNumber}
 • *Athlete Name:* ${data.skaterName}
 • *Discipline:* ${data.discipline || 'N/A'}
+• *Age Group:* ${data.ageGroup || 'N/A'}
+• *School / Club:* ${data.schoolClub || 'N/A'}
 • *Razorpay Payment ID:* ${data.paymentId || 'Verified'}
 • *Amount Paid:* ₹${data.amountPaid || '511.80'}
 • *Date of Birth:* ${data.dob} (Age: ${data.age || 'N/A'})
@@ -373,6 +377,8 @@ Thank you for registering with *${ORG_NAME}*! Your registration details have bee
 • *Registration Year:* ${data.year || '2026'}
 • *Athlete Name:* ${data.skaterName}
 • *Date of Birth:* ${data.dob} (Age: ${data.age || 'N/A'})
+• *Age Group:* ${data.ageGroup || 'N/A'}
+• *School / Club:* ${data.schoolClub || 'N/A'}
 • *Discipline:* ${data.discipline || 'N/A'}
 • *Razorpay Payment ID:* ${data.paymentId || 'Verified'}
 • *Amount Paid:* ₹${data.amountPaid || '51.18'}

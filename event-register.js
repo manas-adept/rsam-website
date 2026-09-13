@@ -239,12 +239,27 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  function calculateAgeGroup(age) {
+    if (age === null || age === undefined || age === "" || isNaN(age)) return "";
+    const num = Number(age);
+    if (num < 6) return "Under 6";
+    if (num < 8) return "6-8";
+    if (num < 10) return "8-10";
+    if (num < 12) return "10-12";
+    if (num < 15) return "12-15";
+    if (num < 18) return "15-18";
+    return "Above-18";
+  }
+
   // Populate Stage 2 Auto-Filled Summary Card
   function populateSkaterCard(skater) {
     document.getElementById("displaySkaterName").textContent = skater.skaterName || "N/A";
     document.getElementById("displayRegNo").textContent      = skater.regNumber || "N/A";
     document.getElementById("displayDob").textContent        = skater.dob || "N/A";
     document.getElementById("displayAge").textContent        = skater.age || "N/A";
+    const ageGrp = skater.ageGroup || calculateAgeGroup(skater.age);
+    document.getElementById("displayAgeGroup").textContent   = ageGrp || "N/A";
+    document.getElementById("displaySchoolClub").textContent = skater.schoolClub || "N/A";
     document.getElementById("displayFather").textContent     = skater.fatherName || "N/A";
     document.getElementById("displayMother").textContent     = skater.motherName || "N/A";
     document.getElementById("displayMobile").textContent     = skater.mobile || "N/A";
@@ -300,6 +315,8 @@ document.addEventListener("DOMContentLoaded", () => {
       skaterName: verifiedSkater.skaterName,
       dob: verifiedSkater.dob,
       age: verifiedSkater.age,
+      ageGroup: verifiedSkater.ageGroup || calculateAgeGroup(verifiedSkater.age),
+      schoolClub: verifiedSkater.schoolClub || "N/A",
       fatherName: verifiedSkater.fatherName,
       motherName: verifiedSkater.motherName,
       address: verifiedSkater.address,
