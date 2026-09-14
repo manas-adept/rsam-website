@@ -505,9 +505,14 @@ document.addEventListener("DOMContentLoaded", () => {
       const payIdEl = document.getElementById("evtSuccessPaymentIdText");
       if (regNoEl) regNoEl.textContent = payload.regNumber || 'R260912001';
       if (payIdEl) payIdEl.textContent = `(Razorpay ID: ${payload.paymentId || 'Verified'})`;
+
+      const dlBtn = document.getElementById("evtDownloadPdfBtn");
+      if (dlBtn) {
+        dlBtn.onclick = () => downloadEventPdfInvoice(payload);
+      }
       evtSuccess.hidden = false;
     }
-    let secondsLeft = 6;
+    let secondsLeft = 12;
     const countdownEl = document.getElementById("countdownNum");
     const interval = setInterval(() => {
       secondsLeft--;
@@ -517,6 +522,113 @@ document.addEventListener("DOMContentLoaded", () => {
         window.location.href = "index.html#events";
       }
     }, 1000);
+  }
+
+  function downloadEventPdfInvoice(payload) {
+    const regNumber = payload.regNumber || "EVT26_001";
+    const skaterName = payload.skaterName || "Athlete";
+    const eventName = payload.eventName || "4th District Championship 2026";
+    const discipline = payload.discipline || "Roller Skating";
+    const ageGroup = payload.ageGroup || "N/A";
+    const age = payload.age || "N/A";
+    const amountPaid = payload.amountPaid || "511.80";
+    const paymentId = payload.paymentId || "Verified";
+    const dob = payload.dob || "N/A";
+    const schoolClub = payload.schoolClub || "N/A";
+    const fatherName = payload.fatherName || "N/A";
+    const motherName = payload.motherName || "N/A";
+    const address = payload.address || "N/A";
+    const mobile = payload.mobile || "N/A";
+    const email = payload.email || "N/A";
+    const aadhaar = payload.aadhaar ? String(payload.aadhaar).replace(/(\d{4})(?=\d)/g, "$1 ") : "N/A";
+    const coachName = payload.coachName || "N/A";
+    const coachMobile = payload.coachMobile || "N/A";
+    const timestamp = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
+
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      alert("Please allow pop-ups in your browser to download the Event Entry Pass & PDF Invoice.");
+      return;
+    }
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>RSAM_Event_Entry_Invoice_${regNumber}</title>
+        <style>
+          body { font-family: 'Arial', sans-serif; color: #111827; background: #fff; margin: 0; padding: 20px; }
+          .invoice-box { border: 2px solid #e01c2e; border-radius: 12px; padding: 24px; max-width: 750px; margin: auto; }
+          .header { text-align: center; border-bottom: 2px solid #e5e7eb; padding-bottom: 16px; margin-bottom: 20px; }
+          .title { color: #e01c2e; font-size: 22px; font-weight: bold; margin: 0; }
+          .subtitle { color: #4b5563; font-size: 12px; margin-top: 4px; text-transform: uppercase; letter-spacing: 1px; }
+          .badge-box { background: #eff6ff; border: 1.5px solid #3b82f6; border-radius: 8px; text-align: center; padding: 12px; margin-bottom: 20px; }
+          .badge-label { color: #1d4ed8; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; display: block; }
+          .badge-num { color: #1e40af; font-size: 24px; font-weight: bold; margin-top: 2px; display: block; }
+          .section-title { font-size: 13px; font-weight: bold; color: #374151; border-bottom: 1.5px solid #e5e7eb; padding-bottom: 4px; margin-top: 18px; margin-bottom: 10px; text-transform: uppercase; }
+          table.details-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+          table.details-table td { padding: 6px 8px; font-size: 12px; border-bottom: 1px solid #f3f4f6; }
+          table.details-table td.lbl { color: #6b7280; font-weight: bold; width: 35%; }
+          table.details-table td.val { color: #111827; font-weight: 500; }
+          table.invoice-table { width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 15px; }
+          table.invoice-table th { background: #f9fafb; color: #4b5563; font-size: 11px; text-transform: uppercase; padding: 8px; text-align: left; border-bottom: 1.5px solid #e5e7eb; }
+          table.invoice-table td { padding: 8px; font-size: 12px; border-bottom: 1px solid #f3f4f6; }
+          .total-row td { font-weight: bold; color: #e01c2e; font-size: 14px; border-top: 2px solid #e01c2e; }
+          .seal-box { margin-top: 25px; text-align: right; font-size: 11px; color: #4b5563; }
+          .footer-note { font-size: 10px; color: #6b7280; text-align: center; margin-top: 25px; border-top: 1px solid #e5e7eb; padding-top: 10px; }
+          @media print { body { padding: 0; } }
+        </style>
+      </head>
+      <body>
+        <div class="invoice-box">
+          <div class="header">
+            <div class="title">ROLLER SPORTS ASSOCIATION MORADABAD</div>
+            <div class="subtitle">Official Championship Event Entry Pass &amp; Fee Invoice</div>
+          </div>
+          <div class="badge-box">
+            <span class="badge-label">${eventName.toUpperCase()}</span>
+            <span class="badge-num">REG NO: ${regNumber}</span>
+          </div>
+          <div class="section-title">Athlete Profile &amp; Event Entry</div>
+          <table class="details-table">
+            <tr><td class="lbl">Athlete Name:</td><td class="val">${skaterName}</td><td class="lbl">RSAM Reg No:</td><td class="val">${regNumber}</td></tr>
+            <tr><td class="lbl">Event Name:</td><td class="val" colspan="3"><strong>${eventName}</strong></td></tr>
+            <tr><td class="lbl">Age &amp; Age Group:</td><td class="val">${age} yrs (${ageGroup})</td><td class="lbl">Discipline:</td><td class="val">${discipline}</td></tr>
+            <tr><td class="lbl">School / Club:</td><td class="val">${schoolClub}</td><td class="lbl">Aadhaar Card:</td><td class="val">${aadhaar}</td></tr>
+            <tr><td class="lbl">Father's Name:</td><td class="val">${fatherName}</td><td class="lbl">Mother's Name:</td><td class="val">${motherName}</td></tr>
+            <tr><td class="lbl">Mobile Number:</td><td class="val">${mobile}</td><td class="lbl">Email Address:</td><td class="val">${email}</td></tr>
+            <tr><td class="lbl">Coach Details:</td><td class="val" colspan="3">${coachName} (${coachMobile})</td></tr>
+          </table>
+          <div class="section-title">Championship Entry Fee Invoice</div>
+          <table class="invoice-table">
+            <thead>
+              <tr><th>Description</th><th>Gateway Rate</th><th style="text-align:right;">Amount (INR)</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Championship Event Registration Fee</td><td>Base Fee</td><td style="text-align:right;">₹500.00</td></tr>
+              <tr><td>Payment Gateway Service Charge</td><td>2.00%</td><td style="text-align:right;">+ ₹10.00</td></tr>
+              <tr><td>GST on Gateway Transaction Fee</td><td>18.00%</td><td style="text-align:right;">+ ₹1.80</td></tr>
+              <tr class="total-row"><td>Total Entry Fee Paid (Razorpay)</td><td>Status: ${payload.paymentStatus || 'SUCCESS'}</td><td style="text-align:right;">₹${amountPaid}</td></tr>
+            </tbody>
+          </table>
+          <table class="details-table" style="margin-top:10px;">
+            <tr><td class="lbl">Razorpay Payment ID:</td><td class="val">${paymentId}</td><td class="lbl">Entry Date:</td><td class="val">${timestamp}</td></tr>
+          </table>
+          <div class="seal-box">
+            <strong>Roller Sports Association Moradabad</strong><br/>
+            <em>Official Event Organizing Committee</em>
+          </div>
+          <div class="footer-note">
+            Moradabad Sports Complex, Kanth Road, Moradabad, UP · Contact: +91-8057781350 · Email: contact@rsam.in
+          </div>
+        </div>
+        <script>
+          window.onload = function() { window.print(); };
+        </script>
+      </body>
+      </html>
+    `);
+    printWindow.document.close();
   }
 
 });

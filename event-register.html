@@ -192,13 +192,14 @@
 
           <div class="success-status-badges">
             <span class="status-badge-pill">💬 WhatsApp Entry Pass Sent</span>
-            <span class="status-badge-pill">📧 Confirmation Emailed</span>
+            <span class="status-badge-pill">📧 PDF Invoice Emailed</span>
           </div>
 
-          <p class="modal-countdown">Redirecting in <span id="countdownNum">6</span>s…</p>
-          <div style="margin-top:1rem;">
-            <a href="index.html#events" class="btn-modal-primary" style="display:inline-block; padding:0.65rem 1.6rem; text-decoration:none; font-size:0.92rem; border-radius:8px;">View Event Calendar</a>
+          <div style="margin-top: 1rem; display: flex; flex-direction: column; gap: 0.6rem; align-items: center;">
+            <button type="button" class="btn-modal-secondary" id="evtDownloadPdfBtn" style="width: 100%; font-size: 0.92rem; padding: 0.65rem;">📄 Download Event PDF &amp; Invoice</button>
+            <a href="index.html#events" class="btn-modal-primary" style="display:inline-block; width: 100%; text-align: center; padding:0.65rem 1.6rem; text-decoration:none; font-size:0.92rem; border-radius:8px;">View Event Calendar</a>
           </div>
+          <p class="modal-countdown" style="margin-top: 0.8rem;">Redirecting in <span id="countdownNum">10</span>s…</p>
         </div>
       </div>
 

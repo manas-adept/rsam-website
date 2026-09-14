@@ -799,18 +799,25 @@ const TOTAL_AMOUNT_PAISE = Math.round(TOTAL_AMOUNT * 100);
           const payIdEl = document.getElementById("successPaymentIdText");
           if (regNoEl) regNoEl.textContent = assignedRegNo || 'R260912001';
           if (payIdEl) payIdEl.textContent = `(Razorpay ID: ${payloadData.paymentId || 'Verified'})`;
+          
+          const dlBtn = document.getElementById("downloadPdfBtn");
+          if (dlBtn) {
+            dlBtn.onclick = () => downloadRegistrationPdfInvoice(payloadData);
+          }
           successModal.hidden = false;
         }
 
-        let secs = 6;
+        let secs = 12;
         const tick = setInterval(() => {
           secs--;
-          document.getElementById("countdownNum").textContent = secs;
+          const cntEl = document.getElementById("countdownNum");
+          if (cntEl) cntEl.textContent = secs;
           if (secs <= 0) { clearInterval(tick); location.reload(); }
         }, 1000);
 
       } catch (submitErr) {
-        alert("Submission failed: " + submitErr.message + "\n\nPlease try again or contact us.");
+        console.error("Submission Error:", submitErr);
+        alert("Registration submission failed: " + submitErr.message);
         submitBtn.disabled = false;
         submitBtn.querySelector(".submit-text").hidden = false;
         submitBtn.querySelector(".submit-spinner").hidden = true;
@@ -821,3 +828,109 @@ const TOTAL_AMOUNT_PAISE = Math.round(TOTAL_AMOUNT * 100);
     alert("Form processing error: " + err.message);
   }
 });
+
+function downloadRegistrationPdfInvoice(payloadData) {
+  const regNumber = payloadData.regNumber || "R260912001";
+  const skaterName = payloadData.skaterName || "Athlete";
+  const discipline = payloadData.discipline || "Roller Skating";
+  const ageGroup = payloadData.ageGroup || "N/A";
+  const age = payloadData.age || "N/A";
+  const amountPaid = payloadData.amountPaid || "10.24";
+  const paymentId = payloadData.paymentId || "Verified";
+  const dob = payloadData.dob || "N/A";
+  const schoolClub = payloadData.schoolClub || "N/A";
+  const fatherName = payloadData.fatherName || "N/A";
+  const motherName = payloadData.motherName || "N/A";
+  const address = payloadData.address || "N/A";
+  const mobile = payloadData.mobile || "N/A";
+  const email = payloadData.email || "N/A";
+  const aadhaar = payloadData.aadhaar ? String(payloadData.aadhaar).replace(/(\d{4})(?=\d)/g, "$1 ") : "N/A";
+  const coachName = payloadData.coachName || "N/A";
+  const coachMobile = payloadData.coachMobile || "N/A";
+  const timestamp = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
+
+  const printWindow = window.open("", "_blank");
+  if (!printWindow) {
+    alert("Please allow pop-ups in your browser to download the PDF Invoice.");
+    return;
+  }
+
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>RSAM_Registration_Invoice_${regNumber}</title>
+      <style>
+        body { font-family: 'Arial', sans-serif; color: #111827; background: #fff; margin: 0; padding: 20px; }
+        .invoice-box { border: 2px solid #e01c2e; border-radius: 12px; padding: 24px; max-width: 750px; margin: auto; }
+        .header { text-align: center; border-bottom: 2px solid #e5e7eb; padding-bottom: 16px; margin-bottom: 20px; }
+        .title { color: #e01c2e; font-size: 22px; font-weight: bold; margin: 0; }
+        .subtitle { color: #4b5563; font-size: 12px; margin-top: 4px; text-transform: uppercase; letter-spacing: 1px; }
+        .badge-box { background: #fffbeeb; border: 1.5px solid #f59e0b; border-radius: 8px; text-align: center; padding: 12px; margin-bottom: 20px; }
+        .badge-label { color: #d97706; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; display: block; }
+        .badge-num { color: #b45309; font-size: 24px; font-weight: bold; margin-top: 2px; display: block; }
+        .section-title { font-size: 13px; font-weight: bold; color: #374151; border-bottom: 1.5px solid #e5e7eb; padding-bottom: 4px; margin-top: 18px; margin-bottom: 10px; text-transform: uppercase; }
+        table.details-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+        table.details-table td { padding: 6px 8px; font-size: 12px; border-bottom: 1px solid #f3f4f6; }
+        table.details-table td.lbl { color: #6b7280; font-weight: bold; width: 35%; }
+        table.details-table td.val { color: #111827; font-weight: 500; }
+        table.invoice-table { width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 15px; }
+        table.invoice-table th { background: #f9fafb; color: #4b5563; font-size: 11px; text-transform: uppercase; padding: 8px; text-align: left; border-bottom: 1.5px solid #e5e7eb; }
+        table.invoice-table td { padding: 8px; font-size: 12px; border-bottom: 1px solid #f3f4f6; }
+        .total-row td { font-weight: bold; color: #e01c2e; font-size: 14px; border-top: 2px solid #e01c2e; }
+        .seal-box { margin-top: 25px; text-align: right; font-size: 11px; color: #4b5563; }
+        .footer-note { font-size: 10px; color: #6b7280; text-align: center; margin-top: 25px; border-top: 1px solid #e5e7eb; padding-top: 10px; }
+        @media print { body { padding: 0; } }
+      </style>
+    </head>
+    <body>
+      <div class="invoice-box">
+        <div class="header">
+          <div class="title">ROLLER SPORTS ASSOCIATION MORADABAD</div>
+          <div class="subtitle">Recognized by UPRSA &amp; RSFI (IndiaSkate) · Official Athlete Registration Slip</div>
+        </div>
+        <div class="badge-box">
+          <span class="badge-label">OFFICIAL RSAM REGISTRATION NUMBER</span>
+          <span class="badge-num">${regNumber}</span>
+        </div>
+        <div class="section-title">Athlete Profile</div>
+        <table class="details-table">
+          <tr><td class="lbl">Athlete Name:</td><td class="val">${skaterName}</td><td class="lbl">Date of Birth:</td><td class="val">${dob}</td></tr>
+          <tr><td class="lbl">Age &amp; Age Group:</td><td class="val">${age} yrs (${ageGroup})</td><td class="lbl">Discipline:</td><td class="val">${discipline}</td></tr>
+          <tr><td class="lbl">School / Club:</td><td class="val">${schoolClub}</td><td class="lbl">Aadhaar Card:</td><td class="val">${aadhaar}</td></tr>
+          <tr><td class="lbl">Father's Name:</td><td class="val">${fatherName}</td><td class="lbl">Mother's Name:</td><td class="val">${motherName}</td></tr>
+          <tr><td class="lbl">Mobile Number:</td><td class="val">${mobile}</td><td class="lbl">Email Address:</td><td class="val">${email}</td></tr>
+          <tr><td class="lbl">Coach Details:</td><td class="val" colspan="3">${coachName} (${coachMobile})</td></tr>
+          <tr><td class="lbl">Residential Address:</td><td class="val" colspan="3">${address}</td></tr>
+        </table>
+        <div class="section-title">Payment &amp; Fee Breakdown Invoice</div>
+        <table class="invoice-table">
+          <thead>
+            <tr><th>Description</th><th>Gateway Rate</th><th style="text-align:right;">Amount (INR)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Base Annual Athlete Membership Fee (2026)</td><td>Base Fee</td><td style="text-align:right;">₹10.00</td></tr>
+            <tr><td>Payment Gateway Service Charge</td><td>2.00%</td><td style="text-align:right;">+ ₹0.20</td></tr>
+            <tr><td>GST on Gateway Transaction Fee</td><td>18.00%</td><td style="text-align:right;">+ ₹0.04</td></tr>
+            <tr class="total-row"><td>Total Amount Paid (Razorpay)</td><td>Status: ${payloadData.paymentStatus || 'SUCCESS'}</td><td style="text-align:right;">₹${amountPaid}</td></tr>
+          </tbody>
+        </table>
+        <table class="details-table" style="margin-top:10px;">
+          <tr><td class="lbl">Razorpay Payment ID:</td><td class="val">${paymentId}</td><td class="lbl">Registration Date:</td><td class="val">${timestamp}</td></tr>
+        </table>
+        <div class="seal-box">
+          <strong>Roller Sports Association Moradabad</strong><br/>
+          <em>Authorized Verification System</em>
+        </div>
+        <div class="footer-note">
+          139, Rana Bhawan, Near 23 PAC, Kanth Road, Moradabad, UP · Contact: +91-8057781350 · Email: contact@rsam.in
+        </div>
+      </div>
+      <script>
+        window.onload = function() { window.print(); };
+      </script>
+    </body>
+    </html>
+  `);
+  printWindow.document.close();
+}
