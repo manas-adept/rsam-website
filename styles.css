@@ -3211,3 +3211,164 @@ body.has-ticker .navbar.spotlight-nav {
   font-size: 1.15rem;
   text-align: center;
 }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   RSAM Mobile Responsiveness & Breakpoint Rules
+   Target Devices: iPhone 12/17 (390px), Samsung F14/A21 (412px), iPhone SE (375px)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+@media (max-width: 768px) {
+  html, body {
+    overflow-x: hidden;
+    width: 100vw;
+  }
+
+  /* 1. Header & Top Ticker */
+  .top-ticker-bar {
+    font-size: 0.78rem;
+    padding: 0.4rem 0.6rem;
+  }
+  .ticker-badge {
+    font-size: 0.65rem;
+    padding: 0.15rem 0.4rem;
+  }
+  .ticker-item {
+    font-size: 0.78rem;
+    gap: 0.4rem;
+  }
+  .nav-inner {
+    padding: 0.6rem 1rem;
+  }
+  .nav-logo-text {
+    font-size: 0.85rem;
+    max-width: 220px;
+    white-space: normal;
+    line-height: 1.2;
+  }
+  .logo-img {
+    width: 38px;
+    height: 38px;
+  }
+
+  /* Mobile Navbar Drawer */
+  .nav-links {
+    position: fixed;
+    top: 60px;
+    right: -100%;
+    width: 82%;
+    max-width: 320px;
+    height: calc(100vh - 60px);
+    background: rgba(10, 10, 15, 0.98);
+    backdrop-filter: blur(16px);
+    flex-direction: column;
+    padding: 2rem 1.5rem;
+    gap: 1.2rem;
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.8);
+    z-index: 9999;
+  }
+  .nav-links.open {
+    right: 0;
+  }
+  .nav-links a {
+    font-size: 1.1rem;
+    width: 100%;
+    display: block;
+    padding: 0.6rem 0;
+  }
+
+  /* 2. Hero Section */
+  .hero-inner {
+    grid-template-columns: 1fr !important;
+    padding: 7rem 1.2rem 3rem !important;
+    gap: 2rem;
+    text-align: center;
+  }
+  .hero-title {
+    font-size: clamp(2.2rem, 9vw, 3.2rem) !important;
+  }
+  .hero-subtitle {
+    font-size: 0.95rem;
+  }
+  .hero-cta {
+    flex-direction: column;
+    width: 100%;
+    gap: 0.8rem;
+  }
+  .hero-cta a, .btn-primary, .btn-ghost {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+    padding: 0.85rem 1.2rem;
+    font-size: 1rem;
+    min-height: 48px;
+  }
+
+  /* 3. Section Headers & Cards */
+  .section-header {
+    margin-bottom: 2rem;
+  }
+  .section-title {
+    font-size: 1.8rem !important;
+  }
+  .grid-3, .grid-4, .grid-2 {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* 4. Photo Gallery & Images */
+  .gallery-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.2rem;
+  }
+  .gallery-img-wrap {
+    height: 220px !important;
+  }
+
+  /* 5. Officials & News Cards */
+  .official-card, .news-card, .hl-card {
+    width: 100% !important;
+    box-sizing: border-box;
+  }
+
+  /* 6. Certificate & Uniform Skinsuit Card */
+  .skinsuit-container {
+    flex-direction: column !important;
+    gap: 1rem;
+  }
+  .skinsuit-divider {
+    width: 100% !important;
+    height: 2px !important;
+    background: linear-gradient(90deg, transparent, rgba(224,28,46,0.5), transparent) !important;
+  }
+  .skinsuit-img-wrapper {
+    height: 280px !important;
+  }
+
+  /* 7. Connect Floating Panel */
+  .connect-tab {
+    font-size: 0.75rem !important;
+    padding: 0.5rem 0.4rem !important;
+  }
+  .connect-panel {
+    width: 90vw !important;
+    max-width: 360px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-logo-full {
+    font-size: 0.75rem;
+    max-width: 170px;
+  }
+  .hero-title {
+    font-size: 2.1rem !important;
+  }
+  .section-title {
+    font-size: 1.5rem !important;
+  }
+  .btn-primary, .btn-secondary, .btn-ghost {
+    font-size: 0.95rem;
+    padding: 0.75rem 1rem;
+  }
+}

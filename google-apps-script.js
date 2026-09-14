@@ -404,6 +404,10 @@ function doPost(e) {
       sendWhatsAppNotification(data);
     }
 
+    // Send confirmation email with skater photo attachment
+    data.regNumber = regNumber;
+    sendRegistrationConfirmationEmail(data, regNumber, photoUrl);
+
     return ContentService.createTextOutput(JSON.stringify({
       status: "ok",
       regNumber: regNumber,
@@ -418,6 +422,81 @@ function doPost(e) {
     Logger.log("Error in doPost: " + err.toString());
     return ContentService.createTextOutput(JSON.stringify({ status: "error", message: err.toString() }))
       .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function sendRegistrationConfirmationEmail(data, regNumber, photoUrl) {
+  if (!data || !data.email || !data.email.includes("@")) return;
+
+  try {
+    const skaterName = data.skaterName || "Athlete";
+    const discipline = data.discipline || "Roller Skating";
+    const ageGroup = data.ageGroup || "N/A";
+    const amountPaid = data.amountPaid || "10.24";
+    const paymentId = data.paymentId || "Verified";
+
+    const subject = `Official RSAM Athlete Registration Confirmation — ${regNumber}`;
+
+    const htmlBody = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #0b0f19; color: #e8e8f0; border: 1px solid #10b981; border-radius: 12px; padding: 24px;">
+        <div style="text-align: center; padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+          <h2 style="color: #10b981; margin: 0; font-size: 22px;">Roller Sports Association Moradabad (RSAM)</h2>
+          <p style="color: #9ca3af; font-size: 13px; margin-top: 4px;">Recognized by UPRSA & RSFI (IndiaSkate)</p>
+        </div>
+
+        <div style="padding: 20px 0;">
+          <h3 style="color: #ffffff; margin-top: 0; font-size: 18px;">Registration Successful! 🎉</h3>
+          <p style="color: #d1d5db; font-size: 14px; line-height: 1.6;">
+            Dear <strong>${skaterName}</strong>,<br/><br/>
+            Your annual athlete membership registration with <strong>Roller Sports Association Moradabad (RSAM)</strong> for <strong>2026</strong> has been successfully completed and verified.
+          </p>
+
+          <div style="background: rgba(245, 158, 11, 0.1); border: 1.5px solid rgba(245, 158, 11, 0.4); border-radius: 10px; padding: 16px; text-align: center; margin: 20px 0;">
+            <span style="display: block; font-size: 11px; color: #f59e0b; font-weight: bold; letter-spacing: 1px;">ASSIGNED RSAM REGISTRATION NUMBER</span>
+            <span style="display: block; font-size: 28px; color: #fbbf24; font-weight: bold; margin-top: 4px;">${regNumber}</span>
+          </div>
+
+          <table style="width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px; color: #d1d5db;">
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.08);"><td style="padding: 8px 0; color: #9ca3af; width: 40%;">Athlete Name:</td><td style="padding: 8px 0; font-weight: bold; color: #fff;">${skaterName}</td></tr>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.08);"><td style="padding: 8px 0; color: #9ca3af;">Discipline:</td><td style="padding: 8px 0; font-weight: bold; color: #fff;">${discipline}</td></tr>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.08);"><td style="padding: 8px 0; color: #9ca3af;">Age Group:</td><td style="padding: 8px 0; font-weight: bold; color: #fff;">${ageGroup} (${data.age || 'N/A'} yrs)</td></tr>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.08);"><td style="padding: 8px 0; color: #9ca3af;">School / Club:</td><td style="padding: 8px 0; font-weight: bold; color: #fff;">${data.schoolClub || 'N/A'}</td></tr>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.08);"><td style="padding: 8px 0; color: #9ca3af;">Coach Details:</td><td style="padding: 8px 0; font-weight: bold; color: #fff;">${data.coachName || 'N/A'} (${data.coachMobile || 'N/A'})</td></tr>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.08);"><td style="padding: 8px 0; color: #9ca3af;">Razorpay Payment ID:</td><td style="padding: 8px 0; color: #34d399; font-weight: bold;">${paymentId} (₹${amountPaid})</td></tr>
+          </table>
+        </div>
+
+        <div style="padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 12px; color: #9ca3af; text-align: center;">
+          <p style="margin: 0;">Roller Sports Association Moradabad · 139 Rana Bhawan, Kanth Road, Moradabad</p>
+          <p style="margin-top: 4px;">Attached to this email is your submitted passport photo for official records.</p>
+        </div>
+      </div>
+    `;
+
+    const attachments = [];
+    if (data.skaterPhoto && data.skaterPhoto.data) {
+      try {
+        const decoded = Utilities.base64Decode(data.skaterPhoto.data);
+        const photoBlob = Utilities.newBlob(decoded, data.skaterPhoto.type || "image/jpeg", `${regNumber}_SkaterPhoto.jpg`);
+        attachments.push(photoBlob);
+      } catch (pErr) {
+        Logger.log("Email attachment error: " + pErr.toString());
+      }
+    }
+
+    const emailOptions = {
+      to: data.email,
+      subject: subject,
+      htmlBody: htmlBody
+    };
+    if (attachments.length > 0) {
+      emailOptions.attachments = attachments;
+    }
+
+    MailApp.sendEmail(emailOptions);
+    Logger.log("Confirmation email with attachment successfully sent to: " + data.email);
+  } catch (e) {
+    Logger.log("Failed to send confirmation email: " + e.toString());
   }
 }
 

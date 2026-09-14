@@ -838,3 +838,186 @@
   font-size: 0.8rem;
   color: #e5e7eb;
 }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   RSAM Form & Modal Mobile Responsive Rules
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+.reg-modal-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background: rgba(0, 0, 0, 0.88) !important;
+  backdrop-filter: blur(10px) !important;
+  z-index: 100000 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 1rem !important;
+  box-sizing: border-box !important;
+  overflow-y: auto !important;
+}
+
+.reg-modal-overlay[hidden] {
+  display: none !important;
+}
+
+.reg-modal {
+  background: #11111a !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  border-radius: 16px !important;
+  padding: 1.5rem 1.2rem !important;
+  width: 100% !important;
+  max-width: 520px !important;
+  max-height: 90vh !important;
+  overflow-y: auto !important;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85) !important;
+  box-sizing: border-box !important;
+  margin: auto !important;
+}
+
+.success-card-modal {
+  max-width: 480px !important;
+  padding: 1.8rem 1.2rem !important;
+}
+
+@media (max-width: 768px) {
+  .reg-main {
+    padding: 6rem 1rem 3rem !important;
+  }
+
+  .reg-form {
+    max-width: 100% !important;
+    gap: 1.5rem !important;
+    margin-top: 1.5rem !important;
+  }
+
+  .reg-fieldset {
+    padding: 1.2rem 1rem !important;
+  }
+
+  .reg-legend {
+    font-size: 0.8rem !important;
+  }
+
+  .personal-top-layout {
+    flex-direction: column-reverse !important;
+    align-items: stretch !important;
+    gap: 1.2rem !important;
+  }
+
+  .photo-frame-wrapper {
+    width: 100% !important;
+    align-items: center !important;
+  }
+
+  .thin-photo-selector {
+    width: 100% !important;
+  }
+
+  .btn-thin-photo {
+    min-height: 48px !important;
+    font-size: 0.9rem !important;
+  }
+
+  .reg-row {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+    margin-top: 1rem !important;
+  }
+
+  .reg-field label {
+    font-size: 0.8rem !important;
+  }
+
+  .reg-field input,
+  .reg-field textarea,
+  .reg-field select {
+    font-size: 16px !important; /* Prevents auto-zoom on iOS Safari */
+    min-height: 46px !important;
+    padding: 0.7rem 0.9rem !important;
+  }
+
+  .file-drop {
+    padding: 1rem 0.8rem !important;
+  }
+
+  .file-drop-label {
+    font-size: 0.85rem !important;
+  }
+
+  .reg-discipline {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.8rem !important;
+  }
+
+  .disc-card {
+    min-width: 0 !important;
+    padding: 0.8rem 0.6rem !important;
+    text-align: center !important;
+  }
+
+  .disc-name {
+    font-size: 0.8rem !important;
+  }
+
+  .reg-submit {
+    width: 100% !important;
+    min-height: 50px !important;
+    font-size: 1.05rem !important;
+  }
+
+  .confirm-modal-card {
+    padding: 1.2rem 1rem !important;
+    max-height: 88vh !important;
+  }
+
+  .confirm-header h3 {
+    font-size: 1.3rem !important;
+  }
+
+  .confirm-photo-header {
+    flex-direction: column !important;
+    text-align: center !important;
+  }
+
+  .confirm-photo-thumb {
+    width: 80px !important;
+    height: 100px !important;
+  }
+
+  .confirm-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.6rem !important;
+  }
+
+  .confirm-item--full {
+    grid-column: span 1 !important;
+  }
+
+  .confirm-actions {
+    flex-direction: column !important;
+    gap: 0.8rem !important;
+  }
+
+  .btn-modal-primary, .btn-modal-secondary {
+    width: 100% !important;
+    min-height: 46px !important;
+    justify-content: center !important;
+    display: flex !important;
+    align-items: center !important;
+    font-size: 1rem !important;
+  }
+
+  .success-title {
+    font-size: 1.5rem !important;
+  }
+
+  .reg-number-val {
+    font-size: 1.5rem !important;
+  }
+}
