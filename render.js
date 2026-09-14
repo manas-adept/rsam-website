@@ -4,6 +4,17 @@
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 /* ── Helpers ──────────────────────────────────────── */
+function escapeHTML(str) {
+  if (typeof str !== 'string') return str || '';
+  return str.replace(/[&<>"']/g, match => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  }[match]));
+}
+
 function mount(id, html) {
   const el = document.getElementById(id);
   if (el) el.innerHTML = html;
