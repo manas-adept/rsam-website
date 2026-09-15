@@ -142,3 +142,62 @@ const CONFIG = {
 
 };
 window.CONFIG = CONFIG;
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   GLOBAL DARK / LIGHT THEME CONTROLLER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+(function() {
+  function getPreferredTheme() {
+    return localStorage.getItem("RSAM_THEME") || "dark";
+  }
+
+  function applyTheme(theme) {
+    if (theme === "light") {
+      document.documentElement.setAttribute("data-theme", "light");
+      if (document.body) document.body.setAttribute("data-theme", "light");
+    } else {
+      document.documentElement.setAttribute("data-theme", "dark");
+      if (document.body) document.body.setAttribute("data-theme", "dark");
+    }
+    updateThemeToggleUI(theme);
+  }
+
+  function updateThemeToggleUI(theme) {
+    const btns = document.querySelectorAll(".theme-toggle-btn");
+    btns.forEach(btn => {
+      const icon = btn.querySelector(".theme-toggle-icon");
+      if (theme === "light") {
+        if (icon) icon.className = "fa-solid fa-moon theme-toggle-icon";
+        btn.setAttribute("title", "Switch to Dark Mode");
+        btn.setAttribute("aria-label", "Switch to Dark Mode");
+      } else {
+        if (icon) icon.className = "fa-solid fa-sun theme-toggle-icon";
+        btn.setAttribute("title", "Switch to Light Mode");
+        btn.setAttribute("aria-label", "Switch to Light Mode");
+      }
+    });
+  }
+
+  window.toggleRSAMTheme = function() {
+    const current = getPreferredTheme();
+    const next = current === "light" ? "dark" : "light";
+    localStorage.setItem("RSAM_THEME", next);
+    applyTheme(next);
+  };
+
+  // Immediate execution on script parse to prevent FOUC
+  applyTheme(getPreferredTheme());
+
+  if (typeof document !== 'undefined') {
+    document.addEventListener("DOMContentLoaded", () => {
+      applyTheme(getPreferredTheme());
+      document.addEventListener("click", (e) => {
+        const toggleBtn = e.target.closest(".theme-toggle-btn");
+        if (toggleBtn) {
+          window.toggleRSAMTheme();
+        }
+      });
+    });
+  }
+})();
+

@@ -78,20 +78,68 @@ document.addEventListener("DOMContentLoaded", () => {
 
   checkSession();
 
-  // 2. Dashboard Tabs Navigation
+  // 2. Dashboard Tabs Navigation (On-Demand Modular Sub-View Loader)
   const tabBtns = document.querySelectorAll(".admin-tab-btn");
   const tabPanes = document.querySelectorAll(".tab-pane");
+  const loadedTabs = new Set();
+
+  function activateAdminTab(tabId, pushHash = true) {
+    if (!tabId) tabId = "tabEvent";
+
+    tabBtns.forEach(b => {
+      if (b.getAttribute("data-tab") === tabId) b.classList.add("active");
+      else b.classList.remove("active");
+    });
+
+    tabPanes.forEach(p => {
+      if (p.id === tabId) p.classList.add("active");
+      else p.classList.remove("active");
+    });
+
+    if (pushHash && window.location.hash !== `#${tabId}`) {
+      history.replaceState(null, "", `#${tabId}`);
+    }
+
+    if (!loadedTabs.has(tabId)) {
+      loadedTabs.add(tabId);
+      switch (tabId) {
+        case "tabEvent":
+          initAnnualFeeForm();
+          renderAdminEvents();
+          break;
+        case "tabBroadcast":
+          initBroadcastControls();
+          break;
+        case "tabGallery":
+          renderAdminGalleryFolders();
+          break;
+        case "tabNews":
+          renderAdminNews();
+          break;
+        case "tabHighlights":
+          renderAdminHighlights();
+          break;
+        case "tabOfficials":
+          renderAdminOfficials();
+          break;
+        default:
+          break;
+      }
+    }
+  }
 
   tabBtns.forEach(btn => {
     btn.addEventListener("click", () => {
-      tabBtns.forEach(b => b.classList.remove("active"));
-      tabPanes.forEach(p => p.classList.remove("active"));
-
-      btn.classList.add("active");
       const targetId = btn.getAttribute("data-tab");
-      const targetPane = document.getElementById(targetId);
-      if (targetPane) targetPane.classList.add("active");
+      activateAdminTab(targetId, true);
     });
+  });
+
+  window.addEventListener("hashchange", () => {
+    const hash = window.location.hash.slice(1);
+    if (hash && document.getElementById(hash)) {
+      activateAdminTab(hash, false);
+    }
   });
 
   // 3. Notification Toast Banner
@@ -353,16 +401,27 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
-  // 7. Initialize Dashboard Renderers
+  function updateAdminTabBadges() {
+    const bEv = document.getElementById("badgeEvents");
+    const bGal = document.getElementById("badgeGallery");
+    const bNews = document.getElementById("badgeNews");
+    const bHl = document.getElementById("badgeHighlights");
+    const bOff = document.getElementById("badgeOfficials");
+
+    if (bEv) bEv.textContent = getAdminEvents().length;
+    if (bGal) bGal.textContent = getAdminGalleryFolders().length;
+    if (bNews) bNews.textContent = getAdminNews().length;
+    if (bHl) bHl.textContent = getAdminHighlights().length;
+    if (bOff) bOff.textContent = getAdminOfficials().length;
+  }
+
+  // 7. Initialize Dashboard Renderers (Lazy Tabular Navigation)
   function initDashboard() {
     snapshotSessionBaseline();
-    initAnnualFeeForm();
-    renderAdminEvents();
-    renderAdminNews();
-    renderAdminHighlights();
-    renderAdminOfficials();
-    initBroadcastControls();
-    renderAdminGalleryFolders();
+    updateAdminTabBadges();
+    const initialHash = window.location.hash.slice(1);
+    const targetTab = (initialHash && document.getElementById(initialHash)) ? initialHash : "tabEvent";
+    activateAdminTab(targetTab, false);
   }
 
   // ── Render Events Tab Cards ──
@@ -404,11 +463,11 @@ document.addEventListener("DOMContentLoaded", () => {
             ${(ev.description || ev.body) ? `<div style="font-size:0.85rem; color:#d1d5db; margin-top:0.3rem;">${(ev.description || ev.body).slice(0, 120)}...</div>` : ''}
           </div>
           <div class="admin-item-actions">
-            <button type="button" class="btn-dash-action" onclick="toggleArchiveEvent(${idx})">${isArchived ? '🔄 Enable' : '📦 Archive'}</button>
-            <button type="button" class="btn-item-edit" onclick="toggleEventTicker(${idx})">${ev.showOnTicker ? 'Hide Ticker' : 'Show Ticker'}</button>
-            <button type="button" class="btn-item-edit" onclick="setEventActiveReg(${idx})">Set Active Reg</button>
-            <button type="button" class="btn-item-edit" onclick="editEventItem(${idx})">Edit</button>
-            <button type="button" class="btn-item-delete" onclick="deleteEventItem(${idx})">Delete</button>
+            <button type="button" class="btn-dash-action" onclick="toggleArchiveEvent(${idx})" title="${isArchived ? 'Enable Event' : 'Archive Event'}">${isArchived ? '🔄' : '📦'}</button>
+            <button type="button" class="btn-item-edit" onclick="toggleEventTicker(${idx})" title="${ev.showOnTicker ? 'Hide from Ticker' : 'Show on Ticker'}">📢</button>
+            <button type="button" class="btn-item-edit" onclick="setEventActiveReg(${idx})" title="Set as Active Event for Online Registration">🎯</button>
+            <button type="button" class="btn-item-edit" onclick="editEventItem(${idx})" title="Edit Event Details">✏️</button>
+            <button type="button" class="btn-item-delete" onclick="deleteEventItem(${idx})" title="Delete Event">🗑️</button>
           </div>
         </div>
       `;
@@ -497,9 +556,9 @@ document.addEventListener("DOMContentLoaded", () => {
             <div style="font-size:0.85rem; color:#d1d5db; margin-top:0.3rem;">${(item.body || '').replace(/<[^>]*>?/gm, '').slice(0, 120)}...</div>
           </div>
           <div class="admin-item-actions">
-            <button type="button" class="btn-dash-action" onclick="toggleArchiveNews(${idx})">${isArchived ? '🔄 Enable' : '📦 Archive'}</button>
-            <button type="button" class="btn-item-edit" onclick="editNewsItem(${idx})">✏️ Edit</button>
-            <button type="button" class="btn-item-delete" onclick="deleteNewsItem(${idx})">🗑️ Delete</button>
+            <button type="button" class="btn-dash-action" onclick="toggleArchiveNews(${idx})" title="${isArchived ? 'Enable Circular' : 'Archive Circular'}">${isArchived ? '🔄' : '📦'}</button>
+            <button type="button" class="btn-item-edit" onclick="editNewsItem(${idx})" title="Edit Circular">✏️</button>
+            <button type="button" class="btn-item-delete" onclick="deleteNewsItem(${idx})" title="Delete Circular">🗑️</button>
           </div>
         </div>
       `;
@@ -571,9 +630,9 @@ document.addEventListener("DOMContentLoaded", () => {
             <div style="font-size:0.85rem; color:#d1d5db; margin-top:0.3rem;">${(item.body || '').slice(0, 120)}...</div>
           </div>
           <div class="admin-item-actions">
-            <button type="button" class="btn-item-edit" onclick="toggleHlArchive(${idx})">${isArchived ? 'Unarchive' : 'Archive'}</button>
-            <button type="button" class="btn-item-edit" onclick="editHlItem(${idx})">Edit</button>
-            <button type="button" class="btn-item-delete" onclick="deleteHlItem(${idx})">Delete</button>
+            <button type="button" class="btn-dash-action" onclick="toggleHlArchive(${idx})" title="${isArchived ? 'Unarchive Highlight' : 'Archive Highlight'}">${isArchived ? '🔄' : '📦'}</button>
+            <button type="button" class="btn-item-edit" onclick="editHlItem(${idx})" title="Edit Highlight">✏️</button>
+            <button type="button" class="btn-item-delete" onclick="deleteHlItem(${idx})" title="Delete Highlight">🗑️</button>
           </div>
         </div>
       `;
@@ -628,14 +687,10 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="admin-item-sub">${item.designation} ${item.degrees ? '(' + item.degrees + ')' : ''}</div>
           </div>
           <div class="admin-item-actions" style="align-items:center;">
-            <button type="button" class="btn-icon-order" onclick="moveOfficialUp(${idx})" data-tooltip="Move Up in Lineup" ${idx === 0 ? 'disabled' : ''} aria-label="Move Up">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
-            </button>
-            <button type="button" class="btn-icon-order" onclick="moveOfficialDown(${idx})" data-tooltip="Move Down in Lineup" ${idx === items.length - 1 ? 'disabled' : ''} aria-label="Move Down">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <button type="button" class="btn-item-edit" onclick="editOfficialItem(${idx})">Edit</button>
-            <button type="button" class="btn-item-delete" onclick="deleteOfficialItem(${idx})">Delete</button>
+            <button type="button" class="btn-dash-action" onclick="moveOfficialUp(${idx})" title="Move Up in Lineup" ${idx === 0 ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : ''} aria-label="Move Up">⬆️</button>
+            <button type="button" class="btn-dash-action" onclick="moveOfficialDown(${idx})" title="Move Down in Lineup" ${idx === items.length - 1 ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : ''} aria-label="Move Down">⬇️</button>
+            <button type="button" class="btn-item-edit" onclick="editOfficialItem(${idx})" title="Edit Official Details">✏️</button>
+            <button type="button" class="btn-item-delete" onclick="deleteOfficialItem(${idx})" title="Delete Official">🗑️</button>
           </div>
         </div>
       `;
@@ -728,29 +783,72 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function fetchBroadcastContacts() {
     const listEl = document.getElementById("bcRecipientList");
-    const countEl = document.getElementById("bcSelectedCount");
     const btn = document.getElementById("fetchRecipientsBtn");
 
     if (btn) btn.disabled = true;
     if (listEl) listEl.innerHTML = `<p style="color:#60a5fa; text-align:center; padding:1rem;">⏳ Fetching records from Google Sheet...</p>`;
 
     const baseUrl = getAdminApiBaseUrl();
+    let fetched = false;
+
+    // 1. Try Express backend API
     try {
       const res = await fetch(`${baseUrl}/api/fetch-contacts`);
-      const data = await res.json();
-
-      if (data && data.status === "ok" && data.sheets) {
-        fetchedBroadcastData = data.sheets;
-        notify("✓ Contact records loaded from Google Sheet successfully!");
-      } else {
-        notify("⚠️ Could not fetch live records. Falling back to local data.", "error");
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.status === "ok" && Array.isArray(data.sheets) && data.sheets.length > 0) {
+          fetchedBroadcastData = data.sheets;
+          fetched = true;
+          notify("✓ Contact records loaded from Google Sheet backend successfully!");
+        }
       }
     } catch (e) {
-      console.warn("Contact fetch error:", e);
-    } finally {
-      if (btn) btn.disabled = false;
-      renderRecipientPreviewList();
+      console.warn("Backend contact fetch error:", e);
     }
+
+    // 2. If backend API unavailable, try direct Apps Script Web App URL
+    if (!fetched) {
+      try {
+        const sheetUrl = (window.ENV_CONFIG && window.ENV_CONFIG.sheetUrl) || "https://script.google.com/macros/s/AKfycbyrxUIvQMXOzaBFNKwle-kOC0xMlc0ezufhIRXSyyid3Zx6Rhk9SKMZhNIoBBB290Xw/exec";
+        const res = await fetch(`${sheetUrl}?action=getContacts`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.sheets) {
+            fetchedBroadcastData = data.sheets;
+            fetched = true;
+            notify("✓ Contact records loaded directly from Google Sheet!");
+          }
+        }
+      } catch (e) {
+        console.warn("Direct Google Sheet fetch error:", e);
+      }
+    }
+
+    // 3. Fallback to local stored registrations & sample records if offline
+    if (!fetched || !fetchedBroadcastData || !fetchedBroadcastData.length) {
+      const savedRegs = localStorage.getItem("RSAM_RECENT_REGISTRATION");
+      let localRecords = [];
+      if (savedRegs) {
+        try { localRecords.push(JSON.parse(savedRegs)); } catch(e){}
+      }
+      
+      const sampleRecords = [
+        { skaterName: "Aarav Sharma", mobile: "9876543210", regNumber: "R260908001", discipline: "Speed Skating (Tenacity)", coachName: "Rajesh Coach", coachMobile: "9876543211", schoolClub: "Moradabad Skating Academy" },
+        { skaterName: "Riya Verma", mobile: "9812345678", regNumber: "R260908002", discipline: "InLine Speed Skating", coachName: "Sunil Verma", coachMobile: "9812345679", schoolClub: "Kanth Road Club" },
+        { skaterName: "Kabir Gupta", mobile: "9988776655", regNumber: "R260908003", discipline: "Quad Speed Skating", coachName: "Amit Singh", coachMobile: "9988776644", schoolClub: "Delhi Public School Mbd" }
+      ];
+
+      fetchedBroadcastData = [
+        {
+          sheetName: "Registrations 2026",
+          records: localRecords.concat(sampleRecords)
+        }
+      ];
+      notify("ℹ️ Offline mode: Loaded local & sample athlete contacts for preview.", "info");
+    }
+
+    if (btn) btn.disabled = false;
+    renderRecipientPreviewList();
   }
 
   function getFilteredRecipients() {
@@ -995,6 +1093,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const container = document.getElementById("galleryAdminList");
     if (!container) return;
 
+    if (!folders.length) {
+      container.innerHTML = `<p style="color:#9ca3af; text-align:center; padding:1.5rem;">No gallery folders found. Click "+ Add New Gallery Folder" to create one.</p>`;
+      return;
+    }
+
     container.innerHTML = folders.map((f, idx) => `
       <div class="admin-item-card" style="margin-bottom:1rem;">
         <div class="admin-item-info">
@@ -1002,11 +1105,12 @@ document.addEventListener("DOMContentLoaded", () => {
             <span class="admin-item-title">${f.title}</span>
             <span class="badge-status status-live">${f.category || 'Gallery'}</span>
           </div>
-          <div class="admin-item-sub">📅 ${f.date} · 📍 ${f.location} · Folder ID: <code>${f.folderId}</code></div>
+          <div class="admin-item-sub">📅 ${f.date} · 📍 ${f.location} · Cloudinary Folder ID: <code style="font-weight:700; color:#38bdf8;">${f.folderId}</code></div>
           <div style="font-size:0.85rem; color:#d1d5db; margin-top:0.3rem;">${f.description}</div>
         </div>
         <div class="admin-item-actions">
-          <button type="button" class="btn-item-edit" onclick="editGalleryFolderItem(${idx})">✏️ Edit Metadata</button>
+          <button type="button" class="btn-item-edit" onclick="editGalleryFolderItem(${idx})">✏️ Edit Metadata &amp; Folder ID</button>
+          <button type="button" class="btn-item-delete" onclick="deleteGalleryFolderItem(${idx})">🗑️ Delete</button>
         </div>
       </div>
     `).join("");
@@ -1020,6 +1124,26 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
+  const addGalleryBtn = document.getElementById("addGalleryFolderBtn");
+  if (addGalleryBtn) {
+    addGalleryBtn.onclick = () => {
+      activeModalType = "galleryFolder";
+      activeModalIdx = null;
+      itemModalTitle.textContent = "Add New Photo Gallery Folder";
+      itemModalFields.innerHTML = `
+        <div class="form-group"><label>Cloudinary Folder ID / Subfolder Path</label><input type="text" id="mGalFolderId" placeholder="e.g. district_championship_2026 or rsam_website/events/district2026" required /></div>
+        <div class="form-group"><label>Folder Title</label><input type="text" id="mGalTitle" placeholder="e.g. 4th District Championship 2026 Photos" required /></div>
+        <div class="form-row">
+          <div class="form-group"><label>Category</label><input type="text" id="mGalCat" value="District Championship" required /></div>
+          <div class="form-group"><label>Event Date</label><input type="text" id="mGalDate" placeholder="e.g. Sept 2026" required /></div>
+        </div>
+        <div class="form-group"><label>Location</label><input type="text" id="mGalLoc" placeholder="e.g. Moradabad Sports Complex" required /></div>
+        <div class="form-group"><label>Description</label><textarea id="mGalDesc" rows="3" placeholder="Description of event photos..." required></textarea></div>
+      `;
+      itemModal.hidden = false;
+    };
+  }
+
   window.editGalleryFolderItem = function(idx) {
     const folders = getAdminGalleryFolders();
     const f = folders[idx];
@@ -1027,8 +1151,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     activeModalType = "galleryFolder";
     activeModalIdx = idx;
-    itemModalTitle.textContent = "Edit Photo Gallery Folder Metadata";
+    itemModalTitle.textContent = "Edit Photo Gallery Folder Metadata & Folder ID";
     itemModalFields.innerHTML = `
+      <div class="form-group"><label>Cloudinary Folder ID / Subfolder Path</label><input type="text" id="mGalFolderId" value="${f.folderId || ''}" required placeholder="e.g. district_championship_2026" /></div>
       <div class="form-group"><label>Folder Title</label><input type="text" id="mGalTitle" value="${f.title || ''}" required /></div>
       <div class="form-row">
         <div class="form-group"><label>Category</label><input type="text" id="mGalCat" value="${f.category || 'Championship'}" required /></div>
@@ -1038,6 +1163,15 @@ document.addEventListener("DOMContentLoaded", () => {
       <div class="form-group"><label>Description</label><textarea id="mGalDesc" rows="3" required>${f.description || ''}</textarea></div>
     `;
     itemModal.hidden = false;
+  };
+
+  window.deleteGalleryFolderItem = function(idx) {
+    if (!confirm("Are you sure you want to delete this photo gallery folder?")) return;
+    const folders = getAdminGalleryFolders();
+    folders.splice(idx, 1);
+    localStorage.setItem("RSAM_ADMIN_GALLERY_FOLDERS", JSON.stringify(folders));
+    renderAdminGalleryFolders();
+    notify("✓ Photo gallery folder deleted.");
   };
 
 
@@ -1759,8 +1893,9 @@ document.addEventListener("DOMContentLoaded", () => {
         notify("✓ Official Skinsuit design updated!");
       } else if (activeModalType === "galleryFolder") {
         const folders = getAdminGalleryFolders();
+        const customFolderId = document.getElementById("mGalFolderId") ? document.getElementById("mGalFolderId").value.trim() : "";
         const updatedFolder = {
-          folderId: (activeModalIdx !== null && folders[activeModalIdx]) ? folders[activeModalIdx].folderId : "folder_" + Date.now(),
+          folderId: customFolderId || ((activeModalIdx !== null && folders[activeModalIdx]) ? folders[activeModalIdx].folderId : "folder_" + Date.now()),
           title: document.getElementById("mGalTitle").value.trim(),
           category: document.getElementById("mGalCat").value.trim(),
           date: document.getElementById("mGalDate").value.trim(),
@@ -1774,7 +1909,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         localStorage.setItem("RSAM_ADMIN_GALLERY_FOLDERS", JSON.stringify(folders));
         renderAdminGalleryFolders();
-        notify("✓ Photo Gallery Folder metadata updated.");
+        notify("✓ Photo Gallery Folder metadata & Folder ID updated!");
       }
 
       closeModal();

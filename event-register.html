@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>4th District Championship 2026 — Event Registration | RSAM</title>
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <link rel="icon" type="image/png" href="https://res.cloudinary.com/igjmhsju/image/upload/v1788797466/rsam_website/branding/rsam-logo.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -19,7 +20,7 @@
 
   <!-- Navbar -->
   <nav class="navbar" id="navbar">
-    <div class="nav-inner">
+    <div class="nav-inner" style="display:flex; align-items:center; justify-content:space-between; width:100%;">
       <a href="index.html" class="nav-logo-link" style="text-decoration:none; color:inherit; display:flex; align-items:center; gap:0.8rem; cursor:pointer;">
         <div class="logo-img-wrap">
           <img src="https://res.cloudinary.com/igjmhsju/image/upload/v1788797466/rsam_website/branding/rsam-logo.png" alt="RSAM Logo" class="logo-img"/>
@@ -28,17 +29,22 @@
           <span class="nav-logo-full">Roller Sports Association Moradabad</span>
         </div>
       </a>
-      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
-        <span></span><span></span><span></span>
-      </button>
-      <ul class="nav-links" id="navLinks">
-        <li><a href="index.html#about">About</a></li>
-        <li><a href="index.html#officials">Officials</a></li>
-        <li><a href="index.html#news">News</a></li>
-        <li><a href="index.html#highlights">Highlights</a></li>
-        <li><a href="register.html">Annual Registration</a></li>
-        <li><a href="event-register.html" class="nav-register-link active">4th District Championship</a></li>
-      </ul>
+      <div style="display:flex; align-items:center; gap:0.75rem; margin-left:auto;">
+        <ul class="nav-links" id="navLinks">
+          <li><a href="index.html#about">About</a></li>
+          <li><a href="index.html#officials">Officials</a></li>
+          <li><a href="index.html#news">News</a></li>
+          <li><a href="index.html#highlights">Highlights</a></li>
+          <li><a href="register.html">Annual Registration</a></li>
+          <li><a href="event-register.html" class="nav-register-link active">4th District Championship</a></li>
+        </ul>
+        <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+          <span></span><span></span><span></span>
+        </button>
+        <button type="button" class="theme-toggle-btn" aria-label="Toggle Theme" title="Toggle Light/Dark Theme">
+          <i class="fa-solid fa-sun theme-toggle-icon"></i>
+        </button>
+      </div>
     </div>
   </nav>
 

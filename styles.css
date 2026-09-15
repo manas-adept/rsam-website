@@ -27,6 +27,203 @@
   --trans:      0.3s ease;
 }
 
+[data-theme="light"] {
+  --bg-dark:    #f8fafc;
+  --bg-card:    #ffffff;
+  --bg-mid:     #f1f5f9;
+  --surface:    #e2e8f0;
+  --surface2:   #cbd5e1;
+  --orange:     #e01c2e;
+  --orange-lt:  #f43f50;
+  --orange-dk:  #b91325;
+  --gold:       #d97706;
+  --text:       #0f172a;
+  --text-muted: #475569;
+  --text-dim:   #64748b;
+  --border:     rgba(224,28,46,0.25);
+  --border-s:   rgba(224,28,46,0.15);
+  --glow:       rgba(224,28,46,0.2);
+}
+
+[data-theme="light"],
+body[data-theme="light"] {
+  background: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+/* Light Mode — Hero Section */
+[data-theme="light"] .hero {
+  background: var(--bg-dark) !important;
+}
+
+[data-theme="light"] .hero-title,
+[data-theme="light"] .hero-title-main,
+[data-theme="light"] .hero-subtitle,
+[data-theme="light"] .section-title,
+[data-theme="light"] .section-desc {
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .aurora-hero-bg {
+  opacity: 0.35 !important;
+  mix-blend-mode: multiply !important;
+}
+
+/* Light Mode — Navbar & Drawer */
+[data-theme="light"] .navbar,
+[data-theme="light"] .navbar.spotlight-nav {
+  background: rgba(255, 255, 255, 0.85) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+}
+
+[data-theme="light"] .nav-logo-full,
+[data-theme="light"] .nav-links a {
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .nav-links a:hover {
+  color: var(--orange) !important;
+}
+
+/* Light Mode — Footer */
+[data-theme="light"] .footer {
+  background: #f1f5f9 !important;
+  border-top: 1px solid rgba(0, 0, 0, 0.12) !important;
+}
+
+[data-theme="light"] .footer-logo span,
+[data-theme="light"] .footer-brand p,
+[data-theme="light"] .footer-bottom,
+[data-theme="light"] .footer-bottom strong,
+[data-theme="light"] .visitor-counter {
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .footer-links a {
+  color: #475569 !important;
+}
+
+[data-theme="light"] .footer-links a:hover {
+  color: var(--orange) !important;
+}
+
+/* Light Mode — Contact Us Drawer */
+[data-theme="light"] .connect-panel {
+  background: rgba(255, 255, 255, 0.96) !important;
+  border-color: rgba(0, 0, 0, 0.15) !important;
+  color: #0f172a !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15) !important;
+}
+
+[data-theme="light"] .connect-header h3,
+[data-theme="light"] .connect-title,
+[data-theme="light"] .connect-address-title,
+[data-theme="light"] .tile-title,
+[data-theme="light"] .connect-phone-text,
+[data-theme="light"] .connect-address-text,
+[data-theme="light"] .inquiry-box-title {
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .connect-desc,
+[data-theme="light"] .connect-address-sub,
+[data-theme="light"] .tile-sub,
+[data-theme="light"] .social-handle {
+  color: #475569 !important;
+}
+
+[data-theme="light"] .connect-action-tile {
+  background: rgba(0, 0, 0, 0.04) !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Light Mode — Photo Gallery Folders & Cards */
+[data-theme="light"] .g-grid-card,
+[data-theme="light"] .devi-folder-card,
+[data-theme="light"] .g-folder-card,
+[data-theme="light"] .g-cylinder-showcase,
+[data-theme="light"] .g-list-item {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(0, 0, 0, 0.12) !important;
+  color: #0f172a !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08) !important;
+}
+
+[data-theme="light"] .g-list-title,
+[data-theme="light"] .g-list-desc,
+[data-theme="light"] .g-list-date {
+  color: #0f172a !important;
+}
+
+/* Light Mode — Cards & Controls */
+[data-theme="light"] .dash-card,
+[data-theme="light"] .admin-item-card,
+[data-theme="light"] .auth-card,
+[data-theme="light"] .admin-auth-card,
+[data-theme="light"] .reg-card,
+[data-theme="light"] .lookup-card {
+  background: rgba(255, 255, 255, 0.95) !important;
+  color: #0f172a !important;
+  border-color: rgba(0, 0, 0, 0.12) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08) !important;
+}
+
+[data-theme="light"] input,
+[data-theme="light"] select,
+[data-theme="light"] textarea {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
+
+[data-theme="light"] .visitor-tab {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(0, 0, 0, 0.15) !important;
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .visitor-tab__label {
+  color: #475569 !important;
+}
+
+[data-theme="light"] .visitor-tab__label .visitor-count-num {
+  color: #0f172a !important;
+}
+
+/* Far-Right Floating Icon-Only Theme Toggle Button */
+.theme-toggle-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+[data-theme="light"] .theme-toggle-btn {
+  background: rgba(0, 0, 0, 0.06);
+  border-color: rgba(0, 0, 0, 0.15);
+  color: #0f172a;
+}
+
+.theme-toggle-btn:hover {
+  background: var(--orange);
+  border-color: var(--orange);
+  color: #ffffff !important;
+  transform: scale(1.08);
+  box-shadow: 0 4px 14px rgba(224, 28, 46, 0.4);
+}
+
 html { scroll-behavior: smooth; }
 
 body {
@@ -263,7 +460,11 @@ code {
   position: fixed;
   top: 0; left: 0; right: 0;
   z-index: 100;
-  padding: 1rem 0;
+  padding: 0.45rem 0;
+  background: rgba(10, 10, 15, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   transition: background var(--trans), padding var(--trans), box-shadow var(--trans), top var(--trans);
 }
 
@@ -273,7 +474,8 @@ body.has-ticker .navbar {
 .navbar.scrolled {
   background: rgba(10,10,15,0.95);
   backdrop-filter: blur(12px);
-  padding: 0.6rem 0;
+  -webkit-backdrop-filter: blur(12px);
+  padding: 0.35rem 0;
   box-shadow: 0 2px 24px rgba(0,0,0,0.5);
 }
 
@@ -448,7 +650,8 @@ body.has-ticker .navbar {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background: #05050c;
+  background: var(--bg-dark);
+  transition: background var(--trans);
 }
 
 .hero-content {
@@ -1740,24 +1943,31 @@ body.has-ticker .navbar {
   left: 0;
   top: 50%;
   transform: translateY(-50%);
-  z-index: 200;
+  z-index: 2000;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.5rem;
+  gap: 1.1rem;
+  transition: opacity 0.35s ease, visibility 0.35s ease;
+}
+.left-floating-container.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 
+/* Contact Us Tab on Left */
 .connect-tab {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.85rem 0.6rem 1rem;
+  justify-content: center;
+  padding: 0.85rem 0.55rem 0.95rem;
   background: linear-gradient(135deg, var(--orange) 0%, #d91b2e 100%);
   color: #fff;
   border: 1px solid rgba(255,255,255,0.2);
   border-left: none;
-  border-radius: 0 14px 14px 0;
+  border-radius: 0 12px 12px 0;
   cursor: pointer;
   box-shadow: 4px 0 25px rgba(224,28,46,0.45);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1766,26 +1976,6 @@ body.has-ticker .navbar {
   background: linear-gradient(135deg, #ff4d5e 0%, #e01c2e 100%);
   box-shadow: 6px 0 35px rgba(224,28,46,0.65);
   transform: translateX(3px);
-}
-
-.left-visitor-badge {
-  background: rgba(13, 13, 24, 0.94);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-left: none;
-  border-radius: 0 10px 10px 0;
-  padding: 0.4rem 0.65rem;
-  color: var(--text-muted);
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  box-shadow: 4px 0 15px rgba(0, 0, 0, 0.45);
-  white-space: nowrap;
-}
-.left-visitor-badge .visitor-count-num {
-  color: #fff;
-  font-weight: 700;
 }
 .connect-tab__label {
   font-family: 'Rajdhani', sans-serif;
@@ -1796,6 +1986,43 @@ body.has-ticker .navbar {
   writing-mode: vertical-rl;
   text-orientation: mixed;
   transform: rotate(180deg);
+}
+
+/* Visitor Count Tab on Left (styled EXACTLY like Contact Us tab) */
+.visitor-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.85rem 0.55rem 0.95rem;
+  background: rgba(13, 13, 24, 0.94);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-left: none;
+  border-radius: 0 12px 12px 0;
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.visitor-tab:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateX(3px);
+}
+.visitor-tab__label {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  color: var(--text-muted);
+}
+.visitor-tab__label .visitor-count-num {
+  color: #fff;
+  font-weight: 700;
 }
 
 /* Glassmorphic Contact Us Sliding Panel */
@@ -1854,8 +2081,8 @@ body.has-ticker .navbar {
   margin: 2px 0 0;
 }
 .connect-panel__close {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -1944,52 +2171,39 @@ body.has-ticker .navbar {
   color: #4ade80;
 }
 
-/* Social Cards */
+/* Social Media Cards - Full Width Matching Address & Call Tiles */
 .connect-social-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.65rem;
-}
-.connect-social-card {
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-  padding: 0.65rem;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  text-decoration: none;
-  transition: all 0.25s ease;
-}
-.connect-social-card:hover {
-  transform: translateY(-2px);
-}
-.youtube-card:hover {
-  background: rgba(255, 0, 0, 0.15);
-  border-color: rgba(255, 0, 0, 0.4);
-}
-.instagram-card:hover {
-  background: rgba(225, 48, 108, 0.15);
-  border-color: rgba(225, 48, 108, 0.4);
-}
-.social-icon-wrapper {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-.social-card-info {
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  gap: 0.9rem;
+  width: 100%;
 }
-.social-name {
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: #fff;
+
+.connect-action-tile.youtube-card:hover {
+  background: rgba(255, 0, 0, 0.15);
+  border-color: rgba(255, 0, 0, 0.4);
+  transform: translateY(-2px);
+}
+.connect-action-tile.youtube-card:hover .tile-arrow {
+  transform: translateX(4px);
+  color: #ff4d4d;
+}
+
+.connect-action-tile.instagram-card:hover {
+  background: rgba(225, 48, 108, 0.15);
+  border-color: rgba(225, 48, 108, 0.4);
+  transform: translateY(-2px);
+}
+.connect-action-tile.instagram-card:hover .tile-arrow {
+  transform: translateX(4px);
+  color: #e1306c;
+}
+
+.yt-icon {
+  background: rgba(255, 0, 0, 0.18);
+}
+.ig-icon {
+  background: rgba(225, 48, 108, 0.18);
 }
 .social-handle {
   font-size: 0.65rem;
@@ -3372,11 +3586,6 @@ body.has-ticker .navbar.spotlight-nav {
 /* 7. Creepy Button Glitch Hover & Floating Contact Us Button Fix */
 .connect-tab,
 .connect-tab.creepy-btn {
-  position: fixed !important;
-  left: 0 !important;
-  top: 50% !important;
-  transform: translateY(-50%) !important;
-  z-index: 2000 !important;
   display: flex !important;
   flex-direction: column;
   align-items: center;
@@ -3399,12 +3608,12 @@ body.has-ticker .navbar.spotlight-nav {
 }
 
 @keyframes creepy-glitch {
-  0% { transform: translateY(-50%) translate(0); }
-  20% { transform: translateY(-50%) translate(-2px, 2px); }
-  40% { transform: translateY(-50%) translate(-2px, -2px); }
-  60% { transform: translateY(-50%) translate(2px, 2px); }
-  80% { transform: translateY(-50%) translate(2px, -2px); }
-  100% { transform: translateY(-50%) translate(0); }
+  0% { transform: translate(0); }
+  20% { transform: translate(-2px, 2px); }
+  40% { transform: translate(-2px, -2px); }
+  60% { transform: translate(2px, 2px); }
+  80% { transform: translate(2px, -2px); }
+  100% { transform: translate(0); }
 }
 
 /* 8. Fullscreen Image Lightbox Modal */

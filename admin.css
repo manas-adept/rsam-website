@@ -193,17 +193,116 @@
   gap: 1rem;
 }
 
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   Trust Center Compliance Documents Tab Navigation
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 .admin-tabs {
   position: sticky;
   top: 75px;
   z-index: 100;
-  background: #06060c;
-  padding: 0.5rem 0;
-  display: flex;
-  gap: 0.5rem;
-  border-bottom: 2px solid rgba(255,255,255,0.1);
-  margin-bottom: 1.5rem;
-  overflow-x: auto;
+  background: rgba(12, 12, 22, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  padding: 6px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.4rem;
+  margin-bottom: 2rem;
+  overflow: visible;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+@media (max-width: 992px) {
+  .admin-tabs {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 576px) {
+  .admin-tabs {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+[data-theme="light"] .admin-tabs {
+  background: rgba(241, 245, 249, 0.95);
+  border-color: rgba(0, 0, 0, 0.12);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+}
+
+.admin-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  padding: 0.65rem 1.15rem;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text-muted, #9ca3af);
+  border: 1px solid transparent;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+}
+
+.admin-tab-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+[data-theme="light"] .admin-tab-btn {
+  color: #475569;
+}
+
+[data-theme="light"] .admin-tab-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #0f172a;
+}
+
+/* Active Segmented Pill Tab (Trust Center Pill Style) */
+.admin-tab-btn.active {
+  background: linear-gradient(135deg, var(--orange, #e01c2e) 0%, #b91325 100%) !important;
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  font-weight: 700;
+  box-shadow: 0 6px 20px rgba(224, 28, 46, 0.45);
+}
+
+[data-theme="light"] .admin-tab-btn.active {
+  background: linear-gradient(135deg, #e01c2e 0%, #b91325 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 6px 20px rgba(224, 28, 46, 0.35);
+}
+
+/* Tab Micro-Badge Count Indicator */
+.tab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #d1d5db;
+  transition: all 0.2s ease;
+}
+
+.admin-tab-btn.active .tab-badge {
+  background: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+[data-theme="light"] .tab-badge {
+  background: rgba(0, 0, 0, 0.08);
+  color: #475569;
 }
 
 .tab-pane {

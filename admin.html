@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin Portal — Roller Sports Association Moradabad</title>
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <link rel="icon" type="image/png" href="https://res.cloudinary.com/igjmhsju/image/upload/v1788797466/rsam_website/branding/rsam-logo.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -29,6 +30,9 @@
         <span class="admin-badge-tag" id="adminUserBadge" hidden>🔒 Logged in as Admin</span>
         <button type="button" class="btn-admin-logout" id="logoutBtn" hidden>Logout</button>
         <a href="index.html" class="nav-home-link">&larr; Back to Website</a>
+        <button type="button" class="theme-toggle-btn" aria-label="Toggle Theme" title="Toggle Light/Dark Theme">
+          <i class="fa-solid fa-sun theme-toggle-icon"></i>
+        </button>
       </div>
     </div>
   </nav>
@@ -68,22 +72,39 @@
         <div class="admin-dash-header">
           <div>
             <span class="section-tag">Management Control Panel</span>
-            <h2>RSAM Admin <span class="accent">Dashboard</span></h2>
           </div>
           <div class="dash-quick-actions">
-            <button type="button" class="btn-dash-action" id="exportConfigBtn">📥 Export JSON Config</button>
-            <button type="button" class="btn-dash-action btn-dash-action--danger" id="resetDefaultsBtn" title="Revert unsaved changes made during this editing session">↺ Revert Session Changes</button>
+            <button type="button" class="btn-dash-action" id="exportConfigBtn" title="Export JSON Configuration"><i class="fa-solid fa-download"></i> Export</button>
+            <button type="button" class="btn-dash-action btn-dash-action--danger" id="resetDefaultsBtn" title="Revert Unsaved Session Changes"><i class="fa-solid fa-arrow-rotate-left"></i> Revert</button>
           </div>
         </div>
 
-        <!-- Dashboard Navigation Tabs -->
-        <div class="admin-tabs">
-          <button type="button" class="admin-tab-btn active" data-tab="tabEvent">🎟️ Events &amp; Fee Control</button>
-          <button type="button" class="admin-tab-btn" data-tab="tabBroadcast">💬 Bulk WhatsApp Broadcast</button>
-          <button type="button" class="admin-tab-btn" data-tab="tabGallery">🖼️ Photo Gallery Control</button>
-          <button type="button" class="admin-tab-btn" data-tab="tabNews">📰 News &amp; Circulars</button>
-          <button type="button" class="admin-tab-btn" data-tab="tabHighlights">🏆 Hall of Highlights</button>
-          <button type="button" class="admin-tab-btn" data-tab="tabOfficials">👔 Officials Roster</button>
+        <!-- Dashboard Navigation Tabs (Trust Center Segmented Grid Track) -->
+        <div class="admin-tabs" id="adminTabsTrack">
+          <button type="button" class="admin-tab-btn active" data-tab="tabEvent">
+            <span>🎟️ Events &amp; Fees</span>
+            <span class="tab-badge" id="badgeEvents">3</span>
+          </button>
+          <button type="button" class="admin-tab-btn" data-tab="tabBroadcast">
+            <span>💬 Broadcast</span>
+            <span class="tab-badge" id="badgeBroadcast">Bot</span>
+          </button>
+          <button type="button" class="admin-tab-btn" data-tab="tabGallery">
+            <span>🖼️ Gallery</span>
+            <span class="tab-badge" id="badgeGallery">3</span>
+          </button>
+          <button type="button" class="admin-tab-btn" data-tab="tabNews">
+            <span>📰 Circulars</span>
+            <span class="tab-badge" id="badgeNews">4</span>
+          </button>
+          <button type="button" class="admin-tab-btn" data-tab="tabHighlights">
+            <span>🏆 Highlights</span>
+            <span class="tab-badge" id="badgeHighlights">4</span>
+          </button>
+          <button type="button" class="admin-tab-btn" data-tab="tabOfficials">
+            <span>👔 Officials</span>
+            <span class="tab-badge" id="badgeOfficials">7</span>
+          </button>
         </div>
 
         <!-- Notification Banner -->
@@ -242,7 +263,10 @@
           <div class="dash-card">
             <div class="card-title-row">
               <h3>🖼️ Manage Photo Gallery Folders</h3>
-              <button type="button" class="btn-dash-action" id="refreshGalleryFoldersBtn">🔄 Refresh Folders</button>
+              <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                <button type="button" class="btn-primary btn-sm" id="addGalleryFolderBtn">+ Add New Gallery Folder</button>
+                <button type="button" class="btn-dash-action" id="refreshGalleryFoldersBtn">🔄 Refresh Folders</button>
+              </div>
             </div>
             <p class="card-desc">Configure title, event date, location, category, and description for photo gallery albums and Cloudinary event subfolders.</p>
 

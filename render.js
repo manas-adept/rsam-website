@@ -210,7 +210,7 @@ function renderNavbar() {
   mount("app-navbar", `
     ${tickerHTML}
     <nav class="navbar spotlight-nav" id="navbar">
-      <div class="nav-inner">
+      <div class="nav-inner" style="display:flex; align-items:center; justify-content:space-between; width:100%;">
         <a href="index.html" class="nav-logo-link" style="text-decoration:none; color:inherit; display:flex; align-items:center; gap:0.8rem; cursor:pointer;">
           <div class="logo-img-wrap">
             <img src="https://res.cloudinary.com/igjmhsju/image/upload/v1788797466/rsam_website/branding/rsam-logo.png" alt="RSAM Logo" class="logo-img"/>
@@ -219,10 +219,17 @@ function renderNavbar() {
             <span class="nav-logo-full">Roller Sports Association Moradabad</span>
           </div>
         </a>
-        <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
-          <span></span><span></span><span></span>
-        </button>
-        <ul class="nav-links" id="navLinks">${links}</ul>
+        <div style="display:flex; align-items:center; gap:0.75rem; margin-left:auto;">
+          <ul class="nav-links" id="navLinks">
+            ${links}
+          </ul>
+          <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+            <span></span><span></span><span></span>
+          </button>
+          <button type="button" class="theme-toggle-btn" aria-label="Toggle Theme" title="Toggle Light/Dark Theme">
+            <i class="fa-solid fa-sun theme-toggle-icon"></i>
+          </button>
+        </div>
       </div>
     </nav>
   `);
@@ -851,31 +858,25 @@ function renderCertificate() {
 window.openConnect = function() {
   const panel = document.getElementById('connectPanel');
   const backdrop = document.getElementById('connectBackdrop');
-  const tab = document.getElementById('connectTab');
+  const floatGroup = document.querySelector('.left-floating-container');
   if (panel) {
     panel.classList.add('open');
     panel.setAttribute('aria-hidden', 'false');
   }
   if (backdrop) backdrop.classList.add('open');
-  if (tab) {
-    tab.classList.add('open');
-    tab.setAttribute('aria-expanded', 'true');
-  }
+  if (floatGroup) floatGroup.classList.add('is-hidden');
 };
 
 window.closeConnect = function() {
   const panel = document.getElementById('connectPanel');
   const backdrop = document.getElementById('connectBackdrop');
-  const tab = document.getElementById('connectTab');
+  const floatGroup = document.querySelector('.left-floating-container');
   if (panel) {
     panel.classList.remove('open');
     panel.setAttribute('aria-hidden', 'true');
   }
   if (backdrop) backdrop.classList.remove('open');
-  if (tab) {
-    tab.classList.remove('open');
-    tab.setAttribute('aria-expanded', 'false');
-  }
+  if (floatGroup) floatGroup.classList.remove('is-hidden');
 };
 
 /* ── Connect (floating panel) ─────────────────────── */
@@ -891,8 +892,8 @@ function renderConnect() {
         <span class="connect-tab__label">Contact Us</span>
       </button>
 
-      <div class="left-visitor-badge" title="Total RSAM Website Visitors">
-        <span class="visitor-count-num topVisitorCount" id="visitorCount">0</span> visitors
+      <div class="visitor-tab" title="Total RSAM Website Visitors">
+        <span class="visitor-tab__label"><span class="visitor-count-num topVisitorCount" id="visitorCount">0</span> visitors</span>
       </div>
     </div>
 
@@ -906,7 +907,7 @@ function renderConnect() {
         </div>
         <button class="connect-panel__close" id="connectClose" onclick="if(window.closeConnect) window.closeConnect();" aria-label="Close">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            <polyline points="15 18 9 12 15 6"/>
           </svg>
         </button>
       </div>
@@ -931,23 +932,24 @@ function renderConnect() {
           </div>
         </div>
 
-        <!-- Social Media Links -->
+        <!-- Social Media Links (Full-Width Matching Cards) -->
         <div class="connect-social-grid">
-          <a href="${connect.youtube}" target="_blank" rel="noopener" class="connect-social-card youtube-card">
-            <div class="social-icon-wrapper yt-icon">
+          <a href="${connect.youtube}" target="_blank" rel="noopener" class="connect-action-tile youtube-card">
+            <div class="connect-tile-icon yt-icon">
               <svg viewBox="0 0 48 48" width="22" height="22">
                 <rect x="2" y="10" width="44" height="28" rx="8" fill="#FF0000"/>
                 <polygon points="20,17 20,31 33,24" fill="white"/>
               </svg>
             </div>
-            <div class="social-card-info">
-              <span class="social-name">YouTube</span>
-              <span class="social-handle">@rsam_mbd</span>
+            <div class="connect-tile-info">
+              <span class="tile-label">YouTube Channel</span>
+              <span class="tile-val">@rsam_mbd</span>
             </div>
+            <span class="tile-arrow">&rarr;</span>
           </a>
 
-          <a href="${connect.instagram}" target="_blank" rel="noopener" class="connect-social-card instagram-card">
-            <div class="social-icon-wrapper ig-icon">
+          <a href="${connect.instagram}" target="_blank" rel="noopener" class="connect-action-tile instagram-card">
+            <div class="connect-tile-icon ig-icon">
               <svg viewBox="0 0 48 48" width="22" height="22">
                 <defs>
                   <linearGradient id="ig2" x1="0%" y1="100%" x2="100%" y2="0%">
@@ -961,38 +963,18 @@ function renderConnect() {
                 <circle cx="34.5" cy="13.5" r="2.5" fill="white"/>
               </svg>
             </div>
-            <div class="social-card-info">
-              <span class="social-name">Instagram</span>
-              <span class="social-handle">@rsam_mbd_official</span>
+            <div class="connect-tile-info">
+              <span class="tile-label">Instagram Official</span>
+              <span class="tile-val">@rsam_mbd_official</span>
             </div>
+            <span class="tile-arrow">&rarr;</span>
           </a>
-        </div>
-
-        <!-- Quick WhatsApp Message Form -->
-        <div class="connect-inquiry-box">
-          <div class="inquiry-box-title">
-            <span>💬 Send Direct WhatsApp Message</span>
-          </div>
-          <form id="connectInquiryForm" class="inquiry-form" onsubmit="return false;">
-            <div class="inquiry-field">
-              <input type="text" id="contactInquiryName" placeholder="Your Name" required />
-            </div>
-            <div class="inquiry-field">
-              <input type="tel" id="contactInquiryPhone" placeholder="Your WhatsApp / Mobile No." required />
-            </div>
-            <div class="inquiry-field">
-              <textarea id="contactInquiryMsg" rows="3" placeholder="Type your message or inquiry..." required></textarea>
-            </div>
-            <button type="button" id="contactSendWaBtn" class="btn-send-wa">
-              <span>💬 Send via WhatsApp</span>
-            </button>
-          </form>
         </div>
       </div>
     </div>
 
     <!-- backdrop -->
-    <div class="connect-backdrop" id="connectBackdrop"></div>
+    <div class="connect-backdrop" id="connectBackdrop" onclick="if(window.closeConnect) window.closeConnect();"></div>
   `);
 }
 
