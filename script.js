@@ -35,17 +35,34 @@ function initInteractions() {
   const yearEl = document.getElementById('year');
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 
-  /* ── Visitor counter ──────────────────────────── */
-  const countEl = document.getElementById('visitorCount');
-  if (countEl) {
-    let count = parseInt(localStorage.getItem('rsam_visitors') || '0', 10);
-    if (!sessionStorage.getItem('rsam_visited')) {
-      count += 1;
-      localStorage.setItem('rsam_visitors', count);
-      sessionStorage.setItem('rsam_visited', '1');
+  /* ── Visitor counter count-up animation ──────────────── */
+  function animateVisitorCounter(targetCount) {
+    const els = document.querySelectorAll('#visitorCount, .topVisitorCount');
+    if (!els.length) return;
+    const duration = 1600;
+    const startTime = performance.now();
+    function step(currentTime) {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const easeProgress = 1 - Math.pow(1 - progress, 3);
+      const current = Math.floor(easeProgress * targetCount);
+      els.forEach(el => { el.textContent = current.toLocaleString(); });
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      } else {
+        els.forEach(el => { el.textContent = targetCount.toLocaleString(); });
+      }
     }
-    countEl.textContent = count.toLocaleString();
+    requestAnimationFrame(step);
   }
+
+  let count = parseInt(localStorage.getItem('rsam_visitors') || '1240', 10);
+  if (!sessionStorage.getItem('rsam_visited')) {
+    count += 1;
+    localStorage.setItem('rsam_visitors', count);
+    sessionStorage.setItem('rsam_visited', '1');
+  }
+  animateVisitorCounter(count);
 
   /* ── Fade-in on scroll ────────────────────────── */
   const fadeObserver = new IntersectionObserver(entries => {

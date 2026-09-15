@@ -286,11 +286,26 @@ body.has-ticker .navbar {
   gap: 2rem;
 }
 
+.nav-logo-link {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-shrink: 0;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  transition: opacity 0.2s ease;
+}
+.nav-logo-link:hover {
+  opacity: 0.9;
+}
+
 .nav-logo {
   display: flex;
   align-items: center;
   gap: 0.6rem;
   flex-shrink: 0;
+  cursor: pointer;
 }
 .nav-logo-text {
   display: flex;
@@ -310,6 +325,34 @@ body.has-ticker .navbar {
   color: var(--text);
   letter-spacing: 0.12em;
   text-transform: uppercase;
+}
+
+.nav-visitor-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  margin-left: 0.5rem;
+  white-space: nowrap;
+}
+.visitor-live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 10px #22c55e;
+  animation: pulse-green 1.8s infinite;
+}
+.visitor-count-num {
+  color: #fff;
+  font-weight: 700;
 }
 
 @keyframes spin-slow { to { transform: rotate(360deg); } }

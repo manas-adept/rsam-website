@@ -145,19 +145,34 @@ function getActiveHighlights() {
 function getActiveOfficials() {
   const saved = localStorage.getItem("RSAM_ADMIN_OFFICIALS");
   if (saved) {
-    try { return JSON.parse(saved); } catch (e) {}
+    try {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    } catch (e) {}
   }
-  const off = typeof OFFICIALS !== 'undefined' ? OFFICIALS : (window.OFFICIALS || {});
-  const assoc = off.association || [];
+  const off = (typeof OFFICIALS !== 'undefined' && OFFICIALS) ? OFFICIALS : (window.OFFICIALS || {});
+  const assoc = (off.association || []).map(o => ({
+    ...o,
+    category: o.category || 'executive',
+    photo: o.photo || 'https://res.cloudinary.com/igjmhsju/image/upload/v1788797466/rsam_website/branding/rsam-logo.png'
+  }));
   const comm = (off.committee && (Array.isArray(off.committee) ? off.committee : off.committee.members)) || [];
-  return [...assoc, ...comm];
+  const commFormatted = comm.map(o => ({
+    ...o,
+    category: o.category || 'referee',
+    photo: o.photo || 'https://res.cloudinary.com/igjmhsju/image/upload/v1788797466/rsam_website/branding/rsam-logo.png'
+  }));
+  return [...assoc, ...commFormatted];
 }
 
 /* ── Navbar ───────────────────────────────────────── */
 function renderNavbar() {
-  const links = CONFIG.nav.map(l =>
-    `<li><a href="${l.href}"${l.cta ? ' class="nav-cta"' : ""}>${l.label}</a></li>`
-  ).join("");
+  const links = CONFIG.nav.map(l => {
+    if (l.label.toLowerCase().includes('contact')) {
+      return `<li><a href="javascript:void(0)" onclick="if(window.openConnect) window.openConnect(); else location.href='index.html#connect';" class="nav-contact-link">${l.label}</a></li>`;
+    }
+    return `<li><a href="${l.href}"${l.cta ? ' class="nav-cta"' : ""}>${l.label}</a></li>`;
+  }).join("");
 
   const events = getActiveEventsList();
   const tickerEvents = events.filter(e => e.showOnTicker);
@@ -192,12 +207,11 @@ function renderNavbar() {
     document.body.classList.remove("has-ticker");
   }
 
-
   mount("app-navbar", `
     ${tickerHTML}
     <nav class="navbar spotlight-nav" id="navbar">
       <div class="nav-inner">
-        <a href="index.html" class="nav-logo-link" style="text-decoration:none; color:inherit; display:flex; align-items:center; gap:0.8rem;">
+        <a href="index.html" class="nav-logo-link" style="text-decoration:none; color:inherit; display:flex; align-items:center; gap:0.8rem; cursor:pointer;">
           <div class="logo-img-wrap">
             <img src="https://res.cloudinary.com/igjmhsju/image/upload/v1788797466/rsam_website/branding/rsam-logo.png" alt="RSAM Logo" class="logo-img"/>
           </div>
@@ -205,6 +219,10 @@ function renderNavbar() {
             <span class="nav-logo-full">Roller Sports Association Moradabad</span>
           </div>
         </a>
+        <div class="nav-visitor-badge" title="Total RSAM Website Visitors">
+          <span class="visitor-live-dot"></span>
+          <span>👁️ <span class="visitor-count-num topVisitorCount">0</span> visitors</span>
+        </div>
         <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
           <span></span><span></span><span></span>
         </button>
@@ -844,7 +862,6 @@ function renderConnect() {
     <!-- floating trigger tab -->
     <button class="connect-tab" id="connectTab" aria-label="Toggle contact panel" aria-expanded="false">
       <span class="connect-tab__pulse"></span>
-      <span class="connect-tab__icon">📞</span>
       <span class="connect-tab__label">Contact Us</span>
     </button>
 
