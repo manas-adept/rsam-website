@@ -2,12 +2,15 @@
    register.js
    Paste your Google Apps Script Web App URL in SHEET_URL below.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-// https://script.google.com/macros/s/AKfycbyohDIL5CEpuaT3pBp7dh6bzm9c-ccQDAEhfneIe4ADsGTmL5_70oKfnFIjp_BiuUncUg/exec
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbyrxUIvQMXOzaBFNKwle-kOC0xMlc0ezufhIRXSyyid3Zx6Rhk9SKMZhNIoBBB290Xw/exec";
-const BACKEND_DOMAIN = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-  ? 'http://localhost:3001'
-  : (window.PRODUCTION_API_URL || 'https://rsam-whatsapp-bot.onrender.com');
-const OPENWA_SERVER_URL = `${BACKEND_DOMAIN}/send-registration`;
+const getEnv = () => window.ENV_CONFIG || {
+  sheetUrl: "https://script.google.com/macros/s/AKfycbyrxUIvQMXOzaBFNKwle-kOC0xMlc0ezufhIRXSyyid3Zx6Rhk9SKMZhNIoBBB290Xw/exec",
+  backendUrl: "http://localhost:3001",
+  openwaServerUrl: "http://localhost:3001/send-registration",
+  razorpayKey: "rzp_test_TZa1vfjhrPJobv"
+};
+const SHEET_URL = getEnv().sheetUrl;
+const BACKEND_DOMAIN = getEnv().backendUrl;
+const OPENWA_SERVER_URL = getEnv().openwaServerUrl;
 const OPENWA_API_KEY    = "rsam_whatsapp_secret_key_2026";
 
 function escapeHTML(str) {
@@ -568,7 +571,7 @@ if (savedFeeCfg) {
   } catch (e) {}
 }
 
-const RAZORPAY_KEY_ID = "rzp_test_TZa1vfjhrPJobv"; // Test Razorpay Key ID
+const RAZORPAY_KEY_ID = (window.ENV_CONFIG && window.ENV_CONFIG.razorpayKey) || "rzp_test_TZa1vfjhrPJobv"; // Razorpay Key ID
 const BASE_REGISTRATION_FEE = baseFeeVal;
 const GATEWAY_FEE = parseFloat(((BASE_REGISTRATION_FEE * gwPctVal) / 100).toFixed(2));
 const GST_FEE = parseFloat(((GATEWAY_FEE * gstPctVal) / 100).toFixed(2));

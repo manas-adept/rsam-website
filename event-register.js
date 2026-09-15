@@ -3,13 +3,17 @@
    Event Registration & Verification Logic for 4th District Championship 2026
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbyrxUIvQMXOzaBFNKwle-kOC0xMlc0ezufhIRXSyyid3Zx6Rhk9SKMZhNIoBBB290Xw/exec";
-const BACKEND_DOMAIN = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-  ? 'http://localhost:3001'
-  : (window.PRODUCTION_API_URL || 'https://rsam-whatsapp-bot.onrender.com');
-const OPENWA_SERVER_URL = `${BACKEND_DOMAIN}/send-registration`;
+const getEvtEnv = () => window.ENV_CONFIG || {
+  sheetUrl: "https://script.google.com/macros/s/AKfycbyrxUIvQMXOzaBFNKwle-kOC0xMlc0ezufhIRXSyyid3Zx6Rhk9SKMZhNIoBBB290Xw/exec",
+  backendUrl: "http://localhost:3001",
+  openwaServerUrl: "http://localhost:3001/send-registration",
+  razorpayKey: "rzp_test_TZa1vfjhrPJobv"
+};
+const SHEET_URL = getEvtEnv().sheetUrl;
+const BACKEND_DOMAIN = getEvtEnv().backendUrl;
+const OPENWA_SERVER_URL = getEvtEnv().openwaServerUrl;
 const OPENWA_API_KEY    = "rsam_whatsapp_secret_key_2026";
-const RAZORPAY_KEY_ID   = "rzp_test_TZa1vfjhrPJobv";
+const RAZORPAY_KEY_ID   = getEvtEnv().razorpayKey;
 
 function escapeHTML(str) {
   if (typeof str !== 'string') return str || '';

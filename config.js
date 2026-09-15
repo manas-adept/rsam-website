@@ -6,7 +6,61 @@
    highlights etc.) edit the files in data/ instead.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-window.PRODUCTION_API_URL = "https://rsam-whatsapp-bot.onrender.com";
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   ENVIRONMENT MODE FLAG
+   Options:
+     "dev"  — Local Development mode (http://localhost:3001)
+     "prod" — Production Live mode (https://rsam-whatsapp-bot.onrender.com)
+     "auto" — Auto-detect mode (localhost/127.0.0.1 -> dev, else -> prod)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+window.RSAM_ENV = "dev"; // 👈 CHANGE THIS SINGLE FLAG ("dev" | "prod" | "auto")
+
+window.ENV_CONFIG = {
+  dev: {
+    mode: "dev",
+    name: "Development (Localhost)",
+    backendUrl: "http://localhost:3001",
+    sheetUrl: "https://script.google.com/macros/s/AKfycbyrxUIvQMXOzaBFNKwle-kOC0xMlc0ezufhIRXSyyid3Zx6Rhk9SKMZhNIoBBB290Xw/exec",
+    razorpayKey: "rzp_test_TZa1vfjhrPJobv",
+    openwaServerUrl: "http://localhost:3001/send-registration",
+    debug: true
+  },
+  prod: {
+    mode: "prod",
+    name: "Production (Netlify / Live)",
+    backendUrl: "https://rsam-whatsapp-bot.onrender.com",
+    sheetUrl: "https://script.google.com/macros/s/AKfycbyrxUIvQMXOzaBFNKwle-kOC0xMlc0ezufhIRXSyyid3Zx6Rhk9SKMZhNIoBBB290Xw/exec",
+    razorpayKey: "rzp_test_TZa1vfjhrPJobv",
+    openwaServerUrl: "https://rsam-whatsapp-bot.onrender.com/send-registration",
+    debug: false
+  },
+
+  get activeEnv() {
+    const flag = String(window.RSAM_ENV || "dev").toLowerCase().trim();
+    if (flag === "dev") return "dev";
+    if (flag === "prod") return "prod";
+    const isLocal = typeof window !== 'undefined' && (
+      window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1' ||
+      window.location.hostname === '::1'
+    );
+    return isLocal ? "dev" : "prod";
+  },
+
+  get current() {
+    return this[this.activeEnv];
+  },
+
+  get mode() { return this.current.mode; },
+  get name() { return this.current.name; },
+  get backendUrl() { return this.current.backendUrl; },
+  get sheetUrl() { return this.current.sheetUrl; },
+  get razorpayKey() { return this.current.razorpayKey; },
+  get openwaServerUrl() { return this.current.openwaServerUrl; },
+  get debug() { return this.current.debug; }
+};
+
+window.PRODUCTION_API_URL = window.ENV_CONFIG.backendUrl;
 
 const CONFIG = {
 
@@ -39,6 +93,7 @@ const CONFIG = {
     { label: "Highlights",  href: "#highlights"  },
     { label: "Gallery",     href: "#gallery"     },
     { label: "Certificate", href: "#certificate" },
+    { label: "Contact Us",   href: "#connect"     },
     { label: "Register",    href: "register.html", cta: true },
   ],
 

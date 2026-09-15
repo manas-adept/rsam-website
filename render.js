@@ -842,59 +842,104 @@ function renderConnect() {
 
   mount("app-connect", `
     <!-- floating trigger tab -->
-    <button class="connect-tab creepy-btn" id="connectTab" aria-label="Toggle connect panel" aria-expanded="false">
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-      </svg>
-      <span class="connect-tab__label">Connect</span>
+    <button class="connect-tab" id="connectTab" aria-label="Toggle contact panel" aria-expanded="false">
+      <span class="connect-tab__pulse"></span>
+      <span class="connect-tab__icon">📞</span>
+      <span class="connect-tab__label">Contact Us</span>
     </button>
 
     <!-- sliding panel -->
     <div class="connect-panel" id="connectPanel" aria-hidden="true">
-      <button class="connect-panel__close" id="connectClose" aria-label="Close">
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-        </svg>
-      </button>
-
-      <div class="connect-socials">
-        <a href="${connect.youtube}" target="_blank" rel="noopener" class="connect-social-btn youtube" aria-label="YouTube">
-          <svg viewBox="0 0 48 48" width="24" height="24">
-            <rect x="2" y="10" width="44" height="28" rx="8" fill="#FF0000"/>
-            <polygon points="20,17 20,31 33,24" fill="white"/>
+      <div class="connect-header">
+        <div class="connect-header-title">
+          <span class="connect-header-badge">OFFICIAL HOTLINE</span>
+          <h3>Contact RSAM</h3>
+          <p>Roller Sports Association Moradabad</p>
+        </div>
+        <button class="connect-panel__close" id="connectClose" aria-label="Close">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
           </svg>
-        </a>
-        <a href="${connect.instagram}" target="_blank" rel="noopener" class="connect-social-btn instagram" aria-label="Instagram">
-          <svg viewBox="0 0 48 48" width="24" height="24">
-            <defs>
-              <linearGradient id="ig2" x1="0%" y1="100%" x2="100%" y2="0%">
-                <stop offset="0%"   style="stop-color:#f09433"/>
-                <stop offset="50%"  style="stop-color:#dc2743"/>
-                <stop offset="100%" style="stop-color:#bc1888"/>
-              </linearGradient>
-            </defs>
-            <rect x="4" y="4" width="40" height="40" rx="12" fill="url(#ig2)"/>
-            <circle cx="24" cy="24" r="9" fill="none" stroke="white" stroke-width="2.5"/>
-            <circle cx="34.5" cy="13.5" r="2.5" fill="white"/>
-          </svg>
-        </a>
+        </button>
       </div>
 
-      <div class="connect-divider"></div>
+      <div class="connect-body">
+        <!-- Direct Call Tile -->
+        <a href="tel:${connect.phone.replace(/[^+\d]/g,"")}" class="connect-action-tile call-tile">
+          <div class="connect-tile-icon pulse-icon">📞</div>
+          <div class="connect-tile-info">
+            <span class="tile-label">Call Official Hotline</span>
+            <span class="tile-val">${connect.phone}</span>
+          </div>
+          <span class="tile-arrow">&rarr;</span>
+        </a>
 
-      <div class="connect-contacts">
-        <a href="mailto:${connect.email}" class="connect-contact-row">
-          <span class="connect-contact-icon">📧</span>
-          <span>${connect.email}</span>
-        </a>
-        <div class="connect-contact-row">
-          <span class="connect-contact-icon">📍</span>
-          <span>${connect.address}</span>
+        <!-- Address Tile -->
+        <div class="connect-action-tile address-tile">
+          <div class="connect-tile-icon">📍</div>
+          <div class="connect-tile-info">
+            <span class="tile-label">Official Address</span>
+            <span class="tile-val text-address">${connect.address}</span>
+          </div>
         </div>
-        <a href="tel:${connect.phone.replace(/[^+\d]/g,"")}" class="connect-contact-row">
-          <span class="connect-contact-icon">📞</span>
-          <span>${connect.phone}</span>
-        </a>
+
+        <!-- Social Media Links -->
+        <div class="connect-social-grid">
+          <a href="${connect.youtube}" target="_blank" rel="noopener" class="connect-social-card youtube-card">
+            <div class="social-icon-wrapper yt-icon">
+              <svg viewBox="0 0 48 48" width="22" height="22">
+                <rect x="2" y="10" width="44" height="28" rx="8" fill="#FF0000"/>
+                <polygon points="20,17 20,31 33,24" fill="white"/>
+              </svg>
+            </div>
+            <div class="social-card-info">
+              <span class="social-name">YouTube</span>
+              <span class="social-handle">@rsam_mbd</span>
+            </div>
+          </a>
+
+          <a href="${connect.instagram}" target="_blank" rel="noopener" class="connect-social-card instagram-card">
+            <div class="social-icon-wrapper ig-icon">
+              <svg viewBox="0 0 48 48" width="22" height="22">
+                <defs>
+                  <linearGradient id="ig2" x1="0%" y1="100%" x2="100%" y2="0%">
+                    <stop offset="0%"   style="stop-color:#f09433"/>
+                    <stop offset="50%"  style="stop-color:#dc2743"/>
+                    <stop offset="100%" style="stop-color:#bc1888"/>
+                  </linearGradient>
+                </defs>
+                <rect x="4" y="4" width="40" height="40" rx="12" fill="url(#ig2)"/>
+                <circle cx="24" cy="24" r="9" fill="none" stroke="white" stroke-width="2.5"/>
+                <circle cx="34.5" cy="13.5" r="2.5" fill="white"/>
+              </svg>
+            </div>
+            <div class="social-card-info">
+              <span class="social-name">Instagram</span>
+              <span class="social-handle">@rsam_mbd_official</span>
+            </div>
+          </a>
+        </div>
+
+        <!-- Quick WhatsApp Message Form -->
+        <div class="connect-inquiry-box">
+          <div class="inquiry-box-title">
+            <span>💬 Send Direct WhatsApp Message</span>
+          </div>
+          <form id="connectInquiryForm" class="inquiry-form" onsubmit="return false;">
+            <div class="inquiry-field">
+              <input type="text" id="contactInquiryName" placeholder="Your Name" required />
+            </div>
+            <div class="inquiry-field">
+              <input type="tel" id="contactInquiryPhone" placeholder="Your WhatsApp / Mobile No." required />
+            </div>
+            <div class="inquiry-field">
+              <textarea id="contactInquiryMsg" rows="3" placeholder="Type your message or inquiry..." required></textarea>
+            </div>
+            <button type="button" id="contactSendWaBtn" class="btn-send-wa">
+              <span>💬 Send via WhatsApp</span>
+            </button>
+          </form>
+        </div>
       </div>
     </div>
 
@@ -1544,8 +1589,7 @@ async function loadLiveCloudinaryGalleries() {
   window.LIVE_GALLERY_CACHE = window.LIVE_GALLERY_CACHE || {};
   window.LIVE_CLOUDINARY_DISCOVERED_FOLDERS = null;
 
-  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-  const baseUrl = isLocal ? 'http://localhost:3001' : (window.PRODUCTION_API_URL || 'https://rsam-whatsapp-bot.onrender.com');
+  const baseUrl = (window.ENV_CONFIG && window.ENV_CONFIG.backendUrl) || 'http://localhost:3001';
 
   try {
     const controller = new AbortController();

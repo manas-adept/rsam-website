@@ -126,10 +126,12 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function getAdminApiBaseUrl() {
+    if (window.ENV_CONFIG && window.ENV_CONFIG.backendUrl) {
+      return window.ENV_CONFIG.backendUrl;
+    }
     const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     if (isLocal) {
-      const port = (window.location.port === '8080' || !window.location.port) ? '3001' : window.location.port;
-      return `http://${window.location.hostname}:${port}`;
+      return 'http://localhost:3001';
     }
     return window.PRODUCTION_API_URL || 'https://rsam-whatsapp-bot.onrender.com';
   }
@@ -1849,6 +1851,15 @@ document.addEventListener("DOMContentLoaded", () => {
         notify("✓ Session changes reverted to session baseline.");
       }
     });
+  }
+
+  const envBadge = document.getElementById("envModeBadge");
+  if (envBadge && window.ENV_CONFIG) {
+    const isDev = window.ENV_CONFIG.activeEnv === "dev";
+    envBadge.textContent = isDev ? `⚡ DEV MODE (${window.ENV_CONFIG.backendUrl})` : `🌐 PROD MODE`;
+    envBadge.style.background = isDev ? "rgba(224,28,46,0.2)" : "rgba(34,197,94,0.2)";
+    envBadge.style.borderColor = isDev ? "rgba(224,28,46,0.5)" : "rgba(34,197,94,0.5)";
+    envBadge.style.color = isDev ? "#ff8888" : "#86efac";
   }
 
   // Global ESC key listener to dismiss open modal

@@ -1702,115 +1702,311 @@ body.has-ticker .navbar {
   flex-direction: column;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.75rem 0.5rem 0.9rem;
-  background: var(--orange);
+  padding: 0.85rem 0.55rem 1rem;
+  background: linear-gradient(135deg, var(--orange) 0%, #d91b2e 100%);
   color: #fff;
-  border: none;
-  border-radius: 0 var(--radius) var(--radius) 0;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-left: none;
+  border-radius: 0 14px 14px 0;
   cursor: pointer;
-  box-shadow: 4px 0 20px rgba(224,28,46,0.35);
-  transition: background var(--trans), box-shadow var(--trans), transform var(--trans);
+  box-shadow: 4px 0 25px rgba(224,28,46,0.45);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .connect-tab:hover {
-  background: var(--orange-lt);
-  box-shadow: 4px 0 28px rgba(224,28,46,0.5);
+  background: linear-gradient(135deg, #ff4d5e 0%, #e01c2e 100%);
+  box-shadow: 6px 0 35px rgba(224,28,46,0.65);
+  transform: translateY(-50%) translateX(2px);
 }
 .connect-tab.open {
   transform: translateY(-50%) translateX(-4px);
 }
+.connect-tab__pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 10px #22c55e;
+  animation: pulse-green 1.8s infinite;
+}
+@keyframes pulse-green {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+  70% { transform: scale(1.15); box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+}
+.connect-tab__icon {
+  font-size: 1.1rem;
+}
 .connect-tab__label {
   font-family: 'Rajdhani', sans-serif;
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   writing-mode: vertical-rl;
   text-orientation: mixed;
   transform: rotate(180deg);
 }
 
-/* sliding panel */
+/* Glassmorphic Contact Us Sliding Panel */
 .connect-panel {
   position: fixed;
   left: 0;
   top: 50%;
-  transform: translateY(-50%) translateX(calc(-100% - 2px));
+  transform: translateY(-50%) translateX(calc(-100% - 10px));
   z-index: 199;
-  width: 220px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-s);
+  width: 320px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: rgba(13, 13, 24, 0.94);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-left: none;
-  border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
-  box-shadow: 6px 0 30px rgba(0,0,0,0.4);
-  padding: 1rem;
-  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 0 20px 20px 0;
+  box-shadow: 12px 0 45px rgba(0, 0, 0, 0.65);
+  padding: 1.25rem;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.connect-panel.open { transform: translateY(-50%) translateX(0); }
+.connect-panel.open {
+  transform: translateY(-50%) translateX(0);
+}
 
-.connect-panel__close {
-  position: absolute;
-  top: 0.6rem; right: 0.6rem;
-  width: 22px; height: 22px;
-  border-radius: 50%;
-  background: none;
-  border: none;
+.connect-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 1.1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+.connect-header-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--gold);
+  background: rgba(255, 184, 0, 0.15);
+  padding: 2px 8px;
+  border-radius: 999px;
+  display: inline-block;
+  margin-bottom: 4px;
+}
+.connect-header-title h3 {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+.connect-header-title p {
+  font-size: 0.75rem;
   color: var(--text-dim);
+  margin: 2px 0 0;
+}
+.connect-panel__close {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #aaa;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: color var(--trans);
+  transition: all 0.2s ease;
 }
-.connect-panel__close:hover { color: var(--orange); }
+.connect-panel__close:hover {
+  background: rgba(224, 28, 46, 0.3);
+  color: #fff;
+  border-color: var(--orange);
+}
 
-.connect-socials {
+.connect-body {
   display: flex;
-  gap: 0.5rem;
-  margin-bottom: 0.9rem;
-  margin-top: 0.25rem;
+  flex-direction: column;
+  gap: 0.9rem;
 }
 
-.connect-social-btn {
-  flex: 1;
-  min-width: 0;
+/* Action Tiles */
+.connect-action-tile {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  text-decoration: none;
+  transition: all 0.25s ease;
+}
+.connect-action-tile.call-tile:hover {
+  background: rgba(34, 197, 94, 0.15);
+  border-color: rgba(34, 197, 94, 0.4);
+  transform: translateY(-2px);
+}
+.connect-tile-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.35rem;
-  padding: 0.45rem 0.4rem;
-  border-radius: 8px;
-  border: 1px solid var(--border-s);
-  background: var(--surface);
-  color: var(--text-muted);
-  text-decoration: none;
-  font-size: 0.75rem;
-  font-weight: 500;
-  overflow: hidden;
-  transition: all var(--trans);
+  font-size: 1.1rem;
+  flex-shrink: 0;
 }
-.connect-social-btn svg { flex-shrink: 0; }
-.connect-social-btn span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.connect-social-btn:hover { color: var(--text); }
-.connect-social-btn.youtube:hover   { border-color: #ff0000; }
-.connect-social-btn.instagram:hover { border-color: #e1306c; }
-
-.connect-divider { height: 1px; background: var(--border-s); margin-bottom: 0.9rem; }
-
-.connect-contacts { display: flex; flex-direction: column; gap: 0.55rem; }
-
-.connect-contact-row {
+.pulse-icon {
+  background: rgba(34, 197, 94, 0.2);
+  color: #4ade80;
+}
+.connect-tile-info {
   display: flex;
-  align-items: flex-start;
-  gap: 0.55rem;
-  color: var(--text-muted);
-  text-decoration: none;
-  font-size: 0.78rem;
-  line-height: 1.4;
-  transition: color var(--trans);
+  flex-direction: column;
+  flex: 1;
 }
-a.connect-contact-row:hover { color: var(--text); }
+.tile-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  font-weight: 600;
+}
+.tile-val {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #fff;
+}
+.tile-val.text-address {
+  font-size: 0.78rem;
+  font-weight: 400;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.85);
+}
+.tile-arrow {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.4);
+  transition: transform 0.2s ease;
+}
+.connect-action-tile.call-tile:hover .tile-arrow {
+  transform: translateX(4px);
+  color: #4ade80;
+}
 
-.connect-contact-icon { font-size: 0.85rem; flex-shrink: 0; margin-top: 1px; }
+/* Social Cards */
+.connect-social-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+}
+.connect-social-card {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.65rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  text-decoration: none;
+  transition: all 0.25s ease;
+}
+.connect-social-card:hover {
+  transform: translateY(-2px);
+}
+.youtube-card:hover {
+  background: rgba(255, 0, 0, 0.15);
+  border-color: rgba(255, 0, 0, 0.4);
+}
+.instagram-card:hover {
+  background: rgba(225, 48, 108, 0.15);
+  border-color: rgba(225, 48, 108, 0.4);
+}
+.social-icon-wrapper {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.social-card-info {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.social-name {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #fff;
+}
+.social-handle {
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Quick Inquiry Form */
+.connect-inquiry-box {
+  margin-top: 0.3rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+.inquiry-box-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.65rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.inquiry-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+.inquiry-field input,
+.inquiry-field textarea {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 0.55rem 0.7rem;
+  color: #fff;
+  font-size: 0.82rem;
+  font-family: inherit;
+  transition: border-color 0.2s ease;
+}
+.inquiry-field input:focus,
+.inquiry-field textarea:focus {
+  outline: none;
+  border-color: var(--orange);
+  background: rgba(0, 0, 0, 0.6);
+}
+.btn-send-wa {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.65rem;
+  border-radius: 8px;
+  border: none;
+  background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+  transition: all 0.25s ease;
+}
+.btn-send-wa:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.5);
+  background: linear-gradient(135deg, #28e36f 0%, #159e8e 100%);
+}
 
 /* backdrop */
 .connect-backdrop {
@@ -1818,7 +2014,8 @@ a.connect-contact-row:hover { color: var(--text); }
   position: fixed;
   inset: 0;
   z-index: 198;
-  background: rgba(0,0,0,0.25);
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
 }
 .connect-backdrop.open { display: block; }
 
@@ -2701,54 +2898,80 @@ a.connect-contact-row:hover { color: var(--text); }
    Vengeance UI & Skiper UI Component Styles
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-/* 1. Aurora Hero Background (Vengeance UI - High Contrast & Vivid Neon) */
+/* 1. Aurora Hero Background (Vengeance UI - High Contrast & Vivid Neon Glow) */
 .aurora-hero-bg {
   position: absolute;
   inset: 0;
   overflow: hidden;
   pointer-events: none;
-  z-index: 2;
-  opacity: 0.9;
+  z-index: 1;
+  opacity: 1;
 }
 
 .aurora-blob {
   position: absolute;
   border-radius: 50%;
-  filter: blur(45px);
-  opacity: 0.75;
-  animation: aurora-wave 10s ease-in-out infinite alternate;
+  filter: blur(65px);
+  mix-blend-mode: screen;
+  opacity: 0.85;
+  will-change: transform;
 }
 
 .aurora-blob--1 {
-  top: -10%;
-  left: 5%;
-  width: 650px;
-  height: 650px;
-  background: radial-gradient(circle, rgba(255, 0, 85, 0.75) 0%, rgba(255, 0, 85, 0) 70%);
+  top: -15%;
+  left: -5%;
+  width: 750px;
+  height: 750px;
+  background: radial-gradient(circle, rgba(255, 0, 85, 0.95) 0%, rgba(255, 0, 85, 0.25) 50%, rgba(255, 0, 85, 0) 75%);
+  animation: aurora-wave-1 12s ease-in-out infinite alternate;
 }
 
 .aurora-blob--2 {
-  bottom: -15%;
-  right: 2%;
-  width: 700px;
-  height: 700px;
-  background: radial-gradient(circle, rgba(255, 170, 0, 0.65) 0%, rgba(255, 170, 0, 0) 70%);
-  animation-delay: -3s;
+  bottom: -20%;
+  right: -5%;
+  width: 800px;
+  height: 800px;
+  background: radial-gradient(circle, rgba(255, 153, 0, 0.9) 0%, rgba(255, 153, 0, 0.2) 50%, rgba(255, 153, 0, 0) 75%);
+  animation: aurora-wave-2 14s ease-in-out infinite alternate;
+  animation-delay: -4s;
 }
 
 .aurora-blob--3 {
-  top: 20%;
-  left: 38%;
-  width: 550px;
-  height: 550px;
-  background: radial-gradient(circle, rgba(0, 242, 254, 0.55) 0%, rgba(0, 242, 254, 0) 70%);
-  animation-delay: -6s;
+  top: 15%;
+  left: 30%;
+  width: 650px;
+  height: 650px;
+  background: radial-gradient(circle, rgba(0, 229, 255, 0.85) 0%, rgba(0, 229, 255, 0.2) 50%, rgba(0, 229, 255, 0) 75%);
+  animation: aurora-wave-3 10s ease-in-out infinite alternate;
+  animation-delay: -7s;
 }
 
-@keyframes aurora-wave {
+.aurora-blob--4 {
+  bottom: 10%;
+  left: 10%;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(124, 77, 255, 0.8) 0%, rgba(124, 77, 255, 0.15) 50%, rgba(124, 77, 255, 0) 75%);
+  animation: aurora-wave-1 16s ease-in-out infinite alternate;
+  animation-delay: -2s;
+}
+
+@keyframes aurora-wave-1 {
+  0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  50% { transform: translate(75px, -50px) scale(1.25) rotate(90deg); }
+  100% { transform: translate(-50px, 60px) scale(0.9) rotate(180deg); }
+}
+
+@keyframes aurora-wave-2 {
   0% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(55px, -40px) scale(1.2); }
-  100% { transform: translate(-40px, 50px) scale(0.85); }
+  50% { transform: translate(-65px, -70px) scale(1.18); }
+  100% { transform: translate(45px, 35px) scale(0.85); }
+}
+
+@keyframes aurora-wave-3 {
+  0% { transform: translate(0, 0) scale(0.9); }
+  50% { transform: translate(80px, 40px) scale(1.2); }
+  100% { transform: translate(-30px, -60px) scale(1); }
 }
 
 /* 2. Spotlight Navbar (Vengeance UI - Translucent Glass & Glowing Radial) */

@@ -62,24 +62,64 @@ function initInteractions() {
   const connectBackdrop = document.getElementById('connectBackdrop');
 
   function openConnect() {
+    if (!connectPanel) return;
     connectPanel.classList.add('open');
-    connectBackdrop.classList.add('open');
-    connectTab.classList.add('open');
-    connectTab.setAttribute('aria-expanded', 'true');
+    if (connectBackdrop) connectBackdrop.classList.add('open');
+    if (connectTab) {
+      connectTab.classList.add('open');
+      connectTab.setAttribute('aria-expanded', 'true');
+    }
     connectPanel.setAttribute('aria-hidden', 'false');
   }
   function closeConnect() {
+    if (!connectPanel) return;
     connectPanel.classList.remove('open');
-    connectBackdrop.classList.remove('open');
-    connectTab.classList.remove('open');
-    connectTab.setAttribute('aria-expanded', 'false');
+    if (connectBackdrop) connectBackdrop.classList.remove('open');
+    if (connectTab) {
+      connectTab.classList.remove('open');
+      connectTab.setAttribute('aria-expanded', 'false');
+    }
     connectPanel.setAttribute('aria-hidden', 'true');
   }
+
+  window.openConnect = openConnect;
+  window.closeConnect = closeConnect;
 
   if (connectTab)      connectTab.addEventListener('click', () => connectPanel.classList.contains('open') ? closeConnect() : openConnect());
   if (connectClose)    connectClose.addEventListener('click', closeConnect);
   if (connectBackdrop) connectBackdrop.addEventListener('click', closeConnect);
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeConnect(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' || e.key === 'Esc') closeConnect(); });
+
+  // Handle Navbar "Contact Us" links (href="#connect")
+  document.querySelectorAll('a[href="#connect"]').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      openConnect();
+    });
+  });
+
+  // Handle Quick WhatsApp Inquiry Form
+  const sendWaBtn = document.getElementById('contactSendWaBtn');
+  if (sendWaBtn) {
+    sendWaBtn.addEventListener('click', () => {
+      const nameInput  = document.getElementById('contactInquiryName');
+      const phoneInput = document.getElementById('contactInquiryPhone');
+      const msgInput   = document.getElementById('contactInquiryMsg');
+
+      const name  = nameInput  ? nameInput.value.trim()  : '';
+      const phone = phoneInput ? phoneInput.value.trim() : '';
+      const msg   = msgInput   ? msgInput.value.trim()   : '';
+
+      if (!name || !phone || !msg) {
+        alert('Please fill in your Name, Phone Number, and Message before sending.');
+        return;
+      }
+
+      const text = `*New Inquiry via RSAM Website*\n\n👤 *Name:* ${name}\n📞 *WhatsApp:* ${phone}\n\n💬 *Message:*\n${msg}`;
+      const waUrl = `https://wa.me/918057781350?text=${encodeURIComponent(text)}`;
+      window.open(waUrl, '_blank');
+    });
+  }
 
   /* ── Highlight image carousels ───────────────── */
   function initHlCarousel(el) {
