@@ -219,10 +219,6 @@ function renderNavbar() {
             <span class="nav-logo-full">Roller Sports Association Moradabad</span>
           </div>
         </a>
-        <div class="nav-visitor-badge" title="Total RSAM Website Visitors">
-          <span class="visitor-live-dot"></span>
-          <span>👁️ <span class="visitor-count-num topVisitorCount">0</span> visitors</span>
-        </div>
         <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
           <span></span><span></span><span></span>
         </button>
@@ -852,6 +848,36 @@ function renderCertificate() {
   `);
 }
 
+window.openConnect = function() {
+  const panel = document.getElementById('connectPanel');
+  const backdrop = document.getElementById('connectBackdrop');
+  const tab = document.getElementById('connectTab');
+  if (panel) {
+    panel.classList.add('open');
+    panel.setAttribute('aria-hidden', 'false');
+  }
+  if (backdrop) backdrop.classList.add('open');
+  if (tab) {
+    tab.classList.add('open');
+    tab.setAttribute('aria-expanded', 'true');
+  }
+};
+
+window.closeConnect = function() {
+  const panel = document.getElementById('connectPanel');
+  const backdrop = document.getElementById('connectBackdrop');
+  const tab = document.getElementById('connectTab');
+  if (panel) {
+    panel.classList.remove('open');
+    panel.setAttribute('aria-hidden', 'true');
+  }
+  if (backdrop) backdrop.classList.remove('open');
+  if (tab) {
+    tab.classList.remove('open');
+    tab.setAttribute('aria-expanded', 'false');
+  }
+};
+
 /* ── Connect (floating panel) ─────────────────────── */
 function renderConnect() {
   if (!CONFIG.sections.connect.enabled) return;
@@ -859,11 +885,16 @@ function renderConnect() {
   const { connect } = CONFIG;
 
   mount("app-connect", `
-    <!-- floating trigger tab -->
-    <button class="connect-tab" id="connectTab" aria-label="Toggle contact panel" aria-expanded="false">
-      <span class="connect-tab__pulse"></span>
-      <span class="connect-tab__label">Contact Us</span>
-    </button>
+    <!-- floating trigger group on left -->
+    <div class="left-floating-container">
+      <button class="connect-tab" id="connectTab" onclick="if(window.openConnect) window.openConnect();" aria-label="Toggle contact panel" aria-expanded="false">
+        <span class="connect-tab__label">Contact Us</span>
+      </button>
+
+      <div class="left-visitor-badge" title="Total RSAM Website Visitors">
+        <span class="visitor-count-num topVisitorCount" id="visitorCount">0</span> visitors
+      </div>
+    </div>
 
     <!-- sliding panel -->
     <div class="connect-panel" id="connectPanel" aria-hidden="true">
@@ -873,7 +904,7 @@ function renderConnect() {
           <h3>Contact RSAM</h3>
           <p>Roller Sports Association Moradabad</p>
         </div>
-        <button class="connect-panel__close" id="connectClose" aria-label="Close">
+        <button class="connect-panel__close" id="connectClose" onclick="if(window.closeConnect) window.closeConnect();" aria-label="Close">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
           </svg>
@@ -988,7 +1019,6 @@ function renderFooter() {
         </div>
         <div class="footer-bottom">
           <span>© <span id="year"></span> ${CONFIG.site.fullName}. All rights reserved.</span>
-          <span class="visitor-counter"><span id="visitorCount">—</span> visitors</span>
         </div>
       </div>
     </footer>

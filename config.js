@@ -93,7 +93,6 @@ const CONFIG = {
     { label: "Highlights",  href: "#highlights"  },
     { label: "Gallery",     href: "#gallery"     },
     { label: "Certificate", href: "#certificate" },
-    { label: "Contact Us",   href: "#connect"     },
     { label: "Register",    href: "register.html", cta: true },
   ],
 
