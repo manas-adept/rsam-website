@@ -894,6 +894,58 @@ app.get('/api/cloudinary-gallery-folders', async (req, res) => {
   }
 });
 
+/**
+ * Endpoint: POST /api/save-gallery-config
+ * Persists admin configured gallery folders & metadata to gallery-config.json for all users
+ */
+app.post('/api/save-gallery-config', async (req, res) => {
+  try {
+    const { folders, defaultItemsPerPage, autoOptimizeAfterDays } = req.body;
+    if (!Array.isArray(folders)) {
+      return res.status(400).json({ success: false, error: 'folders array is required.' });
+    }
+
+    const configPath1 = path.join(__dirname, 'data/gallery-config.json');
+    const configPath2 = path.join(__dirname, '../data/gallery-config.json');
+
+    const configData = {
+      cloudinaryBasePath: 'rsam_website/gallery',
+      defaultItemsPerPage: defaultItemsPerPage || 20,
+      autoOptimizeAfterDays: autoOptimizeAfterDays || 7,
+      folders: folders.map((f, i) => {
+        const folderId = f.folderId || f.name || `folder_${i+1}`;
+        const subfolder = f.cloudinarySubfolder || (folderId.includes('/') ? folderId : `rsam_website/gallery/${folderId}`);
+        return {
+          folderId,
+          cloudinarySubfolder: subfolder,
+          title: f.title || folderId,
+          date: f.date || 'Event Gallery',
+          location: f.location || 'Moradabad / UP',
+          category: f.category || 'Championship',
+          enabled: f.enabled !== false,
+          displayOrder: f.displayOrder || (i + 1),
+          description: f.description || ''
+        };
+      })
+    };
+
+    const jsonStr = JSON.stringify(configData, null, 2);
+
+    if (fs.existsSync(path.dirname(configPath1))) {
+      fs.writeFileSync(configPath1, jsonStr, 'utf8');
+    }
+    if (fs.existsSync(path.dirname(configPath2))) {
+      fs.writeFileSync(configPath2, jsonStr, 'utf8');
+    }
+
+    console.log('[Gallery Config] Saved updated gallery configuration for all users.');
+    return res.json({ success: true, message: 'Gallery configuration saved for all users.', config: configData });
+  } catch (err) {
+    console.error('[Save Gallery Config Error]:', err.message);
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 app.get('/health', (req, res) => {
   res.json({
     status: 'online',

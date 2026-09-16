@@ -1087,11 +1087,23 @@ let galleryState = {
   }
 };
 
+function getActiveGalleryFoldersConfig() {
+  const saved = localStorage.getItem("RSAM_ADMIN_GALLERY_FOLDERS");
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    } catch(e){}
+  }
+  const config = window.GALLERY_CONFIG || {};
+  return config.folders || [];
+}
+
 function renderGallery() {
   if (!CONFIG.sections.gallery || !CONFIG.sections.gallery.enabled) return;
 
   const rawAlbums = window.GALLERY_ALBUMS || [];
-  const galleryConfig = window.GALLERY_CONFIG || { folders: [] };
+  const galleryFolders = getActiveGalleryFoldersConfig();
 
   // Enforce 28 compact photo thumbnails per page in inside folder view
   galleryState.itemsPerPage = 28;
@@ -1100,7 +1112,7 @@ function renderGallery() {
   const liveCache = window.LIVE_GALLERY_CACHE || {};
   const discoveredFolders = window.LIVE_CLOUDINARY_DISCOVERED_FOLDERS;
 
-  // Render dynamically discovered Cloudinary subfolders first, or fall back to gallery-config.json
+  // Render dynamically discovered Cloudinary subfolders first, or fall back to gallery-config.json / admin folders
   let albums = [];
   if (discoveredFolders && Array.isArray(discoveredFolders) && discoveredFolders.length > 0) {
     albums = discoveredFolders.map(folder => ({
@@ -1113,8 +1125,8 @@ function renderGallery() {
       cloudinarySubfolder: folder.cloudinarySubfolder,
       photos: folder.photos || []
     }));
-  } else if (galleryConfig.folders && galleryConfig.folders.length > 0) {
-    albums = galleryConfig.folders
+  } else if (galleryFolders && galleryFolders.length > 0) {
+    albums = galleryFolders
       .filter(f => f.enabled !== false)
       .sort((a, b) => (a.displayOrder || 99) - (b.displayOrder || 99))
       .map(folder => {

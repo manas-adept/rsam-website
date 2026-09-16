@@ -854,10 +854,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!fetched) {
       try {
         const sheetUrl = (window.ENV_CONFIG && window.ENV_CONFIG.sheetUrl) || "https://script.google.com/macros/s/AKfycbyrxUIvQMXOzaBFNKwle-kOC0xMlc0ezufhIRXSyyid3Zx6Rhk9SKMZhNIoBBB290Xw/exec";
-        const res = await fetch(`${sheetUrl}?action=getContacts`);
+        const res = await fetch(`${sheetUrl}?action=fetch_all_contacts`);
         if (res.ok) {
           const data = await res.json();
-          if (data && data.sheets) {
+          if (data && (data.sheets || (data.status === "ok" && data.sheets))) {
             fetchedBroadcastData = data.sheets;
             fetched = true;
             notify("✓ Contact records loaded directly from Google Sheet!");
@@ -868,27 +868,13 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    // 3. Fallback to local stored registrations & sample records if offline
+    // Strict check: No fallback to local storage or fake sample records
     if (!fetched || !fetchedBroadcastData || !fetchedBroadcastData.length) {
-      const savedRegs = localStorage.getItem("RSAM_RECENT_REGISTRATION");
-      let localRecords = [];
-      if (savedRegs) {
-        try { localRecords.push(JSON.parse(savedRegs)); } catch(e){}
+      fetchedBroadcastData = [];
+      if (listEl) {
+        listEl.innerHTML = `<p style="color:#f87171; text-align:center; padding:1.2rem; background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.25); border-radius:8px;">⚠️ Could not fetch contact records from Google Sheet. Please verify your internet connection or Google Apps Script deployment URL.</p>`;
       }
-      
-      const sampleRecords = [
-        { skaterName: "Aarav Sharma", mobile: "9876543210", regNumber: "R260908001", discipline: "Speed Skating (Tenacity)", coachName: "Rajesh Coach", coachMobile: "9876543211", schoolClub: "Moradabad Skating Academy" },
-        { skaterName: "Riya Verma", mobile: "9812345678", regNumber: "R260908002", discipline: "InLine Speed Skating", coachName: "Sunil Verma", coachMobile: "9812345679", schoolClub: "Kanth Road Club" },
-        { skaterName: "Kabir Gupta", mobile: "9988776655", regNumber: "R260908003", discipline: "Quad Speed Skating", coachName: "Amit Singh", coachMobile: "9988776644", schoolClub: "Delhi Public School Mbd" }
-      ];
-
-      fetchedBroadcastData = [
-        {
-          sheetName: "Registrations 2026",
-          records: localRecords.concat(sampleRecords)
-        }
-      ];
-      notify("ℹ️ Offline mode: Loaded local & sample athlete contacts for preview.", "info");
+      notify("⚠️ Unable to fetch contact records from Google Sheet.", "error");
     }
 
     if (btn) btn.disabled = false;
@@ -1188,6 +1174,23 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
+  async function persistAdminGalleryFolders(folders) {
+    localStorage.setItem("RSAM_ADMIN_GALLERY_FOLDERS", JSON.stringify(folders));
+    const baseUrl = getAdminApiBaseUrl();
+    try {
+      const res = await fetch(`${baseUrl}/api/save-gallery-config`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ folders })
+      });
+      if (res.ok) {
+        notify("✓ Gallery folders saved globally for all website users!");
+      }
+    } catch (e) {
+      console.warn("Backend save gallery config warning:", e);
+    }
+  }
+
   window.editGalleryFolderItem = function(idx) {
     const folders = getAdminGalleryFolders();
     const f = folders[idx];
@@ -1213,7 +1216,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!confirm("Are you sure you want to delete this photo gallery folder?")) return;
     const folders = getAdminGalleryFolders();
     folders.splice(idx, 1);
-    localStorage.setItem("RSAM_ADMIN_GALLERY_FOLDERS", JSON.stringify(folders));
+    persistAdminGalleryFolders(folders);
     renderAdminGalleryFolders();
     notify("✓ Photo gallery folder deleted.");
   };
@@ -1951,9 +1954,9 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
           folders.unshift(updatedFolder);
         }
-        localStorage.setItem("RSAM_ADMIN_GALLERY_FOLDERS", JSON.stringify(folders));
+        persistAdminGalleryFolders(folders);
         renderAdminGalleryFolders();
-        notify("✓ Photo Gallery Folder metadata & Folder ID updated!");
+        notify("✓ Photo Gallery Folder metadata & Folder ID updated and saved for all users!");
       }
 
       closeModal();
