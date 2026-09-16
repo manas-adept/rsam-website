@@ -223,15 +223,23 @@
 
             <!-- Message Composer Box -->
             <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 1.2rem;">
-              <h4 style="color:#60a5fa; font-size:1.05rem; margin-bottom:0.8rem;">2. Compose Broadcast Message &amp; Media</h4>
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.6rem; margin-bottom:0.8rem;">
+                <h4 style="color:#60a5fa; font-size:1.05rem; margin:0;">2. Compose Broadcast Message &amp; Media</h4>
+                <!-- Quick Preset Template Buttons -->
+                <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                  <button type="button" class="btn-dash-action btn-sm" id="btnTplSkater" style="font-size:0.78rem; padding:0.3rem 0.6rem; background:rgba(59,130,246,0.15); color:#60a5fa; border-color:rgba(59,130,246,0.3);"><i class="fa-solid fa-bullhorn"></i> 🏃 Skater Announcement</button>
+                  <button type="button" class="btn-dash-action btn-sm" id="btnTplCoach" style="font-size:0.78rem; padding:0.3rem 0.6rem; background:rgba(245,158,11,0.15); color:#fbbf24; border-color:rgba(245,158,11,0.3);"><i class="fa-solid fa-user-tie"></i> 👔 Coach Candidates Report</button>
+                </div>
+              </div>
               
               <div style="margin-bottom:0.8rem;">
-                <span style="color:#9ca3af; font-size:0.8rem; display:block; margin-bottom:0.4rem;">Click to Insert Variables:</span>
+                <span style="color:#9ca3af; font-size:0.8rem; display:block; margin-bottom:0.4rem;">Click to Insert Dynamic Variables:</span>
                 <div style="display:flex; gap:0.4rem; flex-wrap:wrap;" id="bcVarButtons">
+                  <button type="button" class="btn-dash-action btn-sm btn-var-tag" data-var="{coachName}">{coachName}</button>
+                  <button type="button" class="btn-dash-action btn-sm btn-var-tag" data-var="{skaterList}">{skaterList}</button>
                   <button type="button" class="btn-dash-action btn-sm btn-var-tag" data-var="{skaterName}">{skaterName}</button>
                   <button type="button" class="btn-dash-action btn-sm btn-var-tag" data-var="{regNumber}">{regNumber}</button>
                   <button type="button" class="btn-dash-action btn-sm btn-var-tag" data-var="{discipline}">{discipline}</button>
-                  <button type="button" class="btn-dash-action btn-sm btn-var-tag" data-var="{coachName}">{coachName}</button>
                   <button type="button" class="btn-dash-action btn-sm btn-var-tag" data-var="{coachMobile}">{coachMobile}</button>
                   <button type="button" class="btn-dash-action btn-sm btn-var-tag" data-var="{ageGroup}">{ageGroup}</button>
                   <button type="button" class="btn-dash-action btn-sm btn-var-tag" data-var="{schoolClub}">{schoolClub}</button>
@@ -241,7 +249,7 @@
 
               <div style="margin-bottom:1rem;">
                 <label style="display:block; color:#9ca3af; font-size:0.85rem; margin-bottom:0.4rem; font-weight:600;">Message Content</label>
-                <textarea id="bcMessageText" rows="6" style="width:100%; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.15); color:#fff; padding:0.8rem; border-radius:8px; font-size:0.92rem;" placeholder="Dear {skaterName},&#10;&#10;Important update regarding RSAM upcoming event..."></textarea>
+                <textarea id="bcMessageText" rows="7" style="width:100%; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.15); color:#fff; padding:0.8rem; border-radius:8px; font-size:0.92rem; line-height:1.5;" placeholder="Dear {coachName},&#10;&#10;Thank you for believing in RSAM and following candidates with their respective registration numbers have registered with us so far. Please see below their details.&#10;&#10;{skaterList}"></textarea>
               </div>
 
               <div style="margin-bottom:1.2rem;">

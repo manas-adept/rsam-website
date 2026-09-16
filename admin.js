@@ -937,6 +937,19 @@ document.addEventListener("DOMContentLoaded", () => {
     renderRecipientPreviewList();
   }
 
+  function getCandidatesForCoach(coachName, coachMobile, records) {
+    const cleanMob = String(coachMobile || "").replace(/\D/g, "").slice(-10);
+    const cleanName = String(coachName || "").toLowerCase().trim();
+
+    return records.filter(r => {
+      const rCoachMob = String(r.coachMobile || "").replace(/\D/g, "").slice(-10);
+      const rCoachName = String(r.coachName || "").toLowerCase().trim();
+      if (cleanMob && cleanMob.length === 10 && rCoachMob === cleanMob) return true;
+      if (cleanName && rCoachName && (rCoachName === cleanName || cleanName.includes(rCoachName) || rCoachName.includes(cleanName))) return true;
+      return false;
+    });
+  }
+
   function getFilteredRecipients() {
     if (!fetchedBroadcastData || !fetchedBroadcastData.length) return [];
 
@@ -985,10 +998,12 @@ document.addEventListener("DOMContentLoaded", () => {
       if (includeCoaches && coachMob.length === 10) {
         if (!seenMobiles.has(coachMob)) {
           seenMobiles.add(coachMob);
+          const candidates = getCandidatesForCoach(r.coachName, coachMob, records);
           recipients.push({
             role: "Coach",
             name: r.coachName || "Coach",
             mobile: coachMob,
+            candidates: candidates.length > 0 ? candidates : [r],
             data: r
           });
         }
@@ -1018,7 +1033,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <th style="padding:0.4rem;">Role</th>
             <th style="padding:0.4rem;">Name</th>
             <th style="padding:0.4rem;">Mobile</th>
-            <th style="padding:0.4rem;">Reg No</th>
+            <th style="padding:0.4rem;">Reg No / Candidates</th>
             <th style="padding:0.4rem;">Discipline</th>
           </tr>
         </thead>
@@ -1028,7 +1043,7 @@ document.addEventListener("DOMContentLoaded", () => {
               <td style="padding:0.35rem;"><span style="background:${r.role === 'Coach' ? 'rgba(245,158,11,0.2)' : 'rgba(59,130,246,0.2)'}; color:${r.role === 'Coach' ? '#fbbf24' : '#60a5fa'}; padding:2px 6px; border-radius:4px; font-size:0.75rem;">${r.role}</span></td>
               <td style="padding:0.35rem;"><strong>${r.name}</strong></td>
               <td style="padding:0.35rem;"><code>${r.mobile}</code></td>
-              <td style="padding:0.35rem; color:#f59e0b;">${r.data.regNumber || '—'}</td>
+              <td style="padding:0.35rem; color:${r.role === 'Coach' ? '#fbbf24' : '#f59e0b'};">${r.role === 'Coach' ? `👔 ${r.candidates ? r.candidates.length : 0} Candidates` : (r.data.regNumber || '—')}</td>
               <td style="padding:0.35rem;">${r.data.discipline || '—'}</td>
             </tr>
           `).join('')}
@@ -1045,6 +1060,25 @@ document.addEventListener("DOMContentLoaded", () => {
     const varButtons = document.querySelectorAll("#bcVarButtons .btn-var-tag");
     const msgText = document.getElementById("bcMessageText");
     const sendBtn = document.getElementById("sendBroadcastBtn");
+
+    const btnTplSkater = document.getElementById("btnTplSkater");
+    const btnTplCoach = document.getElementById("btnTplCoach");
+
+    if (btnTplSkater) {
+      btnTplSkater.onclick = () => {
+        if (!msgText) return;
+        msgText.value = `Dear {skaterName},\n\nThank you for registering with RSAM. Your Registration Number is {regNumber}.\n\nImportant update regarding RSAM upcoming event...`;
+        notify("✓ Skater announcement template loaded.");
+      };
+    }
+
+    if (btnTplCoach) {
+      btnTplCoach.onclick = () => {
+        if (!msgText) return;
+        msgText.value = `Dear {coachName},\n\nThank you for believing in RSAM and following candidates with their respective registration numbers have registered with us so far. Please see below their details.\n\n{skaterList}\n\nBest regards,\nRoller Skating Association of Moradabad (RSAM)`;
+        notify("✓ Coach candidates report template loaded.");
+      };
+    }
 
     const btnOpenWaQrModal = document.getElementById("btnOpenWaQrModal");
     const waQrModal = document.getElementById("waQrModal");
@@ -1154,12 +1188,26 @@ document.addEventListener("DOMContentLoaded", () => {
           if (progressStatus) progressStatus.textContent = `Sending ${i + 1} of ${recipients.length}: ${r.name} (${r.mobile})...`;
           if (progressBar) progressBar.style.width = `${pct}%`;
 
+          // Candidate list formatting for coach
+          let skaterListStr = "";
+          if (r.role === "Coach") {
+            if (r.candidates && r.candidates.length > 0) {
+              skaterListStr = r.candidates.map(c => `• ${c.skaterName || 'Athlete'} - ${c.regNumber || 'N/A'}`).join('\n');
+            } else {
+              skaterListStr = `• ${r.data.skaterName || 'Athlete'} - ${r.data.regNumber || 'N/A'}`;
+            }
+          } else {
+            skaterListStr = `• ${r.data.skaterName || r.name} - ${r.data.regNumber || 'N/A'}`;
+          }
+
           let parsedMsg = rawTemplate
+            .replace(/{skaterList}/g, skaterListStr)
+            .replace(/{skaterName} - {regNumber}/g, skaterListStr)
             .replace(/{skaterName}/g, r.data.skaterName || r.name)
             .replace(/{regNumber}/g, r.data.regNumber || 'N/A')
             .replace(/{discipline}/g, r.data.discipline || 'N/A')
-            .replace(/{coachName}/g, r.data.coachName || 'N/A')
-            .replace(/{coachMobile}/g, r.data.coachMobile || 'N/A')
+            .replace(/{coachName}/g, r.name || r.data.coachName || 'Coach')
+            .replace(/{coachMobile}/g, r.mobile)
             .replace(/{dob}/g, r.data.dob || 'N/A')
             .replace(/{ageGroup}/g, r.data.ageGroup || 'N/A')
             .replace(/{schoolClub}/g, r.data.schoolClub || 'N/A')
