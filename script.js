@@ -69,8 +69,22 @@ function initInteractions() {
     entries.forEach(e => {
       if (e.isIntersecting) { e.target.classList.add('visible'); fadeObserver.unobserve(e.target); }
     });
-  }, { threshold: 0.12 });
-  document.querySelectorAll('.fade-in').forEach(el => fadeObserver.observe(el));
+  }, { threshold: 0.05, rootMargin: '0px 0px 100px 0px' });
+
+  window.observeFadeElements = function() {
+    document.querySelectorAll('.fade-in').forEach(el => {
+      if (el.classList.contains('visible')) return;
+      const rect = el.getBoundingClientRect();
+      if (rect.top < (window.innerHeight || document.documentElement.clientHeight) + 150) {
+        el.classList.add('visible');
+      } else {
+        fadeObserver.observe(el);
+      }
+    });
+  };
+
+  window.observeFadeElements();
+  document.addEventListener('rsam:rendered', window.observeFadeElements);
 
   /* ── Connect floating panel ──────────────────── */
   const connectTab      = document.getElementById('connectTab');

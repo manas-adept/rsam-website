@@ -3301,23 +3301,41 @@ body.has-ticker .navbar {
   background: var(--bg-dark);
 }
 
+.aurora-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 45%, rgba(6, 6, 12, 0.62) 0%, rgba(6, 6, 12, 0.88) 75%, var(--bg-dark, #06060c) 100%),
+              linear-gradient(180deg, rgba(6, 6, 12, 0.45) 0%, rgba(6, 6, 12, 0.85) 100%);
+  pointer-events: none;
+  z-index: 2;
+}
+
+[data-theme="light"] .aurora-hero-overlay {
+  background: radial-gradient(circle at 50% 45%, rgba(248, 250, 252, 0.6) 0%, rgba(248, 250, 252, 0.88) 75%, var(--bg-dark) 100%),
+              linear-gradient(180deg, rgba(248, 250, 252, 0.45) 0%, rgba(248, 250, 252, 0.85) 100%);
+}
+
 .aurora-curtain-wrap {
   position: absolute;
-  inset: -60% -20%;
+  inset: -40% 0;
+  width: 100%;
+  left: 0;
+  right: 0;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 2px;
   pointer-events: none;
-  transform: rotate(-10deg) scale(1.4);
-  opacity: 0.95;
+  transform: rotate(-6deg) scale(1.25);
+  opacity: 0.92;
+  z-index: 1;
 }
 
 .aurora-ray {
-  width: 14px;
-  flex: 0 0 14px;
+  flex: 1 1 0%;
+  min-width: 0;
   height: 240%;
-  margin: 0 2px;
+  margin: 0 1px;
   border-radius: 999px;
   will-change: transform, opacity;
   mix-blend-mode: screen;

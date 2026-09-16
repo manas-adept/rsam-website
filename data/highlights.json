@@ -3,8 +3,6 @@
     {
       "wide": true,
       "homepage_carousel": true,
-<<<<<<< Updated upstream
-=======
       "date": "2026-07-20",
       "images": [
         "https://res.cloudinary.com/igjmhsju/image/upload/v1788797445/rsam_website/news/news_lko.jpg",
@@ -24,7 +22,6 @@
     {
       "wide": true,
       "homepage_carousel": true,
->>>>>>> Stashed changes
       "date": "2026-05-10",
       "images": ["https://res.cloudinary.com/igjmhsju/image/upload/v1788797476/rsam_website/highlights/vedanga-medal.png"],
       "trophy": "🌟",

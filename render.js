@@ -290,6 +290,7 @@ function renderHero() {
         <div class="aurora-curtain-wrap">
           ${Array.from({ length: 48 }, (_, i) => `<div class="aurora-ray aurora-ray--${(i % 4) + 1}"></div>`).join("")}
         </div>
+        <div class="aurora-hero-overlay"></div>
       </div>
 
       <div class="hero-inner">
@@ -1632,6 +1633,11 @@ function renderAll() {
   renderCertificate();
   if (typeof renderConnect === 'function') renderConnect();
   renderFooter();
+
+  if (typeof window.observeFadeElements === 'function') {
+    window.observeFadeElements();
+  }
+  document.dispatchEvent(new Event('rsam:rendered'));
 }
 
 async function loadLiveCloudinaryGalleries() {

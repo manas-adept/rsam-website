@@ -507,7 +507,7 @@ document.addEventListener("DOMContentLoaded", () => {
             ${(ev.description || ev.body) ? `<div style="font-size:0.85rem; color:#d1d5db; margin-top:0.3rem;">${(ev.description || ev.body).slice(0, 120)}...</div>` : ''}
           </div>
           <div class="admin-item-actions">
-            <button type="button" class="btn-dash-action" onclick="toggleArchiveEvent(${idx})" title="${isArchived ? 'Enable Event' : 'Archive Event'}"><i class="fa-solid ${isArchived ? 'fa-rotate-left' : 'fa-box-archive'}"></i></button>
+            <button type="button" class="btn-item-archive" onclick="toggleArchiveEvent(${idx})" title="${isArchived ? 'Enable Event' : 'Archive Event'}"><i class="fa-solid ${isArchived ? 'fa-rotate-left' : 'fa-box-archive'}"></i></button>
             <button type="button" class="btn-item-edit" onclick="toggleEventTicker(${idx})" title="${ev.showOnTicker ? 'Hide from Ticker' : 'Show on Ticker'}"><i class="fa-solid fa-bullhorn"></i></button>
             <button type="button" class="btn-item-edit" onclick="setEventActiveReg(${idx})" title="Set as Active Event for Online Registration"><i class="fa-solid fa-bullseye"></i></button>
             <button type="button" class="btn-item-edit" onclick="editEventItem(${idx})" title="Edit Event Details"><i class="fa-solid fa-pen-to-square"></i></button>
@@ -600,7 +600,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <div style="font-size:0.85rem; color:#d1d5db; margin-top:0.3rem;">${(item.body || '').replace(/<[^>]*>?/gm, '').slice(0, 120)}...</div>
           </div>
           <div class="admin-item-actions">
-            <button type="button" class="btn-dash-action" onclick="toggleArchiveNews(${idx})" title="${isArchived ? 'Unarchive Circular' : 'Archive Circular'}"><i class="fa-solid ${isArchived ? 'fa-rotate-left' : 'fa-box-archive'}"></i></button>
+            <button type="button" class="btn-item-archive" onclick="toggleArchiveNews(${idx})" title="${isArchived ? 'Unarchive Circular' : 'Archive Circular'}"><i class="fa-solid ${isArchived ? 'fa-rotate-left' : 'fa-box-archive'}"></i></button>
             <button type="button" class="btn-item-edit" onclick="editNewsItem(${idx})" title="Edit Circular"><i class="fa-solid fa-pen-to-square"></i></button>
             <button type="button" class="btn-item-delete" onclick="deleteNewsItem(${idx})" title="Delete Circular"><i class="fa-solid fa-trash-can"></i></button>
           </div>
@@ -674,7 +674,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <div style="font-size:0.85rem; color:#d1d5db; margin-top:0.3rem;">${(item.body || '').slice(0, 120)}...</div>
           </div>
           <div class="admin-item-actions">
-            <button type="button" class="btn-dash-action" onclick="toggleHlArchive(${idx})" title="${isArchived ? 'Unarchive Highlight' : 'Archive Highlight'}"><i class="fa-solid ${isArchived ? 'fa-rotate-left' : 'fa-box-archive'}"></i></button>
+            <button type="button" class="btn-item-archive" onclick="toggleHlArchive(${idx})" title="${isArchived ? 'Unarchive Highlight' : 'Archive Highlight'}"><i class="fa-solid ${isArchived ? 'fa-rotate-left' : 'fa-box-archive'}"></i></button>
             <button type="button" class="btn-item-edit" onclick="editHlItem(${idx})" title="Edit Highlight"><i class="fa-solid fa-pen-to-square"></i></button>
             <button type="button" class="btn-item-delete" onclick="deleteHlItem(${idx})" title="Delete Highlight"><i class="fa-solid fa-trash-can"></i></button>
           </div>
@@ -731,8 +731,8 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="admin-item-sub">${item.designation} ${item.degrees ? '(' + item.degrees + ')' : ''}</div>
           </div>
           <div class="admin-item-actions" style="align-items:center;">
-            <button type="button" class="btn-dash-action" onclick="moveOfficialUp(${idx})" title="Move Up in Lineup" ${idx === 0 ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : ''} aria-label="Move Up"><i class="fa-solid fa-arrow-up"></i></button>
-            <button type="button" class="btn-dash-action" onclick="moveOfficialDown(${idx})" title="Move Down in Lineup" ${idx === items.length - 1 ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : ''} aria-label="Move Down"><i class="fa-solid fa-arrow-down"></i></button>
+            <button type="button" class="btn-item-up" onclick="moveOfficialUp(${idx})" title="Move Up in Lineup" ${idx === 0 ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : ''} aria-label="Move Up"><i class="fa-solid fa-arrow-up"></i></button>
+            <button type="button" class="btn-item-down" onclick="moveOfficialDown(${idx})" title="Move Down in Lineup" ${idx === items.length - 1 ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : ''} aria-label="Move Down"><i class="fa-solid fa-arrow-down"></i></button>
             <button type="button" class="btn-item-edit" onclick="editOfficialItem(${idx})" title="Edit Official Details"><i class="fa-solid fa-pen-to-square"></i></button>
             <button type="button" class="btn-item-delete" onclick="deleteOfficialItem(${idx})" title="Delete Official"><i class="fa-solid fa-trash-can"></i></button>
           </div>
