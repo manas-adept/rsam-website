@@ -113,17 +113,18 @@ body[data-theme="light"] {
 
 .discourse-toggle-switch .toggle-track {
   position: relative;
-  width: 60px;
-  height: 28px;
+  width: 56px;
+  height: 26px;
   border-radius: 999px;
   background: rgba(20, 20, 32, 0.9);
   border: 1.5px solid rgba(255, 255, 255, 0.25);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 8px;
+  padding: 0 6px;
   transition: background 0.3s ease, border-color 0.3s ease;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
 }
 
 [data-theme="light"] .discourse-toggle-switch .toggle-track {
@@ -133,7 +134,7 @@ body[data-theme="light"] {
 }
 
 .discourse-toggle-switch .toggle-icon {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   z-index: 1;
   display: flex;
   align-items: center;
@@ -153,10 +154,10 @@ body[data-theme="light"] {
 
 .discourse-toggle-switch .toggle-thumb {
   position: absolute;
-  top: 2px;
+  top: 1.5px;
   left: 2px;
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background: linear-gradient(135deg, #e01c2e, #ff6b6b);
   box-shadow: 0 2px 6px rgba(224, 28, 46, 0.5);
@@ -166,7 +167,7 @@ body[data-theme="light"] {
 
 /* Light mode thumb slides across track */
 [data-theme="light"] .discourse-toggle-switch .toggle-thumb {
-  transform: translateX(32px);
+  transform: translateX(30px);
   background: linear-gradient(135deg, #f59e0b, #d97706);
   box-shadow: 0 2px 6px rgba(245, 158, 11, 0.5);
 }
@@ -3306,9 +3307,10 @@ body.has-ticker .navbar {
 }
 
 .aurora-ray {
-  flex: 1;
+  width: 10px;
+  flex: 0 0 10px;
   height: 220%;
-  margin: 0 5px;
+  margin: 0 3px;
   border-radius: 999px;
   will-change: transform, opacity;
   mix-blend-mode: screen;

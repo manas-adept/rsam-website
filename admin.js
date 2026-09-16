@@ -63,14 +63,17 @@ document.addEventListener("DOMContentLoaded", () => {
   if (loginForm) {
     loginForm.addEventListener("submit", (e) => {
       e.preventDefault();
-      const user = document.getElementById("adminUser").value.trim();
-      const pass = document.getElementById("adminPass").value;
+      const userInput = document.getElementById("adminUser").value.trim();
+      const passInput = document.getElementById("adminPass").value;
 
       const configCreds = (window.ADMIN_CONFIG && window.ADMIN_CONFIG.credentials) || { username: "admin", password: "rsam@password2026" };
 
-      if (user === configCreds.username && pass === configCreds.password) {
+      const userMatch = userInput.toLowerCase() === (configCreds.username || "admin").toLowerCase();
+      const passMatch = passInput.trim() === (configCreds.password || "rsam@password2026").trim();
+
+      if (userMatch && passMatch) {
         loginError.hidden = true;
-        localStorage.setItem(SESSION_KEY, JSON.stringify({ user, loggedInAt: new Date().toISOString() }));
+        localStorage.setItem(SESSION_KEY, JSON.stringify({ user: userInput, loggedInAt: new Date().toISOString() }));
         checkSession();
       } else {
         loginError.hidden = false;

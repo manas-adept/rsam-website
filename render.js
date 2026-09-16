@@ -282,14 +282,7 @@ function renderHero() {
     <section class="hero" id="home">
       <div class="aurora-hero-bg" aria-hidden="true">
         <div class="aurora-curtain-wrap">
-          <div class="aurora-ray aurora-ray--1"></div>
-          <div class="aurora-ray aurora-ray--2"></div>
-          <div class="aurora-ray aurora-ray--3"></div>
-          <div class="aurora-ray aurora-ray--4"></div>
-          <div class="aurora-ray aurora-ray--1"></div>
-          <div class="aurora-ray aurora-ray--2"></div>
-          <div class="aurora-ray aurora-ray--3"></div>
-          <div class="aurora-ray aurora-ray--4"></div>
+          ${Array.from({ length: 32 }, (_, i) => `<div class="aurora-ray aurora-ray--${(i % 4) + 1}"></div>`).join("")}
         </div>
       </div>
 

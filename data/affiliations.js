@@ -22,3 +22,8 @@ const AFFILIATIONS = [
     label: "World Skate",
   }
 ];
+
+if (typeof window !== "undefined") {
+  window.AFFILIATIONS = AFFILIATIONS;
+}
+
