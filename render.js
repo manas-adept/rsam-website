@@ -43,8 +43,12 @@ function getActiveEventsList() {
   let events = [];
   const saved = localStorage.getItem("RSAM_ADMIN_EVENTS");
   if (saved) {
-    try { events = JSON.parse(saved); } catch (e) {}
-  } else {
+    try {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) events = parsed;
+    } catch (e) {}
+  }
+  if (!events || events.length === 0) {
     events = [
       {
         id: "evt_district_2026",
@@ -125,19 +129,23 @@ function getActiveEventConfig() {
 
 function getActiveNewsItems() {
   const saved = localStorage.getItem("RSAM_ADMIN_NEWS");
-  let items = [];
   if (saved) {
-    try { items = JSON.parse(saved); } catch (e) {}
-  } else {
-    items = (window.NEWS && window.NEWS.items) || [];
+    try {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed.filter(n => !n.archived);
+    } catch (e) {}
   }
+  const items = (window.NEWS && window.NEWS.items) || [];
   return items.filter(n => !n.archived);
 }
 
 function getActiveHighlights() {
   const saved = localStorage.getItem("RSAM_ADMIN_HIGHLIGHTS");
   if (saved) {
-    try { return JSON.parse(saved); } catch (e) {}
+    try {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    } catch (e) {}
   }
   return window.HIGHLIGHTS || [];
 }
@@ -273,10 +281,16 @@ function renderHero() {
   mount("app-hero", `
     <section class="hero" id="home">
       <div class="aurora-hero-bg" aria-hidden="true">
-        <div class="aurora-blob aurora-blob--1"></div>
-        <div class="aurora-blob aurora-blob--2"></div>
-        <div class="aurora-blob aurora-blob--3"></div>
-        <div class="aurora-blob aurora-blob--4"></div>
+        <div class="aurora-curtain-wrap">
+          <div class="aurora-ray aurora-ray--1"></div>
+          <div class="aurora-ray aurora-ray--2"></div>
+          <div class="aurora-ray aurora-ray--3"></div>
+          <div class="aurora-ray aurora-ray--4"></div>
+          <div class="aurora-ray aurora-ray--1"></div>
+          <div class="aurora-ray aurora-ray--2"></div>
+          <div class="aurora-ray aurora-ray--3"></div>
+          <div class="aurora-ray aurora-ray--4"></div>
+        </div>
       </div>
 
       <div class="hero-inner">

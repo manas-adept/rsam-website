@@ -27,6 +27,15 @@ document.addEventListener("DOMContentLoaded", () => {
   const logoutBtn = document.getElementById("logoutBtn");
 
   const adminNotify = document.getElementById("adminNotify");
+  const envBadge = document.getElementById("envModeBadge");
+  if (envBadge) {
+    const activeEnv = (window.ENV_CONFIG && window.ENV_CONFIG.activeEnv) || "dev";
+    const isProd = activeEnv === "prod";
+    envBadge.textContent = isProd ? "⚡ LIVE PROD MODE" : "⚡ DEV MODE";
+    envBadge.style.background = isProd ? "rgba(16, 185, 129, 0.2)" : "rgba(224, 28, 46, 0.2)";
+    envBadge.style.borderColor = isProd ? "rgba(16, 185, 129, 0.5)" : "rgba(224, 28, 46, 0.5)";
+    envBadge.style.color = isProd ? "#34d399" : "#ff6b6b";
+  }
 
   // 1. Authentication Handlers
   function checkSession() {
