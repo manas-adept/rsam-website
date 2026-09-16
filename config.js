@@ -13,7 +13,7 @@
      "prod" — Production Live mode (https://rsam-whatsapp-bot.onrender.com)
      "auto" — Auto-detect mode (localhost/127.0.0.1 -> dev, else -> prod)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-window.RSAM_ENV = "dev"; // 👈 CHANGE THIS SINGLE FLAG ("dev" | "prod" | "auto")
+window.RSAM_ENV = "auto"; // 👈 AUTO-DETECT MODE: dev on localhost, prod on live domain
 
 window.ENV_CONFIG = {
   dev: {
