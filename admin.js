@@ -1212,7 +1212,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     return [
       {
-        folderId: "up_open_state_lko_2026",
+        folderId: "lko_uprsa_7th_2026",
         cloudinarySubfolder: "rsam_website/gallery/lko_uprsa_7th_2026",
         title: "7th UP Open State Championship",
         date: "July 19, 2026",

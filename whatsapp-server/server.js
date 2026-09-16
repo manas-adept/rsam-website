@@ -823,7 +823,8 @@ function matchFolderAlias(str1, str2) {
  */
 app.get('/api/cloudinary-gallery', async (req, res) => {
   try {
-    let subfolder = req.query.subfolder || 'rsam_website/gallery';
+    const rawFolderId = req.query.subfolder || 'rsam_website/gallery';
+    let subfolder = rawFolderId;
     if (!subfolder.includes('/') && subfolder !== 'rsam_website/gallery') {
       subfolder = `rsam_website/gallery/${subfolder}`;
     }
@@ -847,36 +848,15 @@ app.get('/api/cloudinary-gallery', async (req, res) => {
     } while (nextCursor);
 
     if (allResources.length === 0) {
-      try {
-        const baseFolder = 'rsam_website/gallery';
-        const sub = await cloudinary.api.sub_folders(baseFolder);
-        const matchedFolder = sub.folders.find(f =>
-          f.path === subfolder ||
-          f.name === subfolder ||
-          matchFolderAlias(f.path, subfolder) ||
-          matchFolderAlias(f.name, subfolder)
-        );
-        if (matchedFolder) {
-          subfolder = matchedFolder.path;
-          nextCursor = null;
-          do {
-            const options = {
-              type: 'upload',
-              prefix: subfolder,
-              max_results: 500
-            };
-            if (nextCursor) options.next_cursor = nextCursor;
-
-            const result = await cloudinary.api.resources(options);
-            if (result.resources && result.resources.length > 0) {
-              allResources = allResources.concat(result.resources);
-            }
-            nextCursor = result.next_cursor;
-          } while (nextCursor);
-        }
-      } catch (eFallback) {
-        console.warn('[Cloudinary Gallery Alias Search Notice]:', eFallback.message);
-      }
+      return res.json({
+        success: false,
+        notFound: true,
+        folderId: rawFolderId,
+        subfolder,
+        error: `folderID '${rawFolderId}' not found in gallery`,
+        count: 0,
+        photos: []
+      });
     }
 
     const photos = allResources.map(r => {
@@ -899,7 +879,7 @@ app.get('/api/cloudinary-gallery', async (req, res) => {
     });
   } catch (err) {
     console.error('[Cloudinary Gallery API Error]:', err.message);
-    return res.status(500).json({ success: false, error: err.message });
+    return res.status(500).json({ success: false, error: err.message, photos: [] });
   }
 });
 
@@ -942,15 +922,14 @@ app.post('/api/upload-cloudinary', async (req, res) => {
 
 /**
  * Dynamic Subfolder Discovery Endpoint
- * Discovers ALL subfolders under rsam_website/gallery directly from Cloudinary live!
- * Reads titles/metadata from gallery-config.json if available, or formats folder name dynamically.
+ * Discovers subfolders under rsam_website/gallery directly from Cloudinary live!
+ * Strictly matches Admin configured folder IDs.
  */
 app.get('/api/cloudinary-gallery-folders', async (req, res) => {
   try {
     const baseFolder = req.query.baseFolder || 'rsam_website/gallery';
     const sub = await cloudinary.api.sub_folders(baseFolder);
     
-    // Read local gallery-config for rich metadata (title, date, location, description) if matched
     const configPath = fs.existsSync(path.join(__dirname, 'data/gallery-config.json'))
       ? path.join(__dirname, 'data/gallery-config.json')
       : path.join(__dirname, '../data/gallery-config.json');
@@ -963,9 +942,9 @@ app.get('/api/cloudinary-gallery-folders', async (req, res) => {
     }
 
     const folderList = [];
+    const matchedConfigSet = new Set();
 
     for (const folder of sub.folders) {
-      // Fetch live resources for this subfolder
       let allResources = [];
       let nextCursor = null;
 
@@ -990,24 +969,46 @@ app.get('/api/cloudinary-gallery-folders', async (req, res) => {
       });
 
       const matchedConfig = configFolders.find(c =>
-        c.cloudinarySubfolder === folder.path ||
         c.folderId === folder.name ||
-        matchFolderAlias(c.cloudinarySubfolder, folder.path) ||
-        matchFolderAlias(c.folderId, folder.name)
-      ) || {};
+        c.cloudinarySubfolder === folder.path ||
+        c.cloudinarySubfolder === `rsam_website/gallery/${folder.name}`
+      );
+
+      if (matchedConfig) matchedConfigSet.add(matchedConfig.folderId);
 
       folderList.push({
-        folderId: matchedConfig.folderId || folder.name,
+        folderId: (matchedConfig && matchedConfig.folderId) ? matchedConfig.folderId : folder.name,
         cloudinarySubfolder: folder.path,
-        title: matchedConfig.title || folder.name.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
-        date: matchedConfig.date || 'Event Gallery',
-        location: matchedConfig.location || 'Moradabad / UP',
-        category: matchedConfig.category || 'Championship',
-        description: matchedConfig.description || `Event photo archive for ${folder.name}`,
-        displayOrder: matchedConfig.displayOrder || 99,
+        title: (matchedConfig && matchedConfig.title) ? matchedConfig.title : folder.name.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+        date: (matchedConfig && matchedConfig.date) ? matchedConfig.date : 'Event Gallery',
+        location: (matchedConfig && matchedConfig.location) ? matchedConfig.location : 'Moradabad / UP',
+        category: (matchedConfig && matchedConfig.category) ? matchedConfig.category : 'Championship',
+        description: (matchedConfig && matchedConfig.description) ? matchedConfig.description : `Event photo archive for ${folder.name}`,
+        displayOrder: (matchedConfig && matchedConfig.displayOrder) ? matchedConfig.displayOrder : 99,
+        notFound: false,
         count: photos.length,
         photos
       });
+    }
+
+    // Include admin configured folders that were NOT found on Cloudinary with explicit error metadata
+    for (const c of configFolders) {
+      if (c.enabled !== false && !matchedConfigSet.has(c.folderId)) {
+        folderList.push({
+          folderId: c.folderId,
+          cloudinarySubfolder: c.cloudinarySubfolder || `rsam_website/gallery/${c.folderId}`,
+          title: c.title || c.folderId,
+          date: c.date || 'Event Gallery',
+          location: c.location || '',
+          category: c.category || 'Event',
+          description: c.description || '',
+          displayOrder: c.displayOrder || 99,
+          notFound: true,
+          error: `folderID '${c.folderId}' not found in gallery`,
+          count: 0,
+          photos: []
+        });
+      }
     }
 
     folderList.sort((a, b) => a.displayOrder - b.displayOrder);

@@ -1121,100 +1121,52 @@ function renderGallery() {
   albums = targetFolders.map(folder => {
     const matchingAlbum = rawAlbums.find(a => a.id === folder.folderId || a.id === folder.id) || {};
     let rawPhotos = matchingAlbum.photos || [];
-    const subfolder = folder.cloudinarySubfolder || folder.folderId || folder.id || '';
+    const folderId = folder.folderId || folder.id || '';
+    const subfolder = folder.cloudinarySubfolder || (folderId ? `rsam_website/gallery/${folderId}` : '');
     let albumPhotos = [];
 
-    // Helper: fuzzy match subfolder strings / paths / tokens
-    const matchPath = (pathStr) => {
-      if (!pathStr || !subfolder) return false;
-      const s1 = String(subfolder).toLowerCase().trim();
-      const s2 = String(pathStr).toLowerCase().trim();
-      if (s1 === s2) return true;
-      const clean1 = s1.replace(/[^a-z0-9]/g, '');
-      const clean2 = s2.replace(/[^a-z0-9]/g, '');
-      if (clean1 && clean2 && (clean1 === clean2 || clean2.includes(clean1) || clean1.includes(clean2))) return true;
-
-      const ignore = new Set(['rsam', 'website', 'gallery', 'events', 'folder', 'https', 'http', 'res', 'cloudinary', 'com', 'image', 'upload', '7th', '4th', '1st', 'championship', 'open']);
-      const t1 = s1.split(/[^a-z0-9]+/).filter(t => t.length > 0 && !ignore.has(t));
-      const t2 = s2.split(/[^a-z0-9]+/).filter(t => t.length > 0 && !ignore.has(t));
-      if (!t1.length || !t2.length) return false;
-      const set1 = new Set(t1);
-      const set2 = new Set(t2);
-
-      if ((set1.has('hospital') && !set2.has('hospital')) || (set2.has('hospital') && !set1.has('hospital'))) {
-        if (set1.has('felicitaion') || set1.has('felicitation') || set2.has('felicitaion') || set2.has('felicitation')) {
-          return false;
-        }
-      }
-
-      const common = t1.filter(t => set2.has(t));
-      if (common.length >= 2) return true;
-      if (common.length === 1 && (common[0] === 'lko' || common[0] === 'uprsa')) return true;
-      return false;
-    };
-
-    // 1. Live Cloudinary API cache priority
-    if (folder.folderId && liveCache[folder.folderId] && liveCache[folder.folderId].length > 0) {
-      albumPhotos = [...liveCache[folder.folderId]];
+    // 1. Live Cloudinary API cache exact key priority
+    if (folderId && liveCache[folderId] && liveCache[folderId].length > 0) {
+      albumPhotos = [...liveCache[folderId]];
     } else if (subfolder && liveCache[subfolder] && liveCache[subfolder].length > 0) {
       albumPhotos = [...liveCache[subfolder]];
-    } else if (subfolder && Object.keys(liveCache).some(matchPath)) {
-      const matchedKey = Object.keys(liveCache).find(matchPath);
-      albumPhotos = [...liveCache[matchedKey]];
     }
 
-    // 2. Discovered live Cloudinary folders
+    // 2. Discovered live Cloudinary folders exact match
     if (albumPhotos.length === 0 && discoveredFolders && Array.isArray(discoveredFolders)) {
       const disc = discoveredFolders.find(df =>
+        df.folderId === folderId ||
         df.cloudinarySubfolder === subfolder ||
-        df.folderId === subfolder ||
-        matchPath(df.cloudinarySubfolder) ||
-        matchPath(df.folderId)
+        df.cloudinarySubfolder === `rsam_website/gallery/${folderId}`
       );
       if (disc && disc.photos && disc.photos.length > 0) {
         albumPhotos = [...disc.photos];
       }
     }
 
-    // 3. Strict/fuzzy matching photos in gallery.json & media map
-    if (albumPhotos.length === 0 && subfolder) {
-      const subfolderMatches = rawPhotos.filter(p => p.src && matchPath(p.src));
+    // 3. Exact matching photos in gallery.json & media map
+    if (albumPhotos.length === 0 && (folderId || subfolder)) {
+      const exactSub = subfolder.toLowerCase();
+      const exactId = folderId.toLowerCase();
+      const subfolderMatches = rawPhotos.filter(p => {
+        if (!p.src) return false;
+        const srcLower = p.src.toLowerCase();
+        return srcLower.includes(exactSub) || srcLower.includes(`/${exactId}/`);
+      });
       if (subfolderMatches.length > 0) {
         albumPhotos = [...subfolderMatches];
-      } else {
-        const allSitePhotos = rawAlbums.flatMap(a => a.photos || []);
-        const globalMatches = allSitePhotos.filter(p => p.src && matchPath(p.src));
-        if (globalMatches.length > 0) {
-          albumPhotos = [...globalMatches];
-        }
       }
-
-      const existingSrcs = new Set(albumPhotos.map(p => p.src));
-      for (const [key, url] of Object.entries(cloudMap)) {
-        if (url && (matchPath(key) || matchPath(url)) && !existingSrcs.has(url)) {
-          const baseName = key.split('/').pop().split('.')[0];
-          albumPhotos.push({
-            src: url,
-            caption: `Event Showcase Photo (${baseName})`,
-            uploadedAt: new Date().toISOString()
-          });
-          existingSrcs.add(url);
-        }
-      }
-    }
-
-    if (albumPhotos.length === 0) {
-      albumPhotos = [...rawPhotos];
     }
 
     return {
-      id: folder.folderId || folder.id,
+      id: folderId,
       title: folder.title || matchingAlbum.title || 'Event Album',
       date: folder.date || matchingAlbum.date || '',
       location: folder.location || matchingAlbum.location || '',
       category: folder.category || matchingAlbum.category || 'Event',
       description: folder.description || matchingAlbum.description || '',
       cloudinarySubfolder: subfolder,
+      notFound: albumPhotos.length === 0,
       photos: albumPhotos
     };
   });
@@ -1223,6 +1175,32 @@ function renderGallery() {
   if (!galleryState.currentFolderId) {
     const folderCardsHTML = albums.map(album => {
       const photos = album.photos || [];
+      const photoCount = photos.length;
+
+      if (photoCount === 0 || album.notFound) {
+        return `
+          <div class="g-folder-card devi-folder-card visible folder-not-found-card" data-folder-id="${album.id}">
+            <div class="devi-folder-header-tab" style="background:#ef4444; color:#fff;">⚠️ ${album.category}</div>
+            <div class="g-folder-img-wrap" style="background: rgba(239, 68, 68, 0.08); border-bottom: 1px dashed rgba(239, 68, 68, 0.3); display: flex; align-items: center; justify-content: center; flex-direction: column; padding: 2.5rem 1rem; text-align: center;">
+              <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">⚠️</div>
+              <span style="color: #ef4444; font-weight: 700; font-size: 0.95rem;">folderID '${album.id}' not found in gallery</span>
+              <span class="g-folder-count-badge" style="background: #ef4444; color: #fff; margin-top: 0.8rem;">📷 0 Photos</span>
+            </div>
+            <div class="g-folder-info">
+              <div class="g-folder-header">
+                <h3 class="g-folder-title">${album.title}</h3>
+              </div>
+              <p class="g-folder-meta">📅 ${album.date} · 📍 ${album.location}</p>
+              <p class="g-folder-desc" style="color:#f87171; font-weight: 500;">⚠️ folderID '${album.id}' not found in gallery. Please check folder ID in Admin Panel.</p>
+              <div class="g-folder-action-btn" style="border-color: rgba(239, 68, 68, 0.4); background: rgba(239, 68, 68, 0.1);">
+                <span style="color: #ef4444;">folderID '${album.id}' not found in gallery</span>
+                <span class="g-btn-arrow" style="color: #ef4444;">→</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
       const fallbackStack = [
         'https://res.cloudinary.com/igjmhsju/image/upload/v1788797466/rsam_website/events/state2026/state2026_photo1.jpg',
         'https://res.cloudinary.com/igjmhsju/image/upload/v1788797466/rsam_website/events/state2026/state2026_photo2.jpg',
@@ -1231,7 +1209,6 @@ function renderGallery() {
       const p1 = photos[0] ? getOptimizedCloudinaryUrl(photos[0].src, photos[0].uploadedAt, 'thumb') : fallbackStack[0];
       const p2 = photos[1] ? getOptimizedCloudinaryUrl(photos[1].src, photos[1].uploadedAt, 'thumb') : (photos[0] ? fallbackStack[1] : fallbackStack[1]);
       const p3 = photos[2] ? getOptimizedCloudinaryUrl(photos[2].src, photos[2].uploadedAt, 'thumb') : (photos[0] ? fallbackStack[2] : fallbackStack[2]);
-      const photoCount = photos.length;
 
       const stackHTML = `<div class="devi-folder-stack">
             <img src="${p3}" alt="${album.title}" class="devi-thumb devi-thumb--3" loading="lazy"/>
@@ -1433,11 +1410,12 @@ function renderGallery() {
 
   let bodyHTML = '';
   if (totalPhotos === 0) {
+    const targetFolderId = currentAlbum.id || currentAlbum.folderId || currentAlbum.cloudinarySubfolder || 'unknown';
     bodyHTML = `
-      <div class="g-empty-folder-state" style="text-align: center; padding: 60px 20px; background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.12); border-radius: 16px; margin: 25px 0;">
-        <div style="font-size: 52px; margin-bottom: 12px; opacity: 0.8;">📷</div>
-        <h3 style="font-size: 22px; font-weight: 700; color: #f3f4f6; margin-bottom: 8px;">0 Photos Available</h3>
-        <p style="color: #9ca3af; max-width: 520px; margin: 0 auto; line-height: 1.6;">There are currently 0 photos in this event folder (<code>${currentAlbum.cloudinarySubfolder || currentAlbum.id}</code>). Upload photos directly to Cloudinary and they will appear here automatically.</p>
+      <div class="g-empty-folder-state" style="text-align: center; padding: 60px 20px; background: rgba(239, 68, 68, 0.08); border: 1px dashed rgba(239, 68, 68, 0.3); border-radius: 16px; margin: 25px 0;">
+        <div style="font-size: 52px; margin-bottom: 12px; opacity: 0.9;">⚠️</div>
+        <h3 style="font-size: 22px; font-weight: 700; color: #ef4444; margin-bottom: 8px;">folderID '${targetFolderId}' not found in gallery</h3>
+        <p style="color: #9ca3af; max-width: 520px; margin: 0 auto; line-height: 1.6;">No photos exist under folder ID <code>${targetFolderId}</code> inside Cloudinary location <code>rsam_website/gallery</code>. Please check and update the folder ID in Admin Panel.</p>
       </div>
     `;
   } else {
