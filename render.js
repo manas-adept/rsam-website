@@ -1112,76 +1112,112 @@ function renderGallery() {
   const liveCache = window.LIVE_GALLERY_CACHE || {};
   const discoveredFolders = window.LIVE_CLOUDINARY_DISCOVERED_FOLDERS;
 
-  // Render dynamically discovered Cloudinary subfolders first, or fall back to gallery-config.json / admin folders
+  // Render admin configured gallery folders as primary source of truth with flexible Cloudinary path matching
   let albums = [];
-  if (discoveredFolders && Array.isArray(discoveredFolders) && discoveredFolders.length > 0) {
-    albums = discoveredFolders.map(folder => ({
-      id: folder.folderId,
-      title: folder.title,
-      date: folder.date || 'Event Gallery',
-      location: folder.location || 'Moradabad / UP',
-      category: folder.category || 'Championship',
-      description: folder.description || '',
-      cloudinarySubfolder: folder.cloudinarySubfolder,
-      photos: folder.photos || []
-    }));
-  } else if (galleryFolders && galleryFolders.length > 0) {
-    albums = galleryFolders
-      .filter(f => f.enabled !== false)
-      .sort((a, b) => (a.displayOrder || 99) - (b.displayOrder || 99))
-      .map(folder => {
-        const matchingAlbum = rawAlbums.find(a => a.id === folder.folderId) || {};
-        let rawPhotos = matchingAlbum.photos || [];
-        const subfolder = folder.cloudinarySubfolder || folder.folderId || '';
-        let albumPhotos = [];
+  const targetFolders = (galleryFolders && galleryFolders.length > 0)
+    ? galleryFolders.filter(f => f.enabled !== false).sort((a, b) => (a.displayOrder || 99) - (b.displayOrder || 99))
+    : (rawAlbums.length > 0 ? rawAlbums : []);
 
-        // 1. Live Cloudinary API cache priority (dynamic update without file edits)
-        if (subfolder && Array.isArray(liveCache[subfolder]) && liveCache[subfolder].length > 0) {
-          albumPhotos = [...liveCache[subfolder]];
-        } else if (subfolder) {
-          // 2. Strict matching photos in gallery.json & media map for configured subfolder
-          const subfolderMatches = rawPhotos.filter(p => p.src && p.src.includes(subfolder));
-          if (subfolderMatches.length > 0) {
-            albumPhotos = [...subfolderMatches];
-          } else {
-            const allSitePhotos = rawAlbums.flatMap(a => a.photos || []);
-            const globalMatches = allSitePhotos.filter(p => p.src && p.src.includes(subfolder));
-            if (globalMatches.length > 0) {
-              albumPhotos = [...globalMatches];
-            }
-          }
+  albums = targetFolders.map(folder => {
+    const matchingAlbum = rawAlbums.find(a => a.id === folder.folderId || a.id === folder.id) || {};
+    let rawPhotos = matchingAlbum.photos || [];
+    const subfolder = folder.cloudinarySubfolder || folder.folderId || folder.id || '';
+    let albumPhotos = [];
 
-          const existingSrcs = new Set(albumPhotos.map(p => p.src));
-          for (const [key, url] of Object.entries(cloudMap)) {
-            if (url && url.includes(subfolder) && !existingSrcs.has(url)) {
-              const baseName = key.split('/').pop().split('.')[0];
-              albumPhotos.push({
-                src: url,
-                caption: `Event Showcase Photo (${baseName})`,
-                uploadedAt: new Date().toISOString()
-              });
-              existingSrcs.add(url);
-            }
-          }
-        } else {
-          // 3. Fallback when no subfolder specified
-          albumPhotos = [...rawPhotos];
+    // Helper: fuzzy match subfolder strings / paths / tokens
+    const matchPath = (pathStr) => {
+      if (!pathStr || !subfolder) return false;
+      const s1 = String(subfolder).toLowerCase().trim();
+      const s2 = String(pathStr).toLowerCase().trim();
+      if (s1 === s2) return true;
+      const clean1 = s1.replace(/[^a-z0-9]/g, '');
+      const clean2 = s2.replace(/[^a-z0-9]/g, '');
+      if (clean1 && clean2 && (clean1 === clean2 || clean2.includes(clean1) || clean1.includes(clean2))) return true;
+
+      const ignore = new Set(['rsam', 'website', 'gallery', 'events', 'folder', 'https', 'http', 'res', 'cloudinary', 'com', 'image', 'upload', '7th', '4th', '1st', 'championship', 'open']);
+      const t1 = s1.split(/[^a-z0-9]+/).filter(t => t.length > 0 && !ignore.has(t));
+      const t2 = s2.split(/[^a-z0-9]+/).filter(t => t.length > 0 && !ignore.has(t));
+      if (!t1.length || !t2.length) return false;
+      const set1 = new Set(t1);
+      const set2 = new Set(t2);
+
+      if ((set1.has('hospital') && !set2.has('hospital')) || (set2.has('hospital') && !set1.has('hospital'))) {
+        if (set1.has('felicitaion') || set1.has('felicitation') || set2.has('felicitaion') || set2.has('felicitation')) {
+          return false;
         }
+      }
 
-        return {
-          id: folder.folderId,
-          title: folder.title || matchingAlbum.title || 'Event Album',
-          date: folder.date || matchingAlbum.date || '',
-          location: folder.location || matchingAlbum.location || '',
-          category: folder.category || matchingAlbum.category || 'Event',
-          description: folder.description || matchingAlbum.description || '',
-          cloudinarySubfolder: subfolder,
-          photos: albumPhotos
-        };
-      });
-  } else {
-    albums = rawAlbums;
-  }
+      const common = t1.filter(t => set2.has(t));
+      if (common.length >= 2) return true;
+      if (common.length === 1 && (common[0] === 'lko' || common[0] === 'uprsa')) return true;
+      return false;
+    };
+
+    // 1. Live Cloudinary API cache priority
+    if (folder.folderId && liveCache[folder.folderId] && liveCache[folder.folderId].length > 0) {
+      albumPhotos = [...liveCache[folder.folderId]];
+    } else if (subfolder && liveCache[subfolder] && liveCache[subfolder].length > 0) {
+      albumPhotos = [...liveCache[subfolder]];
+    } else if (subfolder && Object.keys(liveCache).some(matchPath)) {
+      const matchedKey = Object.keys(liveCache).find(matchPath);
+      albumPhotos = [...liveCache[matchedKey]];
+    }
+
+    // 2. Discovered live Cloudinary folders
+    if (albumPhotos.length === 0 && discoveredFolders && Array.isArray(discoveredFolders)) {
+      const disc = discoveredFolders.find(df =>
+        df.cloudinarySubfolder === subfolder ||
+        df.folderId === subfolder ||
+        matchPath(df.cloudinarySubfolder) ||
+        matchPath(df.folderId)
+      );
+      if (disc && disc.photos && disc.photos.length > 0) {
+        albumPhotos = [...disc.photos];
+      }
+    }
+
+    // 3. Strict/fuzzy matching photos in gallery.json & media map
+    if (albumPhotos.length === 0 && subfolder) {
+      const subfolderMatches = rawPhotos.filter(p => p.src && matchPath(p.src));
+      if (subfolderMatches.length > 0) {
+        albumPhotos = [...subfolderMatches];
+      } else {
+        const allSitePhotos = rawAlbums.flatMap(a => a.photos || []);
+        const globalMatches = allSitePhotos.filter(p => p.src && matchPath(p.src));
+        if (globalMatches.length > 0) {
+          albumPhotos = [...globalMatches];
+        }
+      }
+
+      const existingSrcs = new Set(albumPhotos.map(p => p.src));
+      for (const [key, url] of Object.entries(cloudMap)) {
+        if (url && (matchPath(key) || matchPath(url)) && !existingSrcs.has(url)) {
+          const baseName = key.split('/').pop().split('.')[0];
+          albumPhotos.push({
+            src: url,
+            caption: `Event Showcase Photo (${baseName})`,
+            uploadedAt: new Date().toISOString()
+          });
+          existingSrcs.add(url);
+        }
+      }
+    }
+
+    if (albumPhotos.length === 0) {
+      albumPhotos = [...rawPhotos];
+    }
+
+    return {
+      id: folder.folderId || folder.id,
+      title: folder.title || matchingAlbum.title || 'Event Album',
+      date: folder.date || matchingAlbum.date || '',
+      location: folder.location || matchingAlbum.location || '',
+      category: folder.category || matchingAlbum.category || 'Event',
+      description: folder.description || matchingAlbum.description || '',
+      cloudinarySubfolder: subfolder,
+      photos: albumPhotos
+    };
+  });
 
   // Mode A: Folder Overview (galleryState.currentFolderId === null)
   if (!galleryState.currentFolderId) {
@@ -1678,8 +1714,11 @@ async function loadLiveCloudinaryGalleries() {
           if (matchedConfig.description) f.description = matchedConfig.description;
           if (matchedConfig.displayOrder) f.displayOrder = matchedConfig.displayOrder;
 
-          if (f.cloudinarySubfolder && f.photos) {
-            window.LIVE_GALLERY_CACHE[f.cloudinarySubfolder] = f.photos;
+          if (f.photos) {
+            if (f.cloudinarySubfolder) window.LIVE_GALLERY_CACHE[f.cloudinarySubfolder] = f.photos;
+            if (f.folderId) window.LIVE_GALLERY_CACHE[f.folderId] = f.photos;
+            if (matchedConfig.folderId) window.LIVE_GALLERY_CACHE[matchedConfig.folderId] = f.photos;
+            if (matchedConfig.cloudinarySubfolder) window.LIVE_GALLERY_CACHE[matchedConfig.cloudinarySubfolder] = f.photos;
           }
         }
         data.folders.sort((a, b) => (a.displayOrder || 99) - (b.displayOrder || 99));

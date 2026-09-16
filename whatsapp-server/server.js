@@ -784,13 +784,50 @@ app.get('/api/lookup-skater', async (req, res) => {
   });
 });
 
+function matchFolderAlias(str1, str2) {
+  if (!str1 || !str2) return false;
+  const s1 = String(str1).toLowerCase().trim();
+  const s2 = String(str2).toLowerCase().trim();
+  if (s1 === s2) return true;
+
+  const clean1 = s1.replace(/[^a-z0-9]/g, '');
+  const clean2 = s2.replace(/[^a-z0-9]/g, '');
+  if (clean1 && clean2 && (clean1 === clean2 || clean2.includes(clean1) || clean1.includes(clean2))) return true;
+
+  const ignore = new Set(['rsam', 'website', 'gallery', 'events', 'folder', 'https', 'http', 'res', 'cloudinary', 'com', 'image', 'upload', '7th', '4th', '1st', 'championship', 'open']);
+  const tokens1 = s1.split(/[^a-z0-9]+/).filter(t => t.length > 0 && !ignore.has(t));
+  const tokens2 = s2.split(/[^a-z0-9]+/).filter(t => t.length > 0 && !ignore.has(t));
+
+  if (!tokens1.length || !tokens2.length) return false;
+
+  const set1 = new Set(tokens1);
+  const set2 = new Set(tokens2);
+
+  if ((set1.has('hospital') && !set2.has('hospital')) || (set2.has('hospital') && !set1.has('hospital'))) {
+    if (set1.has('felicitaion') || set1.has('felicitation') || set2.has('felicitaion') || set2.has('felicitation')) {
+      return false;
+    }
+  }
+
+  const common = tokens1.filter(t => set2.has(t));
+
+  if (common.length >= 2) return true;
+  if (common.length === 1 && (common[0] === 'lko' || common[0] === 'uprsa')) return true;
+
+  return false;
+}
+
 /**
  * Dynamic Cloudinary Gallery Endpoint
  * Queries Cloudinary Admin API live for all resources inside a subfolder
  */
 app.get('/api/cloudinary-gallery', async (req, res) => {
   try {
-    const subfolder = req.query.subfolder || 'rsam_website/gallery';
+    let subfolder = req.query.subfolder || 'rsam_website/gallery';
+    if (!subfolder.includes('/') && subfolder !== 'rsam_website/gallery') {
+      subfolder = `rsam_website/gallery/${subfolder}`;
+    }
+
     let allResources = [];
     let nextCursor = null;
 
@@ -808,6 +845,39 @@ app.get('/api/cloudinary-gallery', async (req, res) => {
       }
       nextCursor = result.next_cursor;
     } while (nextCursor);
+
+    if (allResources.length === 0) {
+      try {
+        const baseFolder = 'rsam_website/gallery';
+        const sub = await cloudinary.api.sub_folders(baseFolder);
+        const matchedFolder = sub.folders.find(f =>
+          f.path === subfolder ||
+          f.name === subfolder ||
+          matchFolderAlias(f.path, subfolder) ||
+          matchFolderAlias(f.name, subfolder)
+        );
+        if (matchedFolder) {
+          subfolder = matchedFolder.path;
+          nextCursor = null;
+          do {
+            const options = {
+              type: 'upload',
+              prefix: subfolder,
+              max_results: 500
+            };
+            if (nextCursor) options.next_cursor = nextCursor;
+
+            const result = await cloudinary.api.resources(options);
+            if (result.resources && result.resources.length > 0) {
+              allResources = allResources.concat(result.resources);
+            }
+            nextCursor = result.next_cursor;
+          } while (nextCursor);
+        }
+      } catch (eFallback) {
+        console.warn('[Cloudinary Gallery Alias Search Notice]:', eFallback.message);
+      }
+    }
 
     const photos = allResources.map(r => {
       const fileName = r.public_id.split('/').pop();
@@ -919,7 +989,12 @@ app.get('/api/cloudinary-gallery-folders', async (req, res) => {
         };
       });
 
-      const matchedConfig = configFolders.find(c => c.cloudinarySubfolder === folder.path || c.folderId === folder.name) || {};
+      const matchedConfig = configFolders.find(c =>
+        c.cloudinarySubfolder === folder.path ||
+        c.folderId === folder.name ||
+        matchFolderAlias(c.cloudinarySubfolder, folder.path) ||
+        matchFolderAlias(c.folderId, folder.name)
+      ) || {};
 
       folderList.push({
         folderId: matchedConfig.folderId || folder.name,

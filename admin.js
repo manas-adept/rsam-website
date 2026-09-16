@@ -1212,15 +1212,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     return [
       {
-        folderId: "district_championship_2026",
-        title: "4th District Roller Skating Championship 2026",
-        date: "Sept 12, 2026",
-        location: "Moradabad Sports Complex",
-        category: "District Championship",
-        description: "Official photo archive of 4th District Championship trials and prize ceremony."
-      },
-      {
         folderId: "up_open_state_lko_2026",
+        cloudinarySubfolder: "rsam_website/gallery/lko_uprsa_7th_2026",
         title: "7th UP Open State Championship",
         date: "July 19, 2026",
         location: "Central Academy, Lucknow",
@@ -1228,12 +1221,13 @@ document.addEventListener("DOMContentLoaded", () => {
         description: "Speed skaters from Moradabad claiming 5 Gold and 8 Silver medals."
       },
       {
-        folderId: "felicitation_ceremony_2026",
-        title: "DMR Felicitation Ceremony",
-        date: "August 2026",
-        location: "Moradabad",
+        folderId: "felicitaion_ceremony_dmr_2026",
+        cloudinarySubfolder: "rsam_website/gallery/felicitaion_ceremony_dmr_2026",
+        title: "Felicitation of Skaters at DMR Hospital",
+        date: "April 18, 2026",
+        location: "DMR Hospital, Moradabad",
         category: "Felicitation",
-        description: "District Magistrate felicitation ceremony honoring outstanding RSAM athletes."
+        description: "Dr. Manjesh Rathi from DMR Hospital honored skaters participated in UP State Championship tournament."
       }
     ];
   }

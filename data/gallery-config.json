@@ -4,9 +4,9 @@
   "autoOptimizeAfterDays": 7,
   "folders": [
     {
-      "folderId": "lko_uprsa_7th_2026",
+      "folderId": "up_open_state_lko_2026",
       "cloudinarySubfolder": "rsam_website/gallery/lko_uprsa_7th_2026",
-      "title": "UP State Championship – Lucknow 2026",
+      "title": "7th UP Open State Championship",
       "date": "May 10, 2026",
       "location": "Central Academy, Lucknow",
       "category": "State Championship",
@@ -17,10 +17,10 @@
     {
       "folderId": "felicitaion_ceremony_dmr_2026",
       "cloudinarySubfolder": "rsam_website/gallery/felicitaion_ceremony_dmr_2026",
-      "title": "Felicitaion of Skaters at DMR Hospital",
+      "title": "Felicitation of Skaters at DMR Hospital",
       "date": "April 18, 2026",
       "location": "DMR Hospital, Moradabad",
-      "category": "Felicitaion",
+      "category": "Felicitation",
       "enabled": true,
       "displayOrder": 2,
       "description": "Dr. Manjesh Rathi from DMR Hospital honored skaters participated in UP State Championship tournament."
