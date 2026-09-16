@@ -135,7 +135,8 @@ function getActiveNewsItems() {
       if (Array.isArray(parsed) && parsed.length > 0) return parsed.filter(n => !n.archived);
     } catch (e) {}
   }
-  const items = (window.NEWS && window.NEWS.items) || [];
+  const newsObj = (typeof NEWS !== 'undefined' && NEWS) ? NEWS : (window.NEWS || {});
+  const items = newsObj.items || [];
   return items.filter(n => !n.archived);
 }
 
@@ -147,7 +148,8 @@ function getActiveHighlights() {
       if (Array.isArray(parsed) && parsed.length > 0) return parsed;
     } catch (e) {}
   }
-  return window.HIGHLIGHTS || [];
+  const hl = (typeof HIGHLIGHTS !== 'undefined' && HIGHLIGHTS) ? HIGHLIGHTS : (window.HIGHLIGHTS || []);
+  return Array.isArray(hl) ? hl : [];
 }
 
 function getActiveOfficials() {
@@ -281,6 +283,10 @@ function renderHero() {
   mount("app-hero", `
     <section class="hero" id="home">
       <div class="aurora-hero-bg" aria-hidden="true">
+        <div class="aurora-blob aurora-blob--1"></div>
+        <div class="aurora-blob aurora-blob--2"></div>
+        <div class="aurora-blob aurora-blob--3"></div>
+        <div class="aurora-blob aurora-blob--4"></div>
         <div class="aurora-curtain-wrap">
           ${Array.from({ length: 48 }, (_, i) => `<div class="aurora-ray aurora-ray--${(i % 4) + 1}"></div>`).join("")}
         </div>
@@ -327,7 +333,8 @@ function renderAbout() {
     </div>
   `).join("");
 
-  const affilItems = AFFILIATIONS.map(a => `
+  const affils = (typeof AFFILIATIONS !== 'undefined' && Array.isArray(AFFILIATIONS)) ? AFFILIATIONS : (window.AFFILIATIONS || []);
+  const affilItems = affils.map(a => `
     <div class="affil-logo-cell">
       <div class="affil-logo-img-wrap">
         <img src="${a.image}" alt="${a.label}" loading="lazy" decoding="async"
@@ -786,6 +793,8 @@ function renderCertificate() {
       </div>`;
   }
 
+  const certData = (typeof CERTIFICATE !== 'undefined' && CERTIFICATE) ? CERTIFICATE : (window.CERTIFICATE || {});
+
   mount("app-certificate", `
     <section class="certificate section" id="certificate">
       <div class="container">
@@ -796,10 +805,10 @@ function renderCertificate() {
         </div>
         <div class="cert-docs-grid">
           <div class="cert-col cert-col--main">
-            ${protectedFrame(CERTIFICATE.regImage, "Registration Certificate")}
+            ${protectedFrame(certData.regImage || '', "Registration Certificate")}
           </div>
           <div class="cert-col cert-col--side">
-            ${protectedFrame(CERTIFICATE.panImage, "PAN Card")}
+            ${protectedFrame(certData.panImage || '', "PAN Card")}
           </div>
         </div>
 
@@ -860,7 +869,7 @@ function renderCertificate() {
         })()}
 
 
-        <p class="cert-note-text fade-in">${CERTIFICATE.note}</p>
+        <p class="cert-note-text fade-in">${certData.note || ''}</p>
       </div>
     </section>
   `);
