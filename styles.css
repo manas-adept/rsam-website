@@ -69,22 +69,82 @@ body[data-theme="light"] {
   mix-blend-mode: multiply !important;
 }
 
-/* Light Mode — Navbar & Drawer */
-[data-theme="light"] .navbar,
-[data-theme="light"] .navbar.spotlight-nav {
-  background: rgba(255, 255, 255, 0.85) !important;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   Discourse Pill-Style Sliding Theme Toggle Switch
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.theme-toggle-btn.discourse-toggle-switch {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  cursor: pointer;
+  outline: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-left: 0.5rem;
 }
 
-[data-theme="light"] .nav-logo-full,
-[data-theme="light"] .nav-links a {
-  color: #0f172a !important;
+.discourse-toggle-switch .toggle-track {
+  position: relative;
+  width: 54px;
+  height: 28px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 7px;
+  transition: all 0.3s ease;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.35);
 }
 
-[data-theme="light"] .nav-links a:hover {
-  color: var(--orange) !important;
+[data-theme="light"] .discourse-toggle-switch .toggle-track {
+  background: rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 0, 0, 0.15);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.discourse-toggle-switch .toggle-icon {
+  font-size: 0.72rem;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.3s ease, opacity 0.3s ease;
+}
+
+.discourse-toggle-switch .toggle-icon-sun {
+  color: #f59e0b;
+}
+
+.discourse-toggle-switch .toggle-icon-moon {
+  color: #a78bfa;
+}
+
+.discourse-toggle-switch .toggle-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #e01c2e, #ff6b6b);
+  box-shadow: 0 2px 6px rgba(224, 28, 46, 0.5);
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s ease, box-shadow 0.3s ease;
+  z-index: 2;
+}
+
+/* Light mode thumb slides across track */
+[data-theme="light"] .discourse-toggle-switch .toggle-thumb {
+  transform: translateX(26px);
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  box-shadow: 0 2px 6px rgba(245, 158, 11, 0.5);
+}
+
+.discourse-toggle-switch:hover .toggle-track {
+  border-color: var(--orange, #e01c2e);
 }
 
 /* Light Mode — Footer */
@@ -109,34 +169,62 @@ body[data-theme="light"] {
   color: var(--orange) !important;
 }
 
-/* Light Mode — Contact Us Drawer */
-[data-theme="light"] .connect-panel {
-  background: rgba(255, 255, 255, 0.96) !important;
+/* Light Mode — Contact Us Drawer & Pop-up Box */
+[data-theme="light"] .connect-panel,
+[data-theme="light"] .connect-card,
+[data-theme="light"] .connect-info-card,
+[data-theme="light"] .contact-box,
+[data-theme="light"] .floating-contact-drawer {
+  background: #ffffff !important;
   border-color: rgba(0, 0, 0, 0.15) !important;
   color: #0f172a !important;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15) !important;
 }
 
+[data-theme="light"] .connect-panel h3,
+[data-theme="light"] .connect-panel h4,
+[data-theme="light"] .connect-panel p,
+[data-theme="light"] .connect-panel span,
+[data-theme="light"] .connect-panel strong,
 [data-theme="light"] .connect-header h3,
 [data-theme="light"] .connect-title,
 [data-theme="light"] .connect-address-title,
 [data-theme="light"] .tile-title,
 [data-theme="light"] .connect-phone-text,
 [data-theme="light"] .connect-address-text,
-[data-theme="light"] .inquiry-box-title {
+[data-theme="light"] .inquiry-box-title,
+[data-theme="light"] .contact-box h3,
+[data-theme="light"] .contact-box label {
   color: #0f172a !important;
 }
 
 [data-theme="light"] .connect-desc,
 [data-theme="light"] .connect-address-sub,
 [data-theme="light"] .tile-sub,
-[data-theme="light"] .social-handle {
+[data-theme="light"] .social-handle,
+[data-theme="light"] .connect-sub {
   color: #475569 !important;
 }
 
 [data-theme="light"] .connect-action-tile {
   background: rgba(0, 0, 0, 0.04) !important;
   border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+[data-theme="light"] .connect-inquiry-box input,
+[data-theme="light"] .connect-inquiry-box textarea,
+[data-theme="light"] .contact-box input,
+[data-theme="light"] .contact-box textarea {
+  background: #f8fafc !important;
+  color: #0f172a !important;
+  border: 1px solid rgba(0, 0, 0, 0.2) !important;
+}
+
+[data-theme="light"] .connect-inquiry-box input::placeholder,
+[data-theme="light"] .connect-inquiry-box textarea::placeholder,
+[data-theme="light"] .contact-box input::placeholder,
+[data-theme="light"] .contact-box textarea::placeholder {
+  color: #64748b !important;
 }
 
 /* Light Mode — Photo Gallery Folders & Cards */
