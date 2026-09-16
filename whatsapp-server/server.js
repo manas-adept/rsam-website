@@ -818,8 +818,65 @@ function matchFolderAlias(str1, str2) {
 }
 
 /**
+ * Helper: Dual-strategy Cloudinary photo fetcher
+ * Strategy 1: Search API by asset folder expression (catches photos assigned to asset folders without path prefix in public_id)
+ * Strategy 2: Admin API prefix matching (catches photos with path-prefixed public_ids)
+ */
+async function getCloudinarySubfolderPhotos(subfolder) {
+  const photoMap = new Map();
+
+  try {
+    const searchRes = await cloudinary.search.expression(`folder:"${subfolder}"`).max_results(500).execute();
+    if (searchRes && searchRes.resources && searchRes.resources.length > 0) {
+      for (const r of searchRes.resources) {
+        const fileName = r.public_id.split('/').pop();
+        photoMap.set(r.secure_url, {
+          src: r.secure_url,
+          publicId: r.public_id,
+          caption: `Action Photo (${fileName})`,
+          uploadedAt: r.created_at || new Date().toISOString(),
+          width: r.width,
+          height: r.height
+        });
+      }
+    }
+  } catch (eSearch) {
+    console.warn('[Cloudinary Search API Notice]:', eSearch.message);
+  }
+
+  try {
+    let nextCursor = null;
+    do {
+      const options = { type: 'upload', prefix: subfolder, max_results: 500 };
+      if (nextCursor) options.next_cursor = nextCursor;
+      const result = await cloudinary.api.resources(options);
+      if (result.resources && result.resources.length > 0) {
+        for (const r of result.resources) {
+          if (!photoMap.has(r.secure_url)) {
+            const fileName = r.public_id.split('/').pop();
+            photoMap.set(r.secure_url, {
+              src: r.secure_url,
+              publicId: r.public_id,
+              caption: `Action Photo (${fileName})`,
+              uploadedAt: r.created_at || new Date().toISOString(),
+              width: r.width,
+              height: r.height
+            });
+          }
+        }
+      }
+      nextCursor = result.next_cursor;
+    } while (nextCursor);
+  } catch (eRes) {
+    console.warn('[Cloudinary Resources API Notice]:', eRes.message);
+  }
+
+  return Array.from(photoMap.values());
+}
+
+/**
  * Dynamic Cloudinary Gallery Endpoint
- * Queries Cloudinary Admin API live for all resources inside a subfolder
+ * Queries Cloudinary live for all resources inside a subfolder using dual-strategy fetcher
  */
 app.get('/api/cloudinary-gallery', async (req, res) => {
   try {
@@ -829,25 +886,9 @@ app.get('/api/cloudinary-gallery', async (req, res) => {
       subfolder = `rsam_website/gallery/${subfolder}`;
     }
 
-    let allResources = [];
-    let nextCursor = null;
+    const photos = await getCloudinarySubfolderPhotos(subfolder);
 
-    do {
-      const options = {
-        type: 'upload',
-        prefix: subfolder,
-        max_results: 500
-      };
-      if (nextCursor) options.next_cursor = nextCursor;
-
-      const result = await cloudinary.api.resources(options);
-      if (result.resources && result.resources.length > 0) {
-        allResources = allResources.concat(result.resources);
-      }
-      nextCursor = result.next_cursor;
-    } while (nextCursor);
-
-    if (allResources.length === 0) {
+    if (photos.length === 0) {
       return res.json({
         success: false,
         notFound: true,
@@ -858,18 +899,6 @@ app.get('/api/cloudinary-gallery', async (req, res) => {
         photos: []
       });
     }
-
-    const photos = allResources.map(r => {
-      const fileName = r.public_id.split('/').pop();
-      return {
-        src: r.secure_url,
-        publicId: r.public_id,
-        caption: `Action Photo (${fileName})`,
-        uploadedAt: r.created_at || new Date().toISOString(),
-        width: r.width,
-        height: r.height
-      };
-    });
 
     return res.json({
       success: true,
@@ -923,7 +952,7 @@ app.post('/api/upload-cloudinary', async (req, res) => {
 /**
  * Dynamic Subfolder Discovery Endpoint
  * Discovers subfolders under rsam_website/gallery directly from Cloudinary live!
- * Strictly matches Admin configured folder IDs.
+ * Uses dual-strategy photo fetcher for 100% reliable asset retrieval across all folder types.
  */
 app.get('/api/cloudinary-gallery-folders', async (req, res) => {
   try {
@@ -945,28 +974,7 @@ app.get('/api/cloudinary-gallery-folders', async (req, res) => {
     const matchedConfigSet = new Set();
 
     for (const folder of sub.folders) {
-      let allResources = [];
-      let nextCursor = null;
-
-      do {
-        const opts = { type: 'upload', prefix: folder.path, max_results: 500 };
-        if (nextCursor) opts.next_cursor = nextCursor;
-        const result = await cloudinary.api.resources(opts);
-        if (result.resources) allResources = allResources.concat(result.resources);
-        nextCursor = result.next_cursor;
-      } while (nextCursor);
-
-      const photos = allResources.map(r => {
-        const fileName = r.public_id.split('/').pop();
-        return {
-          src: r.secure_url,
-          publicId: r.public_id,
-          caption: `Action Photo (${fileName})`,
-          uploadedAt: r.created_at || new Date().toISOString(),
-          width: r.width,
-          height: r.height
-        };
-      });
+      const photos = await getCloudinarySubfolderPhotos(folder.path);
 
       const matchedConfig = configFolders.find(c =>
         c.folderId === folder.name ||
@@ -985,7 +993,7 @@ app.get('/api/cloudinary-gallery-folders', async (req, res) => {
         category: (matchedConfig && matchedConfig.category) ? matchedConfig.category : 'Championship',
         description: (matchedConfig && matchedConfig.description) ? matchedConfig.description : `Event photo archive for ${folder.name}`,
         displayOrder: (matchedConfig && matchedConfig.displayOrder) ? matchedConfig.displayOrder : 99,
-        notFound: false,
+        notFound: photos.length === 0,
         count: photos.length,
         photos
       });

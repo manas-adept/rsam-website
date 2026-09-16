@@ -1221,13 +1221,22 @@ document.addEventListener("DOMContentLoaded", () => {
         description: "Speed skaters from Moradabad claiming 5 Gold and 8 Silver medals."
       },
       {
-        folderId: "felicitaion_ceremony_dmr_2026",
-        cloudinarySubfolder: "rsam_website/gallery/felicitaion_ceremony_dmr_2026",
-        title: "Felicitation of Skaters at DMR Hospital",
-        date: "April 18, 2026",
+        folderId: "dmr_hospital_2026",
+        cloudinarySubfolder: "rsam_website/gallery/dmr_hospital_2026",
+        title: "Moradabad Skaters Felicitation at DMR Hospital",
+        date: "August 2026",
         location: "DMR Hospital, Moradabad",
         category: "Felicitation",
-        description: "Dr. Manjesh Rathi from DMR Hospital honored skaters participated in UP State Championship tournament."
+        description: "Special felicitation ceremony hosted at DMR Hospital honoring state championship medalists."
+      },
+      {
+        folderId: "felicitaion_ceremony_dmr_2026",
+        cloudinarySubfolder: "rsam_website/gallery/felicitaion_ceremony_dmr_2026",
+        title: "Felicitation Ceremony Moradabad",
+        date: "April 18, 2026",
+        location: "Moradabad",
+        category: "Felicitation",
+        description: "Honoring RSAM athletes for outstanding sportsmanship and track achievements."
       }
     ];
   }
