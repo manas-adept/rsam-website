@@ -138,6 +138,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   const lookupRegNo     = document.getElementById("lookupRegNo");
+  if (lookupRegNo) {
+    lookupRegNo.addEventListener("input", () => {
+      lookupRegNo.value = lookupRegNo.value.toUpperCase();
+    });
+  }
   const verifyBtn       = document.getElementById("verifyBtn");
   const lookupSpinner   = document.getElementById("lookupSpinner");
   const lookupError     = document.getElementById("lookupError");

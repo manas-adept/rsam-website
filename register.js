@@ -133,6 +133,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const tabRenewReg     = document.getElementById("tabRenewReg");
   const renewCard       = document.getElementById("renewCard");
   const renewQueryInput = document.getElementById("renewQueryInput");
+  if (renewQueryInput) {
+    renewQueryInput.addEventListener("input", () => {
+      renewQueryInput.value = renewQueryInput.value.toUpperCase();
+    });
+  }
   const renewLookupBtn  = document.getElementById("renewLookupBtn");
   const renewSpinner    = document.getElementById("renewSpinner");
   const renewAlert      = document.getElementById("renewAlert");

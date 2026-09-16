@@ -27,15 +27,23 @@ document.addEventListener("DOMContentLoaded", () => {
   const logoutBtn = document.getElementById("logoutBtn");
 
   const adminNotify = document.getElementById("adminNotify");
-  const envBadge = document.getElementById("envModeBadge");
-  if (envBadge) {
-    const activeEnv = (window.ENV_CONFIG && window.ENV_CONFIG.activeEnv) || "dev";
-    const isProd = activeEnv === "prod";
-    envBadge.textContent = isProd ? "⚡ LIVE PROD MODE" : "⚡ DEV MODE";
-    envBadge.style.background = isProd ? "rgba(16, 185, 129, 0.2)" : "rgba(224, 28, 46, 0.2)";
-    envBadge.style.borderColor = isProd ? "rgba(16, 185, 129, 0.5)" : "rgba(224, 28, 46, 0.5)";
-    envBadge.style.color = isProd ? "#34d399" : "#ff6b6b";
+  
+  function updateEnvBadge() {
+    const envBadge = document.getElementById("envModeBadge");
+    if (envBadge) {
+      const isLocal = typeof window !== 'undefined' && (
+        window.location.hostname === 'localhost' ||
+        window.location.hostname === '127.0.0.1' ||
+        window.location.hostname === '::1'
+      );
+      const isProd = !isLocal;
+      envBadge.textContent = isProd ? "⚡ LIVE PROD MODE" : "⚡ DEV MODE";
+      envBadge.style.background = isProd ? "rgba(16, 185, 129, 0.2)" : "rgba(224, 28, 46, 0.2)";
+      envBadge.style.borderColor = isProd ? "rgba(16, 185, 129, 0.5)" : "rgba(224, 28, 46, 0.5)";
+      envBadge.style.color = isProd ? "#34d399" : "#ff6b6b";
+    }
   }
+  updateEnvBadge();
 
   // 1. Authentication Handlers
   function checkSession() {
@@ -44,20 +52,44 @@ document.addEventListener("DOMContentLoaded", () => {
       try {
         const sessData = JSON.parse(session);
         if (sessData && sessData.user) {
-          loginCard.hidden = true;
-          adminDashboard.hidden = false;
-          adminUserBadge.textContent = `🔒 Logged in as ${sessData.user}`;
-          adminUserBadge.hidden = false;
-          logoutBtn.hidden = false;
+          if (loginCard) {
+            loginCard.hidden = true;
+            loginCard.style.display = "none";
+          }
+          if (adminDashboard) {
+            adminDashboard.hidden = false;
+            adminDashboard.style.display = "block";
+          }
+          if (adminUserBadge) {
+            adminUserBadge.textContent = `🔒 Logged in as ${sessData.user}`;
+            adminUserBadge.hidden = false;
+            adminUserBadge.style.display = "inline-flex";
+          }
+          if (logoutBtn) {
+            logoutBtn.hidden = false;
+            logoutBtn.style.display = "inline-flex";
+          }
           initDashboard();
           return;
         }
       } catch (e) {}
     }
-    loginCard.hidden = false;
-    adminDashboard.hidden = true;
-    adminUserBadge.hidden = true;
-    logoutBtn.hidden = true;
+    if (loginCard) {
+      loginCard.hidden = false;
+      loginCard.style.display = "block";
+    }
+    if (adminDashboard) {
+      adminDashboard.hidden = true;
+      adminDashboard.style.display = "none";
+    }
+    if (adminUserBadge) {
+      adminUserBadge.hidden = true;
+      adminUserBadge.style.display = "none";
+    }
+    if (logoutBtn) {
+      logoutBtn.hidden = true;
+      logoutBtn.style.display = "none";
+    }
   }
 
   if (loginForm) {
