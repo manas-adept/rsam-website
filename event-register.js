@@ -58,7 +58,7 @@ function formatDriveImageUrl(url) {
 }
 
 const activeEvConfig     = getActiveEventConfig();
-const BASE_FEE           = parseFloat(activeEvConfig.baseFee || 500.00);
+const BASE_FEE           = activeEvConfig.baseFee !== undefined ? parseFloat(activeEvConfig.baseFee) : 500.00;
 const GATEWAY_CHARGE     = parseFloat(((BASE_FEE * (parseFloat(activeEvConfig.gatewayPercent) || 2.0)) / 100).toFixed(2));
 const GST_CHARGE         = parseFloat(((GATEWAY_CHARGE * (parseFloat(activeEvConfig.gstPercent) || 18.0)) / 100).toFixed(2));
 const TOTAL_AMOUNT       = parseFloat((BASE_FEE + GATEWAY_CHARGE + GST_CHARGE).toFixed(2));
@@ -69,6 +69,7 @@ let verifiedSkater = null;
 document.addEventListener("DOMContentLoaded", () => {
 
   const isOrganizerPaid = activeEvConfig.feeType === 'organizer' || activeEvConfig.payToOrganizer;
+  const isFreeFee = BASE_FEE === 0;
 
   // Update Fee Banners & Submit Button Text dynamically from admin active event config
   const feeBanner = document.querySelector(".reg-fee-banner");
@@ -78,14 +79,23 @@ document.addEventListener("DOMContentLoaded", () => {
       feeBanner.style.background = "rgba(245, 158, 11, 0.15)";
       feeBanner.style.borderColor = "rgba(245, 158, 11, 0.4)";
       feeBanner.style.color = "#fef08a";
+    } else if (isFreeFee) {
+      feeBanner.innerHTML = `🎉 Championship Entry Fee: <strong>Free (₹0.00)</strong> <small>(Fee waived for this event)</small>`;
+      feeBanner.style.background = "rgba(52, 211, 153, 0.15)";
+      feeBanner.style.borderColor = "rgba(52, 211, 153, 0.4)";
+      feeBanner.style.color = "#6ee7b7";
     } else {
       feeBanner.innerHTML = `💳 Championship Entry Fee: <strong>₹${BASE_FEE.toFixed(2)}</strong> <small>(+ ${parseFloat(activeEvConfig.gatewayPercent || 2.0)}% gateway charge &amp; ${parseFloat(activeEvConfig.gstPercent || 18.0)}% GST = ₹${TOTAL_AMOUNT.toFixed(2)} Total)</small>`;
     }
   }
 
   const submitText = document.querySelector("#evtSubmitBtn .submit-text");
-  if (submitText && !isOrganizerPaid) {
-    submitText.textContent = `Confirm & Pay ₹${TOTAL_AMOUNT.toFixed(2)}`;
+  if (submitText) {
+    if (isOrganizerPaid || isFreeFee) {
+      submitText.textContent = `Submit Event Registration`;
+    } else {
+      submitText.textContent = `Confirm & Pay ₹${TOTAL_AMOUNT.toFixed(2)}`;
+    }
   }
 
   // Ticker banner is hidden specifically on championship registration page
@@ -392,23 +402,30 @@ document.addEventListener("DOMContentLoaded", () => {
           <span class="confirm-value">${payload.aadhaar}</span>
         </div>
 
-        <div class="confirm-fee-breakdown" style="grid-column: span 2; background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 10px; padding: 1rem; margin-top: 0.5rem;">
-          <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #d1d5db; margin-bottom: 0.3rem;">
-            <span>Championship Entry Base Fee:</span>
-            <strong>₹${BASE_FEE.toFixed(2)}</strong>
-          </div>
-          <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #d1d5db; margin-bottom: 0.3rem;">
-            <span>Gateway Transaction Charge (${parseFloat(activeEvConfig.gatewayPercent || 2.0)}%):</span>
-            <span>+ ₹${GATEWAY_CHARGE.toFixed(2)}</span>
-          </div>
-          <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #d1d5db; margin-bottom: 0.6rem;">
-            <span>GST on Transaction Fee (${parseFloat(activeEvConfig.gstPercent || 18.0)}%):</span>
-            <span>+ ₹${GST_CHARGE.toFixed(2)}</span>
-          </div>
-          <div style="display: flex; justify-content: space-between; font-size: 1.05rem; font-weight: 700; color: #f59e0b; border-top: 1px dashed rgba(245, 158, 11, 0.3); padding-top: 0.5rem;">
-            <span>Total Payable Amount (Razorpay):</span>
-            <span style="font-size: 1.2rem;">₹${TOTAL_AMOUNT.toFixed(2)}</span>
-          </div>
+        <div class="confirm-fee-breakdown" style="grid-column: span 2; background: ${BASE_FEE === 0 ? 'rgba(52, 211, 153, 0.08)' : 'rgba(245, 158, 11, 0.08)'}; border: 1px solid ${BASE_FEE === 0 ? 'rgba(52, 211, 153, 0.25)' : 'rgba(245, 158, 11, 0.25)'}; border-radius: 10px; padding: 1rem; margin-top: 0.5rem;">
+          ${BASE_FEE === 0 ? `
+            <div style="display: flex; justify-content: space-between; font-size: 1.05rem; font-weight: 700; color: #34d399;">
+              <span>Entry Fee Status:</span>
+              <span>🎉 FREE / WAIVED (₹0.00)</span>
+            </div>
+          ` : `
+            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #d1d5db; margin-bottom: 0.3rem;">
+              <span>Championship Entry Base Fee:</span>
+              <strong>₹${BASE_FEE.toFixed(2)}</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #d1d5db; margin-bottom: 0.3rem;">
+              <span>Gateway Transaction Charge (${parseFloat(activeEvConfig.gatewayPercent || 2.0)}%):</span>
+              <span>+ ₹${GATEWAY_CHARGE.toFixed(2)}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #d1d5db; margin-bottom: 0.6rem;">
+              <span>GST on Transaction Fee (${parseFloat(activeEvConfig.gstPercent || 18.0)}%):</span>
+              <span>+ ₹${GST_CHARGE.toFixed(2)}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 1.05rem; font-weight: 700; color: #f59e0b; border-top: 1px dashed rgba(245, 158, 11, 0.3); padding-top: 0.5rem;">
+              <span>Total Payable Amount (Razorpay):</span>
+              <span style="font-size: 1.2rem;">₹${TOTAL_AMOUNT.toFixed(2)}</span>
+            </div>
+          `}
         </div>
       </div>
     `;
@@ -419,7 +436,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     confirmProceedBtn.onclick = () => {
       confirmModal.hidden = true;
-      launchRazorpayCheckout(payload);
+      if (BASE_FEE === 0 || activeEvConfig.feeType === 'organizer' || activeEvConfig.payToOrganizer) {
+        payload.paymentId = "WAIVED_FREE";
+        payload.paymentStatus = "WAIVED";
+        payload.amountPaid = "0.00";
+        submitEventRegistration(payload);
+      } else {
+        launchRazorpayCheckout(payload);
+      }
     };
   }
 
@@ -448,13 +472,13 @@ document.addEventListener("DOMContentLoaded", () => {
         console.log("[Razorpay Event] Success! Payment ID:", response.razorpay_payment_id);
         payload.paymentId = response.razorpay_payment_id || ("pay_evt_test_" + Date.now());
         payload.paymentStatus = "SUCCESS";
-        payload.amountPaid = "511.80";
+        payload.amountPaid = TOTAL_AMOUNT.toFixed(2);
 
         await submitEventRegistration(payload);
       },
       modal: {
         ondismiss: function () {
-          alert("⚠️ Payment Cancelled: Event registration requires a successful payment of ₹511.80.\n\nYour event registration was not submitted.");
+          alert(`⚠️ Payment Cancelled: Event registration requires a successful payment of ₹${TOTAL_AMOUNT.toFixed(2)}.\n\nYour event registration was not submitted.`);
           evtSubmitBtn.disabled = false;
           evtSubmitBtn.querySelector(".submit-text").hidden = false;
           evtSubmitBtn.querySelector(".submit-spinner").hidden = true;

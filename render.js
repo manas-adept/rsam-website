@@ -1132,25 +1132,22 @@ function renderGallery() {
       .map(folder => {
         const matchingAlbum = rawAlbums.find(a => a.id === folder.folderId) || {};
         let rawPhotos = matchingAlbum.photos || [];
-        const subfolder = folder.cloudinarySubfolder || '';
+        const subfolder = folder.cloudinarySubfolder || folder.folderId || '';
         let albumPhotos = [];
 
         // 1. Live Cloudinary API cache priority (dynamic update without file edits)
-        if (subfolder && Array.isArray(liveCache[subfolder])) {
-          albumPhotos = liveCache[subfolder];
-        } else {
-          // 2. Fallback to matching photos in gallery.json & media map
-          albumPhotos = [...rawPhotos];
-          if (subfolder) {
-            const subfolderMatches = rawPhotos.filter(p => p.src && p.src.includes(subfolder));
-            if (subfolderMatches.length > 0) {
-              albumPhotos = subfolderMatches;
-            } else {
-              const allSitePhotos = rawAlbums.flatMap(a => a.photos || []);
-              const globalMatches = allSitePhotos.filter(p => p.src && p.src.includes(subfolder));
-              if (globalMatches.length > 0) {
-                albumPhotos = globalMatches;
-              }
+        if (subfolder && Array.isArray(liveCache[subfolder]) && liveCache[subfolder].length > 0) {
+          albumPhotos = [...liveCache[subfolder]];
+        } else if (subfolder) {
+          // 2. Strict matching photos in gallery.json & media map for configured subfolder
+          const subfolderMatches = rawPhotos.filter(p => p.src && p.src.includes(subfolder));
+          if (subfolderMatches.length > 0) {
+            albumPhotos = [...subfolderMatches];
+          } else {
+            const allSitePhotos = rawAlbums.flatMap(a => a.photos || []);
+            const globalMatches = allSitePhotos.filter(p => p.src && p.src.includes(subfolder));
+            if (globalMatches.length > 0) {
+              albumPhotos = [...globalMatches];
             }
           }
 
@@ -1166,6 +1163,9 @@ function renderGallery() {
               existingSrcs.add(url);
             }
           }
+        } else {
+          // 3. Fallback when no subfolder specified
+          albumPhotos = [...rawPhotos];
         }
 
         return {

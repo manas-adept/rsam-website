@@ -825,6 +825,61 @@ document.addEventListener("DOMContentLoaded", () => {
   // ── Bulk WhatsApp Broadcast Center ──
   let fetchedBroadcastData = null;
 
+  function updateBroadcastSourceDropdown() {
+    const sourceSelect = document.getElementById("bcSourceSelect");
+    if (!sourceSelect || !fetchedBroadcastData || !fetchedBroadcastData.length) return;
+
+    const currentVal = sourceSelect.value;
+    let optionsHTML = '';
+
+    fetchedBroadcastData.forEach((s) => {
+      const isReg = s.sheetName.toLowerCase().includes("registrations");
+      const icon = isReg ? '🔄' : '🎟️';
+      const label = isReg ? `Annual Skater Registrations (${s.sheetName})` : `Event Specific (${s.sheetName})`;
+      optionsHTML += `<option value="sheet:${s.sheetName}">${icon} ${label} [${s.count} records]</option>`;
+    });
+
+    optionsHTML += `<option value="general">📢 General Broadcast (All Unique Contacts across all sheets)</option>`;
+
+    sourceSelect.innerHTML = optionsHTML;
+    if (currentVal && sourceSelect.querySelector(`option[value="${currentVal}"]`)) {
+      sourceSelect.value = currentVal;
+    }
+  }
+
+  async function checkWaBotStatus() {
+    const badge = document.getElementById("waBotStatusBadge");
+    const baseUrl = getAdminApiBaseUrl();
+    try {
+      const res = await fetch(`${baseUrl}/api/bot-status`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.isConnected) {
+          if (badge) {
+            badge.textContent = "🟢 Bot Connected & Ready";
+            badge.style.background = "rgba(16, 185, 129, 0.2)";
+            badge.style.color = "#34d399";
+          }
+          return { isConnected: true };
+        } else {
+          if (badge) {
+            badge.textContent = "🔴 Bot Offline (Scan QR)";
+            badge.style.background = "rgba(239, 68, 68, 0.2)";
+            badge.style.color = "#f87171";
+          }
+          return { isConnected: false, qrDataUrl: data ? data.qrDataUrl : null };
+        }
+      }
+    } catch (e) {}
+
+    if (badge) {
+      badge.textContent = "⚠️ Bot Server Standby";
+      badge.style.background = "rgba(245, 158, 11, 0.2)";
+      badge.style.color = "#fbbf24";
+    }
+    return { isConnected: false };
+  }
+
   async function fetchBroadcastContacts() {
     const listEl = document.getElementById("bcRecipientList");
     const btn = document.getElementById("fetchRecipientsBtn");
@@ -878,26 +933,32 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (btn) btn.disabled = false;
+    updateBroadcastSourceDropdown();
     renderRecipientPreviewList();
   }
 
   function getFilteredRecipients() {
-    if (!fetchedBroadcastData) return [];
+    if (!fetchedBroadcastData || !fetchedBroadcastData.length) return [];
 
     const sourceSelect = document.getElementById("bcSourceSelect");
-    const source = sourceSelect ? sourceSelect.value : "annual";
+    const source = sourceSelect ? sourceSelect.value : "general";
     const includeSkaters = document.getElementById("bcFilterSkaters") ? document.getElementById("bcFilterSkaters").checked : true;
     const includeCoaches = document.getElementById("bcFilterCoaches") ? document.getElementById("bcFilterCoaches").checked : true;
 
     let records = [];
 
-    if (source === "annual") {
+    if (source.startsWith("sheet:")) {
+      const sheetName = source.replace("sheet:", "");
+      const matchedSheet = fetchedBroadcastData.find(s => s.sheetName === sheetName);
+      if (matchedSheet) records = matchedSheet.records || [];
+    } else if (source === "annual") {
       const annSheet = fetchedBroadcastData.find(s => s.sheetName.toLowerCase().includes("registrations")) || fetchedBroadcastData[0];
       if (annSheet) records = annSheet.records || [];
     } else if (source === "event") {
       const evtSheet = fetchedBroadcastData.find(s => !s.sheetName.toLowerCase().includes("registrations")) || fetchedBroadcastData[0];
       if (evtSheet) records = evtSheet.records || [];
     } else {
+      // General Broadcast: All unique contacts across all worksheets
       fetchedBroadcastData.forEach(s => {
         records = records.concat(s.records || []);
       });
@@ -907,25 +968,27 @@ document.addEventListener("DOMContentLoaded", () => {
     const seenMobiles = new Set();
 
     records.forEach(r => {
-      if (includeSkaters && r.mobile && r.mobile.length === 10) {
-        if (!seenMobiles.has(r.mobile)) {
-          seenMobiles.add(r.mobile);
+      const skaterMob = String(r.mobile || "").replace(/\D/g, "").slice(-10);
+      if (includeSkaters && skaterMob.length === 10) {
+        if (!seenMobiles.has(skaterMob)) {
+          seenMobiles.add(skaterMob);
           recipients.push({
             role: "Skater",
             name: r.skaterName || "Athlete",
-            mobile: r.mobile,
+            mobile: skaterMob,
             data: r
           });
         }
       }
 
-      if (includeCoaches && r.coachMobile && r.coachMobile.length === 10) {
-        if (!seenMobiles.has(r.coachMobile)) {
-          seenMobiles.add(r.coachMobile);
+      const coachMob = String(r.coachMobile || "").replace(/\D/g, "").slice(-10);
+      if (includeCoaches && coachMob.length === 10) {
+        if (!seenMobiles.has(coachMob)) {
+          seenMobiles.add(coachMob);
           recipients.push({
             role: "Coach",
             name: r.coachName || "Coach",
-            mobile: r.coachMobile,
+            mobile: coachMob,
             data: r
           });
         }
@@ -983,6 +1046,47 @@ document.addEventListener("DOMContentLoaded", () => {
     const msgText = document.getElementById("bcMessageText");
     const sendBtn = document.getElementById("sendBroadcastBtn");
 
+    const btnOpenWaQrModal = document.getElementById("btnOpenWaQrModal");
+    const waQrModal = document.getElementById("waQrModal");
+    const waQrModalClose = document.getElementById("waQrModalClose");
+    const refreshWaQrBtn = document.getElementById("refreshWaQrBtn");
+    const waQrStatusText = document.getElementById("waQrStatusText");
+    const waQrImgWrap = document.getElementById("waQrImgWrap");
+
+    async function loadQrModalData() {
+      if (waQrStatusText) waQrStatusText.textContent = "⏳ Checking WhatsApp bot connection...";
+      if (waQrImgWrap) waQrImgWrap.innerHTML = `<p style="color:#4b5563; font-size:0.9rem; padding-top:100px;">Loading QR Code...</p>`;
+
+      const status = await checkWaBotStatus();
+      if (status.isConnected) {
+        if (waQrStatusText) waQrStatusText.innerHTML = `<strong style="color:#10b981;">✅ WhatsApp Bot is Active &amp; Connected!</strong>`;
+        if (waQrImgWrap) waQrImgWrap.innerHTML = `<div style="padding:40px; color:#10b981; font-weight:700; font-size:1.1rem;">✅ Connected to WhatsApp Web</div>`;
+      } else {
+        const baseUrl = getAdminApiBaseUrl();
+        if (waQrStatusText) waQrStatusText.textContent = "📱 Scan this QR Code on WhatsApp (Linked Devices):";
+        if (waQrImgWrap) {
+          waQrImgWrap.innerHTML = `<iframe src="${baseUrl}/qr" style="width:300px; height:320px; border:none; border-radius:8px;"></iframe>`;
+        }
+      }
+    }
+
+    if (btnOpenWaQrModal) {
+      btnOpenWaQrModal.onclick = () => {
+        if (waQrModal) waQrModal.hidden = false;
+        loadQrModalData();
+      };
+    }
+    if (waQrModalClose) {
+      waQrModalClose.onclick = () => {
+        if (waQrModal) waQrModal.hidden = true;
+      };
+    }
+    if (refreshWaQrBtn) {
+      refreshWaQrBtn.onclick = loadQrModalData;
+    }
+
+    checkWaBotStatus();
+
     if (fetchBtn) fetchBtn.onclick = fetchBroadcastContacts;
     if (sourceSelect) sourceSelect.onchange = renderRecipientPreviewList;
     if (filterSkaters) filterSkaters.onchange = renderRecipientPreviewList;
@@ -1016,6 +1120,17 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
 
+        // Verify bot connection before launching broadcast
+        const botStatus = await checkWaBotStatus();
+        if (!botStatus.isConnected) {
+          const proceedAnyway = confirm("⚠️ Warning: WhatsApp Bot appears offline or disconnected.\n\nWould you like to open the QR scanner modal to link your WhatsApp account before sending?");
+          if (proceedAnyway) {
+            if (waQrModal) waQrModal.hidden = false;
+            loadQrModalData();
+            return;
+          }
+        }
+
         if (!confirm(`Are you sure you want to send this WhatsApp broadcast to ${recipients.length} recipients?`)) {
           return;
         }
@@ -1029,6 +1144,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         let sentCount = 0;
         let failCount = 0;
+        let lastErrorMsg = "";
         const baseUrl = getAdminApiBaseUrl();
 
         for (let i = 0; i < recipients.length; i++) {
@@ -1052,11 +1168,12 @@ document.addEventListener("DOMContentLoaded", () => {
             .replace(/{aadhaar}/g, r.data.aadhaar || 'N/A');
 
           try {
+            const apiKey = (window.ENV_CONFIG && window.ENV_CONFIG.apiKey) || "rsam_whatsapp_secret_key_2026";
             const res = await fetch(`${baseUrl}/api/send-custom-whatsapp`, {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
-                "x-api-key": "rsam_whatsapp_secret_key_2026"
+                "x-api-key": apiKey
               },
               body: JSON.stringify({
                 mobile: r.mobile,
@@ -1065,20 +1182,23 @@ document.addEventListener("DOMContentLoaded", () => {
               })
             });
             const resData = await res.json();
-            if (resData && resData.success) {
+            if (res.ok && resData && resData.success) {
               sentCount++;
             } else {
               failCount++;
+              lastErrorMsg = (resData && resData.error) || `HTTP Error ${res.status}`;
             }
           } catch (err) {
             failCount++;
+            lastErrorMsg = err.message;
           }
 
           await new Promise(res => setTimeout(res, 800));
         }
 
-        if (progressStatus) progressStatus.textContent = `✓ Broadcast complete! ${sentCount} sent, ${failCount} failed.`;
-        notify(`🚀 WhatsApp Broadcast finished! ${sentCount} messages delivered.`);
+        const failSuffix = lastErrorMsg ? ` (Last Error: ${lastErrorMsg})` : '';
+        if (progressStatus) progressStatus.textContent = `✓ Broadcast complete! ${sentCount} sent, ${failCount} failed.${failSuffix}`;
+        notify(`🚀 WhatsApp Broadcast finished! ${sentCount} sent, ${failCount} failed.${failSuffix}`);
         sendBtn.disabled = false;
       };
     }
@@ -1941,8 +2061,10 @@ document.addEventListener("DOMContentLoaded", () => {
       } else if (activeModalType === "galleryFolder") {
         const folders = getAdminGalleryFolders();
         const customFolderId = document.getElementById("mGalFolderId") ? document.getElementById("mGalFolderId").value.trim() : "";
+        const folderPath = customFolderId || ((activeModalIdx !== null && folders[activeModalIdx]) ? folders[activeModalIdx].folderId : "folder_" + Date.now());
         const updatedFolder = {
-          folderId: customFolderId || ((activeModalIdx !== null && folders[activeModalIdx]) ? folders[activeModalIdx].folderId : "folder_" + Date.now()),
+          folderId: folderPath,
+          cloudinarySubfolder: folderPath,
           title: document.getElementById("mGalTitle").value.trim(),
           category: document.getElementById("mGalCat").value.trim(),
           date: document.getElementById("mGalDate").value.trim(),

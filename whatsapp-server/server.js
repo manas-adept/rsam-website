@@ -82,9 +82,15 @@ function generateRegistrationPDF(data, regNumber) {
       doc.on('end', () => resolve(Buffer.concat(buffers)));
 
       // Colors
-      const primaryColor = '#1e3a8a'; // Deep navy blue
-      const accentColor = '#d97706';  // Gold accent
+      const isEvent = data.type === 'event_registration';
+      const isRenewal = data.isRenewal || data.type === 'renewal';
+      const primaryColor = isEvent ? '#b91c1c' : (isRenewal ? '#047857' : '#1e3a8a');
+      const accentColor = isEvent ? '#f59e0b' : '#d97706';
       const textColor = '#1f2937';
+
+      const certTitle = isEvent
+        ? `Official Event Entry Pass — ${data.eventName || 'District Championship 2026'}`
+        : (isRenewal ? 'Official Athlete Annual Registration Certificate (Renewal) - 2026' : 'Official Athlete Annual Registration Certificate - 2026');
 
       // Outer Border
       doc.rect(20, 20, 555, 802).lineWidth(2).stroke(primaryColor);
@@ -92,12 +98,12 @@ function generateRegistrationPDF(data, regNumber) {
 
       // Header Banner
       doc.rect(26, 26, 543, 85).fill(primaryColor);
-      doc.fillColor('#ffffff').fontSize(20).font('Helvetica-Bold').text('ROLLER SPORTS ASSOCIATION MORADABAD', 30, 42, { align: 'center' });
-      doc.fontSize(12).font('Helvetica').text('Official Athlete Annual Registration Certificate - 2026', 30, 70, { align: 'center' });
+      doc.fillColor('#ffffff').fontSize(18).font('Helvetica-Bold').text('ROLLER SPORTS ASSOCIATION MORADABAD', 30, 42, { align: 'center' });
+      doc.fontSize(11).font('Helvetica').text(certTitle, 30, 68, { align: 'center' });
 
       // Registration Number Callout Box
       doc.rect(40, 130, 320, 75).fillAndStroke('#fef3c7', accentColor);
-      doc.fillColor('#92400e').fontSize(11).font('Helvetica-Bold').text('RSAM REGISTRATION NUMBER', 50, 142);
+      doc.fillColor('#92400e').fontSize(11).font('Helvetica-Bold').text(isEvent ? 'RSAM REGISTRATION / ENTRY NO' : 'RSAM REGISTRATION NUMBER', 50, 142);
       doc.fillColor('#b45309').fontSize(22).font('Helvetica-Bold').text(regNumber, 50, 162);
 
       // Skater Photo (if uploaded)
@@ -113,53 +119,64 @@ function generateRegistrationPDF(data, regNumber) {
         }
       } else {
         doc.rect(390, 130, 140, 160).stroke(primaryColor);
-        doc.fillColor('#666').fontSize(10).text('No Photo Uploaded', 415, 200);
+        doc.fillColor('#666').fontSize(10).text('Photo On File', 420, 200);
       }
 
       // Details Table Section
       let y = 225;
-      doc.fillColor(primaryColor).fontSize(14).font('Helvetica-Bold').text('ATHLETE REGISTRATION DETAILS', 40, y);
+      const sectionTitle = isEvent ? 'CHAMPIONSHIP ENTRY DETAILS' : (isRenewal ? 'ATHLETE RENEWAL DETAILS' : 'ATHLETE REGISTRATION DETAILS');
+      doc.fillColor(primaryColor).fontSize(14).font('Helvetica-Bold').text(sectionTitle, 40, y);
       doc.moveTo(40, y + 18).lineTo(360, y + 18).lineWidth(1.5).stroke(accentColor);
 
       y += 30;
       const details = [
         ['RSAM Reg. No.:', regNumber],
         ['Full Name:', data.skaterName || 'N/A'],
+      ];
+
+      if (isEvent) {
+        details.push(['Event Name:', data.eventName || '4th District Championship 2026']);
+      }
+
+      details.push(
         ['Date of Birth:', `${data.dob || 'N/A'}  (Age: ${data.age || 'N/A'} yrs · ${data.ageGroup || 'N/A'})`],
         ['Age Group:', data.ageGroup || 'N/A'],
         ['School / Club Name:', data.schoolClub || 'N/A'],
         ['Coach Name:', data.coachName ? `${data.coachName} (${data.coachMobile || 'N/A'})` : 'N/A'],
         ['Discipline:', data.discipline || 'N/A'],
-        ['Registration Year:', data.year || '2026'],
-        ['Razorpay Payment ID:', data.paymentId || 'Verified (₹10.24)'],
+        ['Year / Season:', data.year || '2026'],
+        ['Payment ID:', data.paymentId || 'Verified'],
+        ['Amount Paid:', `₹${data.amountPaid || (isEvent ? '511.80' : '10.24')}`],
         ['Mobile Number:', data.mobile || 'N/A'],
-        ['Email:', data.email || 'N/A'],
+        ['Email Address:', data.email || 'N/A'],
         ["Father's Name:", data.fatherName || 'N/A'],
         ["Mother's Name:", data.motherName || 'N/A'],
-        ['Aadhaar Number:', data.aadhaar ? `XXXX-XXXX-${data.aadhaar.slice(-4)}` : 'N/A'],
-        ['Residential Address:', data.address || 'N/A'],
-      ];
+        ['Aadhaar Number:', data.aadhaar ? (data.aadhaar.length >= 4 ? `XXXX-XXXX-${data.aadhaar.slice(-4)}` : data.aadhaar) : 'N/A'],
+        ['Residential Address:', data.address || 'N/A']
+      );
 
       doc.fontSize(10);
       details.forEach(([label, value]) => {
         doc.font('Helvetica-Bold').fillColor(textColor).text(label, 40, y, { width: 140 });
         doc.font('Helvetica').fillColor('#374151').text(value, 180, y, { width: 340 });
-        y += 24;
+        y += 22;
       });
 
       // Verification Box
-      y = Math.max(y + 20, 600);
-      doc.rect(40, y, 515, 75).fillAndStroke('#f3f4f6', '#d1d5db');
-      doc.fillColor('#1f2937').fontSize(10).font('Helvetica-Bold').text('OFFICIAL VERIFICATION NOTICE', 55, y + 12);
-      doc.font('Helvetica').fontSize(9).fillColor('#4b5563').text(
-        'This certificate confirms annual registration with Roller Sports Association Moradabad. All uploaded documents (Aadhaar & DOB proof) are verified by RSAM officials. Please present this certificate and your assigned RSAM Registration Number during all district and state championships.',
+      y = Math.max(y + 15, 605);
+      doc.rect(40, y, 515, 70).fillAndStroke('#f3f4f6', '#d1d5db');
+      doc.fillColor('#1f2937').fontSize(10).font('Helvetica-Bold').text('OFFICIAL VERIFICATION NOTICE', 55, y + 10);
+      doc.font('Helvetica').fontSize(8.5).fillColor('#4b5563').text(
+        isEvent
+          ? 'This entry pass confirms championship event registration with Roller Sports Association Moradabad. Please present this document and your assigned RSAM Registration Number at the venue entry.'
+          : 'This certificate confirms annual registration with Roller Sports Association Moradabad. All uploaded documents are verified by RSAM officials. Please present this certificate during all district and state championships.',
         55,
-        y + 30,
+        y + 26,
         { width: 485 }
       );
 
       // Signatures
-      y += 105;
+      y += 95;
       doc.font('Helvetica-Bold').fontSize(10).fillColor(primaryColor);
       doc.text('General Secretary', 60, y);
       doc.text('President / RSAM Official', 380, y);
@@ -189,7 +206,7 @@ async function sendRegistrationEmail(data, regNumber, pdfBuffer) {
   const smtpPass = process.env.SMTP_PASS;
 
   if (!smtpUser || !smtpPass) {
-    console.log('[Email] Skipping email sending: SMTP credentials not set in .env');
+    console.log('[Email] Skipping email sending: SMTP credentials (SMTP_USER & SMTP_PASS) not set in .env');
     return { skipped: true, reason: 'SMTP credentials not configured in .env' };
   }
 
@@ -203,32 +220,55 @@ async function sendRegistrationEmail(data, regNumber, pdfBuffer) {
     }
   });
 
+  const isEvent = data.type === 'event_registration';
+  const isRenewal = data.isRenewal || data.type === 'renewal';
+
+  const subjectText = isEvent
+    ? `🏆 Event Entry Pass - ${data.eventName || 'District Championship'} (Reg No: ${regNumber})`
+    : (isRenewal
+      ? `🔄 Registration Renewal Confirmation - Reg No: ${regNumber} (${ORG_NAME})`
+      : `🛼 Registration Certificate - Reg No: ${regNumber} (${ORG_NAME})`);
+
+  const headerTitle = isEvent
+    ? (data.eventName || 'District Championship 2026 Entry')
+    : (isRenewal ? 'Annual Skater Renewal 2026' : 'Annual Skater Registration 2026');
+
+  const pdfFileName = isEvent
+    ? `RSAM_Event_Pass_${regNumber}.pdf`
+    : `RSAM_Registration_${regNumber}.pdf`;
+
   const mailOptions = {
     from: `"${ORG_NAME}" <${process.env.EMAIL_FROM || smtpUser}>`,
     to: data.email,
-    subject: `🛼 Registration Certificate - Reg No: ${regNumber} (${ORG_NAME})`,
+    subject: subjectText,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px;">
-        <div style="background-color: #1e3a8a; color: white; padding: 15px; text-align: center; border-radius: 8px 8px 0 0;">
+        <div style="background-color: ${isEvent ? '#b91c1c' : (isRenewal ? '#047857' : '#1e3a8a')}; color: white; padding: 15px; text-align: center; border-radius: 8px 8px 0 0;">
           <h2 style="margin: 0;">Roller Sports Association Moradabad</h2>
-          <p style="margin: 5px 0 0 0; font-size: 14px;">Annual Skater Registration 2026</p>
+          <p style="margin: 5px 0 0 0; font-size: 14px;">${headerTitle}</p>
         </div>
         <div style="padding: 20px; color: #333;">
           <p>Dear <strong>${data.skaterName}</strong>,</p>
-          <p>Thank you for registering with <strong>Roller Sports Association Moradabad (RSAM)</strong>!</p>
+          <p>${isEvent
+            ? `Your registration for <strong>${data.eventName || '4th District Championship 2026'}</strong> is confirmed!`
+            : (isRenewal
+              ? `Your annual registration with <strong>Roller Sports Association Moradabad (RSAM)</strong> has been successfully renewed for 2026!`
+              : `Thank you for registering with <strong>Roller Sports Association Moradabad (RSAM)</strong>!`)}</p>
           
           <div style="background-color: #fef3c7; border: 2px solid #f59e0b; padding: 15px; border-radius: 8px; text-align: center; margin: 20px 0;">
-            <span style="color: #92400e; font-weight: bold; font-size: 14px;">YOUR ASSIGNED RSAM REGISTRATION NUMBER</span><br/>
+            <span style="color: #92400e; font-weight: bold; font-size: 14px;">${isEvent ? 'RSAM ENTRY REGISTRATION NUMBER' : 'YOUR ASSIGNED RSAM REGISTRATION NUMBER'}</span><br/>
             <span style="color: #b45309; font-size: 26px; font-weight: bold;">${regNumber}</span>
           </div>
 
-          <p>Please find your official <strong>Registration Certificate (PDF)</strong> attached to this email. You can present this certificate and registration number at all upcoming trials and championships.</p>
+          <p>Please find your official <strong>${isEvent ? 'Event Entry Pass & Receipt' : 'Registration Certificate'} (PDF)</strong> attached to this email. Present this document during trials and championship entry.</p>
 
           <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
             <tr><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>RSAM Reg. No.:</strong></td><td style="padding: 8px; border-bottom: 1px solid #eee;">${regNumber}</td></tr>
             <tr><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>Athlete Name:</strong></td><td style="padding: 8px; border-bottom: 1px solid #eee;">${data.skaterName}</td></tr>
-            <tr><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>Discipline:</strong></td><td style="padding: 8px; border-bottom: 1px solid #eee;">${data.discipline}</td></tr>
-            <tr><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>Date of Birth:</strong></td><td style="padding: 8px; border-bottom: 1px solid #eee;">${data.dob} (Age: ${data.age})</td></tr>
+            ${isEvent ? `<tr><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>Event Name:</strong></td><td style="padding: 8px; border-bottom: 1px solid #eee;">${data.eventName || 'District Championship'}</td></tr>` : ''}
+            <tr><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>Discipline:</strong></td><td style="padding: 8px; border-bottom: 1px solid #eee;">${data.discipline || 'N/A'}</td></tr>
+            <tr><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>Date of Birth:</strong></td><td style="padding: 8px; border-bottom: 1px solid #eee;">${data.dob || 'N/A'} (Age: ${data.age || 'N/A'})</td></tr>
+            <tr><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>Payment ID:</strong></td><td style="padding: 8px; border-bottom: 1px solid #eee;">${data.paymentId || 'Verified'}</td></tr>
             <tr><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>Mobile:</strong></td><td style="padding: 8px; border-bottom: 1px solid #eee;">${data.mobile}</td></tr>
           </table>
 
@@ -236,16 +276,16 @@ async function sendRegistrationEmail(data, regNumber, pdfBuffer) {
         </div>
       </div>
     `,
-    attachments: [
+    attachments: pdfBuffer ? [
       {
-        filename: `RSAM_Registration_${regNumber}.pdf`,
+        filename: pdfFileName,
         content: pdfBuffer,
         contentType: 'application/pdf'
       }
-    ]
+    ] : []
   };
 
-  console.log(`[Email] Sending registration email with PDF to ${data.email}...`);
+  console.log(`[Email] Sending ${isEvent ? 'event entry' : 'registration'} email to ${data.email}...`);
   const info = await transporter.sendMail(mailOptions);
   console.log(`[Email] Sent successfully to ${data.email}! MessageId: ${info.messageId}`);
   return { success: true, messageId: info.messageId };
@@ -314,13 +354,28 @@ async function startWhatsAppBot() {
 function formatWhatsAppJid(phoneStr) {
   let cleaned = String(phoneStr || '').replace(/\D/g, '');
   if (!cleaned) return null;
-  
-  if (cleaned.length === 10) {
-    cleaned = '91' + cleaned;
+
+  if (cleaned.length > 10 && cleaned.startsWith('91')) {
+    cleaned = cleaned.slice(-12);
+  } else if (cleaned.length >= 10) {
+    cleaned = '91' + cleaned.slice(-10);
+  } else {
+    return null;
   }
-  
+
   return `${cleaned}@s.whatsapp.net`;
 }
+
+/**
+ * WhatsApp Bot Connection Status API
+ */
+app.get('/api/bot-status', (req, res) => {
+  res.json({
+    success: true,
+    isConnected,
+    qrDataUrl: latestQrDataUrl
+  });
+});
 
 /**
  * Build WhatsApp Message Text

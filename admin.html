@@ -169,7 +169,10 @@
           <div class="dash-card">
             <div class="card-title-row">
               <h3>💬 Bulk WhatsApp Broadcast Center</h3>
-              <span class="badge-status status-live" id="waBotStatusBadge">📱 Bot Ready</span>
+              <div style="display:flex; gap:0.6rem; align-items:center;">
+                <span class="badge-status status-live" id="waBotStatusBadge">📱 Checking Bot...</span>
+                <button type="button" class="btn-dash-action btn-sm" id="btnOpenWaQrModal" style="padding:0.35rem 0.8rem; font-size:0.8rem;"><i class="fa-solid fa-qrcode"></i> Scan Bot QR Code</button>
+              </div>
             </div>
             <p class="card-desc">Send targeted WhatsApp broadcast updates directly to registered skaters and coaches. Select contact source (Annual, Event Specific, or General All Unique), choose target roles, customize your message with dynamic placeholders, and attach media images.</p>
 
@@ -346,6 +349,24 @@
           <button type="submit" class="btn-primary" id="itemModalSave">Save Item</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- WhatsApp QR Code Scanner Modal -->
+  <div class="admin-modal-overlay" id="waQrModal" hidden>
+    <div class="admin-modal" style="max-width: 440px; text-align: center;">
+      <div class="admin-modal-header">
+        <h3>📱 Scan WhatsApp Bot QR Code</h3>
+        <button type="button" class="admin-modal-close" id="waQrModalClose">&times;</button>
+      </div>
+      <div style="padding: 1.5rem 1rem;">
+        <div id="waQrStatusText" style="color: #9ca3af; font-size: 0.9rem; margin-bottom: 1rem;">Checking connection status...</div>
+        <div id="waQrImgWrap" style="background: #fff; padding: 10px; border-radius: 12px; display: inline-block; min-width: 250px; min-height: 250px;">
+          <p style="color: #4b5563; font-size: 0.9rem; padding-top: 100px;">Loading QR Code...</p>
+        </div>
+        <p style="color: #9ca3af; font-size: 0.8rem; margin-top: 1rem;">Open <strong>WhatsApp</strong> ➔ <strong>Settings / Menu</strong> ➔ <strong>Linked Devices</strong> and scan to connect.</p>
+        <button type="button" class="btn-dash-action" id="refreshWaQrBtn" style="margin-top: 0.8rem; font-size: 0.85rem;"><i class="fa-solid fa-arrows-rotate"></i> Refresh QR Code</button>
+      </div>
     </div>
   </div>
 

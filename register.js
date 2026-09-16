@@ -650,23 +650,30 @@ const TOTAL_AMOUNT_PAISE = Math.round(TOTAL_AMOUNT * 100);
           </div>
           
           <!-- Fee & Razorpay Payment Breakdown -->
-          <div class="confirm-fee-breakdown" style="grid-column: span 2; background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 10px; padding: 1rem; margin-top: 0.5rem;">
-            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #d1d5db; margin-bottom: 0.3rem;">
-              <span>Base Registration Fee:</span>
-              <strong>₹${BASE_REGISTRATION_FEE.toFixed(2)}</strong>
-            </div>
-            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #d1d5db; margin-bottom: 0.3rem;">
-              <span>Gateway Transaction Charge (${gwPctVal}%):</span>
-              <span>+ ₹${GATEWAY_FEE.toFixed(2)}</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #d1d5db; margin-bottom: 0.6rem;">
-              <span>GST on Transaction Fee (${gstPctVal}%):</span>
-              <span>+ ₹${GST_FEE.toFixed(2)}</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; font-size: 1.05rem; font-weight: 700; color: #f59e0b; border-top: 1px dashed rgba(245, 158, 11, 0.3); padding-top: 0.5rem;">
-              <span>Total Payable Amount (Razorpay):</span>
-              <span style="font-size: 1.2rem;">₹${TOTAL_AMOUNT.toFixed(2)}</span>
-            </div>
+          <div class="confirm-fee-breakdown" style="grid-column: span 2; background: ${BASE_REGISTRATION_FEE === 0 ? 'rgba(52, 211, 153, 0.08)' : 'rgba(245, 158, 11, 0.08)'}; border: 1px solid ${BASE_REGISTRATION_FEE === 0 ? 'rgba(52, 211, 153, 0.25)' : 'rgba(245, 158, 11, 0.25)'}; border-radius: 10px; padding: 1rem; margin-top: 0.5rem;">
+            ${BASE_REGISTRATION_FEE === 0 ? `
+              <div style="display: flex; justify-content: space-between; font-size: 1.05rem; font-weight: 700; color: #34d399;">
+                <span>Registration Fee Status:</span>
+                <span>🎉 FREE / WAIVED (₹0.00)</span>
+              </div>
+            ` : `
+              <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #d1d5db; margin-bottom: 0.3rem;">
+                <span>Base Registration Fee:</span>
+                <strong>₹${BASE_REGISTRATION_FEE.toFixed(2)}</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #d1d5db; margin-bottom: 0.3rem;">
+                <span>Gateway Transaction Charge (${gwPctVal}%):</span>
+                <span>+ ₹${GATEWAY_FEE.toFixed(2)}</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #d1d5db; margin-bottom: 0.6rem;">
+                <span>GST on Transaction Fee (${gstPctVal}%):</span>
+                <span>+ ₹${GST_FEE.toFixed(2)}</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 1.05rem; font-weight: 700; color: #f59e0b; border-top: 1px dashed rgba(245, 158, 11, 0.3); padding-top: 0.5rem;">
+                <span>Total Payable Amount (Razorpay):</span>
+                <span style="font-size: 1.2rem;">₹${TOTAL_AMOUNT.toFixed(2)}</span>
+              </div>
+            `}
           </div>
         </div>
       `;
@@ -678,9 +685,17 @@ const TOTAL_AMOUNT_PAISE = Math.round(TOTAL_AMOUNT * 100);
         confirmModal.hidden = true;
       };
 
-      // Handle Proceed to Razorpay Payment
+      // Handle Proceed to Payment / Submission
       confirmProceedBtn.onclick = () => {
         confirmModal.hidden = true;
+
+        if (BASE_REGISTRATION_FEE === 0) {
+          payload.paymentId = "WAIVED_FREE";
+          payload.paymentStatus = "WAIVED";
+          payload.amountPaid = "0.00";
+          processRegistrationSubmission(payload);
+          return;
+        }
 
         // Razorpay Checkout Options
         const rzpOptions = {
