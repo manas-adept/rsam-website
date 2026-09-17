@@ -307,6 +307,9 @@ function doPost(e) {
         sendWhatsAppNotification(data);
       }
 
+      // Send confirmation email with PDF invoice attachment for Event Registration
+      sendRegistrationConfirmationEmail(data, eventRegNo, data.photoUrl);
+
       return ContentService.createTextOutput(JSON.stringify({
         status: "ok",
         eventRegNo: eventRegNo,
@@ -435,7 +438,11 @@ function sendRegistrationConfirmationEmail(data, regNumber, photoUrl) {
     const amountPaid = data.amountPaid || "10.24";
     const paymentId = data.paymentId || "Verified";
 
-    const subject = `Official RSAM Athlete Registration Confirmation — ${regNumber}`;
+    const isEvent = (data.type === "event_registration");
+    const eventTitle = data.eventName || "4th District Championship 2026";
+    const subject = isEvent
+      ? `Official RSAM Event Registration Confirmation — ${eventTitle} (${regNumber})`
+      : `Official RSAM Athlete Registration Confirmation — ${regNumber}`;
 
     const htmlBody = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #0b0f19; color: #e8e8f0; border: 1px solid #10b981; border-radius: 12px; padding: 24px;">
@@ -445,24 +452,28 @@ function sendRegistrationConfirmationEmail(data, regNumber, photoUrl) {
         </div>
 
         <div style="padding: 20px 0;">
-          <h3 style="color: #ffffff; margin-top: 0; font-size: 18px;">Registration Successful! 🎉</h3>
+          <h3 style="color: #ffffff; margin-top: 0; font-size: 18px;">${isEvent ? 'Event Entry Registration Successful!' : 'Annual Registration Successful!'} 🎉</h3>
           <p style="color: #d1d5db; font-size: 14px; line-height: 1.6;">
             Dear <strong>${skaterName}</strong>,<br/><br/>
-            Your annual athlete membership registration with <strong>Roller Sports Association Moradabad (RSAM)</strong> for <strong>2026</strong> has been successfully completed and verified.
+            ${isEvent 
+              ? `Your registration entry for <strong>${eventTitle}</strong> with <strong>Roller Sports Association Moradabad (RSAM)</strong> has been successfully completed and verified.` 
+              : `Your annual athlete membership registration with <strong>Roller Sports Association Moradabad (RSAM)</strong> for <strong>2026</strong> has been successfully completed and verified.`
+            }
           </p>
 
           <div style="background: rgba(245, 158, 11, 0.1); border: 1.5px solid rgba(245, 158, 11, 0.4); border-radius: 10px; padding: 16px; text-align: center; margin: 20px 0;">
-            <span style="display: block; font-size: 11px; color: #f59e0b; font-weight: bold; letter-spacing: 1px;">ASSIGNED RSAM REGISTRATION NUMBER</span>
+            <span style="display: block; font-size: 11px; color: #f59e0b; font-weight: bold; letter-spacing: 1px;">${isEvent ? 'ASSIGNED EVENT REGISTRATION NUMBER' : 'ASSIGNED RSAM REGISTRATION NUMBER'}</span>
             <span style="display: block; font-size: 28px; color: #fbbf24; font-weight: bold; margin-top: 4px;">${regNumber}</span>
           </div>
 
           <table style="width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px; color: #d1d5db;">
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.08);"><td style="padding: 8px 0; color: #9ca3af; width: 40%;">Athlete Name:</td><td style="padding: 8px 0; font-weight: bold; color: #fff;">${skaterName}</td></tr>
+            ${isEvent ? `<tr style="border-bottom: 1px solid rgba(255,255,255,0.08);"><td style="padding: 8px 0; color: #9ca3af;">Event Name:</td><td style="padding: 8px 0; font-weight: bold; color: #f59e0b;">${eventTitle}</td></tr>` : ''}
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.08);"><td style="padding: 8px 0; color: #9ca3af;">Discipline:</td><td style="padding: 8px 0; font-weight: bold; color: #fff;">${discipline}</td></tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.08);"><td style="padding: 8px 0; color: #9ca3af;">Age Group:</td><td style="padding: 8px 0; font-weight: bold; color: #fff;">${ageGroup} (${data.age || 'N/A'} yrs)</td></tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.08);"><td style="padding: 8px 0; color: #9ca3af;">School / Club:</td><td style="padding: 8px 0; font-weight: bold; color: #fff;">${data.schoolClub || 'N/A'}</td></tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.08);"><td style="padding: 8px 0; color: #9ca3af;">Coach Details:</td><td style="padding: 8px 0; font-weight: bold; color: #fff;">${data.coachName || 'N/A'} (${data.coachMobile || 'N/A'})</td></tr>
-            <tr style="border-bottom: 1px solid rgba(255,255,255,0.08);"><td style="padding: 8px 0; color: #9ca3af;">Razorpay Payment ID:</td><td style="padding: 8px 0; color: #34d399; font-weight: bold;">${paymentId} (₹${amountPaid})</td></tr>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.08);"><td style="padding: 8px 0; color: #9ca3af;">Payment Reference:</td><td style="padding: 8px 0; color: #34d399; font-weight: bold;">${paymentId} (₹${amountPaid})</td></tr>
           </table>
         </div>
 
