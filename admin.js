@@ -326,8 +326,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (partialConfig.officials) {
       localStorage.setItem("RSAM_ADMIN_OFFICIALS", JSON.stringify(partialConfig.officials));
     }
-    if (partialConfig.skinsuits) {
-      localStorage.setItem("RSAM_ADMIN_SKINSUIT", JSON.stringify(partialConfig.skinsuits[0]));
+    if (partialConfig.skinsuits || partialConfig.skinsuit) {
+      const sObj = Array.isArray(partialConfig.skinsuits) ? partialConfig.skinsuits[0] : (partialConfig.skinsuits || partialConfig.skinsuit);
+      if (sObj) {
+        localStorage.setItem("RSAM_ADMIN_SKINSUIT", JSON.stringify(sObj));
+      }
     }
 
     const baseUrl = getAdminApiBaseUrl();
@@ -584,7 +587,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="admin-item-actions">
             <button type="button" class="btn-item-archive" onclick="toggleArchiveEvent(${idx})" title="${isArchived ? 'Enable Event' : 'Archive Event'}"><i class="fa-solid ${isArchived ? 'fa-rotate-left' : 'fa-box-archive'}"></i></button>
             <button type="button" class="btn-item-edit" onclick="toggleEventTicker(${idx})" title="${ev.showOnTicker ? 'Hide from Ticker' : 'Show on Ticker'}"><i class="fa-solid fa-bullhorn"></i></button>
-            <button type="button" class="btn-item-edit" onclick="setEventActiveReg(${idx})" title="Set as Active Event for Online Registration"><i class="fa-solid fa-bullseye"></i></button>
+            <button type="button" class="btn-item-edit" onclick="toggleEventActiveReg(${idx})" title="${ev.isRegistrationActive ? 'Disable Online Registration for this Event' : 'Enable Online Registration for this Event'}" style="${ev.isRegistrationActive ? 'background:rgba(16,185,129,0.25); color:#34d399; border:1px solid rgba(16,185,129,0.4);' : ''}"><i class="fa-solid fa-bullseye"></i></button>
             <button type="button" class="btn-item-edit" onclick="editEventItem(${idx})" title="Edit Event Details"><i class="fa-solid fa-pen-to-square"></i></button>
             <button type="button" class="btn-item-delete" onclick="deleteEventItem(${idx})" title="Delete Event"><i class="fa-solid fa-trash-can"></i></button>
           </div>
@@ -613,19 +616,30 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  window.setEventActiveReg = function(idx) {
+  window.toggleEventActiveReg = function(idx) {
     const events = getAdminEvents();
-    events.forEach((ev, i) => {
-      ev.isRegistrationActive = (i === idx);
-    });
-    localStorage.setItem("RSAM_ADMIN_EVENTS", JSON.stringify(events));
-    // Also sync active event settings to RSAM_ADMIN_EVENT for event-register.js
-    if (events[idx]) {
+    if (!events[idx]) return;
+
+    const isCurrentlyActive = !!events[idx].isRegistrationActive;
+    if (isCurrentlyActive) {
+      events[idx].isRegistrationActive = false;
+      localStorage.removeItem("RSAM_ADMIN_EVENT");
+      updateSessionBaselineKey("events", JSON.stringify(events));
+      persistSiteConfig({ events });
+      renderAdminEvents();
+      notify(`⏸️ Online registration disabled for ${events[idx].title}`);
+    } else {
+      events.forEach((ev, i) => {
+        ev.isRegistrationActive = (i === idx);
+      });
       localStorage.setItem("RSAM_ADMIN_EVENT", JSON.stringify(events[idx]));
+      updateSessionBaselineKey("events", JSON.stringify(events));
+      persistSiteConfig({ events });
+      renderAdminEvents();
+      notify(`✓ ${events[idx].title} set as Active Event for online registration!`);
     }
-    renderAdminEvents();
-    notify(`✓ ${events[idx].title} set as Active Event for online registration!`);
   };
+  window.setEventActiveReg = window.toggleEventActiveReg;
 
   window.deleteEventItem = function(idx) {
     if (!confirm("Are you sure you want to delete this event?")) return;
@@ -1343,8 +1357,8 @@ document.addEventListener("DOMContentLoaded", () => {
           <div style="font-size:0.85rem; color:#d1d5db; margin-top:0.3rem;">${f.description || ''}</div>
         </div>
         <div class="admin-item-actions" style="display:flex; gap:0.4rem; flex-wrap:wrap;">
-          <button type="button" class="btn-item-edit" style="padding:0.4rem 0.6rem; font-size:0.85rem;" onclick="moveGalleryFolderItem(${idx}, -1)" ${idx === 0 ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : ''}>⬆️ Up</button>
-          <button type="button" class="btn-item-edit" style="padding:0.4rem 0.6rem; font-size:0.85rem;" onclick="moveGalleryFolderItem(${idx}, 1)" ${idx === folders.length - 1 ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : ''}>⬇️ Down</button>
+          <button type="button" class="btn-item-up" onclick="moveGalleryFolderItem(${idx}, -1)" title="Move Up in Gallery" ${idx === 0 ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : ''} aria-label="Move Up"><i class="fa-solid fa-arrow-up"></i></button>
+          <button type="button" class="btn-item-down" onclick="moveGalleryFolderItem(${idx}, 1)" title="Move Down in Gallery" ${idx === folders.length - 1 ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : ''} aria-label="Move Down"><i class="fa-solid fa-arrow-down"></i></button>
           <button type="button" class="btn-item-edit" style="padding:0.4rem 0.6rem; font-size:0.85rem; background:${isArchived ? 'rgba(16,185,129,0.2)' : 'rgba(245,158,11,0.2)'}; color:${isArchived ? '#34d399' : '#fbbf24'}; border:1px solid ${isArchived ? 'rgba(16,185,129,0.3)' : 'rgba(245,158,11,0.3)'};" onclick="toggleArchiveGalleryFolderItem(${idx})">
             ${isArchived ? '🟢 Enable' : '📦 Archive'}
           </button>
@@ -1976,11 +1990,27 @@ document.addEventListener("DOMContentLoaded", () => {
   if (editSkinsuitBtn) {
     editSkinsuitBtn.addEventListener("click", () => {
       const offObj = typeof OFFICIALS !== 'undefined' ? OFFICIALS : (window.OFFICIALS || {});
-      let skinsuitConfig = offObj.skinsuit || {};
-      const savedSkinsuit = localStorage.getItem("RSAM_ADMIN_SKINSUIT");
-      if (savedSkinsuit) {
-        try { skinsuitConfig = JSON.parse(savedSkinsuit); } catch (e) {}
+      let skinsuitConfig = {};
+      if (window.LIVE_SITE_CONFIG) {
+        if (Array.isArray(window.LIVE_SITE_CONFIG.skinsuits) && window.LIVE_SITE_CONFIG.skinsuits.length > 0) {
+          skinsuitConfig = window.LIVE_SITE_CONFIG.skinsuits[0];
+        } else if (window.LIVE_SITE_CONFIG.skinsuit) {
+          skinsuitConfig = window.LIVE_SITE_CONFIG.skinsuit;
+        }
       }
+      if (!skinsuitConfig || !skinsuitConfig.frontImage) {
+        const savedSkinsuit = localStorage.getItem("RSAM_ADMIN_SKINSUIT");
+        if (savedSkinsuit) {
+          try {
+            const parsed = JSON.parse(savedSkinsuit);
+            skinsuitConfig = Array.isArray(parsed) ? parsed[0] : parsed;
+          } catch (e) {}
+        }
+      }
+      if ((!skinsuitConfig || !skinsuitConfig.frontImage) && offObj.skinsuit) {
+        skinsuitConfig = offObj.skinsuit;
+      }
+      skinsuitConfig = skinsuitConfig || {};
 
       const frontUrl = skinsuitConfig.frontImage || 'https://res.cloudinary.com/igjmhsju/image/upload/v1788797466/rsam_website/branding/skinsuit_front.png';
       const backUrl = skinsuitConfig.backImage || 'https://res.cloudinary.com/igjmhsju/image/upload/v1788797466/rsam_website/branding/skinsuit_back.png';
@@ -2054,7 +2084,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Submit Modal Form
   if (itemModalForm) {
-    itemModalForm.addEventListener("submit", (e) => {
+    itemModalForm.addEventListener("submit", async (e) => {
       e.preventDefault();
 
       if (activeModalType === "event") {
@@ -2185,7 +2215,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const skinStr = JSON.stringify(skinsuitConfig);
         localStorage.setItem("RSAM_ADMIN_SKINSUIT", skinStr);
         updateSessionBaselineKey("skinsuit", skinStr);
-        persistSiteConfig({ skinsuits: [skinsuitConfig] });
+        await persistSiteConfig({ skinsuits: [skinsuitConfig], skinsuit: skinsuitConfig });
+        if (typeof window.renderCertificate === 'function') {
+          window.renderCertificate();
+        }
         notify("✓ Official Skinsuit design updated permanently!");
       }
  else if (activeModalType === "galleryFolder") {

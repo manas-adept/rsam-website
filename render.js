@@ -824,6 +824,7 @@ function renderLatestVideo() {
 
 /* ── Certificate ──────────────────────────────────── */
 function renderCertificate() {
+  window.renderCertificate = renderCertificate;
   if (!CONFIG.sections.certificate.enabled) return;
 
   function protectedFrame(src, label) {
@@ -870,11 +871,27 @@ function renderCertificate() {
 
         <!-- Official Skater Skinsuit Showcase -->
         ${(() => {
-          let skinsuitConfig = (OFFICIALS && OFFICIALS.skinsuit) || {};
-          const savedSkinsuit = localStorage.getItem("RSAM_ADMIN_SKINSUIT");
-          if (savedSkinsuit) {
-            try { skinsuitConfig = JSON.parse(savedSkinsuit); } catch (e) {}
+          let skinsuitConfig = {};
+          if (window.LIVE_SITE_CONFIG) {
+            if (Array.isArray(window.LIVE_SITE_CONFIG.skinsuits) && window.LIVE_SITE_CONFIG.skinsuits.length > 0) {
+              skinsuitConfig = window.LIVE_SITE_CONFIG.skinsuits[0];
+            } else if (window.LIVE_SITE_CONFIG.skinsuit) {
+              skinsuitConfig = window.LIVE_SITE_CONFIG.skinsuit;
+            }
           }
+          if (!skinsuitConfig || !skinsuitConfig.frontImage) {
+            const savedSkinsuit = localStorage.getItem("RSAM_ADMIN_SKINSUIT");
+            if (savedSkinsuit) {
+              try {
+                const parsed = JSON.parse(savedSkinsuit);
+                skinsuitConfig = Array.isArray(parsed) ? parsed[0] : parsed;
+              } catch (e) {}
+            }
+          }
+          if ((!skinsuitConfig || !skinsuitConfig.frontImage) && typeof OFFICIALS !== 'undefined' && OFFICIALS.skinsuit) {
+            skinsuitConfig = OFFICIALS.skinsuit;
+          }
+          skinsuitConfig = skinsuitConfig || {};
           const frontImg = skinsuitConfig.frontImage || "https://res.cloudinary.com/igjmhsju/image/upload/v1788797466/rsam_website/branding/rsam-logo.png";
           const backImg  = skinsuitConfig.backImage || "https://res.cloudinary.com/igjmhsju/image/upload/v1788797469/rsam_website/branding/skater-boy.png";
 
@@ -1904,8 +1921,11 @@ Promise.all([
       if (siteConfigData.fees) {
         localStorage.setItem("RSAM_ADMIN_FEE_CONFIG", JSON.stringify(siteConfigData.fees));
       }
-      if (siteConfigData.skinsuits) {
-        localStorage.setItem("RSAM_ADMIN_SKINSUIT", JSON.stringify(siteConfigData.skinsuits));
+      if (siteConfigData.skinsuits || siteConfigData.skinsuit) {
+        const sObj = Array.isArray(siteConfigData.skinsuits) ? siteConfigData.skinsuits[0] : (siteConfigData.skinsuits || siteConfigData.skinsuit);
+        if (sObj) {
+          localStorage.setItem("RSAM_ADMIN_SKINSUIT", JSON.stringify(sObj));
+        }
       }
     } catch (e) {}
   }
