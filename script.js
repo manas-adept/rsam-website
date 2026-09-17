@@ -5,54 +5,69 @@
 
 function initInteractions() {
 
-  /* ── Navbar scroll & mobile drawer ────────────── */
-  const navbar    = document.getElementById('navbar');
-  const navToggle = document.getElementById('navToggle');
-  const navLinks  = document.getElementById('navLinks');
-  const navBackdrop = document.getElementById('navBackdrop');
-  const navMobileClose = document.getElementById('navMobileClose');
-  const scrollHint = document.querySelector('.hero-scroll-hint');
-
+  /* ── Navbar scroll & mobile drawer (Document Event Delegation) ── */
   window.addEventListener('scroll', () => {
+    const navbar = document.getElementById('navbar');
+    const scrollHint = document.querySelector('.hero-scroll-hint');
     if (navbar) navbar.classList.toggle('scrolled', window.scrollY > 50);
     if (scrollHint) scrollHint.classList.toggle('hidden', window.scrollY > 80);
     updateActiveNavLink();
   });
 
   function openNavDrawer() {
+    const navLinks = document.getElementById('navLinks');
+    const navBackdrop = document.getElementById('navBackdrop');
     if (navLinks) navLinks.classList.add('open');
     if (navBackdrop) navBackdrop.style.display = 'block';
     document.body.style.overflow = 'hidden';
   }
 
   function closeNavDrawer() {
+    const navLinks = document.getElementById('navLinks');
+    const navBackdrop = document.getElementById('navBackdrop');
     if (navLinks) navLinks.classList.remove('open');
     if (navBackdrop) navBackdrop.style.display = 'none';
     document.body.style.overflow = '';
   }
 
-  if (navToggle) {
-    navToggle.addEventListener('click', (e) => {
+  document.addEventListener('click', (e) => {
+    // 1. Hamburger Toggle Button Click
+    const toggleBtn = e.target.closest('#navToggle');
+    if (toggleBtn) {
       e.stopPropagation();
+      const navLinks = document.getElementById('navLinks');
       if (navLinks && navLinks.classList.contains('open')) {
         closeNavDrawer();
       } else {
         openNavDrawer();
       }
-    });
-  }
+      return;
+    }
 
-  if (navMobileClose) navMobileClose.addEventListener('click', closeNavDrawer);
-  if (navBackdrop) navBackdrop.addEventListener('click', closeNavDrawer);
+    // 2. Mobile Close Button or Backdrop Click
+    if (e.target.closest('#navMobileClose') || e.target.closest('#navBackdrop')) {
+      closeNavDrawer();
+      return;
+    }
 
-  if (navLinks) {
-    navLinks.querySelectorAll('a').forEach(link =>
-      link.addEventListener('click', closeNavDrawer)
-    );
-  }
+    // 3. Mobile Nav Link Click / Navigation
+    const navLink = e.target.closest('#navLinks a');
+    if (navLink) {
+      closeNavDrawer();
+      const href = navLink.getAttribute('href');
+      if (href && href.startsWith('#')) {
+        const targetSec = document.querySelector(href);
+        if (targetSec) {
+          e.preventDefault();
+          targetSec.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
+    }
+  });
 
   function updateActiveNavLink() {
     const scrollY = window.scrollY + 100;
+    const navLinks = document.getElementById('navLinks');
     document.querySelectorAll('section[id]').forEach(sec => {
       const link = navLinks ? navLinks.querySelector(`a[href="#${sec.id}"]`) : null;
       if (link) link.classList.toggle('active', scrollY >= sec.offsetTop && scrollY < sec.offsetTop + sec.offsetHeight);

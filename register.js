@@ -305,6 +305,25 @@ function formatDriveImageUrl(url) {
       performRenewalLookup();
     }
   }
+
+  async function fetchSiteConfigFee() {
+    try {
+      const baseUrl = getEnv().backendUrl;
+      const res = await fetch(`${baseUrl}/api/site-config`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.config) {
+          window.LIVE_SITE_CONFIG = data.config;
+          if (data.config.fees) {
+            localStorage.setItem("RSAM_ADMIN_FEE_CONFIG", JSON.stringify(data.config.fees));
+          }
+        }
+      }
+    } catch(e) {}
+    if (typeof updateFeeDisplayUI === 'function') updateFeeDisplayUI();
+  }
+  fetchSiteConfigFee();
+  if (typeof updateFeeDisplayUI === 'function') updateFeeDisplayUI();
 });
 
 /* ── Passport Photo Frame & Cropper Handler ── */
@@ -574,27 +593,72 @@ function formatDateDDMMMYYYY(dateStr) {
   return `${day}-${month}-${year}`;
 }
 
-// Razorpay Gateway Configuration & Fee Calculations (Dynamic from Admin Config or default ₹10 base)
-let baseFeeVal = 10.00;
-let gwPctVal = 2.0;
-let gstPctVal = 18.0;
+function getFeeBreakdown() {
+  let baseFee = 0;
+  let gwPct = 2.0;
+  let gstPct = 18.0;
 
-const savedFeeCfg = localStorage.getItem("RSAM_ADMIN_FEE_CONFIG");
-if (savedFeeCfg) {
-  try {
-    const parsedCfg = JSON.parse(savedFeeCfg);
-    if (parsedCfg.baseFee !== undefined) baseFeeVal = parseFloat(parsedCfg.baseFee);
-    if (parsedCfg.gatewayPercent !== undefined) gwPctVal = parseFloat(parsedCfg.gatewayPercent);
-    if (parsedCfg.gstPercent !== undefined) gstPctVal = parseFloat(parsedCfg.gstPercent);
-  } catch (e) {}
+  if (window.LIVE_SITE_CONFIG && window.LIVE_SITE_CONFIG.fees) {
+    const f = window.LIVE_SITE_CONFIG.fees;
+    baseFee = parseFloat(f.annualBaseFee !== undefined ? f.annualBaseFee : (f.baseFee !== undefined ? f.baseFee : 0));
+    gwPct = parseFloat(f.gatewayPercent || 2.0);
+    gstPct = parseFloat(f.gstPercent || 18.0);
+  } else {
+    const saved = localStorage.getItem("RSAM_ADMIN_FEE_CONFIG");
+    if (saved) {
+      try {
+        const p = JSON.parse(saved);
+        if (p.annualBaseFee !== undefined) baseFee = parseFloat(p.annualBaseFee);
+        else if (p.baseFee !== undefined) baseFee = parseFloat(p.baseFee);
+        if (p.gatewayPercent !== undefined) gwPct = parseFloat(p.gatewayPercent);
+        if (p.gstPercent !== undefined) gstPct = parseFloat(p.gstPercent);
+      } catch (e) {}
+    }
+  }
+
+  const gatewayFee = parseFloat(((baseFee * gwPct) / 100).toFixed(2));
+  const gstFee = parseFloat(((gatewayFee * gstPct) / 100).toFixed(2));
+  const totalAmount = parseFloat((baseFee + gatewayFee + gstFee).toFixed(2));
+  const totalAmountPaise = Math.round(totalAmount * 100);
+
+  return {
+    baseFee,
+    gwPct,
+    gstPct,
+    gatewayFee,
+    gstFee,
+    totalAmount,
+    totalAmountPaise,
+    isFree: baseFee === 0
+  };
 }
 
-const RAZORPAY_KEY_ID = (window.ENV_CONFIG && window.ENV_CONFIG.razorpayKey) || "rzp_test_TZa1vfjhrPJobv"; // Razorpay Key ID
-const BASE_REGISTRATION_FEE = baseFeeVal;
-const GATEWAY_FEE = parseFloat(((BASE_REGISTRATION_FEE * gwPctVal) / 100).toFixed(2));
-const GST_FEE = parseFloat(((GATEWAY_FEE * gstPctVal) / 100).toFixed(2));
-const TOTAL_AMOUNT = parseFloat((BASE_REGISTRATION_FEE + GATEWAY_FEE + GST_FEE).toFixed(2));
-const TOTAL_AMOUNT_PAISE = Math.round(TOTAL_AMOUNT * 100);
+function updateFeeDisplayUI() {
+  const fee = getFeeBreakdown();
+  const feeBanner = document.querySelector(".reg-fee-banner");
+  if (feeBanner) {
+    if (fee.isFree) {
+      feeBanner.innerHTML = `🎉 Annual Registration Fee: <strong>FREE / WAIVED (₹0.00)</strong> <small>(No online payment required)</small>`;
+      feeBanner.style.background = "rgba(52, 211, 153, 0.15)";
+      feeBanner.style.borderColor = "rgba(52, 211, 153, 0.4)";
+      feeBanner.style.color = "#6ee7b7";
+    } else {
+      feeBanner.innerHTML = `💳 Registration Fee: <strong>₹${fee.baseFee.toFixed(2)}</strong> <small>(+ ${fee.gwPct}% gateway charge &amp; ${fee.gstPct}% GST = ₹${fee.totalAmount.toFixed(2)} Total)</small>`;
+      feeBanner.style.background = "rgba(245, 158, 11, 0.15)";
+      feeBanner.style.borderColor = "rgba(245, 158, 11, 0.4)";
+      feeBanner.style.color = "#fef08a";
+    }
+  }
+
+  const submitBtnText = document.querySelector("#regForm button[type='submit'] .submit-text, .reg-submit-row button .submit-text, .reg-submit .submit-text");
+  if (submitBtnText) {
+    if (fee.isFree) {
+      submitBtnText.textContent = "Submit Registration (Free / Waived)";
+    } else {
+      submitBtnText.textContent = `Confirm & Pay ₹${fee.totalAmount.toFixed(2)}`;
+    }
+  }
+}
 
       // Populate Pre-Submission Confirmation Modal Summary
       const confirmModal = document.getElementById("confirmModal");
@@ -605,6 +669,7 @@ const TOTAL_AMOUNT_PAISE = Math.round(TOTAL_AMOUNT * 100);
       const photoSrc = croppedPhotoDataUrl || (photoPreview.src ? photoPreview.src : "");
       const aadhaarFileName = form.aadhaarProof.files[0] ? form.aadhaarProof.files[0].name : "Attached File";
       const dobFileName = form.dobProof.files[0] ? form.dobProof.files[0].name : "Attached File";
+      const fee = getFeeBreakdown();
 
       confirmSummaryBody.innerHTML = `
         <div class="confirm-photo-header">
@@ -617,7 +682,7 @@ const TOTAL_AMOUNT_PAISE = Math.round(TOTAL_AMOUNT * 100);
         <div class="confirm-grid">
           <div class="confirm-item">
             <span class="confirm-label">Date of Birth</span>
-            <span class="confirm-value">${payload.dob}</span>
+            <span class="confirm-value">${formatDateDDMMMYYYY(payload.dob)}</span>
           </div>
           <div class="confirm-item">
             <span class="confirm-label">Age Group</span>
@@ -663,8 +728,8 @@ const TOTAL_AMOUNT_PAISE = Math.round(TOTAL_AMOUNT * 100);
           </div>
           
           <!-- Fee & Razorpay Payment Breakdown -->
-          <div class="confirm-fee-breakdown" style="grid-column: span 2; background: ${BASE_REGISTRATION_FEE === 0 ? 'rgba(52, 211, 153, 0.08)' : 'rgba(245, 158, 11, 0.08)'}; border: 1px solid ${BASE_REGISTRATION_FEE === 0 ? 'rgba(52, 211, 153, 0.25)' : 'rgba(245, 158, 11, 0.25)'}; border-radius: 10px; padding: 1rem; margin-top: 0.5rem;">
-            ${BASE_REGISTRATION_FEE === 0 ? `
+          <div class="confirm-fee-breakdown" style="grid-column: span 2; background: ${fee.isFree ? 'rgba(52, 211, 153, 0.08)' : 'rgba(245, 158, 11, 0.08)'}; border: 1px solid ${fee.isFree ? 'rgba(52, 211, 153, 0.25)' : 'rgba(245, 158, 11, 0.25)'}; border-radius: 10px; padding: 1rem; margin-top: 0.5rem;">
+            ${fee.isFree ? `
               <div style="display: flex; justify-content: space-between; font-size: 1.05rem; font-weight: 700; color: #34d399;">
                 <span>Registration Fee Status:</span>
                 <span>🎉 FREE / WAIVED (₹0.00)</span>
@@ -672,19 +737,19 @@ const TOTAL_AMOUNT_PAISE = Math.round(TOTAL_AMOUNT * 100);
             ` : `
               <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #d1d5db; margin-bottom: 0.3rem;">
                 <span>Base Registration Fee:</span>
-                <strong>₹${BASE_REGISTRATION_FEE.toFixed(2)}</strong>
+                <strong>₹${fee.baseFee.toFixed(2)}</strong>
               </div>
               <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #d1d5db; margin-bottom: 0.3rem;">
-                <span>Gateway Transaction Charge (${gwPctVal}%):</span>
-                <span>+ ₹${GATEWAY_FEE.toFixed(2)}</span>
+                <span>Gateway Transaction Charge (${fee.gwPct}%):</span>
+                <span>+ ₹${fee.gatewayFee.toFixed(2)}</span>
               </div>
               <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #d1d5db; margin-bottom: 0.6rem;">
-                <span>GST on Transaction Fee (${gstPctVal}%):</span>
-                <span>+ ₹${GST_FEE.toFixed(2)}</span>
+                <span>GST on Transaction Fee (${fee.gstPct}%):</span>
+                <span>+ ₹${fee.gstFee.toFixed(2)}</span>
               </div>
               <div style="display: flex; justify-content: space-between; font-size: 1.05rem; font-weight: 700; color: #f59e0b; border-top: 1px dashed rgba(245, 158, 11, 0.3); padding-top: 0.5rem;">
                 <span>Total Payable Amount (Razorpay):</span>
-                <span style="font-size: 1.2rem;">₹${TOTAL_AMOUNT.toFixed(2)}</span>
+                <span style="font-size: 1.2rem;">₹${fee.totalAmount.toFixed(2)}</span>
               </div>
             `}
           </div>
@@ -701,8 +766,9 @@ const TOTAL_AMOUNT_PAISE = Math.round(TOTAL_AMOUNT * 100);
       // Handle Proceed to Payment / Submission
       confirmProceedBtn.onclick = () => {
         confirmModal.hidden = true;
+        const currentFee = getFeeBreakdown();
 
-        if (BASE_REGISTRATION_FEE === 0) {
+        if (currentFee.isFree) {
           payload.paymentId = "WAIVED_FREE";
           payload.paymentStatus = "WAIVED";
           payload.amountPaid = "0.00";
@@ -712,8 +778,8 @@ const TOTAL_AMOUNT_PAISE = Math.round(TOTAL_AMOUNT * 100);
 
         // Razorpay Checkout Options
         const rzpOptions = {
-          key: window.RAZORPAY_KEY_ID || RAZORPAY_KEY_ID,
-          amount: TOTAL_AMOUNT_PAISE,
+          key: (window.ENV_CONFIG && window.ENV_CONFIG.razorpayKey) || "rzp_test_TZa1vfjhrPJobv",
+          amount: currentFee.totalAmountPaise,
           currency: "INR",
           payment_capture: 1, // Auto-capture payment immediately
           name: "Roller Sports Association Moradabad",
