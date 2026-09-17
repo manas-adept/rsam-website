@@ -337,26 +337,9 @@ function initHeroCarousel() {
   setInterval(() => goTo(current + 1), 4000);
 }
 
-/* ── Skiper UI: Skate Motion Trail Particle Effect ── */
+/* ── Mouse Cursor Trail Effect Disabled ── */
 function initSkateTrail() {
-  let lastX = 0, lastY = 0;
-  window.addEventListener('mousemove', e => {
-    const dist = Math.hypot(e.clientX - lastX, e.clientY - lastY);
-    if (dist > 25) {
-      lastX = e.clientX;
-      lastY = e.clientY;
-      const p = document.createElement('div');
-      p.className = 'skate-cursor-particle';
-      p.style.left = `${e.clientX}px`;
-      p.style.top = `${e.clientY}px`;
-      document.body.appendChild(p);
-      setTimeout(() => {
-        p.style.transform = 'translate(-50%, -50%) scale(0.2)';
-        p.style.opacity = '0';
-      }, 50);
-      setTimeout(() => { p.remove(); }, 450);
-    }
-  });
+  // Mouse cursor animation disabled as requested
 }
 
 /* ── 3D Cylinder Gallery Carousel (Vengeance UI Cylinder Carousel) ──── */
@@ -570,9 +553,9 @@ function initBackToTop() {
   });
 }
 
-/* ── Global Document Event Delegation for Gallery Folders & Modals ── */
+/* ── Global Document Event Delegation for Carousels, Gallery Folders & Modals ── */
 document.addEventListener('click', (e) => {
-  // Photo Gallery Folder Click Handler
+  // 1. Photo Gallery Folder Click Handler
   const folderCard = e.target.closest('.g-folder-card');
   if (folderCard && folderCard.dataset.folderId) {
     e.preventDefault();
@@ -585,6 +568,95 @@ document.addEventListener('click', (e) => {
     }
     const gSec = document.getElementById('gallery');
     if (gSec) gSec.scrollIntoView({ behavior: 'smooth' });
+    return;
+  }
+
+  // 2. Events Carousel Arrow Click Handler (News & Circulars)
+  const evArrow = e.target.closest('.events-arrow');
+  if (evArrow) {
+    e.preventDefault();
+    e.stopPropagation();
+    const carousel = evArrow.closest('#eventsCarousel, .events-carousel');
+    if (carousel) {
+      const isNext = evArrow.classList.contains('events-arrow--next');
+      const track = carousel.querySelector('.events-track');
+      const slides = carousel.querySelectorAll('.events-slide');
+      const dots = carousel.querySelectorAll('.events-dot');
+      if (track && slides.length > 0) {
+        let cur = parseInt(carousel.dataset.currentSlide || '0', 10);
+        cur = isNext ? (cur + 1) % slides.length : (cur - 1 + slides.length) % slides.length;
+        carousel.dataset.currentSlide = cur;
+        track.style.transform = `translateX(-${cur * 100}%)`;
+        dots.forEach((d, i) => d.classList.toggle('active', i === cur));
+      }
+    }
+    return;
+  }
+
+  // 3. Events Carousel Dot Click Handler
+  const evDot = e.target.closest('.events-dot');
+  if (evDot) {
+    e.preventDefault();
+    e.stopPropagation();
+    const carousel = evDot.closest('#eventsCarousel, .events-carousel');
+    if (carousel && evDot.dataset.idx !== undefined) {
+      const idx = parseInt(evDot.dataset.idx, 10);
+      const track = carousel.querySelector('.events-track');
+      const slides = carousel.querySelectorAll('.events-slide');
+      const dots = carousel.querySelectorAll('.events-dot');
+      if (track && slides.length > 0) {
+        carousel.dataset.currentSlide = idx;
+        track.style.transform = `translateX(-${idx * 100}%)`;
+        dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+      }
+    }
+    return;
+  }
+
+  // 4. Hall of Highlights Image Carousel Arrow Click Handler
+  const hlArrow = e.target.closest('.hl-arrow');
+  if (hlArrow) {
+    e.preventDefault();
+    e.stopPropagation();
+    const carousel = hlArrow.closest('.hl-carousel');
+    if (carousel) {
+      const isNext = hlArrow.classList.contains('hl-arrow--next');
+      const track = carousel.querySelector('.hl-track');
+      const slides = carousel.querySelectorAll('.hl-slide');
+      const dots = carousel.querySelectorAll('.hl-dot');
+      const counter = carousel.querySelector('.hl-counter');
+      if (track && slides.length > 0) {
+        let cur = parseInt(carousel.dataset.currentSlide || '0', 10);
+        cur = isNext ? (cur + 1) % slides.length : (cur - 1 + slides.length) % slides.length;
+        carousel.dataset.currentSlide = cur;
+        track.style.transform = `translateX(-${cur * 100}%)`;
+        dots.forEach((d, i) => d.classList.toggle('active', i === cur));
+        if (counter) counter.textContent = `${cur + 1} / ${slides.length}`;
+      }
+    }
+    return;
+  }
+
+  // 5. Hall of Highlights Image Carousel Dot Click Handler
+  const hlDot = e.target.closest('.hl-dot');
+  if (hlDot) {
+    e.preventDefault();
+    e.stopPropagation();
+    const carousel = hlDot.closest('.hl-carousel');
+    if (carousel && hlDot.dataset.idx !== undefined) {
+      const idx = parseInt(hlDot.dataset.idx, 10);
+      const track = carousel.querySelector('.hl-track');
+      const slides = carousel.querySelectorAll('.hl-slide');
+      const dots = carousel.querySelectorAll('.hl-dot');
+      const counter = carousel.querySelector('.hl-counter');
+      if (track && slides.length > 0) {
+        carousel.dataset.currentSlide = idx;
+        track.style.transform = `translateX(-${idx * 100}%)`;
+        dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+        if (counter) counter.textContent = `${idx + 1} / ${slides.length}`;
+      }
+    }
+    return;
   }
 });
 
@@ -592,7 +664,6 @@ document.addEventListener('click', (e) => {
 document.addEventListener('rsam:ready', () => {
   initInteractions();
   initHeroCarousel();
-  initSkateTrail();
   initSpotlightNavbar();
   initCylinderGalleryCarousel();
   initImageLightbox();

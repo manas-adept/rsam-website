@@ -1407,8 +1407,14 @@ function renderGallery() {
   }
 
   // Mode B: Inside Event Folder (galleryState.currentFolderId !== null)
-  const currentAlbum = albums.find(a => a.id === galleryState.currentFolderId || a.cloudinarySubfolder === galleryState.currentFolderId)
-    || albums.find(a => a.id === galleryState.currentFolderId)
+  const targetId = String(galleryState.currentFolderId || '').toLowerCase();
+  const currentAlbum = albums.find(a =>
+      String(a.id || '').toLowerCase() === targetId ||
+      String(a.folderId || '').toLowerCase() === targetId ||
+      String(a.cloudinarySubfolder || '').toLowerCase() === targetId ||
+      String(a.cloudinarySubfolder || '').toLowerCase().endsWith(`/${targetId}`)
+    )
+    || albums.find(a => String(a.title || '').toLowerCase().includes(targetId))
     || albums[0]
     || { id: 'unknown', title: 'Event Album', photos: [] };
 

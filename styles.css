@@ -1662,7 +1662,8 @@ body.has-ticker .navbar {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  z-index: 5;
+  z-index: 10 !important;
+  pointer-events: auto !important;
   width: 28px; height: 28px;
   border-radius: 50%;
   background: rgba(10,10,15,0.65);
@@ -1686,7 +1687,8 @@ body.has-ticker .navbar {
   transform: translateX(-50%);
   display: flex;
   gap: 5px;
-  z-index: 5;
+  z-index: 10 !important;
+  pointer-events: auto !important;
 }
 
 .hl-dot {
@@ -1741,6 +1743,7 @@ body.has-ticker .navbar {
   display: flex;
   align-items: flex-end;
   padding: 0.75rem;
+  pointer-events: none !important;
 }
 .hl-trophy { font-size: 1.6rem; }
 
@@ -3272,15 +3275,7 @@ body.has-ticker .navbar {
 
 /* Skate Trail Motion Particle */
 .skate-cursor-particle {
-  position: fixed;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(224,28,46,0.8) 0%, rgba(245,158,11,0.4) 100%);
-  pointer-events: none;
-  z-index: 999999;
-  transform: translate(-50%, -50%);
-  transition: transform 0.4s ease-out, opacity 0.4s ease-out;
+  display: none !important;
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
