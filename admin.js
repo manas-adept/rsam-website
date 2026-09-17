@@ -515,7 +515,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!window.LIVE_SITE_CONFIG) window.LIVE_SITE_CONFIG = {};
       window.LIVE_SITE_CONFIG.fees = cfg;
       await persistSiteConfig({ fees: cfg });
-      notify("✓ Annual Athlete Registration Fee updated and saved to data/site-config.json!");
+      notify("✓ Annual Athlete Registration Fee updated successfully!");
     };
   }
 
@@ -701,7 +701,7 @@ document.addEventListener("DOMContentLoaded", () => {
     items.splice(idx, 1);
     await persistSiteConfig({ news: items });
     renderAdminNews();
-    notify("Circular deleted and updated in data/site-config.json.");
+    notify("✓ Circular deleted successfully.");
   };
 
   // ── Render Highlights Tab Cards ──
@@ -772,7 +772,7 @@ document.addEventListener("DOMContentLoaded", () => {
     items.splice(idx, 1);
     await persistSiteConfig({ highlights: items });
     renderAdminHighlights();
-    notify("Highlight deleted and updated in data/site-config.json.");
+    notify("✓ Highlight deleted successfully.");
   };
 
   // ── Render Officials Tab Cards ──
@@ -820,7 +820,7 @@ document.addEventListener("DOMContentLoaded", () => {
       items[idx - 1] = temp;
       await persistSiteConfig({ officials: items });
       renderAdminOfficials();
-      notify("✓ Lineup order updated in data/site-config.json!");
+      notify("✓ Lineup order updated successfully!");
     }
   };
 
@@ -832,7 +832,7 @@ document.addEventListener("DOMContentLoaded", () => {
       items[idx + 1] = temp;
       await persistSiteConfig({ officials: items });
       renderAdminOfficials();
-      notify("✓ Lineup order updated in data/site-config.json!");
+      notify("✓ Lineup order updated successfully!");
     }
   };
 
@@ -842,7 +842,7 @@ document.addEventListener("DOMContentLoaded", () => {
     items.splice(idx, 1);
     await persistSiteConfig({ officials: items });
     renderAdminOfficials();
-    notify("Official deleted and updated in data/site-config.json.");
+    notify("✓ Official deleted successfully.");
   };
 
 

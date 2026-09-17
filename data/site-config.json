@@ -1,12 +1,12 @@
 {
   "fees": {
-    "annualBaseFee": 0,
-    "baseFee": 0,
+    "annualBaseFee": 10,
+    "baseFee": 10,
     "gatewayPercent": 2,
     "gstPercent": 18,
-    "gatewayFee": 0,
-    "gstFee": 0,
-    "totalPayable": 0
+    "gatewayFee": 0.2,
+    "gstFee": 0.04,
+    "totalPayable": 10.24
   },
   "events": [
     {

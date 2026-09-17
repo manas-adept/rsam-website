@@ -986,17 +986,6 @@ function renderConnect() {
             <a href="https://maps.google.com/?q=Rana+Bhawan+Near+23+PAC+Kanth+Road+Moradabad" target="_blank" rel="noopener" class="contact-link-btn" style="color:#38bdf8; font-weight:700; text-decoration:none; font-size:0.85rem;">📍 Open in Google Maps</a>
           </div>
 
-          <!-- General Secretary Card -->
-          <div class="contact-card" style="background:var(--bg-card, #111118); border:1px solid var(--border); border-radius:16px; padding:1.5rem; text-align:center;">
-            <div class="contact-card-icon" style="width:54px; height:54px; border-radius:50%; background:rgba(34,197,94,0.15); color:#34d399; display:inline-flex; align-items:center; justify-content:center; font-size:1.4rem; margin-bottom:1rem;"><i class="fa-solid fa-phone"></i></div>
-            <h3 style="font-family:'Rajdhani',sans-serif; font-size:1.3rem; margin-bottom:0.5rem; color:var(--text);">General Secretary</h3>
-            <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:1rem; line-height:1.5;"><strong>Devendra Rana</strong><br/>Roller Sports Association Moradabad</p>
-            <div class="contact-btn-group" style="display:flex; flex-direction:column; gap:0.6rem; align-items:center;">
-              <a href="tel:${phoneNo.replace(/[^+\d]/g,"")}" class="btn-contact-action call" style="width:100%; max-width:240px; padding:0.6rem; border-radius:8px; background:rgba(34,197,94,0.2); color:#4ade80; border:1px solid rgba(34,197,94,0.4); font-weight:700; text-decoration:none; font-size:0.85rem; display:inline-flex; align-items:center; justify-content:center; gap:0.4rem;"><i class="fa-solid fa-phone"></i> ${phoneNo}</a>
-              <a href="https://wa.me/${phoneNo.replace(/\D/g,"")}?text=Hello%20RSAM%20Moradabad%2C%20I%20have%20an%20inquiry%20regarding%20skating%20registration." target="_blank" rel="noopener" class="btn-contact-action wa" style="width:100%; max-width:240px; padding:0.6rem; border-radius:8px; background:linear-gradient(135deg, #25D366 0%, #128C7E 100%); color:#fff; font-weight:700; text-decoration:none; font-size:0.85rem; display:inline-flex; align-items:center; justify-content:center; gap:0.4rem;"><i class="fa-brands fa-whatsapp"></i> Chat on WhatsApp</a>
-            </div>
-          </div>
-
           <!-- Official Email Card -->
           <div class="contact-card" style="background:var(--bg-card, #111118); border:1px solid var(--border); border-radius:16px; padding:1.5rem; text-align:center;">
             <div class="contact-card-icon" style="width:54px; height:54px; border-radius:50%; background:rgba(245,158,11,0.15); color:#fbbf24; display:inline-flex; align-items:center; justify-content:center; font-size:1.4rem; margin-bottom:1rem;"><i class="fa-solid fa-envelope"></i></div>
