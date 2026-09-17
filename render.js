@@ -44,20 +44,22 @@ function getLiveSiteConfig() {
 }
 
 function getActiveEventsList() {
+  let eventsList = [];
   const live = getLiveSiteConfig();
   if (live && Array.isArray(live.events) && live.events.length > 0) {
-    return live.events.filter(e => !e.archived);
+    eventsList = live.events.filter(e => !e.archived && e.enabled !== false);
   }
-  let events = [];
-  const saved = localStorage.getItem("RSAM_ADMIN_EVENTS");
-  if (saved) {
-    try {
-      const parsed = JSON.parse(saved);
-      if (Array.isArray(parsed) && parsed.length > 0) events = parsed;
-    } catch (e) {}
+  if (eventsList.length === 0) {
+    const saved = localStorage.getItem("RSAM_ADMIN_EVENTS");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) eventsList = parsed.filter(e => !e.archived && e.enabled !== false);
+      } catch (e) {}
+    }
   }
-  if (!events || events.length === 0) {
-    events = [
+  if (!eventsList || eventsList.length === 0) {
+    eventsList = [
       {
         id: "evt_district_2026",
         title: "4th District Championship 2026",
@@ -114,7 +116,33 @@ function getActiveEventsList() {
       }
     ];
   }
-  return events.filter(e => !e.archived);
+
+  // Normalise all event fields to prevent 'undefined'
+  return eventsList.map(ev => ({
+    ...ev,
+    id: ev.id || "evt_" + Math.random().toString(36).substr(2, 6),
+    title: ev.title || ev.name || "RSAM Official Championship",
+    category: ev.category || "Championship Event",
+    date: ev.date || "2026",
+    location: ev.location || "Moradabad, UP",
+    description: ev.description || ev.body || "Official Roller Skating Event organized under the aegis of RSAM & UPRSA.",
+    image: ev.image || "https://res.cloudinary.com/igjmhsju/image/upload/v1788797466/rsam_website/branding/rsam-logo.png"
+  }));
+}
+
+function getEventStatus(ev) {
+  const catLabel = ev.category || 'Championship Event';
+  if (!ev.startDateTime && !ev.endDateTime) {
+    return { label: catLabel, cls: 'status-default' };
+  }
+  /* IST = UTC + 5h 30m */
+  const nowIST = new Date(Date.now() + (5.5 * 60 - new Date().getTimezoneOffset()) * 60000);
+  const start  = ev.startDateTime ? new Date(ev.startDateTime) : null;
+  const end    = ev.endDateTime   ? new Date(ev.endDateTime)   : null;
+
+  if (end && nowIST > end)          return { label: 'Event Ended',    cls: 'status-ended' };
+  if (start && nowIST < start)      return { label: 'Upcoming Event', cls: 'status-upcoming' };
+  return                                   { label: 'Happening Now',  cls: 'status-live' };
 }
 
 function getActiveEventConfig() {
