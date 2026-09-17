@@ -3765,7 +3765,7 @@ body.has-ticker .navbar.spotlight-nav {
 /* 6. Vengeance Stats Counter (Vengeance UI Glassmorphism Stat Cards) */
 .veng-stat-card {
   position: relative;
-  background: rgba(18, 18, 30, 0.65);
+  background: transparent !important;
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 16px;
@@ -4219,16 +4219,112 @@ body[data-theme="light"] {
 [data-theme="light"] .g-folder-card,
 [data-theme="light"] .admin-card,
 [data-theme="light"] .modal-content,
+[data-theme="light"] .admin-modal,
+[data-theme="light"] .reg-modal,
+[data-theme="light"] .confirm-modal-card,
+[data-theme="light"] .success-card-modal,
+[data-theme="light"] .crop-modal,
 [data-theme="light"] .confirm-fee-breakdown,
 [data-theme="light"] .connect-panel,
 [data-theme="light"] .reg-fee-banner,
 [data-theme="light"] .news-item,
 [data-theme="light"] .reg-card,
-[data-theme="light"] .lookup-card {
-  background-color: #ffffff !important;
+[data-theme="light"] .lookup-card,
+[data-theme="light"] .renew-lookup-card,
+[data-theme="light"] .dash-card,
+[data-theme="light"] .admin-item-card,
+[data-theme="light"] .modal-section-card,
+[data-theme="light"] .skin-view-card,
+[data-theme="light"] .skinsuit-unified-container {
+  background-color: transparent !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+[data-theme="light"] .veng-stat-card {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+/* Light Theme Skinsuit Design Section & Button Enhancements */
+[data-theme="light"] #editSkinsuitBtn {
+  background: #ffffff !important;
+  color: #e01c2e !important;
+  border: 1.5px solid #e01c2e !important;
+  box-shadow: 0 2px 8px rgba(224, 28, 46, 0.15) !important;
+  font-weight: 700 !important;
+}
+
+[data-theme="light"] #editSkinsuitBtn:hover {
+  background: #e01c2e !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(224, 28, 46, 0.35) !important;
+}
+
+[data-theme="light"] .skinsuit-unified-container {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+[data-theme="light"] .skinsuit-view-header h4 {
   color: #0f172a !important;
-  border: 1px solid rgba(0, 0, 0, 0.12) !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06) !important;
+}
+
+[data-theme="light"] .skinsuit-view-header p {
+  color: #475569 !important;
+}
+
+[data-theme="light"] .skinsuit-view-col .cert-img-shield {
+  background: #f1f5f9 !important;
+  border: 1.5px solid #cbd5e1 !important;
+  border-radius: 14px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06) !important;
+}
+
+[data-theme="light"] .skinsuit-divider {
+  background: linear-gradient(to bottom, transparent, rgba(224, 28, 46, 0.3), transparent) !important;
+}
+
+[data-theme="light"] .skin-view-card {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+[data-theme="light"] .skin-view-card h5 {
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .skin-img-preview-box {
+  background: #f1f5f9 !important;
+  border: 1.5px solid #cbd5e1 !important;
+  border-radius: 12px !important;
+}
+
+[data-theme="light"] .skin-view-card input[type="url"] {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border: 1.5px solid #cbd5e1 !important;
+}
+
+[data-theme="light"] .skin-view-card .btn-dash-action {
+  background: #e01c2e !important;
+  color: #ffffff !important;
+  border: none !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="light"] .modal-section-card {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+[data-theme="light"] .modal-sec-title {
+  color: #e01c2e !important;
+  border-bottom: 1px dashed rgba(0, 0, 0, 0.15) !important;
 }
 
 /* Light Mode Card Titles & Headings */
