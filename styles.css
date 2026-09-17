@@ -1891,7 +1891,7 @@ body.has-ticker .navbar {
 /* decorative frame */
 .cert-frame {
   position: relative;
-  padding: 10px;
+  padding: 4px;
   background: var(--surface);
   border-radius: var(--radius-lg);
   box-shadow:
@@ -1911,14 +1911,15 @@ body.has-ticker .navbar {
 /* corner accents */
 .cert-corner {
   position: absolute;
-  width: 18px; height: 18px;
+  width: 14px; height: 14px;
   z-index: 2;
   pointer-events: none;
 }
-.cert-corner--tl { top: 4px;  left: 4px;  border-top: 2px solid var(--orange); border-left: 2px solid var(--orange); border-radius: 4px 0 0 0; }
-.cert-corner--tr { top: 4px;  right: 4px; border-top: 2px solid var(--orange); border-right: 2px solid var(--orange); border-radius: 0 4px 0 0; }
-.cert-corner--bl { bottom: 4px; left: 4px;  border-bottom: 2px solid var(--orange); border-left: 2px solid var(--orange); border-radius: 0 0 0 4px; }
-.cert-corner--br { bottom: 4px; right: 4px; border-bottom: 2px solid var(--orange); border-right: 2px solid var(--orange); border-radius: 0 0 4px 0; }
+.cert-corner--tl { top: 2px;  left: 2px;  border-top: 2px solid var(--orange); border-left: 2px solid var(--orange); border-radius: 4px 0 0 0; }
+.cert-corner--tr { top: 2px;  right: 2px; border-top: 2px solid var(--orange); border-right: 2px solid var(--orange); border-radius: 0 4px 0 0; }
+.cert-corner--bl { bottom: 2px; left: 2px;  border-bottom: 2px solid var(--orange); border-left: 2px solid var(--orange); border-radius: 0 0 0 4px; }
+.cert-corner--br { bottom: 2px; right: 2px; border-bottom: 2px solid var(--orange); border-right: 2px solid var(--orange); border-radius: 0 0 4px 0; }
+
 
 /* protected image container */
 .cert-img-shield {
@@ -3304,16 +3305,17 @@ body.has-ticker .navbar {
 .aurora-hero-overlay {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 50% 45%, rgba(6, 6, 12, 0.62) 0%, rgba(6, 6, 12, 0.88) 75%, var(--bg-dark, #06060c) 100%),
-              linear-gradient(180deg, rgba(6, 6, 12, 0.45) 0%, rgba(6, 6, 12, 0.85) 100%);
+  background: radial-gradient(circle at 50% 45%, rgba(6, 6, 12, 0.25) 0%, rgba(6, 6, 12, 0.55) 75%, var(--bg-dark, #06060c) 100%),
+              linear-gradient(180deg, rgba(6, 6, 12, 0.20) 0%, rgba(6, 6, 12, 0.50) 100%);
   pointer-events: none;
   z-index: 2;
 }
 
 [data-theme="light"] .aurora-hero-overlay {
-  background: radial-gradient(circle at 50% 45%, rgba(248, 250, 252, 0.6) 0%, rgba(248, 250, 252, 0.88) 75%, var(--bg-dark) 100%),
-              linear-gradient(180deg, rgba(248, 250, 252, 0.45) 0%, rgba(248, 250, 252, 0.85) 100%);
+  background: radial-gradient(circle at 50% 45%, rgba(248, 250, 252, 0.25) 0%, rgba(248, 250, 252, 0.55) 75%, var(--bg-dark) 100%),
+              linear-gradient(180deg, rgba(248, 250, 252, 0.20) 0%, rgba(248, 250, 252, 0.50) 100%);
 }
+
 
 .aurora-curtain-wrap {
   position: absolute;

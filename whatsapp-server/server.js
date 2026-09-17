@@ -1085,6 +1085,78 @@ app.post('/api/save-gallery-config', async (req, res) => {
   }
 });
 
+/**
+ * GET /api/site-config
+ * Serves live unified site configuration (fees, events, skinsuits, news, highlights, gallery, officials, ticker)
+ */
+app.get('/api/site-config', (req, res) => {
+  try {
+    const configPath1 = path.join(__dirname, 'data/site-config.json');
+    const configPath2 = path.join(__dirname, '../data/site-config.json');
+    const targetPath = fs.existsSync(configPath1) ? configPath1 : (fs.existsSync(configPath2) ? configPath2 : null);
+
+    if (targetPath) {
+      const data = JSON.parse(fs.readFileSync(targetPath, 'utf8'));
+      return res.json({ success: true, config: data });
+    }
+    return res.status(404).json({ success: false, error: 'site-config.json not found' });
+  } catch (err) {
+    console.error('[Get Site Config Error]:', err.message);
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
+ * POST /api/save-site-config
+ * Updates live unified site configuration across server and syncs to client files
+ */
+app.post('/api/save-site-config', (req, res) => {
+  try {
+    const newConfig = req.body;
+    if (!newConfig || typeof newConfig !== 'object') {
+      return res.status(400).json({ success: false, error: 'Invalid configuration object provided.' });
+    }
+
+    const configPath1 = path.join(__dirname, 'data/site-config.json');
+    const configPath2 = path.join(__dirname, '../data/site-config.json');
+
+    // Read existing to merge safely
+    let currentConfig = {};
+    if (fs.existsSync(configPath1)) {
+      try { currentConfig = JSON.parse(fs.readFileSync(configPath1, 'utf8')); } catch (e) {}
+    } else if (fs.existsSync(configPath2)) {
+      try { currentConfig = JSON.parse(fs.readFileSync(configPath2, 'utf8')); } catch (e) {}
+    }
+
+    const mergedConfig = {
+      ...currentConfig,
+      ...newConfig,
+      lastUpdated: new Date().toISOString()
+    };
+
+    const jsonStr = JSON.stringify(mergedConfig, null, 2);
+
+    if (fs.existsSync(path.dirname(configPath1))) fs.writeFileSync(configPath1, jsonStr, 'utf8');
+    if (fs.existsSync(path.dirname(configPath2))) fs.writeFileSync(configPath2, jsonStr, 'utf8');
+
+    // Also sync gallery folders if provided
+    if (mergedConfig.gallery && Array.isArray(mergedConfig.gallery.folders)) {
+      const gPath1 = path.join(__dirname, 'data/gallery-config.json');
+      const gPath2 = path.join(__dirname, '../data/gallery-config.json');
+      const gStr = JSON.stringify(mergedConfig.gallery, null, 2);
+      if (fs.existsSync(path.dirname(gPath1))) fs.writeFileSync(gPath1, gStr, 'utf8');
+      if (fs.existsSync(path.dirname(gPath2))) fs.writeFileSync(gPath2, gStr, 'utf8');
+    }
+
+    console.log('[Site Config] Permanently updated site configuration for all users.');
+    return res.json({ success: true, message: 'Site configuration permanently updated.', config: mergedConfig });
+  } catch (err) {
+    console.error('[Save Site Config Error]:', err.message);
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+
 app.get('/health', (req, res) => {
   res.json({
     status: 'online',

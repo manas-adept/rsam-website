@@ -327,12 +327,13 @@ function renderAbout() {
     <div class="veng-stat-card stat">
       <div class="veng-stat-glow"></div>
       <div class="stat-num-wrap">
-        <span class="stat-num" data-target="${s.value}">0</span>
+        <span class="stat-num" data-target="${s.value}">${s.value}</span>
         <span class="stat-unit">${s.unit}</span>
       </div>
       <span class="stat-label">${s.label}</span>
     </div>
   `).join("");
+
 
   const affils = (typeof AFFILIATIONS !== 'undefined' && Array.isArray(AFFILIATIONS)) ? AFFILIATIONS : (window.AFFILIATIONS || []);
   const affilItems = affils.map(a => `
@@ -1644,6 +1645,52 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'ArrowRight') navigateLightbox(1);
 });
 
+/* ── Contact Section ─────────────────────────────── */
+function renderConnect() {
+  if (!CONFIG.sections.connect || !CONFIG.sections.connect.enabled) return;
+
+  mount("app-connect", `
+    <section class="section connect-section" id="connect">
+      <div class="container">
+        <div class="section-head text-center fade-in">
+          <span class="section-tag">GET IN TOUCH</span>
+          <h2 class="section-title">Contact RSAM Moradabad</h2>
+          <p class="section-desc">Have questions regarding Annual Athlete Registration, Championship Circulars, or Track Training? Reach out to our team directly.</p>
+        </div>
+
+        <div class="contact-grid fade-in" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:1.5rem; margin-top:2rem;">
+          <!-- Moradabad HQ Card -->
+          <div class="contact-card" style="background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:1.5rem; text-align:center;">
+            <div class="contact-card-icon" style="width:54px; height:54px; border-radius:50%; background:rgba(224,28,46,0.15); color:var(--orange); display:inline-flex; align-items:center; justify-content:center; font-size:1.4rem; margin-bottom:1rem;"><i class="fa-solid fa-location-dot"></i></div>
+            <h3 style="font-family:'Rajdhani',sans-serif; font-size:1.3rem; margin-bottom:0.5rem; color:#fff;">Association Headquarters</h3>
+            <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:1rem; line-height:1.5;">139, Rana Bhawan, Near 23 PAC, Kanth Road, Moradabad, Uttar Pradesh - 244001</p>
+            <a href="https://maps.google.com/?q=Rana+Bhawan+Near+23+PAC+Kanth+Road+Moradabad" target="_blank" rel="noopener" class="contact-link-btn" style="color:#38bdf8; font-weight:700; text-decoration:none; font-size:0.85rem;">📍 Open in Google Maps</a>
+          </div>
+
+          <!-- General Secretary Card -->
+          <div class="contact-card" style="background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:1.5rem; text-align:center;">
+            <div class="contact-card-icon" style="width:54px; height:54px; border-radius:50%; background:rgba(34,197,94,0.15); color:#34d399; display:inline-flex; align-items:center; justify-content:center; font-size:1.4rem; margin-bottom:1rem;"><i class="fa-solid fa-phone"></i></div>
+            <h3 style="font-family:'Rajdhani',sans-serif; font-size:1.3rem; margin-bottom:0.5rem; color:#fff;">General Secretary</h3>
+            <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:1rem; line-height:1.5;"><strong>Devendra Rana</strong><br/>Roller Sports Association Moradabad</p>
+            <div class="contact-btn-group" style="display:flex; flex-direction:column; gap:0.6rem; align-items:center;">
+              <a href="tel:+918057781350" class="btn-contact-action call" style="width:100%; max-width:240px; padding:0.6rem; border-radius:8px; background:rgba(34,197,94,0.2); color:#4ade80; border:1px solid rgba(34,197,94,0.4); font-weight:700; text-decoration:none; font-size:0.85rem; display:inline-flex; align-items:center; justify-content:center; gap:0.4rem;"><i class="fa-solid fa-phone"></i> +91-8057781350</a>
+              <a href="https://wa.me/918057781350?text=Hello%20RSAM%20Moradabad%2C%20I%20have%20an%20inquiry%20regarding%20skating%20registration." target="_blank" class="btn-contact-action wa" style="width:100%; max-width:240px; padding:0.6rem; border-radius:8px; background:linear-gradient(135deg, #25D366 0%, #128C7E 100%); color:#fff; font-weight:700; text-decoration:none; font-size:0.85rem; display:inline-flex; align-items:center; justify-content:center; gap:0.4rem;"><i class="fa-brands fa-whatsapp"></i> Chat on WhatsApp</a>
+            </div>
+          </div>
+
+          <!-- Official Email Card -->
+          <div class="contact-card" style="background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:1.5rem; text-align:center;">
+            <div class="contact-card-icon" style="width:54px; height:54px; border-radius:50%; background:rgba(245,158,11,0.15); color:#fbbf24; display:inline-flex; align-items:center; justify-content:center; font-size:1.4rem; margin-bottom:1rem;"><i class="fa-solid fa-envelope"></i></div>
+            <h3 style="font-family:'Rajdhani',sans-serif; font-size:1.3rem; margin-bottom:0.5rem; color:#fff;">Email Support</h3>
+            <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:1rem; line-height:1.5;">Write to our technical and administrative desk for official circulars and verified certificates.</p>
+            <a href="mailto:contact@rsam.in" class="contact-link-btn" style="color:#fbbf24; font-weight:700; text-decoration:none; font-size:0.85rem;">✉️ contact@rsam.in</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  `);
+}
+
 /* ── Boot ─────────────────────────────────────────── */
 function renderAll() {
   document.title = CONFIG.site.tabTitle;
@@ -1657,7 +1704,7 @@ function renderAll() {
   renderGallery();
   if (typeof renderLatestVideo === 'function') renderLatestVideo();
   renderCertificate();
-  if (typeof renderConnect === 'function') renderConnect();
+  renderConnect();
   renderFooter();
 
   if (typeof window.observeFadeElements === 'function') {
@@ -1744,7 +1791,11 @@ if (document.readyState === "loading") {
 }
 
 // Background async data hydration & live gallery sync (non-blocking)
+const baseUrl = (window.ENV_CONFIG && window.ENV_CONFIG.backendUrl) || 'http://localhost:3001';
+
 Promise.all([
+  fetch("data/site-config.json").then(r => r.ok ? r.json() : null).catch(() => null),
+  fetch(`${baseUrl}/api/site-config`).then(r => r.ok ? r.json() : null).catch(() => null),
   fetch("data/news-items.json").then(r => r.ok ? r.json() : null).catch(() => null),
   fetch("data/upcoming-events.json").then(r => r.ok ? r.json() : null).catch(() => null),
   fetch("data/highlights.json").then(r => r.ok ? r.json() : null).catch(() => null),
@@ -1753,26 +1804,33 @@ Promise.all([
   fetch("data/gallery.json").then(r => r.ok ? r.json() : null).catch(() => null),
   fetch("data/gallery-config.json").then(r => r.ok ? r.json() : null).catch(() => null),
   fetch("data/cloudinary-media-map.json").then(r => r.ok ? r.json() : null).catch(() => null),
-]).then(async ([newsItems, upcomingEvents, highlights, officials, affiliations, galleryData, galleryConfig, cloudMap]) => {
-  if (newsItems && newsItems.items) {
+]).then(async ([localSiteConfig, liveSiteConfig, newsItems, upcomingEvents, highlights, officials, affiliations, galleryData, galleryConfig, cloudMap]) => {
+  const siteConfigData = (liveSiteConfig && liveSiteConfig.config) || localSiteConfig;
+  if (siteConfigData) {
+    if (siteConfigData.news) window.NEWS = { items: siteConfigData.news };
+    if (siteConfigData.highlights) window.HIGHLIGHTS = siteConfigData.highlights;
+    if (siteConfigData.officials) window.OFFICIALS = siteConfigData.officials;
+    if (siteConfigData.gallery) window.GALLERY_CONFIG = siteConfigData.gallery;
+  }
+  if (newsItems && newsItems.items && (!window.NEWS || !window.NEWS.items)) {
     window.NEWS = {
       items: newsItems.items,
-      upcomingEvents: (upcomingEvents && upcomingEvents.events) || (window.NEWS && window.NEWS.upcomingEvents) || []
+      upcomingEvents: (upcomingEvents && upcomingEvents.events) || []
     };
   }
-  if (highlights && highlights.items) {
+  if (highlights && highlights.items && !window.HIGHLIGHTS) {
     window.HIGHLIGHTS = highlights.items;
   }
-  if (officials) {
+  if (officials && !window.OFFICIALS) {
     window.OFFICIALS = officials;
   }
-  if (affiliations && affiliations.items) {
+  if (affiliations && affiliations.items && !window.AFFILIATIONS) {
     window.AFFILIATIONS = affiliations.items;
   }
-  if (galleryData && galleryData.albums) {
+  if (galleryData && galleryData.albums && !window.GALLERY_ALBUMS) {
     window.GALLERY_ALBUMS = galleryData.albums;
   }
-  if (galleryConfig) {
+  if (galleryConfig && !window.GALLERY_CONFIG) {
     window.GALLERY_CONFIG = galleryConfig;
   }
   if (cloudMap) {
@@ -1791,3 +1849,4 @@ Promise.all([
   console.error("Data fetch warning, rendering with default data:", err);
   renderAll();
 });
+

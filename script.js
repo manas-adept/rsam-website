@@ -204,19 +204,26 @@ function initInteractions() {
     entries.forEach(e => {
       if (e.isIntersecting) { animateCounter(e.target); countObserver.unobserve(e.target); }
     });
-  }, { threshold: 0.5 });
+  }, { threshold: 0.3 });
   document.querySelectorAll('.stat-num').forEach(el => countObserver.observe(el));
 
   function animateCounter(el) {
+    if (el.dataset.animated === 'true') return;
+    el.dataset.animated = 'true';
     const target = parseInt(el.dataset.target, 10);
-    const increment = target / (1600 / 16);
+    if (isNaN(target)) return;
+    const increment = target / (1400 / 16);
     let current = 0;
     const timer = setInterval(() => {
       current = Math.min(current + increment, target);
       el.textContent = Math.floor(current);
-      if (current >= target) clearInterval(timer);
+      if (current >= target) {
+        el.textContent = target;
+        clearInterval(timer);
+      }
     }, 16);
   }
+
 
   /* ── Smooth scroll ────────────────────────────── */
   document.querySelectorAll('a[href^="#"]').forEach(anchor => {

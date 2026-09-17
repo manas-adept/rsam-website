@@ -813,14 +813,35 @@ document.addEventListener("DOMContentLoaded", () => {
     form.onsubmit = (e) => {
       e.preventDefault();
       const newConfig = {
-        baseFee: parseFloat(baseInput.value) || 10,
+        baseFee: parseFloat(baseInput.value) || 0,
         gatewayPercent: parseFloat(gwInput.value) || 2.0,
         gstPercent: parseFloat(gstInput.value) || 18.0
       };
       localStorage.setItem("RSAM_ADMIN_FEE_CONFIG", JSON.stringify(newConfig));
-      notify("✓ Annual athlete registration fee settings saved!");
+      persistSiteConfig({ fees: newConfig });
+      notify("✓ Annual athlete registration fee settings saved permanently for all users!");
     };
   }
+
+  async function persistSiteConfig(updates = {}) {
+    const baseUrl = getAdminApiBaseUrl();
+    try {
+      const res = await fetch(`${baseUrl}/api/save-site-config`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates)
+      });
+      if (res.ok) {
+        console.log("Site config persisted globally to server.");
+        return true;
+      }
+    } catch (e) {
+      console.warn("Backend save site config warning:", e);
+    }
+    return false;
+  }
+
+
 
   // ── Bulk WhatsApp Broadcast Center ──
   let fetchedBroadcastData = null;
@@ -1299,22 +1320,36 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    container.innerHTML = folders.map((f, idx) => `
-      <div class="admin-item-card" style="margin-bottom:1rem;">
+    container.innerHTML = folders.map((f, idx) => {
+      const isArchived = f.enabled === false;
+      const statusBadge = isArchived 
+        ? `<span class="badge-status" style="background:rgba(239,68,68,0.2); color:#f87171; border:1px solid rgba(239,68,68,0.3);">📦 Archived</span>`
+        : `<span class="badge-status status-live">🟢 Active</span>`;
+      
+      return `
+      <div class="admin-item-card" style="margin-bottom:1rem; ${isArchived ? 'opacity:0.7;' : ''}">
         <div class="admin-item-info">
-          <div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:0.4rem;">
+          <div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:0.4rem; flex-wrap:wrap;">
             <span class="admin-item-title">${f.title}</span>
             <span class="badge-status status-live">${f.category || 'Gallery'}</span>
+            ${statusBadge}
+            <span style="font-size:0.75rem; color:#9ca3af; background:rgba(255,255,255,0.05); padding:2px 8px; border-radius:4px;">Order: #${idx + 1}</span>
           </div>
           <div class="admin-item-sub">📅 ${f.date} · 📍 ${f.location} · Cloudinary Folder ID: <code style="font-weight:700; color:#38bdf8;">${f.folderId}</code></div>
-          <div style="font-size:0.85rem; color:#d1d5db; margin-top:0.3rem;">${f.description}</div>
+          <div style="font-size:0.85rem; color:#d1d5db; margin-top:0.3rem;">${f.description || ''}</div>
         </div>
-        <div class="admin-item-actions">
-          <button type="button" class="btn-item-edit" onclick="editGalleryFolderItem(${idx})">✏️ Edit Metadata &amp; Folder ID</button>
-          <button type="button" class="btn-item-delete" onclick="deleteGalleryFolderItem(${idx})">🗑️ Delete</button>
+        <div class="admin-item-actions" style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+          <button type="button" class="btn-item-edit" style="padding:0.4rem 0.6rem; font-size:0.85rem;" onclick="moveGalleryFolderItem(${idx}, -1)" ${idx === 0 ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : ''}>⬆️ Up</button>
+          <button type="button" class="btn-item-edit" style="padding:0.4rem 0.6rem; font-size:0.85rem;" onclick="moveGalleryFolderItem(${idx}, 1)" ${idx === folders.length - 1 ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : ''}>⬇️ Down</button>
+          <button type="button" class="btn-item-edit" style="padding:0.4rem 0.6rem; font-size:0.85rem; background:${isArchived ? 'rgba(16,185,129,0.2)' : 'rgba(245,158,11,0.2)'}; color:${isArchived ? '#34d399' : '#fbbf24'}; border:1px solid ${isArchived ? 'rgba(16,185,129,0.3)' : 'rgba(245,158,11,0.3)'};" onclick="toggleArchiveGalleryFolderItem(${idx})">
+            ${isArchived ? '🟢 Enable' : '📦 Archive'}
+          </button>
+          <button type="button" class="btn-item-edit" style="padding:0.4rem 0.6rem; font-size:0.85rem;" onclick="editGalleryFolderItem(${idx})">✏️ Edit</button>
+          <button type="button" class="btn-item-delete" style="padding:0.4rem 0.6rem; font-size:0.85rem;" onclick="deleteGalleryFolderItem(${idx})">🗑️ Delete</button>
         </div>
       </div>
-    `).join("");
+    `;
+    }).join("");
   }
 
   const refreshGalleryBtn = document.getElementById("refreshGalleryFoldersBtn");
@@ -1349,18 +1384,50 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.setItem("RSAM_ADMIN_GALLERY_FOLDERS", JSON.stringify(folders));
     const baseUrl = getAdminApiBaseUrl();
     try {
-      const res = await fetch(`${baseUrl}/api/save-gallery-config`, {
+      await fetch(`${baseUrl}/api/save-gallery-config`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ folders })
       });
-      if (res.ok) {
-        notify("✓ Gallery folders saved globally for all website users!");
-      }
+      await fetch(`${baseUrl}/api/save-site-config`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ gallery: { folders } })
+      });
+      notify("✓ Gallery folder order & archive settings saved globally for all website users!");
     } catch (e) {
       console.warn("Backend save gallery config warning:", e);
     }
   }
+
+  window.moveGalleryFolderItem = function(idx, direction) {
+    const folders = getAdminGalleryFolders();
+    const targetIdx = idx + direction;
+    if (targetIdx < 0 || targetIdx >= folders.length) return;
+
+    // Swap folders
+    const temp = folders[idx];
+    folders[idx] = folders[targetIdx];
+    folders[targetIdx] = temp;
+
+    // Update display order properties
+    folders.forEach((f, i) => { f.displayOrder = i + 1; });
+
+    persistAdminGalleryFolders(folders);
+    renderAdminGalleryFolders();
+    notify(`✓ Moved folder ${direction < 0 ? 'up' : 'down'} (New position: #${targetIdx + 1}).`);
+  };
+
+  window.toggleArchiveGalleryFolderItem = function(idx) {
+    const folders = getAdminGalleryFolders();
+    const f = folders[idx];
+    if (!f) return;
+
+    f.enabled = f.enabled === false ? true : false;
+    persistAdminGalleryFolders(folders);
+    renderAdminGalleryFolders();
+    notify(f.enabled ? `✓ Folder "${f.title}" is now active and visible on gallery.` : `📦 Folder "${f.title}" has been archived/disabled.`);
+  };
 
   window.editGalleryFolderItem = function(idx) {
     const folders = getAdminGalleryFolders();
@@ -1387,10 +1454,12 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!confirm("Are you sure you want to delete this photo gallery folder?")) return;
     const folders = getAdminGalleryFolders();
     folders.splice(idx, 1);
+    folders.forEach((f, i) => { f.displayOrder = i + 1; });
     persistAdminGalleryFolders(folders);
     renderAdminGalleryFolders();
     notify("✓ Photo gallery folder deleted.");
   };
+
 
 
   // 8. Add & Edit Modals Handlers
@@ -2036,6 +2105,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const evsStr = JSON.stringify(events);
         localStorage.setItem("RSAM_ADMIN_EVENTS", evsStr);
         updateSessionBaselineKey("events", evsStr);
+        persistSiteConfig({ events });
 
         if (isRegActive) {
           const activeStr = JSON.stringify(newEvent);
@@ -2044,7 +2114,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         renderAdminEvents();
-        notify("✓ Championship Event saved successfully!");
+        notify("✓ Championship Event saved permanently for all website visitors!");
       } else if (activeModalType === "news") {
         const items = getAdminNews();
         const newItem = {
@@ -2060,8 +2130,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const newsStr = JSON.stringify(items);
         localStorage.setItem("RSAM_ADMIN_NEWS", newsStr);
         updateSessionBaselineKey("news", newsStr);
+        persistSiteConfig({ news: items });
         renderAdminNews();
-        notify("✓ Circular saved.");
+        notify("✓ Circular saved permanently.");
       } else if (activeModalType === "highlight") {
         const items = getAdminHighlights();
         const newItem = {
@@ -2078,8 +2149,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const hlStr = JSON.stringify(items);
         localStorage.setItem("RSAM_ADMIN_HIGHLIGHTS", hlStr);
         updateSessionBaselineKey("highlights", hlStr);
+        persistSiteConfig({ highlights: items });
         renderAdminHighlights();
-        notify("✓ Highlight saved.");
+        notify("✓ Highlight saved permanently.");
       } else if (activeModalType === "official") {
         const items = getAdminOfficials();
         const newItem = {
@@ -2095,8 +2167,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const offStr = JSON.stringify(items);
         localStorage.setItem("RSAM_ADMIN_OFFICIALS", offStr);
         updateSessionBaselineKey("officials", offStr);
+        persistSiteConfig({ officials: items });
         renderAdminOfficials();
-        notify("✓ Official saved.");
+        notify("✓ Official saved permanently.");
       } else if (activeModalType === "skinsuit") {
         const skinsuitConfig = {
           title: document.getElementById("mSkinTitle").value.trim(),
@@ -2108,8 +2181,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const skinStr = JSON.stringify(skinsuitConfig);
         localStorage.setItem("RSAM_ADMIN_SKINSUIT", skinStr);
         updateSessionBaselineKey("skinsuit", skinStr);
-        notify("✓ Official Skinsuit design updated!");
-      } else if (activeModalType === "galleryFolder") {
+        persistSiteConfig({ skinsuits: [skinsuitConfig] });
+        notify("✓ Official Skinsuit design updated permanently!");
+      }
+ else if (activeModalType === "galleryFolder") {
         const folders = getAdminGalleryFolders();
         const customFolderId = document.getElementById("mGalFolderId") ? document.getElementById("mGalFolderId").value.trim() : "";
         const folderPath = customFolderId || ((activeModalIdx !== null && folders[activeModalIdx]) ? folders[activeModalIdx].folderId : "folder_" + Date.now());
