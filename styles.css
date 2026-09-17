@@ -4303,7 +4303,7 @@ body[data-theme="light"] {
   background: #ffffff !important;
   color: #0f172a !important;
   border-left: 1px solid rgba(0, 0, 0, 0.15) !important;
-  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.15) !important;
+  box-shadow: none !important;
 }
 
 [data-theme="light"] .nav-links a {
