@@ -30,6 +30,12 @@
   padding: 1.8rem 2rem;
   background: rgba(255,255,255,0.02);
 }
+[data-theme="light"] .reg-fieldset {
+  background-color: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04) !important;
+}
+
 .reg-legend {
   font-family: 'Rajdhani', sans-serif;
   font-size: 0.7rem;
@@ -38,6 +44,10 @@
   text-transform: uppercase;
   color: var(--accent, #e01c2e);
   padding: 0 0.5rem;
+}
+[data-theme="light"] .reg-legend {
+  color: #e01c2e !important;
+  background-color: #ffffff !important;
 }
 
 /* ── Row & field ───────────────────────────────────── */

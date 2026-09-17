@@ -616,6 +616,16 @@ function getFeeBreakdown() {
     baseFee = parseFloat(f.annualBaseFee !== undefined ? f.annualBaseFee : (f.baseFee !== undefined ? f.baseFee : 0));
     gwPct = parseFloat(f.gatewayPercent !== undefined ? f.gatewayPercent : 2.0);
     gstPct = parseFloat(f.gstPercent !== undefined ? f.gstPercent : 18.0);
+  } else {
+    const savedFee = localStorage.getItem("RSAM_ADMIN_FEE_CONFIG");
+    if (savedFee) {
+      try {
+        const f = JSON.parse(savedFee);
+        baseFee = parseFloat(f.annualBaseFee !== undefined ? f.annualBaseFee : (f.baseFee !== undefined ? f.baseFee : 0));
+        gwPct = parseFloat(f.gatewayPercent !== undefined ? f.gatewayPercent : 2.0);
+        gstPct = parseFloat(f.gstPercent !== undefined ? f.gstPercent : 18.0);
+      } catch (e) {}
+    }
   }
 
   const gatewayFee = parseFloat(((baseFee * gwPct) / 100).toFixed(2));
