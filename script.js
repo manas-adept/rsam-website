@@ -116,47 +116,50 @@ function initInteractions() {
   document.addEventListener('rsam:rendered', window.observeFadeElements);
 
   /* ── Connect floating panel ──────────────────── */
-  const connectTab      = document.getElementById('connectTab');
-  const connectPanel    = document.getElementById('connectPanel');
-  const connectClose    = document.getElementById('connectClose');
-  const connectBackdrop = document.getElementById('connectBackdrop');
-
   function openConnect() {
-    if (!connectPanel) return;
-    connectPanel.classList.add('open');
-    if (connectBackdrop) connectBackdrop.classList.add('open');
-    if (connectTab) {
-      connectTab.classList.add('open');
-      connectTab.setAttribute('aria-expanded', 'true');
+    const panel      = document.getElementById('connectPanel');
+    const backdrop   = document.getElementById('connectBackdrop');
+    const tab        = document.getElementById('connectTab');
+    const floatGroup = document.querySelector('.left-floating-container');
+    if (!panel) return;
+    panel.classList.add('open');
+    if (backdrop) backdrop.classList.add('open');
+    if (tab) {
+      tab.classList.add('open');
+      tab.setAttribute('aria-expanded', 'true');
     }
-    connectPanel.setAttribute('aria-hidden', 'false');
+    if (floatGroup) floatGroup.classList.add('is-hidden');
+    panel.setAttribute('aria-hidden', 'false');
   }
+
   function closeConnect() {
-    if (!connectPanel) return;
-    connectPanel.classList.remove('open');
-    if (connectBackdrop) connectBackdrop.classList.remove('open');
-    if (connectTab) {
-      connectTab.classList.remove('open');
-      connectTab.setAttribute('aria-expanded', 'false');
+    const panel      = document.getElementById('connectPanel');
+    const backdrop   = document.getElementById('connectBackdrop');
+    const tab        = document.getElementById('connectTab');
+    const floatGroup = document.querySelector('.left-floating-container');
+    if (!panel) return;
+    panel.classList.remove('open');
+    if (backdrop) backdrop.classList.remove('open');
+    if (tab) {
+      tab.classList.remove('open');
+      tab.setAttribute('aria-expanded', 'false');
     }
-    connectPanel.setAttribute('aria-hidden', 'true');
+    if (floatGroup) floatGroup.classList.remove('is-hidden');
+    panel.setAttribute('aria-hidden', 'true');
   }
 
   window.openConnect = openConnect;
   window.closeConnect = closeConnect;
 
-  if (connectTab)      connectTab.addEventListener('click', () => connectPanel.classList.contains('open') ? closeConnect() : openConnect());
-  if (connectClose)    connectClose.addEventListener('click', closeConnect);
-  if (connectBackdrop) connectBackdrop.addEventListener('click', closeConnect);
-  document.addEventListener('keydown', e => { if (e.key === 'Escape' || e.key === 'Esc') closeConnect(); });
-
-  // Handle Navbar "Contact Us" links (href="#connect")
-  document.querySelectorAll('a[href="#connect"]').forEach(link => {
-    link.addEventListener('click', (e) => {
+  document.addEventListener('click', (e) => {
+    const link = e.target.closest('a[href="#connect"], a[href="#contact"], .nav-contact-link');
+    if (link) {
       e.preventDefault();
       openConnect();
-    });
+    }
   });
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' || e.key === 'Esc') closeConnect(); });
 
   // Handle Quick WhatsApp Inquiry Form
   const sendWaBtn = document.getElementById('contactSendWaBtn');

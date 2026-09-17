@@ -1127,7 +1127,6 @@ function renderGallery() {
 
   albums = targetFolders.map(folder => {
     const matchingAlbum = rawAlbums.find(a => a.id === folder.folderId || a.id === folder.id) || {};
-    let rawPhotos = matchingAlbum.photos || [];
     const folderId = folder.folderId || folder.id || '';
     const subfolder = folder.cloudinarySubfolder || (folderId ? `rsam_website/gallery/${folderId}` : '');
     let albumPhotos = [];
@@ -1151,17 +1150,27 @@ function renderGallery() {
       }
     }
 
-    // 3. Exact matching photos in gallery.json & media map
+    // 3. Exact matching photos in gallery.json & media map across all albums
     if (albumPhotos.length === 0 && (folderId || subfolder)) {
       const exactSub = subfolder.toLowerCase();
       const exactId = folderId.toLowerCase();
-      const subfolderMatches = rawPhotos.filter(p => {
+      const allRawPhotos = [
+        ...(matchingAlbum.photos || []),
+        ...rawAlbums.flatMap(a => a.photos || [])
+      ];
+      const subfolderMatches = allRawPhotos.filter(p => {
         if (!p.src) return false;
         const srcLower = p.src.toLowerCase();
         return srcLower.includes(exactSub) || srcLower.includes(`/${exactId}/`);
       });
       if (subfolderMatches.length > 0) {
-        albumPhotos = [...subfolderMatches];
+        // Deduplicate photos by src
+        const seen = new Set();
+        albumPhotos = subfolderMatches.filter(p => {
+          if (seen.has(p.src)) return false;
+          seen.add(p.src);
+          return true;
+        });
       }
     }
 

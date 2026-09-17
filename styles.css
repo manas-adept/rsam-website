@@ -4134,3 +4134,21 @@ body.has-ticker .navbar.spotlight-nav {
   border-radius: 6px !important;
   min-height: 40px !important;
 }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   Theme Toggle Stacking Above Watermark Layer
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.theme-toggle-btn,
+.theme-toggle-btn.discourse-toggle-switch {
+  position: relative !important;
+  z-index: 10001 !important;
+}
+
+.navbar {
+  z-index: 10000 !important;
+}
+
+.page-watermark {
+  z-index: 0 !important;
+  pointer-events: none !important;
+}

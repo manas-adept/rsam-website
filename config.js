@@ -87,13 +87,14 @@ const CONFIG = {
 
   /* ── Navigation ─────────────────────────────────── */
   nav: [
-    { label: "About",       href: "#about"       },
-    { label: "Officials",   href: "#officials"   },
-    { label: "News",        href: "#news"        },
-    { label: "Highlights",  href: "#highlights"  },
-    { label: "Gallery",     href: "#gallery"     },
-    { label: "Certificate", href: "#certificate" },
-    { label: "Register",    href: "register.html", cta: true },
+    { label: "About",       href: "index.html#about"       },
+    { label: "Officials",   href: "index.html#officials"   },
+    { label: "News",        href: "index.html#news"        },
+    { label: "Highlights",  href: "index.html#highlights"  },
+    { label: "Gallery",     href: "index.html#gallery"     },
+    { label: "Certificate", href: "index.html#certificate" },
+    { label: "Annual Reg",  href: "register.html"          },
+    { label: "Event Reg",   href: "event-register.html", cta: true },
   ],
 
   /* ── Hero section ───────────────────────────────── */

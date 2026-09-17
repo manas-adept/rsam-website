@@ -561,6 +561,19 @@ document.getElementById("regForm").addEventListener("submit", async (e) => {
         dobProof:     dobFile,
       };
 
+function formatDateDDMMMYYYY(dateStr) {
+  if (!dateStr) return 'N/A';
+  const str = String(dateStr).trim();
+  if (/^\d{2}-[A-Za-z]{3}-\d{4}$/.test(str)) return str;
+  const d = new Date(str);
+  if (isNaN(d.getTime())) return str;
+  const day = String(d.getDate()).padStart(2, '0');
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const month = months[d.getMonth()];
+  const year = d.getFullYear();
+  return `${day}-${month}-${year}`;
+}
+
 // Razorpay Gateway Configuration & Fee Calculations (Dynamic from Admin Config or default ₹10 base)
 let baseFeeVal = 10.00;
 let gwPctVal = 2.0;

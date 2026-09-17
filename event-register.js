@@ -270,11 +270,24 @@ document.addEventListener("DOMContentLoaded", () => {
     return "Above-18";
   }
 
+  function formatDateDDMMMYYYY(dateStr) {
+    if (!dateStr) return 'N/A';
+    const str = String(dateStr).trim();
+    if (/^\d{2}-[A-Za-z]{3}-\d{4}$/.test(str)) return str;
+    const d = new Date(str);
+    if (isNaN(d.getTime())) return str;
+    const day = String(d.getDate()).padStart(2, '0');
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const month = months[d.getMonth()];
+    const year = d.getFullYear();
+    return `${day}-${month}-${year}`;
+  }
+
   // Populate Stage 2 Auto-Filled Summary Card
   function populateSkaterCard(skater) {
     document.getElementById("displaySkaterName").textContent = skater.skaterName || "N/A";
     document.getElementById("displayRegNo").textContent      = skater.regNumber || "N/A";
-    document.getElementById("displayDob").textContent        = skater.dob || "N/A";
+    document.getElementById("displayDob").textContent        = formatDateDDMMMYYYY(skater.dob);
     document.getElementById("displayAge").textContent        = skater.age || "N/A";
     const ageGrp = skater.ageGroup || calculateAgeGroup(skater.age);
     document.getElementById("displayAgeGroup").textContent   = ageGrp || "N/A";
@@ -287,7 +300,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (displayCoachMobile) displayCoachMobile.textContent = skater.coachMobile || "N/A";
     document.getElementById("displayMobile").textContent     = skater.mobile || "N/A";
     document.getElementById("displayEmail").textContent      = skater.email || "N/A";
-    document.getElementById("displayAadhaar").textContent    = skater.aadhaar || "N/A";
+
+    const rawAadhaar = String(skater.aadhaar || '').replace(/\D/g, '').slice(0, 12);
+    document.getElementById("displayAadhaar").textContent    = rawAadhaar ? rawAadhaar.replace(/(\d{4})(?=\d)/g, "$1 ") : (skater.aadhaar || "N/A");
 
     const photoImg = document.getElementById("evtSkaterPhoto");
     const photoPlaceholder = document.getElementById("evtPhotoPlaceholder");
@@ -303,6 +318,18 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       photoImg.hidden = true;
       photoPlaceholder.hidden = false;
+    }
+
+    const proofsContainer = document.getElementById("displayDocumentProofs");
+    if (proofsContainer) {
+      let badgesHTML = `<span class="confirm-file-badge" style="background:rgba(16,185,129,0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3); padding:4px 10px; border-radius:6px; font-size:0.82rem;">✓ Passport Photo</span>`;
+      if (skater.aadhaarProof || skater.aadhaar) {
+        badgesHTML += `<span class="confirm-file-badge" style="background:rgba(16,185,129,0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3); padding:4px 10px; border-radius:6px; font-size:0.82rem;">✓ Address Proof (Aadhaar Card)</span>`;
+      }
+      if (skater.dobProof || skater.dob) {
+        badgesHTML += `<span class="confirm-file-badge" style="background:rgba(16,185,129,0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3); padding:4px 10px; border-radius:6px; font-size:0.82rem;">✓ Date of Birth Proof</span>`;
+      }
+      proofsContainer.innerHTML = badgesHTML;
     }
 
     // Auto-select existing discipline if valid
