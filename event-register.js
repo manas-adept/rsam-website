@@ -27,6 +27,10 @@ function escapeHTML(str) {
 }
 
 function getActiveEventConfig() {
+  if (window.LIVE_SITE_CONFIG && Array.isArray(window.LIVE_SITE_CONFIG.events)) {
+    const active = window.LIVE_SITE_CONFIG.events.find(e => e.isRegistrationActive);
+    if (active) return active;
+  }
   const savedEvents = localStorage.getItem("RSAM_ADMIN_EVENTS");
   if (savedEvents) {
     try {

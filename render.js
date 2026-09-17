@@ -39,7 +39,15 @@ function placeholderImg(classes = "") {
   </div>`;
 }
 
+function getLiveSiteConfig() {
+  return window.LIVE_SITE_CONFIG || null;
+}
+
 function getActiveEventsList() {
+  const live = getLiveSiteConfig();
+  if (live && Array.isArray(live.events) && live.events.length > 0) {
+    return live.events.filter(e => !e.archived);
+  }
   let events = [];
   const saved = localStorage.getItem("RSAM_ADMIN_EVENTS");
   if (saved) {
@@ -110,13 +118,13 @@ function getActiveEventsList() {
 }
 
 function getActiveEventConfig() {
+  const events = getActiveEventsList();
+  const active = events.find(e => e.isRegistrationActive);
+  if (active) return active;
   const saved = localStorage.getItem("RSAM_ADMIN_EVENT");
   if (saved) {
     try { return JSON.parse(saved); } catch (e) {}
   }
-  const events = getActiveEventsList();
-  const active = events.find(e => e.isRegistrationActive);
-  if (active) return active;
   return (window.ADMIN_CONFIG && window.ADMIN_CONFIG.activeEvent) || {
     title: "4th District Championship 2026",
     year: "2026",
@@ -128,6 +136,10 @@ function getActiveEventConfig() {
 }
 
 function getActiveNewsItems() {
+  const live = getLiveSiteConfig();
+  if (live && Array.isArray(live.news) && live.news.length > 0) {
+    return live.news.filter(n => !n.archived);
+  }
   const saved = localStorage.getItem("RSAM_ADMIN_NEWS");
   if (saved) {
     try {
@@ -141,6 +153,10 @@ function getActiveNewsItems() {
 }
 
 function getActiveHighlights() {
+  const live = getLiveSiteConfig();
+  if (live && Array.isArray(live.highlights) && live.highlights.length > 0) {
+    return live.highlights;
+  }
   const saved = localStorage.getItem("RSAM_ADMIN_HIGHLIGHTS");
   if (saved) {
     try {
@@ -153,6 +169,10 @@ function getActiveHighlights() {
 }
 
 function getActiveOfficials() {
+  const live = getLiveSiteConfig();
+  if (live && Array.isArray(live.officials) && live.officials.length > 0) {
+    return live.officials;
+  }
   const saved = localStorage.getItem("RSAM_ADMIN_OFFICIALS");
   if (saved) {
     try {
@@ -1822,10 +1842,34 @@ Promise.all([
 ]).then(async ([localSiteConfig, liveSiteConfig, newsItems, upcomingEvents, highlights, officials, affiliations, galleryData, galleryConfig, cloudMap]) => {
   const siteConfigData = (liveSiteConfig && liveSiteConfig.config) || localSiteConfig;
   if (siteConfigData) {
-    if (siteConfigData.news) window.NEWS = { items: siteConfigData.news };
-    if (siteConfigData.highlights) window.HIGHLIGHTS = siteConfigData.highlights;
-    if (siteConfigData.officials) window.OFFICIALS = siteConfigData.officials;
-    if (siteConfigData.gallery) window.GALLERY_CONFIG = siteConfigData.gallery;
+    window.LIVE_SITE_CONFIG = siteConfigData;
+    try {
+      if (siteConfigData.events) localStorage.setItem("RSAM_ADMIN_EVENTS", JSON.stringify(siteConfigData.events));
+      if (siteConfigData.news) {
+        window.NEWS = { items: siteConfigData.news };
+        localStorage.setItem("RSAM_ADMIN_NEWS", JSON.stringify(siteConfigData.news));
+      }
+      if (siteConfigData.highlights) {
+        window.HIGHLIGHTS = siteConfigData.highlights;
+        localStorage.setItem("RSAM_ADMIN_HIGHLIGHTS", JSON.stringify(siteConfigData.highlights));
+      }
+      if (siteConfigData.officials) {
+        window.OFFICIALS = siteConfigData.officials;
+        localStorage.setItem("RSAM_ADMIN_OFFICIALS", JSON.stringify(siteConfigData.officials));
+      }
+      if (siteConfigData.gallery) {
+        window.GALLERY_CONFIG = siteConfigData.gallery;
+        if (siteConfigData.gallery.folders) {
+          localStorage.setItem("RSAM_ADMIN_GALLERY_FOLDERS", JSON.stringify(siteConfigData.gallery.folders));
+        }
+      }
+      if (siteConfigData.fees) {
+        localStorage.setItem("RSAM_ADMIN_FEE_CONFIG", JSON.stringify(siteConfigData.fees));
+      }
+      if (siteConfigData.skinsuits) {
+        localStorage.setItem("RSAM_ADMIN_SKINSUIT", JSON.stringify(siteConfigData.skinsuits));
+      }
+    } catch (e) {}
   }
   if (newsItems && newsItems.items && (!window.NEWS || !window.NEWS.items)) {
     window.NEWS = {
