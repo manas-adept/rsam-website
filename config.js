@@ -133,11 +133,13 @@ const CONFIG = {
 
   /* ── Connect / social ───────────────────────────── */
   connect: {
-    youtube:   "https://www.youtube.com/@rsam_mbd",  // replace with actual URL
-    instagram: "https://www.instagram.com/rsam_mbd_official",         // replace with actual URL
-    email:     "contact@rsam.in",
-    phone:     "+91-8057781350",
-    address:   "139, Rana Bhawan, Near 23 PAC, Kanth Road, Moradabad, Uttar Pradesh, India",
+    youtube:         "https://www.youtube.com/@rsam_mbd",
+    instagram:       "https://www.instagram.com/rsam_mbd_official",
+    whatsappChannel: "https://whatsapp.com/channel/0029Va9Z7Fm1XquT1H9yA20A",
+    whatsappNumber:  "+91-8057781350",
+    email:           "contact@rsam.in",
+    phone:           "+91-8057781350",
+    address:         "139, Rana Bhawan, Near 23 PAC, Kanth Road, Moradabad, Uttar Pradesh, India",
   },
 
 };

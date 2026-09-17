@@ -927,14 +927,72 @@ window.closeConnect = function() {
   if (floatGroup) floatGroup.classList.remove('is-hidden');
 };
 
-/* ── Connect (floating panel) ─────────────────────── */
+/* ── Connect Section & Floating Panel ─────────────────────── */
 function renderConnect() {
-  if (!CONFIG.sections.connect.enabled) return;
+  if (!CONFIG.sections.connect || !CONFIG.sections.connect.enabled) return;
 
   const { connect } = CONFIG;
+  const youtubeUrl = connect.youtube || "https://www.youtube.com/@rsam_mbd";
+  const instagramUrl = connect.instagram || "https://www.instagram.com/rsam_mbd_official";
+  const waChannelUrl = connect.whatsappChannel || "https://whatsapp.com/channel/0029Va9Z7Fm1XquT1H9yA20A";
+  const phoneNo = connect.phone || "+91-8057781350";
+  const emailAddr = connect.email || "contact@rsam.in";
+  const addressText = connect.address || "139, Rana Bhawan, Near 23 PAC, Kanth Road, Moradabad, Uttar Pradesh - 244001";
 
   mount("app-connect", `
-    <!-- floating trigger group on left -->
+    <!-- Main Page Contact Section -->
+    <section class="section connect-section" id="connect">
+      <div class="container">
+        <div class="section-head text-center fade-in">
+          <span class="section-tag">GET IN TOUCH</span>
+          <h2 class="section-title">Contact RSAM Moradabad</h2>
+          <p class="section-desc">Have questions regarding Annual Athlete Registration, Championship Circulars, or Track Training? Reach out to our team directly.</p>
+        </div>
+
+        <div class="contact-grid fade-in" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:1.5rem; margin-top:2rem;">
+          <!-- Moradabad HQ Card -->
+          <div class="contact-card" style="background:var(--bg-card, #111118); border:1px solid var(--border); border-radius:16px; padding:1.5rem; text-align:center;">
+            <div class="contact-card-icon" style="width:54px; height:54px; border-radius:50%; background:rgba(224,28,46,0.15); color:var(--orange); display:inline-flex; align-items:center; justify-content:center; font-size:1.4rem; margin-bottom:1rem;"><i class="fa-solid fa-location-dot"></i></div>
+            <h3 style="font-family:'Rajdhani',sans-serif; font-size:1.3rem; margin-bottom:0.5rem; color:var(--text);">Association Headquarters</h3>
+            <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:1rem; line-height:1.5;">${addressText}</p>
+            <a href="https://maps.google.com/?q=Rana+Bhawan+Near+23+PAC+Kanth+Road+Moradabad" target="_blank" rel="noopener" class="contact-link-btn" style="color:#38bdf8; font-weight:700; text-decoration:none; font-size:0.85rem;">📍 Open in Google Maps</a>
+          </div>
+
+          <!-- General Secretary Card -->
+          <div class="contact-card" style="background:var(--bg-card, #111118); border:1px solid var(--border); border-radius:16px; padding:1.5rem; text-align:center;">
+            <div class="contact-card-icon" style="width:54px; height:54px; border-radius:50%; background:rgba(34,197,94,0.15); color:#34d399; display:inline-flex; align-items:center; justify-content:center; font-size:1.4rem; margin-bottom:1rem;"><i class="fa-solid fa-phone"></i></div>
+            <h3 style="font-family:'Rajdhani',sans-serif; font-size:1.3rem; margin-bottom:0.5rem; color:var(--text);">General Secretary</h3>
+            <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:1rem; line-height:1.5;"><strong>Devendra Rana</strong><br/>Roller Sports Association Moradabad</p>
+            <div class="contact-btn-group" style="display:flex; flex-direction:column; gap:0.6rem; align-items:center;">
+              <a href="tel:${phoneNo.replace(/[^+\d]/g,"")}" class="btn-contact-action call" style="width:100%; max-width:240px; padding:0.6rem; border-radius:8px; background:rgba(34,197,94,0.2); color:#4ade80; border:1px solid rgba(34,197,94,0.4); font-weight:700; text-decoration:none; font-size:0.85rem; display:inline-flex; align-items:center; justify-content:center; gap:0.4rem;"><i class="fa-solid fa-phone"></i> ${phoneNo}</a>
+              <a href="https://wa.me/${phoneNo.replace(/\D/g,"")}?text=Hello%20RSAM%20Moradabad%2C%20I%20have%20an%20inquiry%20regarding%20skating%20registration." target="_blank" rel="noopener" class="btn-contact-action wa" style="width:100%; max-width:240px; padding:0.6rem; border-radius:8px; background:linear-gradient(135deg, #25D366 0%, #128C7E 100%); color:#fff; font-weight:700; text-decoration:none; font-size:0.85rem; display:inline-flex; align-items:center; justify-content:center; gap:0.4rem;"><i class="fa-brands fa-whatsapp"></i> Chat on WhatsApp</a>
+            </div>
+          </div>
+
+          <!-- Official Email Card -->
+          <div class="contact-card" style="background:var(--bg-card, #111118); border:1px solid var(--border); border-radius:16px; padding:1.5rem; text-align:center;">
+            <div class="contact-card-icon" style="width:54px; height:54px; border-radius:50%; background:rgba(245,158,11,0.15); color:#fbbf24; display:inline-flex; align-items:center; justify-content:center; font-size:1.4rem; margin-bottom:1rem;"><i class="fa-solid fa-envelope"></i></div>
+            <h3 style="font-family:'Rajdhani',sans-serif; font-size:1.3rem; margin-bottom:0.5rem; color:var(--text);">Email Support</h3>
+            <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:1rem; line-height:1.5;">Write to our technical and administrative desk for official circulars and verified certificates.</p>
+            <a href="mailto:${emailAddr}" class="contact-link-btn" style="color:#fbbf24; font-weight:700; text-decoration:none; font-size:0.85rem;">✉️ ${emailAddr}</a>
+          </div>
+
+          <!-- Social Channels Card -->
+          <div class="contact-card" style="background:var(--bg-card, #111118); border:1px solid var(--border); border-radius:16px; padding:1.5rem; text-align:center;">
+            <div class="contact-card-icon" style="width:54px; height:54px; border-radius:50%; background:rgba(168,85,247,0.15); color:#c084fc; display:inline-flex; align-items:center; justify-content:center; font-size:1.4rem; margin-bottom:1rem;"><i class="fa-solid fa-share-nodes"></i></div>
+            <h3 style="font-family:'Rajdhani',sans-serif; font-size:1.3rem; margin-bottom:0.5rem; color:var(--text);">Official Social Channels</h3>
+            <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:1rem; line-height:1.5;">Follow RSAM on YouTube, Instagram & WhatsApp Channel for live updates and championship streams.</p>
+            <div style="display:flex; justify-content:center; gap:0.6rem; flex-wrap:wrap;">
+              <a href="${youtubeUrl}" target="_blank" rel="noopener" style="padding:0.5rem 0.8rem; border-radius:8px; background:#FF0000; color:#fff; font-weight:700; font-size:0.8rem; text-decoration:none; display:inline-flex; align-items:center; gap:0.3rem;"><i class="fa-brands fa-youtube"></i> YouTube</a>
+              <a href="${instagramUrl}" target="_blank" rel="noopener" style="padding:0.5rem 0.8rem; border-radius:8px; background:linear-gradient(45deg, #f09433, #dc2743, #bc1888); color:#fff; font-weight:700; font-size:0.8rem; text-decoration:none; display:inline-flex; align-items:center; gap:0.3rem;"><i class="fa-brands fa-instagram"></i> Instagram</a>
+              <a href="${waChannelUrl}" target="_blank" rel="noopener" style="padding:0.5rem 0.8rem; border-radius:8px; background:#25D366; color:#fff; font-weight:700; font-size:0.8rem; text-decoration:none; display:inline-flex; align-items:center; gap:0.3rem;"><i class="fa-brands fa-whatsapp"></i> Channel</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Floating Trigger Group on Left -->
     <div class="left-floating-container">
       <button class="connect-tab" id="connectTab" onclick="if(window.openConnect) window.openConnect();" aria-label="Toggle contact panel" aria-expanded="false">
         <span class="connect-tab__label">Contact Us</span>
@@ -945,7 +1003,7 @@ function renderConnect() {
       </div>
     </div>
 
-    <!-- sliding panel -->
+    <!-- Sliding Floating Contact Panel -->
     <div class="connect-panel" id="connectPanel" aria-hidden="true">
       <div class="connect-header">
         <div class="connect-header-title">
@@ -962,11 +1020,11 @@ function renderConnect() {
 
       <div class="connect-body">
         <!-- Direct Call Tile -->
-        <a href="tel:${connect.phone.replace(/[^+\d]/g,"")}" class="connect-action-tile call-tile">
+        <a href="tel:${phoneNo.replace(/[^+\d]/g,"")}" class="connect-action-tile call-tile">
           <div class="connect-tile-icon pulse-icon">📞</div>
           <div class="connect-tile-info">
             <span class="tile-label">Call Official Hotline</span>
-            <span class="tile-val">${connect.phone}</span>
+            <span class="tile-val">${phoneNo}</span>
           </div>
           <span class="tile-arrow">&rarr;</span>
         </a>
@@ -976,13 +1034,13 @@ function renderConnect() {
           <div class="connect-tile-icon">📍</div>
           <div class="connect-tile-info">
             <span class="tile-label">Official Address</span>
-            <span class="tile-val text-address">${connect.address}</span>
+            <span class="tile-val text-address">${addressText}</span>
           </div>
         </div>
 
-        <!-- Social Media Links (Full-Width Matching Cards) -->
-        <div class="connect-social-grid">
-          <a href="${connect.youtube}" target="_blank" rel="noopener" class="connect-action-tile youtube-card">
+        <!-- Social Media Links Grid -->
+        <div class="connect-social-grid" style="display:flex; flex-direction:column; gap:0.6rem; margin-top:0.8rem;">
+          <a href="${youtubeUrl}" target="_blank" rel="noopener" class="connect-action-tile youtube-card">
             <div class="connect-tile-icon yt-icon">
               <svg viewBox="0 0 48 48" width="22" height="22">
                 <rect x="2" y="10" width="44" height="28" rx="8" fill="#FF0000"/>
@@ -996,7 +1054,7 @@ function renderConnect() {
             <span class="tile-arrow">&rarr;</span>
           </a>
 
-          <a href="${connect.instagram}" target="_blank" rel="noopener" class="connect-action-tile instagram-card">
+          <a href="${instagramUrl}" target="_blank" rel="noopener" class="connect-action-tile instagram-card">
             <div class="connect-tile-icon ig-icon">
               <svg viewBox="0 0 48 48" width="22" height="22">
                 <defs>
@@ -1017,11 +1075,20 @@ function renderConnect() {
             </div>
             <span class="tile-arrow">&rarr;</span>
           </a>
+
+          <a href="${waChannelUrl}" target="_blank" rel="noopener" class="connect-action-tile whatsapp-channel-card" style="display:flex; align-items:center; gap:0.8rem; padding:0.8rem 1rem; border-radius:12px; background:rgba(37, 211, 102, 0.12); border:1px solid rgba(37, 211, 102, 0.3); text-decoration:none;">
+            <div class="connect-tile-icon" style="font-size:1.5rem; color:#25D366;"><i class="fa-brands fa-whatsapp"></i></div>
+            <div class="connect-tile-info" style="flex:1;">
+              <span class="tile-label" style="display:block; font-size:0.75rem; color:#8888aa; text-transform:uppercase; font-weight:700;">WhatsApp Channel</span>
+              <span class="tile-val" style="display:block; font-size:0.9rem; color:#25D366; font-weight:700;">Join Official Channel</span>
+            </div>
+            <span class="tile-arrow" style="color:#25D366;">&rarr;</span>
+          </a>
         </div>
       </div>
     </div>
 
-    <!-- backdrop -->
+    <!-- Backdrop -->
     <div class="connect-backdrop" id="connectBackdrop" onclick="if(window.closeConnect) window.closeConnect();"></div>
   `);
 }
@@ -1679,52 +1746,6 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'ArrowLeft') navigateLightbox(-1);
   if (e.key === 'ArrowRight') navigateLightbox(1);
 });
-
-/* ── Contact Section ─────────────────────────────── */
-function renderConnect() {
-  if (!CONFIG.sections.connect || !CONFIG.sections.connect.enabled) return;
-
-  mount("app-connect", `
-    <section class="section connect-section" id="connect">
-      <div class="container">
-        <div class="section-head text-center fade-in">
-          <span class="section-tag">GET IN TOUCH</span>
-          <h2 class="section-title">Contact RSAM Moradabad</h2>
-          <p class="section-desc">Have questions regarding Annual Athlete Registration, Championship Circulars, or Track Training? Reach out to our team directly.</p>
-        </div>
-
-        <div class="contact-grid fade-in" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:1.5rem; margin-top:2rem;">
-          <!-- Moradabad HQ Card -->
-          <div class="contact-card" style="background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:1.5rem; text-align:center;">
-            <div class="contact-card-icon" style="width:54px; height:54px; border-radius:50%; background:rgba(224,28,46,0.15); color:var(--orange); display:inline-flex; align-items:center; justify-content:center; font-size:1.4rem; margin-bottom:1rem;"><i class="fa-solid fa-location-dot"></i></div>
-            <h3 style="font-family:'Rajdhani',sans-serif; font-size:1.3rem; margin-bottom:0.5rem; color:#fff;">Association Headquarters</h3>
-            <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:1rem; line-height:1.5;">139, Rana Bhawan, Near 23 PAC, Kanth Road, Moradabad, Uttar Pradesh - 244001</p>
-            <a href="https://maps.google.com/?q=Rana+Bhawan+Near+23+PAC+Kanth+Road+Moradabad" target="_blank" rel="noopener" class="contact-link-btn" style="color:#38bdf8; font-weight:700; text-decoration:none; font-size:0.85rem;">📍 Open in Google Maps</a>
-          </div>
-
-          <!-- General Secretary Card -->
-          <div class="contact-card" style="background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:1.5rem; text-align:center;">
-            <div class="contact-card-icon" style="width:54px; height:54px; border-radius:50%; background:rgba(34,197,94,0.15); color:#34d399; display:inline-flex; align-items:center; justify-content:center; font-size:1.4rem; margin-bottom:1rem;"><i class="fa-solid fa-phone"></i></div>
-            <h3 style="font-family:'Rajdhani',sans-serif; font-size:1.3rem; margin-bottom:0.5rem; color:#fff;">General Secretary</h3>
-            <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:1rem; line-height:1.5;"><strong>Devendra Rana</strong><br/>Roller Sports Association Moradabad</p>
-            <div class="contact-btn-group" style="display:flex; flex-direction:column; gap:0.6rem; align-items:center;">
-              <a href="tel:+918057781350" class="btn-contact-action call" style="width:100%; max-width:240px; padding:0.6rem; border-radius:8px; background:rgba(34,197,94,0.2); color:#4ade80; border:1px solid rgba(34,197,94,0.4); font-weight:700; text-decoration:none; font-size:0.85rem; display:inline-flex; align-items:center; justify-content:center; gap:0.4rem;"><i class="fa-solid fa-phone"></i> +91-8057781350</a>
-              <a href="https://wa.me/918057781350?text=Hello%20RSAM%20Moradabad%2C%20I%20have%20an%20inquiry%20regarding%20skating%20registration." target="_blank" class="btn-contact-action wa" style="width:100%; max-width:240px; padding:0.6rem; border-radius:8px; background:linear-gradient(135deg, #25D366 0%, #128C7E 100%); color:#fff; font-weight:700; text-decoration:none; font-size:0.85rem; display:inline-flex; align-items:center; justify-content:center; gap:0.4rem;"><i class="fa-brands fa-whatsapp"></i> Chat on WhatsApp</a>
-            </div>
-          </div>
-
-          <!-- Official Email Card -->
-          <div class="contact-card" style="background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:1.5rem; text-align:center;">
-            <div class="contact-card-icon" style="width:54px; height:54px; border-radius:50%; background:rgba(245,158,11,0.15); color:#fbbf24; display:inline-flex; align-items:center; justify-content:center; font-size:1.4rem; margin-bottom:1rem;"><i class="fa-solid fa-envelope"></i></div>
-            <h3 style="font-family:'Rajdhani',sans-serif; font-size:1.3rem; margin-bottom:0.5rem; color:#fff;">Email Support</h3>
-            <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:1rem; line-height:1.5;">Write to our technical and administrative desk for official circulars and verified certificates.</p>
-            <a href="mailto:contact@rsam.in" class="contact-link-btn" style="color:#fbbf24; font-weight:700; text-decoration:none; font-size:0.85rem;">✉️ contact@rsam.in</a>
-          </div>
-        </div>
-      </div>
-    </section>
-  `);
-}
 
 /* ── Boot ─────────────────────────────────────────── */
 function renderAll() {

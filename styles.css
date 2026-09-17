@@ -4152,3 +4152,185 @@ body.has-ticker .navbar.spotlight-nav {
   z-index: 0 !important;
   pointer-events: none !important;
 }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   COMPREHENSIVE LIGHT THEME CONTRAST & VISIBILITY OVERRIDES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+[data-theme="light"] {
+  --bg-dark:    #f8fafc;
+  --bg-card:    #ffffff;
+  --bg-mid:     #f1f5f9;
+  --surface:    #f8fafc;
+  --surface2:   #e2e8f0;
+  --orange:     #e01c2e;
+  --orange-lt:  #f43f50;
+  --orange-dk:  #b91325;
+  --gold:       #d97706;
+  --text:       #0f172a;
+  --text-muted: #475569;
+  --text-dim:   #64748b;
+  --border:     rgba(0, 0, 0, 0.12);
+  --border-s:   rgba(0, 0, 0, 0.08);
+  --glow:       rgba(224, 28, 46, 0.15);
+}
+
+[data-theme="light"],
+body[data-theme="light"] {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+/* Light Mode Cards, Sections & Panels */
+[data-theme="light"] .news-card,
+[data-theme="light"] .highlight-card,
+[data-theme="light"] .official-card,
+[data-theme="light"] .cert-card,
+[data-theme="light"] .contact-card,
+[data-theme="light"] .event-card,
+[data-theme="light"] .g-folder-card,
+[data-theme="light"] .admin-card,
+[data-theme="light"] .modal-content,
+[data-theme="light"] .confirm-fee-breakdown,
+[data-theme="light"] .connect-panel,
+[data-theme="light"] .reg-fee-banner,
+[data-theme="light"] .news-item,
+[data-theme="light"] .reg-card,
+[data-theme="light"] .lookup-card {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border: 1px solid rgba(0, 0, 0, 0.12) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06) !important;
+}
+
+/* Light Mode Card Titles & Headings */
+[data-theme="light"] h1,
+[data-theme="light"] h2,
+[data-theme="light"] h3,
+[data-theme="light"] h4,
+[data-theme="light"] h5,
+[data-theme="light"] .news-card-body h3,
+[data-theme="light"] .hl-caption h3,
+[data-theme="light"] .g-folder-title,
+[data-theme="light"] .official-name,
+[data-theme="light"] .cert-title,
+[data-theme="light"] .confirm-value,
+[data-theme="light"] .tile-val,
+[data-theme="light"] .stat-num {
+  color: #0f172a !important;
+}
+
+[data-theme="light"] p,
+[data-theme="light"] span,
+[data-theme="light"] .news-card-body p,
+[data-theme="light"] .hl-caption p,
+[data-theme="light"] .g-folder-desc,
+[data-theme="light"] .g-folder-meta,
+[data-theme="light"] .official-role,
+[data-theme="light"] .confirm-label,
+[data-theme="light"] .tile-label {
+  color: #475569 !important;
+}
+
+/* Light Mode Form Inputs, Selects & Textareas */
+[data-theme="light"] input[type="text"],
+[data-theme="light"] input[type="tel"],
+[data-theme="light"] input[type="email"],
+[data-theme="light"] input[type="date"],
+[data-theme="light"] input[type="number"],
+[data-theme="light"] select,
+[data-theme="light"] textarea,
+[data-theme="light"] .form-input,
+[data-theme="light"] .form-select,
+[data-theme="light"] .form-control {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border: 1.5px solid #cbd5e1 !important;
+}
+
+[data-theme="light"] input:focus,
+[data-theme="light"] select:focus,
+[data-theme="light"] textarea:focus {
+  border-color: #e01c2e !important;
+  box-shadow: 0 0 0 3px rgba(224, 28, 46, 0.15) !important;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   MOBILE NAVIGATION DRAWER VISIBILITY FIX
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+@media (max-width: 768px) {
+  .nav-toggle {
+    display: flex !important;
+  }
+  .nav-links {
+    display: flex !important;
+    position: fixed !important;
+    top: 0 !important;
+    right: -100% !important;
+    width: 80% !important;
+    max-width: 320px !important;
+    height: 100vh !important;
+    background: var(--bg-card, #0a0a0f) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    flex-direction: column !important;
+    padding: 5rem 1.5rem 2rem !important;
+    gap: 1.2rem !important;
+    border-left: 1px solid var(--border) !important;
+    transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5) !important;
+    z-index: 99999 !important;
+  }
+  .nav-links.open {
+    right: 0 !important;
+  }
+  .nav-links a {
+    color: var(--text) !important;
+    font-size: 1.15rem !important;
+    width: 100% !important;
+    display: block !important;
+    padding: 0.75rem 1rem !important;
+    border-radius: 8px !important;
+  }
+  .nav-links a:hover, .nav-links a.active {
+    color: var(--orange) !important;
+    background: rgba(224, 28, 46, 0.1) !important;
+  }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   FLOATING BACK TO TOP BUTTON
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.back-to-top-btn {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #e01c2e 0%, #f43f50 100%);
+  color: #ffffff;
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 20px rgba(224, 28, 46, 0.4);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  z-index: 9999;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(20px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.back-to-top-btn.visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.back-to-top-btn:hover {
+  transform: translateY(-4px) scale(1.08);
+  box-shadow: 0 8px 25px rgba(224, 28, 46, 0.6);
+}
+

@@ -553,6 +553,41 @@ function initImageLightbox() {
   });
 }
 
+/* ── Floating Back To Top Button ──────────────────── */
+function initBackToTop() {
+  const btn = document.getElementById('backToTopBtn');
+  if (!btn) return;
+
+  const updateVisibility = () => {
+    btn.classList.toggle('visible', window.scrollY > 300);
+  };
+
+  window.addEventListener('scroll', updateVisibility);
+  updateVisibility();
+
+  btn.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+
+/* ── Global Document Event Delegation for Gallery Folders & Modals ── */
+document.addEventListener('click', (e) => {
+  // Photo Gallery Folder Click Handler
+  const folderCard = e.target.closest('.g-folder-card');
+  if (folderCard && folderCard.dataset.folderId) {
+    e.preventDefault();
+    if (typeof galleryState !== 'undefined') {
+      galleryState.currentFolderId = folderCard.dataset.folderId;
+      galleryState.currentPage = 1;
+    }
+    if (typeof renderGallery === 'function') {
+      renderGallery();
+    }
+    const gSec = document.getElementById('gallery');
+    if (gSec) gSec.scrollIntoView({ behavior: 'smooth' });
+  }
+});
+
 /* Run after render.js has finished building the DOM (async fetch) */
 document.addEventListener('rsam:ready', () => {
   initInteractions();
@@ -561,4 +596,11 @@ document.addEventListener('rsam:ready', () => {
   initSpotlightNavbar();
   initCylinderGalleryCarousel();
   initImageLightbox();
+  initBackToTop();
+  document.querySelectorAll('.hl-carousel').forEach(initHlCarousel);
+});
+
+document.addEventListener('rsam:rendered', () => {
+  document.querySelectorAll('.hl-carousel').forEach(initHlCarousel);
+  initBackToTop();
 });
