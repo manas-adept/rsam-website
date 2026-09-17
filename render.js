@@ -219,6 +219,7 @@ function renderNavbar() {
 
   mount("app-navbar", `
     ${tickerHTML}
+    <div class="nav-backdrop" id="navBackdrop" style="display:none;"></div>
     <nav class="navbar spotlight-nav" id="navbar">
       <div class="nav-inner" style="display:flex; align-items:center; justify-content:space-between; width:100%;">
         <a href="index.html" class="nav-logo-link" style="text-decoration:none; color:inherit; display:flex; align-items:center; gap:0.8rem; cursor:pointer;">
@@ -231,6 +232,10 @@ function renderNavbar() {
         </a>
         <div style="display:flex; align-items:center; gap:0.75rem; margin-left:auto;">
           <ul class="nav-links" id="navLinks">
+            <li class="nav-mobile-header" style="display:none; align-items:center; justify-content:space-between; padding-bottom:1rem; margin-bottom:1rem; border-bottom:1px solid rgba(255,255,255,0.15); width:100%;">
+              <span style="font-family:'Rajdhani',sans-serif; font-size:1.2rem; font-weight:700; color:#fff;">NAVIGATION</span>
+              <button type="button" id="navMobileClose" style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:#fff; width:36px; height:36px; border-radius:50%; font-size:1.2rem; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
+            </li>
             ${links}
           </ul>
           <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
@@ -247,6 +252,7 @@ function renderNavbar() {
       </div>
     </nav>
   `);
+
 }
 
 /* ── Hero ─────────────────────────────────────────── */

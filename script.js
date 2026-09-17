@@ -5,31 +5,60 @@
 
 function initInteractions() {
 
-  /* ── Navbar scroll behavior ───────────────────── */
+  /* ── Navbar scroll & mobile drawer ────────────── */
   const navbar    = document.getElementById('navbar');
   const navToggle = document.getElementById('navToggle');
   const navLinks  = document.getElementById('navLinks');
+  const navBackdrop = document.getElementById('navBackdrop');
+  const navMobileClose = document.getElementById('navMobileClose');
   const scrollHint = document.querySelector('.hero-scroll-hint');
 
   window.addEventListener('scroll', () => {
-    navbar.classList.toggle('scrolled', window.scrollY > 50);
+    if (navbar) navbar.classList.toggle('scrolled', window.scrollY > 50);
     if (scrollHint) scrollHint.classList.toggle('hidden', window.scrollY > 80);
     updateActiveNavLink();
   });
 
-  navToggle.addEventListener('click', () => navLinks.classList.toggle('open'));
+  function openNavDrawer() {
+    if (navLinks) navLinks.classList.add('open');
+    if (navBackdrop) navBackdrop.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+  }
 
-  navLinks.querySelectorAll('a').forEach(link =>
-    link.addEventListener('click', () => navLinks.classList.remove('open'))
-  );
+  function closeNavDrawer() {
+    if (navLinks) navLinks.classList.remove('open');
+    if (navBackdrop) navBackdrop.style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
+  if (navToggle) {
+    navToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (navLinks && navLinks.classList.contains('open')) {
+        closeNavDrawer();
+      } else {
+        openNavDrawer();
+      }
+    });
+  }
+
+  if (navMobileClose) navMobileClose.addEventListener('click', closeNavDrawer);
+  if (navBackdrop) navBackdrop.addEventListener('click', closeNavDrawer);
+
+  if (navLinks) {
+    navLinks.querySelectorAll('a').forEach(link =>
+      link.addEventListener('click', closeNavDrawer)
+    );
+  }
 
   function updateActiveNavLink() {
     const scrollY = window.scrollY + 100;
     document.querySelectorAll('section[id]').forEach(sec => {
-      const link = navLinks.querySelector(`a[href="#${sec.id}"]`);
+      const link = navLinks ? navLinks.querySelector(`a[href="#${sec.id}"]`) : null;
       if (link) link.classList.toggle('active', scrollY >= sec.offsetTop && scrollY < sec.offsetTop + sec.offsetHeight);
     });
   }
+
 
   /* ── Footer year ──────────────────────────────── */
   const yearEl = document.getElementById('year');
