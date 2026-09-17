@@ -135,7 +135,7 @@ const CONFIG = {
   connect: {
     youtube:         "https://www.youtube.com/@rsam_mbd",
     instagram:       "https://www.instagram.com/rsam_mbd_official",
-    whatsappChannel: "https://whatsapp.com/channel/0029Va9Z7Fm1XquT1H9yA20A",
+    whatsappChannel: "https://whatsapp.com/channel/0029VbCcTGfCHDynFKrFTV07",
     whatsappNumber:  "+91-8057781350",
     email:           "contact@rsam.in",
     phone:           "+91-8057781350",

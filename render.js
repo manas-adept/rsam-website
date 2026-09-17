@@ -934,7 +934,7 @@ function renderConnect() {
   const { connect } = CONFIG;
   const youtubeUrl = connect.youtube || "https://www.youtube.com/@rsam_mbd";
   const instagramUrl = connect.instagram || "https://www.instagram.com/rsam_mbd_official";
-  const waChannelUrl = connect.whatsappChannel || "https://whatsapp.com/channel/0029Va9Z7Fm1XquT1H9yA20A";
+  const waChannelUrl = connect.whatsappChannel || "https://whatsapp.com/channel/0029VbCcTGfCHDynFKrFTV07";
   const phoneNo = connect.phone || "+91-8057781350";
   const emailAddr = connect.email || "contact@rsam.in";
   const addressText = connect.address || "139, Rana Bhawan, Near 23 PAC, Kanth Road, Moradabad, Uttar Pradesh - 244001";
