@@ -1,8 +1,12 @@
 {
   "fees": {
     "annualBaseFee": 0,
-    "annualRenewalFee": 0,
-    "eventBaseFee": 500
+    "baseFee": 0,
+    "gatewayPercent": 2,
+    "gstPercent": 18,
+    "gatewayFee": 0,
+    "gstFee": 0,
+    "totalPayable": 0
   },
   "events": [
     {

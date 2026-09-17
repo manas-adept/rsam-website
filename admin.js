@@ -305,6 +305,46 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  async function persistSiteConfig(partialConfig) {
+    if (!window.LIVE_SITE_CONFIG) window.LIVE_SITE_CONFIG = {};
+    window.LIVE_SITE_CONFIG = {
+      ...window.LIVE_SITE_CONFIG,
+      ...partialConfig
+    };
+    if (partialConfig.fees) {
+      localStorage.setItem("RSAM_ADMIN_FEE_CONFIG", JSON.stringify(partialConfig.fees));
+    }
+    if (partialConfig.events) {
+      localStorage.setItem("RSAM_ADMIN_EVENTS", JSON.stringify(partialConfig.events));
+    }
+    if (partialConfig.news) {
+      localStorage.setItem("RSAM_ADMIN_NEWS", JSON.stringify(partialConfig.news));
+    }
+    if (partialConfig.highlights) {
+      localStorage.setItem("RSAM_ADMIN_HIGHLIGHTS", JSON.stringify(partialConfig.highlights));
+    }
+    if (partialConfig.officials) {
+      localStorage.setItem("RSAM_ADMIN_OFFICIALS", JSON.stringify(partialConfig.officials));
+    }
+    if (partialConfig.skinsuits) {
+      localStorage.setItem("RSAM_ADMIN_SKINSUIT", JSON.stringify(partialConfig.skinsuits[0]));
+    }
+
+    const baseUrl = getAdminApiBaseUrl();
+    try {
+      const res = await fetch(`${baseUrl}/api/save-site-config`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(partialConfig)
+      });
+      if (res.ok) {
+        console.log("[Admin] site-config updated successfully on server.");
+      }
+    } catch (e) {
+      console.warn("Backend save-site-config fetch warning:", e);
+    }
+  }
+
   // 6. Data Loaders (Source of Truth: window.LIVE_SITE_CONFIG from data/site-config.json)
   function getAdminEvents() {
     if (window.LIVE_SITE_CONFIG && Array.isArray(window.LIVE_SITE_CONFIG.events) && window.LIVE_SITE_CONFIG.events.length > 0) {
