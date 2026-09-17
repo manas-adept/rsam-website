@@ -17,10 +17,10 @@
       "deadline": "2026-10-01T23:59:59+05:30",
       "location": "Moradabad Sports Complex, Kanth Road",
       "feeType": "online",
-      "baseFee": 500.00,
+      "baseFee": 500,
       "fee": 500,
-      "gatewayPercent": 2.0,
-      "gstPercent": 18.0,
+      "gatewayPercent": 2,
+      "gstPercent": 18,
       "image": "https://res.cloudinary.com/igjmhsju/image/upload/v1788797466/rsam_website/branding/rsam-logo.png",
       "description": "Official 4th District Championship for all age groups & disciplines in Moradabad.",
       "body": "Official 4th District Championship for all age groups & disciplines in Moradabad.",
@@ -336,5 +336,6 @@
         "description": "Honoring RSAM athletes for outstanding sportsmanship and track achievements."
       }
     ]
-  }
+  },
+  "lastUpdated": "2026-09-17T11:20:36.564Z"
 }

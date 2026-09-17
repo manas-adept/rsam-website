@@ -1091,9 +1091,9 @@ app.post('/api/save-gallery-config', async (req, res) => {
  */
 app.get('/api/site-config', (req, res) => {
   try {
-    const configPath1 = path.join(__dirname, 'data/site-config.json');
     const configPath2 = path.join(__dirname, '../data/site-config.json');
-    const targetPath = fs.existsSync(configPath1) ? configPath1 : (fs.existsSync(configPath2) ? configPath2 : null);
+    const configPath1 = path.join(__dirname, 'data/site-config.json');
+    const targetPath = fs.existsSync(configPath2) ? configPath2 : (fs.existsSync(configPath1) ? configPath1 : null);
 
     if (targetPath) {
       const data = JSON.parse(fs.readFileSync(targetPath, 'utf8'));
@@ -1117,15 +1117,15 @@ app.post('/api/save-site-config', (req, res) => {
       return res.status(400).json({ success: false, error: 'Invalid configuration object provided.' });
     }
 
-    const configPath1 = path.join(__dirname, 'data/site-config.json');
     const configPath2 = path.join(__dirname, '../data/site-config.json');
+    const configPath1 = path.join(__dirname, 'data/site-config.json');
 
     // Read existing to merge safely
     let currentConfig = {};
-    if (fs.existsSync(configPath1)) {
-      try { currentConfig = JSON.parse(fs.readFileSync(configPath1, 'utf8')); } catch (e) {}
-    } else if (fs.existsSync(configPath2)) {
+    if (fs.existsSync(configPath2)) {
       try { currentConfig = JSON.parse(fs.readFileSync(configPath2, 'utf8')); } catch (e) {}
+    } else if (fs.existsSync(configPath1)) {
+      try { currentConfig = JSON.parse(fs.readFileSync(configPath1, 'utf8')); } catch (e) {}
     }
 
     const mergedConfig = {
@@ -1136,20 +1136,24 @@ app.post('/api/save-site-config', (req, res) => {
 
     const jsonStr = JSON.stringify(mergedConfig, null, 2);
 
-    if (fs.existsSync(path.dirname(configPath1))) fs.writeFileSync(configPath1, jsonStr, 'utf8');
-    if (fs.existsSync(path.dirname(configPath2))) fs.writeFileSync(configPath2, jsonStr, 'utf8');
+    try {
+      if (fs.existsSync(path.dirname(configPath2))) fs.writeFileSync(configPath2, jsonStr, 'utf8');
+    } catch(e) {}
+    try {
+      if (fs.existsSync(path.dirname(configPath1))) fs.writeFileSync(configPath1, jsonStr, 'utf8');
+    } catch(e) {}
 
     // Also sync gallery folders if provided
     if (mergedConfig.gallery && Array.isArray(mergedConfig.gallery.folders)) {
-      const gPath1 = path.join(__dirname, 'data/gallery-config.json');
       const gPath2 = path.join(__dirname, '../data/gallery-config.json');
+      const gPath1 = path.join(__dirname, 'data/gallery-config.json');
       const gStr = JSON.stringify(mergedConfig.gallery, null, 2);
-      if (fs.existsSync(path.dirname(gPath1))) fs.writeFileSync(gPath1, gStr, 'utf8');
-      if (fs.existsSync(path.dirname(gPath2))) fs.writeFileSync(gPath2, gStr, 'utf8');
+      try { if (fs.existsSync(path.dirname(gPath2))) fs.writeFileSync(gPath2, gStr, 'utf8'); } catch(e) {}
+      try { if (fs.existsSync(path.dirname(gPath1))) fs.writeFileSync(gPath1, gStr, 'utf8'); } catch(e) {}
     }
 
-    console.log('[Site Config] Permanently updated site configuration for all users.');
-    return res.json({ success: true, message: 'Site configuration permanently updated.', config: mergedConfig });
+    console.log('[Site Config] Permanently updated data/site-config.json for all users.');
+    return res.json({ success: true, message: 'data/site-config.json updated.', config: mergedConfig });
   } catch (err) {
     console.error('[Save Site Config Error]:', err.message);
     return res.status(500).json({ success: false, error: err.message });
