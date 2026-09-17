@@ -230,11 +230,25 @@ function formatDriveImageUrl(url) {
           form.dob.value = formatToInputDate(s.dob);
           form.dob.dispatchEvent(new Event("change"));
         }
+        if (form.schoolClub) {
+          const schoolVal = s.schoolClub || s.school || s.club || "";
+          if (schoolVal) form.schoolClub.value = schoolVal;
+        }
         if (form.fatherName && s.fatherName) form.fatherName.value = s.fatherName;
         if (form.motherName && s.motherName) form.motherName.value = s.motherName;
         if (form.address && s.address) form.address.value = s.address;
         if (form.mobile && s.mobile) form.mobile.value = String(s.mobile).replace(/^'/, "");
         if (form.email && s.email) form.email.value = s.email;
+        if (form.coachName) {
+          const coachVal = s.coachName || s.coach || "";
+          if (coachVal) form.coachName.value = coachVal;
+        }
+        if (form.coachMobile) {
+          const coachMobVal = s.coachMobile || s.coachContact || s.coachPhone || s.coachNum || s.coachNo || "";
+          if (coachMobVal) {
+            form.coachMobile.value = String(coachMobVal).replace(/^'/, "").replace(/\D/g, "").slice(0, 10);
+          }
+        }
         if (form.aadhaar && s.aadhaar) {
           form.aadhaar.value = String(s.aadhaar).replace(/^'/, "");
           form.aadhaar.dispatchEvent(new Event("input"));

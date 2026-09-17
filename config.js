@@ -169,11 +169,11 @@ window.CONFIG = CONFIG;
     btns.forEach(btn => {
       const icon = btn.querySelector(".theme-toggle-icon");
       if (theme === "light") {
-        if (icon) icon.className = "fa-solid fa-moon theme-toggle-icon";
+        if (icon) icon.className = "fa-solid fa-sun theme-toggle-icon";
         btn.setAttribute("title", "Switch to Dark Mode");
         btn.setAttribute("aria-label", "Switch to Dark Mode");
       } else {
-        if (icon) icon.className = "fa-solid fa-sun theme-toggle-icon";
+        if (icon) icon.className = "fa-solid fa-moon theme-toggle-icon";
         btn.setAttribute("title", "Switch to Light Mode");
         btn.setAttribute("aria-label", "Switch to Light Mode");
       }
