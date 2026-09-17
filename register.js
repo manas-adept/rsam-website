@@ -24,6 +24,91 @@ function escapeHTML(str) {
   }[match]));
 }
 
+/* ── Dynamic Fee Breakdown & UI Display ────────────────── */
+function getFeeBreakdown() {
+  let baseFee = 0;
+  let gwPct = 2.0;
+  let gstPct = 18.0;
+
+  if (window.LIVE_SITE_CONFIG && window.LIVE_SITE_CONFIG.fees) {
+    const f = window.LIVE_SITE_CONFIG.fees;
+    baseFee = parseFloat(f.annualBaseFee !== undefined ? f.annualBaseFee : (f.baseFee !== undefined ? f.baseFee : 0));
+    gwPct = parseFloat(f.gatewayPercent !== undefined ? f.gatewayPercent : 2.0);
+    gstPct = parseFloat(f.gstPercent !== undefined ? f.gstPercent : 18.0);
+  } else {
+    const savedFee = localStorage.getItem("RSAM_ADMIN_FEE_CONFIG");
+    if (savedFee) {
+      try {
+        const f = JSON.parse(savedFee);
+        baseFee = parseFloat(f.annualBaseFee !== undefined ? f.annualBaseFee : (f.baseFee !== undefined ? f.baseFee : 0));
+        gwPct = parseFloat(f.gatewayPercent !== undefined ? f.gatewayPercent : 2.0);
+        gstPct = parseFloat(f.gstPercent !== undefined ? f.gstPercent : 18.0);
+      } catch (e) {}
+    }
+  }
+
+  const gatewayFee = parseFloat(((baseFee * gwPct) / 100).toFixed(2));
+  const gstFee = parseFloat(((gatewayFee * gstPct) / 100).toFixed(2));
+  const totalAmount = parseFloat((baseFee + gatewayFee + gstFee).toFixed(2));
+  const totalAmountPaise = Math.round(totalAmount * 100);
+
+  return {
+    baseFee,
+    gwPct,
+    gstPct,
+    gatewayFee,
+    gstFee,
+    totalAmount,
+    totalAmountPaise,
+    isFree: baseFee === 0
+  };
+}
+
+function updateFeeDisplayUI() {
+  const fee = getFeeBreakdown();
+  const feeBanner = document.querySelector(".reg-fee-banner");
+  if (feeBanner) {
+    if (fee.isFree) {
+      feeBanner.innerHTML = `🎉 Annual Registration Fee: <strong>FREE / WAIVED (₹0.00)</strong> <small>(No online payment required)</small>`;
+      feeBanner.style.background = "rgba(52, 211, 153, 0.15)";
+      feeBanner.style.borderColor = "rgba(52, 211, 153, 0.4)";
+      feeBanner.style.color = "#6ee7b7";
+    } else {
+      feeBanner.innerHTML = `💳 Registration Fee: <strong>₹${fee.baseFee.toFixed(2)}</strong> <small>(+ ${fee.gwPct}% gateway charge &amp; ${fee.gstPct}% GST = ₹${fee.totalAmount.toFixed(2)} Total)</small>`;
+      feeBanner.style.background = "rgba(245, 158, 11, 0.15)";
+      feeBanner.style.borderColor = "rgba(245, 158, 11, 0.4)";
+      feeBanner.style.color = "#fef08a";
+    }
+  }
+
+  const submitBtnText = document.querySelector("#regForm button[type='submit'] .submit-text, .reg-submit-row button .submit-text, .reg-submit .submit-text");
+  if (submitBtnText) {
+    if (fee.isFree) {
+      submitBtnText.textContent = "Submit Registration (Free / Waived)";
+    } else {
+      submitBtnText.textContent = `Confirm & Pay ₹${fee.totalAmount.toFixed(2)}`;
+    }
+  }
+
+  const confirmProceedBtn = document.getElementById("confirmProceedBtn");
+  if (confirmProceedBtn) {
+    if (fee.isFree) {
+      confirmProceedBtn.textContent = "✓ Submit Registration (Free)";
+    } else {
+      confirmProceedBtn.textContent = `💳 Pay ₹${fee.totalAmount.toFixed(2)} & Register`;
+    }
+  }
+}
+
+if (typeof window !== "undefined") {
+  window.addEventListener("rsam:siteconfig_updated", () => updateFeeDisplayUI());
+  window.addEventListener("storage", (e) => {
+    if (e.key === "RSAM_ADMIN_FEE_CONFIG" || e.key === "RSAM_SITE_CONFIG") {
+      updateFeeDisplayUI();
+    }
+  });
+}
+
 /* ── Age & Age Group auto-calculate ────────────────────── */
 function getAgeGroup(age) {
   if (age === null || age === undefined || age === "" || isNaN(age)) return "";
@@ -620,80 +705,7 @@ function formatDateDDMMMYYYY(dateStr) {
   return `${day}-${month}-${year}`;
 }
 
-function getFeeBreakdown() {
-  let baseFee = 0;
-  let gwPct = 2.0;
-  let gstPct = 18.0;
 
-  if (window.LIVE_SITE_CONFIG && window.LIVE_SITE_CONFIG.fees) {
-    const f = window.LIVE_SITE_CONFIG.fees;
-    baseFee = parseFloat(f.annualBaseFee !== undefined ? f.annualBaseFee : (f.baseFee !== undefined ? f.baseFee : 0));
-    gwPct = parseFloat(f.gatewayPercent !== undefined ? f.gatewayPercent : 2.0);
-    gstPct = parseFloat(f.gstPercent !== undefined ? f.gstPercent : 18.0);
-  } else {
-    const savedFee = localStorage.getItem("RSAM_ADMIN_FEE_CONFIG");
-    if (savedFee) {
-      try {
-        const f = JSON.parse(savedFee);
-        baseFee = parseFloat(f.annualBaseFee !== undefined ? f.annualBaseFee : (f.baseFee !== undefined ? f.baseFee : 0));
-        gwPct = parseFloat(f.gatewayPercent !== undefined ? f.gatewayPercent : 2.0);
-        gstPct = parseFloat(f.gstPercent !== undefined ? f.gstPercent : 18.0);
-      } catch (e) {}
-    }
-  }
-
-  const gatewayFee = parseFloat(((baseFee * gwPct) / 100).toFixed(2));
-  const gstFee = parseFloat(((gatewayFee * gstPct) / 100).toFixed(2));
-  const totalAmount = parseFloat((baseFee + gatewayFee + gstFee).toFixed(2));
-  const totalAmountPaise = Math.round(totalAmount * 100);
-
-  return {
-    baseFee,
-    gwPct,
-    gstPct,
-    gatewayFee,
-    gstFee,
-    totalAmount,
-    totalAmountPaise,
-    isFree: baseFee === 0
-  };
-}
-
-function updateFeeDisplayUI() {
-  const fee = getFeeBreakdown();
-  const feeBanner = document.querySelector(".reg-fee-banner");
-  if (feeBanner) {
-    if (fee.isFree) {
-      feeBanner.innerHTML = `🎉 Annual Registration Fee: <strong>FREE / WAIVED (₹0.00)</strong> <small>(No online payment required)</small>`;
-      feeBanner.style.background = "rgba(52, 211, 153, 0.15)";
-      feeBanner.style.borderColor = "rgba(52, 211, 153, 0.4)";
-      feeBanner.style.color = "#6ee7b7";
-    } else {
-      feeBanner.innerHTML = `💳 Registration Fee: <strong>₹${fee.baseFee.toFixed(2)}</strong> <small>(+ ${fee.gwPct}% gateway charge &amp; ${fee.gstPct}% GST = ₹${fee.totalAmount.toFixed(2)} Total)</small>`;
-      feeBanner.style.background = "rgba(245, 158, 11, 0.15)";
-      feeBanner.style.borderColor = "rgba(245, 158, 11, 0.4)";
-      feeBanner.style.color = "#fef08a";
-    }
-  }
-
-  const submitBtnText = document.querySelector("#regForm button[type='submit'] .submit-text, .reg-submit-row button .submit-text, .reg-submit .submit-text");
-  if (submitBtnText) {
-    if (fee.isFree) {
-      submitBtnText.textContent = "Submit Registration (Free / Waived)";
-    } else {
-      submitBtnText.textContent = `Confirm & Pay ₹${fee.totalAmount.toFixed(2)}`;
-    }
-  }
-
-  const confirmProceedBtn = document.getElementById("confirmProceedBtn");
-  if (confirmProceedBtn) {
-    if (fee.isFree) {
-      confirmProceedBtn.textContent = "✓ Submit Registration (Free)";
-    } else {
-      confirmProceedBtn.textContent = `💳 Pay ₹${fee.totalAmount.toFixed(2)} & Register`;
-    }
-  }
-}
 
       // Populate Pre-Submission Confirmation Modal Summary
       const confirmModal = document.getElementById("confirmModal");
