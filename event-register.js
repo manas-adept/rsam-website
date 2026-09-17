@@ -70,7 +70,29 @@ const TOTAL_AMOUNT_PAISE = Math.round(TOTAL_AMOUNT * 100);
 
 let verifiedSkater = null;
 
-document.addEventListener("DOMContentLoaded", () => {
+async function fetchSiteConfigEvent() {
+  try {
+    const cacheBust = `?v=${Date.now()}`;
+    const localRes = await fetch(`data/site-config.json${cacheBust}`);
+    if (localRes.ok) {
+      const localData = await localRes.json();
+      if (localData) {
+        window.LIVE_SITE_CONFIG = localData;
+      }
+    }
+    const baseUrl = getEvtEnv().backendUrl;
+    const res = await fetch(`${baseUrl}/api/site-config${cacheBust}`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.config) {
+        window.LIVE_SITE_CONFIG = data.config;
+      }
+    }
+  } catch(e) {}
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+  await fetchSiteConfigEvent();
 
   const isOrganizerPaid = activeEvConfig.feeType === 'organizer' || activeEvConfig.payToOrganizer;
   const isFreeFee = BASE_FEE === 0;

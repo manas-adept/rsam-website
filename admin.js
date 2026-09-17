@@ -282,119 +282,219 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // 6. Data Loaders (Merging Static Pre-Filled Data with Local Storage Overrides)
-  function getAdminEvents() {
-    const saved = localStorage.getItem("RSAM_ADMIN_EVENTS");
-    if (saved) {
-      try { return JSON.parse(saved); } catch (e) {}
-    }
-
-    return [
-      {
-        id: "evt_district_2026",
-        title: "4th District Championship 2026",
-        year: "2026",
-        category: "District Championship",
-        date: "15th - 16th October 2026",
-        startDateTime: "2026-10-15T08:00",
-        endDateTime: "2026-10-16T18:00",
-        deadline: "2026-10-01T23:59:59+05:30",
-        location: "Moradabad Sports Complex, Kanth Road",
-        feeType: "online",
-        baseFee: 500.00,
-        gatewayPercent: 2.0,
-        gstPercent: 18.0,
-        image: "https://res.cloudinary.com/igjmhsju/image/upload/v1788797466/rsam_website/branding/rsam-logo.png",
-        description: "Official 4th District Championship for all age groups & disciplines in Moradabad.",
-        showOnTicker: true,
-        isRegistrationActive: true
-      },
-      {
-        id: "evt_up_state_2026",
-        title: "7th UP Open State (Flat Track)",
-        year: "2026",
-        category: "State Championship",
-        date: "July 19, 2026",
-        startDateTime: "2026-05-10T04:30",
-        endDateTime: "2026-05-10T10:30",
-        deadline: "2026-10-01T23:59:59+05:30",
-        location: "Central Academy, Lucknow, Uttar Pradesh",
-        feeType: "organizer",
-        payToOrganizer: true,
-        baseFee: 0,
-        gatewayPercent: 0,
-        gstPercent: 0,
-        image: "https://res.cloudinary.com/igjmhsju/image/upload/v1788797445/rsam_website/news/news_lko.jpg",
-        description: "Moradabad speeders won 5 Gold, 8 Silver and 4+ Bronze Medals at 7th UP Open-state Championship at Central Academy, Lucknow.",
-        showOnTicker: true,
-        isRegistrationActive: false
-      },
-      {
-        id: "evt_marathon_2026",
-        title: "Run on Wheels 4.0 Skating Marathon",
-        year: "2026",
-        category: "Marathon Championship",
-        date: "May 10, 2026",
-        startDateTime: "2026-05-10T06:00",
-        endDateTime: "2026-05-10T12:00",
-        deadline: "2026-10-01T23:59:59+05:30",
-        location: "Agra, Uttar Pradesh",
-        feeType: "organizer",
-        payToOrganizer: true,
-        baseFee: 0,
-        gatewayPercent: 0,
-        gstPercent: 0,
-        image: "https://res.cloudinary.com/igjmhsju/image/upload/v1788797458/rsam_website/gallery/felicitaion_ceremony_dmr_2026/row-event.jpg",
-        description: "The Great Skating Marathon 2026 organized by Agra Roller Skating Welfare Association under the aegis of UPRSA.",
-        showOnTicker: true,
-        isRegistrationActive: false
+  async function fetchSiteConfigInAdmin() {
+    try {
+      const cacheBust = `?v=${Date.now()}`;
+      const localRes = await fetch(`data/site-config.json${cacheBust}`);
+      if (localRes.ok) {
+        const localData = await localRes.json();
+        if (localData) {
+          window.LIVE_SITE_CONFIG = localData;
+        }
       }
-    ];
+      const baseUrl = getAdminApiBaseUrl();
+      const apiRes = await fetch(`${baseUrl}/api/site-config${cacheBust}`);
+      if (apiRes.ok) {
+        const apiData = await apiRes.json();
+        if (apiData && apiData.config) {
+          window.LIVE_SITE_CONFIG = apiData.config;
+        }
+      }
+    } catch(e) {
+      console.warn("Error loading site config in admin:", e);
+    }
   }
 
+  // 6. Data Loaders (Merging Static Pre-Filled Data with Local Storage Overrides)
+  function getAdminEvents() {
+    let list = null;
+    const saved = localStorage.getItem("RSAM_ADMIN_EVENTS");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length >= 3) list = parsed;
+      } catch (e) {}
+    }
+    if (!list && window.LIVE_SITE_CONFIG && Array.isArray(window.LIVE_SITE_CONFIG.events) && window.LIVE_SITE_CONFIG.events.length > 0) {
+      list = window.LIVE_SITE_CONFIG.events;
+    }
+    if (!list || list.length === 0) {
+      list = [
+        {
+          id: "evt_district_2026",
+          title: "4th District Championship 2026",
+          year: "2026",
+          category: "District Championship",
+          date: "15th - 16th October 2026",
+          startDateTime: "2026-10-15T08:00",
+          endDateTime: "2026-10-16T18:00",
+          deadline: "2026-10-01T23:59:59+05:30",
+          location: "Moradabad Sports Complex, Kanth Road",
+          feeType: "online",
+          baseFee: 500.00,
+          gatewayPercent: 2.0,
+          gstPercent: 18.0,
+          image: "https://res.cloudinary.com/igjmhsju/image/upload/v1788797466/rsam_website/branding/rsam-logo.png",
+          description: "Official 4th District Championship for all age groups & disciplines in Moradabad.",
+          body: "Official 4th District Championship for all age groups & disciplines in Moradabad.",
+          showOnTicker: true,
+          isRegistrationActive: true
+        },
+        {
+          id: "evt_up_state_2026",
+          title: "7th UP Open State (Flat Track)",
+          year: "2026",
+          category: "State Championship",
+          date: "July 19, 2026",
+          startDateTime: "2026-05-10T04:30",
+          endDateTime: "2026-05-10T10:30",
+          deadline: "2026-10-01T23:59:59+05:30",
+          location: "Central Academy, Lucknow, Uttar Pradesh",
+          feeType: "organizer",
+          payToOrganizer: true,
+          baseFee: 0,
+          gatewayPercent: 0,
+          gstPercent: 0,
+          image: "https://res.cloudinary.com/igjmhsju/image/upload/v1788797445/rsam_website/news/news_lko.jpg",
+          description: "Moradabad speeders won 5 Gold, 8 Silver and 4+ Bronze Medals at 7th UP Open-state Championship at Central Academy, Lucknow.",
+          body: "Moradabad speeders won 5 Gold, 8 Silver and 4+ Bronze Medals at 7th UP Open-state Championship at Central Academy, Lucknow.",
+          showOnTicker: true,
+          isRegistrationActive: false
+        },
+        {
+          id: "evt_marathon_2026",
+          title: "Run on Wheels 4.0 Skating Marathon",
+          year: "2026",
+          category: "Marathon Championship",
+          date: "May 10, 2026",
+          startDateTime: "2026-05-10T06:00",
+          endDateTime: "2026-05-10T12:00",
+          deadline: "2026-10-01T23:59:59+05:30",
+          location: "Agra, Uttar Pradesh",
+          feeType: "organizer",
+          payToOrganizer: true,
+          baseFee: 0,
+          gatewayPercent: 0,
+          gstPercent: 0,
+          image: "https://res.cloudinary.com/igjmhsju/image/upload/v1788797458/rsam_website/gallery/felicitaion_ceremony_dmr_2026/row-event.jpg",
+          description: "The Great Skating Marathon 2026 organized by Agra Roller Skating Welfare Association under the aegis of UPRSA.",
+          body: "The Great Skating Marathon 2026 organized by Agra Roller Skating Welfare Association under the aegis of UPRSA.",
+          showOnTicker: true,
+          isRegistrationActive: false
+        }
+      ];
+    }
+    if (window.LIVE_SITE_CONFIG && Array.isArray(window.LIVE_SITE_CONFIG.events) && window.LIVE_SITE_CONFIG.events.length > list.length) {
+      list = window.LIVE_SITE_CONFIG.events;
+    }
+    return list;
+  }
 
   function getAdminNews() {
+    let list = null;
     const saved = localStorage.getItem("RSAM_ADMIN_NEWS");
     if (saved) {
-      try { return JSON.parse(saved); } catch (e) {}
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length >= 3) list = parsed;
+      } catch (e) {}
     }
-    const newsObj = typeof NEWS !== 'undefined' ? NEWS : (window.NEWS || {});
-    return newsObj.items || [];
+    if (!list && window.LIVE_SITE_CONFIG && Array.isArray(window.LIVE_SITE_CONFIG.news) && window.LIVE_SITE_CONFIG.news.length > 0) {
+      list = window.LIVE_SITE_CONFIG.news;
+    }
+    if (!list || list.length === 0) {
+      const newsObj = typeof NEWS !== 'undefined' ? NEWS : (window.NEWS || {});
+      list = newsObj.items || [];
+    }
+    if (window.LIVE_SITE_CONFIG && Array.isArray(window.LIVE_SITE_CONFIG.news) && window.LIVE_SITE_CONFIG.news.length > list.length) {
+      list = window.LIVE_SITE_CONFIG.news;
+    }
+    return list;
   }
 
   function getAdminHighlights() {
+    let list = null;
     const saved = localStorage.getItem("RSAM_ADMIN_HIGHLIGHTS");
     if (saved) {
-      try { return JSON.parse(saved); } catch (e) {}
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length >= 7) list = parsed;
+      } catch (e) {}
     }
-    const hlObj = typeof HIGHLIGHTS !== 'undefined' ? HIGHLIGHTS : (window.HIGHLIGHTS || []);
-    return hlObj;
+    if (!list && window.LIVE_SITE_CONFIG && Array.isArray(window.LIVE_SITE_CONFIG.highlights) && window.LIVE_SITE_CONFIG.highlights.length > 0) {
+      list = window.LIVE_SITE_CONFIG.highlights;
+    }
+    if (!list || list.length === 0) {
+      const hlObj = typeof HIGHLIGHTS !== 'undefined' ? HIGHLIGHTS : (window.HIGHLIGHTS || []);
+      list = Array.isArray(hlObj) ? hlObj : (hlObj.items || []);
+    }
+    if (window.LIVE_SITE_CONFIG && Array.isArray(window.LIVE_SITE_CONFIG.highlights) && window.LIVE_SITE_CONFIG.highlights.length > list.length) {
+      list = window.LIVE_SITE_CONFIG.highlights;
+    }
+    return list;
   }
 
   function getAdminOfficials() {
+    let list = null;
     const saved = localStorage.getItem("RSAM_ADMIN_OFFICIALS");
     if (saved) {
-      try { return JSON.parse(saved); } catch (e) {}
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length >= 15) list = parsed;
+      } catch (e) {}
     }
-    const offObj = typeof OFFICIALS !== 'undefined' ? OFFICIALS : (window.OFFICIALS || {});
-    const assoc = offObj.association || [];
-    const comm = (offObj.committee && (Array.isArray(offObj.committee) ? offObj.committee : offObj.committee.members)) || [];
-    return [...assoc, ...comm];
-
+    if (!list && window.LIVE_SITE_CONFIG && Array.isArray(window.LIVE_SITE_CONFIG.officials) && window.LIVE_SITE_CONFIG.officials.length > 0) {
+      list = window.LIVE_SITE_CONFIG.officials;
+    }
+    if (!list || list.length === 0) {
+      const offObj = typeof OFFICIALS !== 'undefined' ? OFFICIALS : (window.OFFICIALS || {});
+      const assoc = offObj.association || [];
+      const comm = (offObj.committee && (Array.isArray(offObj.committee) ? offObj.committee : offObj.committee.members)) || [];
+      list = [...assoc, ...comm];
+    }
+    if (window.LIVE_SITE_CONFIG && Array.isArray(window.LIVE_SITE_CONFIG.officials) && window.LIVE_SITE_CONFIG.officials.length > list.length) {
+      list = window.LIVE_SITE_CONFIG.officials;
+    }
+    return list;
   }
-
 
   // ── Annual Athlete Registration Fee Control ──
   function getAnnualFeeConfig() {
     const saved = localStorage.getItem("RSAM_ADMIN_FEE_CONFIG");
     if (saved) {
-      try { return JSON.parse(saved); } catch (e) {}
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed && (parsed.annualBaseFee !== undefined || parsed.baseFee !== undefined)) {
+          const bFee = parsed.annualBaseFee !== undefined ? parseFloat(parsed.annualBaseFee) : parseFloat(parsed.baseFee);
+          const gwPct = parsed.gatewayPercent !== undefined ? parseFloat(parsed.gatewayPercent) : 2.0;
+          const gstPct = parsed.gstPercent !== undefined ? parseFloat(parsed.gstPercent) : 18.0;
+          const gwFee = parseFloat(((bFee * gwPct) / 100).toFixed(2));
+          const gstFee = parseFloat(((gwFee * gstPct) / 100).toFixed(2));
+          const totalPayable = parseFloat((bFee + gwFee + gstFee).toFixed(2));
+          return { baseFee: bFee, gatewayPercent: gwPct, gstPercent: gstPct, totalPayable };
+        }
+      } catch (e) {}
+    }
+    if (window.LIVE_SITE_CONFIG && window.LIVE_SITE_CONFIG.fees) {
+      const f = window.LIVE_SITE_CONFIG.fees;
+      const baseFee = f.annualBaseFee !== undefined ? parseFloat(f.annualBaseFee) : (f.baseFee !== undefined ? parseFloat(f.baseFee) : 0.00);
+      const gwPct = f.gatewayPercent !== undefined ? parseFloat(f.gatewayPercent) : 2.0;
+      const gstPct = f.gstPercent !== undefined ? parseFloat(f.gstPercent) : 18.0;
+      const gwFee = parseFloat(((baseFee * gwPct) / 100).toFixed(2));
+      const gstFee = parseFloat(((gwFee * gstPct) / 100).toFixed(2));
+      const totalPayable = parseFloat((baseFee + gwFee + gstFee).toFixed(2));
+      return {
+        baseFee: baseFee,
+        gatewayPercent: gwPct,
+        gstPercent: gstPct,
+        totalPayable: totalPayable
+      };
     }
     return {
-      baseFee: 10.00,
+      baseFee: 0.00,
       gatewayPercent: 2.0,
       gstPercent: 18.0,
-      totalPayable: 10.24
+      totalPayable: 0.00
     };
   }
 
@@ -433,6 +533,7 @@ document.addEventListener("DOMContentLoaded", () => {
       e.preventDefault();
       const calc = updatePreview();
       const cfg = {
+        annualBaseFee: calc.base,
         baseFee: calc.base,
         gatewayPercent: calc.gwPct,
         gstPercent: calc.gstPct,
@@ -441,6 +542,7 @@ document.addEventListener("DOMContentLoaded", () => {
         totalPayable: calc.total
       };
       localStorage.setItem("RSAM_ADMIN_FEE_CONFIG", JSON.stringify(cfg));
+      persistSiteConfig({ fees: cfg });
       notify("✓ Annual Athlete Registration Fee updated!");
     };
   }
@@ -460,7 +562,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // 7. Initialize Dashboard Renderers (Lazy Tabular Navigation)
-  function initDashboard() {
+  async function initDashboard() {
+    await fetchSiteConfigInAdmin();
     snapshotSessionBaseline();
     updateAdminTabBadges();
     const initialHash = window.location.hash.slice(1);

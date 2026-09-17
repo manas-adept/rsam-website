@@ -308,8 +308,21 @@ function formatDriveImageUrl(url) {
 
   async function fetchSiteConfigFee() {
     try {
+      const cacheBust = `?v=${Date.now()}`;
+      const localRes = await fetch(`data/site-config.json${cacheBust}`);
+      if (localRes.ok) {
+        const localData = await localRes.json();
+        if (localData) {
+          window.LIVE_SITE_CONFIG = localData;
+          if (localData.fees) {
+            localStorage.setItem("RSAM_ADMIN_FEE_CONFIG", JSON.stringify(localData.fees));
+          }
+        }
+      }
+      if (typeof updateFeeDisplayUI === 'function') updateFeeDisplayUI();
+
       const baseUrl = getEnv().backendUrl;
-      const res = await fetch(`${baseUrl}/api/site-config`);
+      const res = await fetch(`${baseUrl}/api/site-config${cacheBust}`);
       if (res.ok) {
         const data = await res.json();
         if (data && data.config) {
