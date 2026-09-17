@@ -684,6 +684,15 @@ function updateFeeDisplayUI() {
       submitBtnText.textContent = `Confirm & Pay ₹${fee.totalAmount.toFixed(2)}`;
     }
   }
+
+  const confirmProceedBtn = document.getElementById("confirmProceedBtn");
+  if (confirmProceedBtn) {
+    if (fee.isFree) {
+      confirmProceedBtn.textContent = "✓ Submit Registration (Free)";
+    } else {
+      confirmProceedBtn.textContent = `💳 Pay ₹${fee.totalAmount.toFixed(2)} & Register`;
+    }
+  }
 }
 
       // Populate Pre-Submission Confirmation Modal Summary
@@ -829,14 +838,17 @@ function updateFeeDisplayUI() {
             console.log("[Razorpay] Payment Success! Payment ID:", response.razorpay_payment_id);
             payload.paymentId = response.razorpay_payment_id || ("pay_test_" + Date.now());
             payload.paymentStatus = "SUCCESS";
-            payload.amountPaid = TOTAL_AMOUNT.toFixed(2);
+            payload.amountPaid = currentFee.totalAmount.toFixed(2);
+            payload.baseFee = currentFee.baseFee.toFixed(2);
+            payload.gatewayFee = currentFee.gatewayFee.toFixed(2);
+            payload.gstFee = currentFee.gstFee.toFixed(2);
 
             // Execute registration submission only AFTER successful payment
             await processRegistrationSubmission(payload);
           },
           modal: {
             ondismiss: function () {
-              alert(`⚠️ Payment Cancelled: Skater registration requires a successful payment of ₹${TOTAL_AMOUNT.toFixed(2)}.\n\nYour registration was not submitted.`);
+              alert(`⚠️ Payment Cancelled: Skater registration requires a successful payment of ₹${currentFee.totalAmount.toFixed(2)}.\n\nYour registration was not submitted.`);
               submitBtn.disabled = false;
               submitBtn.querySelector(".submit-text").hidden = false;
               submitBtn.querySelector(".submit-spinner").hidden = true;
@@ -858,7 +870,10 @@ function updateFeeDisplayUI() {
           console.warn("Razorpay script not available. Simulating test payment for registration...");
           payload.paymentId = "pay_demo_" + Date.now();
           payload.paymentStatus = "SUCCESS";
-          payload.amountPaid = "10.24";
+          payload.amountPaid = currentFee.totalAmount.toFixed(2);
+          payload.baseFee = currentFee.baseFee.toFixed(2);
+          payload.gatewayFee = currentFee.gatewayFee.toFixed(2);
+          payload.gstFee = currentFee.gstFee.toFixed(2);
           processRegistrationSubmission(payload);
         }
       };
@@ -958,12 +973,18 @@ function updateFeeDisplayUI() {
 });
 
 function downloadRegistrationPdfInvoice(payloadData) {
+  const feeInfo = getFeeBreakdown();
+  const baseFeeVal = payloadData.baseFee !== undefined ? parseFloat(payloadData.baseFee) : feeInfo.baseFee;
+  const gwFeeVal = payloadData.gatewayFee !== undefined ? parseFloat(payloadData.gatewayFee) : feeInfo.gatewayFee;
+  const gstFeeVal = payloadData.gstFee !== undefined ? parseFloat(payloadData.gstFee) : feeInfo.gstFee;
+  const amountPaidVal = payloadData.amountPaid !== undefined ? payloadData.amountPaid : feeInfo.totalAmount.toFixed(2);
+
   const regNumber = payloadData.regNumber || "R260912001";
   const skaterName = payloadData.skaterName || "Athlete";
   const discipline = payloadData.discipline || "Roller Skating";
   const ageGroup = payloadData.ageGroup || "N/A";
   const age = payloadData.age || "N/A";
-  const amountPaid = payloadData.amountPaid || "10.24";
+  const amountPaid = amountPaidVal;
   const paymentId = payloadData.paymentId || "Verified";
   const dob = payloadData.dob || "N/A";
   const schoolClub = payloadData.schoolClub || "N/A";
@@ -1037,10 +1058,10 @@ function downloadRegistrationPdfInvoice(payloadData) {
             <tr><th>Description</th><th>Gateway Rate</th><th style="text-align:right;">Amount (INR)</th></tr>
           </thead>
           <tbody>
-            <tr><td>Base Annual Athlete Membership Fee (2026)</td><td>Base Fee</td><td style="text-align:right;">₹10.00</td></tr>
-            <tr><td>Payment Gateway Service Charge</td><td>2.00%</td><td style="text-align:right;">+ ₹0.20</td></tr>
-            <tr><td>GST on Gateway Transaction Fee</td><td>18.00%</td><td style="text-align:right;">+ ₹0.04</td></tr>
-            <tr class="total-row"><td>Total Amount Paid (Razorpay)</td><td>Status: ${payloadData.paymentStatus || 'SUCCESS'}</td><td style="text-align:right;">₹${amountPaid}</td></tr>
+            <tr><td>Base Annual Athlete Membership Fee (2026)</td><td>Base Fee</td><td style="text-align:right;">₹${baseFeeVal.toFixed(2)}</td></tr>
+            <tr><td>Payment Gateway Service Charge</td><td>${feeInfo.gwPct.toFixed(2)}%</td><td style="text-align:right;">+ ₹${gwFeeVal.toFixed(2)}</td></tr>
+            <tr><td>GST on Gateway Transaction Fee</td><td>${feeInfo.gstPct.toFixed(2)}%</td><td style="text-align:right;">+ ₹${gstFeeVal.toFixed(2)}</td></tr>
+            <tr class="total-row"><td>Total Amount Paid (Razorpay)</td><td>Status: ${payloadData.paymentStatus || 'SUCCESS'}</td><td style="text-align:right;">₹${parseFloat(amountPaid).toFixed(2)}</td></tr>
           </tbody>
         </table>
         <table class="details-table" style="margin-top:10px;">
