@@ -1530,8 +1530,9 @@ function renderGallery() {
     const globalIdx = startIndex + pageIdx;
     const thumbUrl = getOptimizedCloudinaryUrl(photo.src, photo.uploadedAt, 'thumb');
     const ageDays = photo.uploadedAt ? (Date.now() - new Date(photo.uploadedAt).getTime()) / (1000 * 60 * 60 * 24) : 999;
-    const isRecent = ageDays <= (galleryConfig.autoOptimizeAfterDays || 7);
-    const qualityLabel = isRecent ? `✨ Master High Quality (< ${galleryConfig.autoOptimizeAfterDays || 7} days)` : `⚡ Cloudinary Auto-Optimized (> ${galleryConfig.autoOptimizeAfterDays || 7} days)`;
+    const autoDays = (window.GALLERY_CONFIG && window.GALLERY_CONFIG.autoOptimizeAfterDays) || 7;
+    const isRecent = ageDays <= autoDays;
+    const qualityLabel = isRecent ? `✨ Master High Quality (< ${autoDays} days)` : `⚡ Cloudinary Auto-Optimized (> ${autoDays} days)`;
 
     return `
       <div class="g-list-item visible" data-global-photo-idx="${globalIdx}">
