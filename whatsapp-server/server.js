@@ -75,128 +75,172 @@ function getNextRegistrationNumber(year = '2026') {
 function generateRegistrationPDF(data, regNumber) {
   return new Promise((resolve, reject) => {
     try {
-      const doc = new PDFDocument({ margin: 40, size: 'A4' });
+      const doc = new PDFDocument({ margin: 30, size: 'A4' });
       const buffers = [];
 
       doc.on('data', buffers.push.bind(buffers));
       doc.on('end', () => resolve(Buffer.concat(buffers)));
 
-      // Colors
-      const isEvent = data.type === 'event_registration';
-      const isRenewal = data.isRenewal || data.type === 'renewal';
-      const primaryColor = isEvent ? '#b91c1c' : (isRenewal ? '#047857' : '#1e3a8a');
-      const accentColor = isEvent ? '#f59e0b' : '#d97706';
-      const textColor = '#1f2937';
+      const isEvent = (data.type === 'event_registration');
+      const eventRegNo = isEvent ? (String(regNumber).replace(/\D/g, "").slice(-3) || "611") : null;
 
-      const certTitle = isEvent
-        ? `Official Event Entry Pass — ${data.eventName || 'District Championship 2026'}`
-        : (isRenewal ? 'Official Athlete Annual Registration Certificate (Renewal) - 2026' : 'Official Athlete Annual Registration Certificate - 2026');
+      const redColor = '#cc001b';
+      const borderRed = '#d92638';
+      const greenColor = '#168a44';
+      const darkText = '#222222';
+      const grayText = '#333333';
+      const lightBorder = '#f0f0f0';
 
-      // Outer Border
-      doc.rect(20, 20, 555, 802).lineWidth(2).stroke(primaryColor);
-      doc.rect(25, 25, 545, 792).lineWidth(1).stroke(accentColor);
+      // 1. Red Outer Rounded Border Box
+      doc.roundedRect(25, 25, 545, 792, 10).lineWidth(1.5).stroke(borderRed);
 
-      // Header Banner
-      doc.rect(26, 26, 543, 85).fill(primaryColor);
-
-      // RSAM Logo Image inside Header
+      // 2. Header Logo & Titles
       const logoPath = path.join(__dirname, 'rsam-logo.png');
       if (fs.existsSync(logoPath)) {
         try {
-          doc.image(logoPath, 36, 31, { fit: [75, 75], align: 'center', valign: 'center' });
-        } catch (logoErr) {
-          console.warn('Could not embed RSAM logo in PDF:', logoErr.message);
+          doc.image(logoPath, 45, 42, { fit: [65, 65] });
+        } catch (e) {
+          console.warn('Logo embed warning:', e.message);
         }
       }
 
-      doc.fillColor('#ffffff').fontSize(16).font('Helvetica-Bold').text('ROLLER SPORTS ASSOCIATION MORADABAD', 115, 42, { width: 440, align: 'center' });
-      doc.fontSize(10.5).font('Helvetica').text(certTitle, 115, 68, { width: 440, align: 'center' });
+      doc.fillColor(redColor).fontSize(19).font('Helvetica-Bold').text('ROLLER SPORTS ASSOCIATION MORADABAD', 120, 48, { width: 430 });
+      doc.fillColor('#333333').fontSize(12).font('Helvetica-Bold').text(isEvent ? 'ANNUAL REGISTRATION SLIP' : 'ANNUAL REGISTRATION SLIP', 120, 72, { width: 430 });
 
-      // Registration Number Callout Box
-      doc.rect(40, 130, 320, 75).fillAndStroke('#fef3c7', accentColor);
-      doc.fillColor('#92400e').fontSize(11).font('Helvetica-Bold').text(isEvent ? 'RSAM REGISTRATION / ENTRY NO' : 'RSAM REGISTRATION NUMBER', 50, 142);
-      doc.fillColor('#b45309').fontSize(22).font('Helvetica-Bold').text(regNumber, 50, 162);
+      // 3. Green Registration Callout Badge Box(es)
+      const badgeY = 120;
+      if (isEvent) {
+        // Two Boxes: RSAM Reg No & Event Reg No
+        const boxWidth = 240;
+        // Left Box - RSAM Reg
+        doc.roundedRect(45, badgeY, boxWidth, 52, 6).lineWidth(1.2).stroke(greenColor);
+        doc.fillColor(greenColor).fontSize(10).font('Helvetica-Bold').text('RSAM REGISTRATION NUMBER', 45, badgeY + 10, { width: boxWidth, align: 'center' });
+        doc.fillColor(greenColor).fontSize(22).font('Helvetica-Bold').text(regNumber, 45, badgeY + 25, { width: boxWidth, align: 'center' });
 
-      // Skater Photo (if uploaded)
-      if (data.skaterPhoto && data.skaterPhoto.data) {
-        try {
-          const imgBuffer = Buffer.from(data.skaterPhoto.data, 'base64');
-          doc.image(imgBuffer, 390, 130, { fit: [140, 160], align: 'center', valign: 'center' });
-          doc.rect(390, 130, 140, 160).lineWidth(1.5).stroke(primaryColor);
-        } catch (imgErr) {
-          console.warn('Could not embed skater photo in PDF:', imgErr.message);
-          doc.rect(390, 130, 140, 160).stroke(primaryColor);
-          doc.fillColor('#666').fontSize(10).text('Photo On File', 420, 200);
-        }
+        // Right Box - Event Reg No (3 Digits)
+        doc.roundedRect(305, badgeY, boxWidth, 52, 6).lineWidth(1.2).stroke(greenColor);
+        doc.fillColor(greenColor).fontSize(10).font('Helvetica-Bold').text('EVENT REGISTRATION NUMBER', 305, badgeY + 10, { width: boxWidth, align: 'center' });
+        doc.fillColor(greenColor).fontSize(22).font('Helvetica-Bold').text(eventRegNo, 305, badgeY + 25, { width: boxWidth, align: 'center' });
       } else {
-        doc.rect(390, 130, 140, 160).stroke(primaryColor);
-        doc.fillColor('#666').fontSize(10).text('Photo On File', 420, 200);
+        // Single Box - RSAM Reg
+        const boxWidth = 500;
+        doc.roundedRect(45, badgeY, boxWidth, 52, 6).lineWidth(1.2).stroke(greenColor);
+        doc.fillColor(greenColor).fontSize(10).font('Helvetica-Bold').text('RSAM REGISTRATION NUMBER', 45, badgeY + 10, { width: boxWidth, align: 'center' });
+        doc.fillColor(greenColor).fontSize(24).font('Helvetica-Bold').text(regNumber, 45, badgeY + 24, { width: boxWidth, align: 'center' });
       }
 
-      // Details Table Section
-      let y = 225;
-      const sectionTitle = isEvent ? 'CHAMPIONSHIP ENTRY DETAILS' : (isRenewal ? 'ATHLETE RENEWAL DETAILS' : 'ATHLETE REGISTRATION DETAILS');
-      doc.fillColor(primaryColor).fontSize(14).font('Helvetica-Bold').text(sectionTitle, 40, y);
-      doc.moveTo(40, y + 18).lineTo(360, y + 18).lineWidth(1.5).stroke(accentColor);
+      // 4. ATHLETE PROFILE Section
+      let y = 195;
+      doc.fillColor(darkText).fontSize(12).font('Helvetica-Bold').text('ATHLETE PROFILE', 45, y);
+      doc.moveTo(45, y + 16).lineTo(545, y + 16).lineWidth(0.8).stroke('#eeeeee');
 
-      y += 30;
-      const details = [
-        ['RSAM Reg. No.:', regNumber],
-        ['Full Name:', data.skaterName || 'N/A'],
-      ];
+      y += 24;
 
       if (isEvent) {
-        details.push(['Event Name:', data.eventName || '4th District Championship 2026']);
+        doc.font('Helvetica-Bold').fontSize(11).fillColor(darkText).text('CHAMPIONSHIP:', 45, y);
+        doc.font('Helvetica-Bold').fontSize(11).fillColor(redColor).text(data.eventName || '4th District Championship 2026', 150, y);
+        y += 20;
+        doc.moveTo(45, y - 4).lineTo(545, y - 4).lineWidth(0.5).stroke(lightBorder);
       }
 
-      details.push(
-        ['Date of Birth:', `${data.dob || 'N/A'}  (Age: ${data.age || 'N/A'} yrs · ${data.ageGroup || 'N/A'})`],
-        ['Age Group:', data.ageGroup || 'N/A'],
-        ['School / Club Name:', data.schoolClub || 'N/A'],
-        ['Coach Name:', data.coachName ? `${data.coachName} (${data.coachMobile || 'N/A'})` : 'N/A'],
-        ['Discipline:', data.discipline || 'N/A'],
-        ['Year / Season:', data.year || '2026'],
-        ['Payment ID:', data.paymentId || 'Verified'],
-        ['Amount Paid:', `₹${data.amountPaid || (isEvent ? '511.80' : '10.24')}`],
-        ['Mobile Number:', data.mobile || 'N/A'],
-        ['Email Address:', data.email || 'N/A'],
-        ["Father's Name:", data.fatherName || 'N/A'],
-        ["Mother's Name:", data.motherName || 'N/A'],
-        ['Aadhaar Number:', data.aadhaar ? (data.aadhaar.length >= 4 ? `XXXX-XXXX-${data.aadhaar.slice(-4)}` : data.aadhaar) : 'N/A'],
-        ['Residential Address:', data.address || 'N/A']
-      );
+      const rows = [
+        [['Athlete Name:', data.skaterName || 'N/A'], ['Date of Birth:', data.dob || 'N/A']],
+        [['Age & Age Group:', `${data.age || 'N/A'} yrs (${data.ageGroup || 'N/A'})`], ['Discipline:', data.discipline || 'N/A']],
+        [['School / Club:', data.schoolClub || 'N/A'], ['Aadhaar Card:', data.aadhaar ? String(data.aadhaar).replace(/(\d{4})(?=\d)/g, "$1 ") : 'N/A']],
+        [["Father's Name:", data.fatherName || 'N/A'], ["Mother's Name:", data.motherName || 'N/A']],
+        [['Mobile Number:', data.mobile || 'N/A'], ['Email Address:', data.email || 'N/A']],
+      ];
 
       doc.fontSize(10);
-      details.forEach(([label, value]) => {
-        doc.font('Helvetica-Bold').fillColor(textColor).text(label, 40, y, { width: 140 });
-        doc.font('Helvetica').fillColor('#374151').text(value, 180, y, { width: 340 });
-        y += 22;
+      rows.forEach(row => {
+        const [left, right] = row;
+        doc.font('Helvetica-Bold').fillColor(darkText).text(left[0], 45, y, { width: 105 });
+        doc.font('Helvetica').fillColor(grayText).text(left[1], 150, y, { width: 140 });
+        doc.font('Helvetica-Bold').fillColor(darkText).text(right[0], 300, y, { width: 105 });
+        doc.font('Helvetica').fillColor(grayText).text(right[1], 405, y, { width: 140 });
+
+        y += 18;
+        doc.moveTo(45, y - 3).lineTo(545, y - 3).lineWidth(0.5).stroke(lightBorder);
       });
 
-      // Verification Box
-      y = Math.max(y + 15, 605);
-      doc.rect(40, y, 515, 70).fillAndStroke('#f3f4f6', '#d1d5db');
-      doc.fillColor('#1f2937').fontSize(10).font('Helvetica-Bold').text('OFFICIAL VERIFICATION NOTICE', 55, y + 10);
-      doc.font('Helvetica').fontSize(8.5).fillColor('#4b5563').text(
-        isEvent
-          ? 'This entry pass confirms championship event registration with Roller Sports Association Moradabad. Please present this document and your assigned RSAM Registration Number at the venue entry.'
-          : 'This certificate confirms annual registration with Roller Sports Association Moradabad. All uploaded documents are verified by RSAM officials. Please present this certificate during all district and state championships.',
-        55,
-        y + 26,
-        { width: 485 }
-      );
+      // Coach Details
+      doc.font('Helvetica-Bold').fillColor(darkText).text('Coach Details:', 45, y, { width: 105 });
+      doc.font('Helvetica').fillColor(grayText).text(data.coachName ? `${data.coachName} (${data.coachMobile || 'N/A'})` : 'N/A', 150, y, { width: 395 });
+      y += 18;
+      doc.moveTo(45, y - 3).lineTo(545, y - 3).lineWidth(0.5).stroke(lightBorder);
 
-      // Signatures
-      y += 95;
-      doc.font('Helvetica-Bold').fontSize(10).fillColor(primaryColor);
-      doc.text('General Secretary', 60, y);
-      doc.text('President / RSAM Official', 380, y);
-      doc.font('Helvetica').fontSize(8).fillColor('#6b7280');
-      doc.text('Roller Sports Association Moradabad', 60, y + 14);
-      doc.text('Roller Sports Association Moradabad', 380, y + 14);
+      // Residential Address
+      doc.font('Helvetica-Bold').fillColor(darkText).text('Residential Address:', 45, y, { width: 105 });
+      doc.font('Helvetica').fillColor(grayText).text(data.address || 'N/A', 150, y, { width: 395 });
+      y += 24;
 
-      // Footer
-      doc.fontSize(8).fillColor('#9ca3af').text(`Generated on ${new Date().toLocaleString('en-IN')} | Document ID: ${regNumber}`, 40, 800, { align: 'center' });
+      // 5. PAYMENT & FEE BREAKDOWN INVOICE Section
+      y = Math.max(y + 15, 480);
+      doc.fillColor(darkText).fontSize(12).font('Helvetica-Bold').text('PAYMENT & FEE BREAKDOWN INVOICE', 45, y);
+      y += 18;
+
+      // Table Header
+      doc.font('Helvetica-Bold').fontSize(10).fillColor('#444444');
+      doc.text('DESCRIPTION', 45, y);
+      doc.text('GATEWAY RATE', 300, y);
+      doc.text('AMOUNT (INR)', 460, y, { width: 85, align: 'right' });
+      y += 14;
+      doc.moveTo(45, y).lineTo(545, y).lineWidth(1).stroke('#dddddd');
+      y += 8;
+
+      const itemDesc = isEvent
+        ? `4th District Championship Registration Fee (2026)`
+        : `Base Annual Athlete Membership Fee (2026)`;
+      const baseFee = isEvent ? '₹500.00' : '₹10.00';
+      const gwFee = isEvent ? '+ ₹10.00' : '+ ₹0.20';
+      const gstFee = isEvent ? '+ ₹1.80' : '+ ₹0.04';
+      const totalFee = isEvent ? '₹511.80' : '₹10.24';
+
+      const lineItems = [
+        [itemDesc, 'Base Fee', baseFee],
+        ['Payment Gateway Service Charge', '2.00%', gwFee],
+        ['GST on Gateway Transaction Fee', '18.00%', gstFee]
+      ];
+
+      doc.font('Helvetica').fontSize(10).fillColor(grayText);
+      lineItems.forEach(([desc, rate, amt]) => {
+        doc.text(desc, 45, y, { width: 250 });
+        doc.text(rate, 300, y, { width: 150 });
+        doc.text(amt, 460, y, { width: 85, align: 'right' });
+        y += 18;
+        doc.moveTo(45, y - 4).lineTo(545, y - 4).lineWidth(0.5).stroke(lightBorder);
+      });
+
+      // Total Row
+      y += 2;
+      doc.moveTo(45, y - 4).lineTo(545, y - 4).lineWidth(1.2).stroke(redColor);
+      doc.font('Helvetica-Bold').fontSize(11).fillColor(redColor).text('Total Amount Paid (Razorpay)', 45, y);
+      
+      const paymentStatus = (data.paymentStatus || 'SUCCESS').toUpperCase();
+      const statusText = `Status: ${paymentStatus}`;
+      const statusColor = (paymentStatus === 'FAILED') ? redColor : greenColor;
+      doc.font('Helvetica-Bold').fontSize(11).fillColor(statusColor).text(statusText, 300, y);
+      doc.font('Helvetica-Bold').fontSize(11).fillColor(redColor).text(totalFee, 460, y, { width: 85, align: 'right' });
+      
+      y += 18;
+      doc.moveTo(45, y).lineTo(545, y).lineWidth(1.2).stroke(redColor);
+
+      // Payment Ref & Date
+      y += 16;
+      doc.font('Helvetica-Bold').fontSize(10).fillColor(darkText).text('Razorpay Payment ID:', 45, y);
+      doc.font('Helvetica').fontSize(10).fillColor(grayText).text(data.paymentId || 'pay_TdR7X0unAUMomw', 160, y);
+
+      doc.font('Helvetica-Bold').fontSize(10).fillColor(darkText).text('Registration Date:', 330, y);
+      const timestampStr = new Date().toLocaleString('en-IN', { day: 'numeric', month: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+      doc.font('Helvetica').fontSize(10).fillColor(grayText).text(timestampStr, 430, y);
+
+      // 6. Seal & Footer
+      y = 740;
+      doc.font('Helvetica-Bold').fontSize(10).fillColor(grayText).text('Roller Sports Association Moradabad', 350, y, { width: 195, align: 'right' });
+      doc.font('Helvetica-Oblique').fontSize(9).fillColor('#777777').text('Authorized Verification System', 350, y + 14, { width: 195, align: 'right' });
+
+      doc.moveTo(45, 785).lineTo(545, 785).lineWidth(0.8).stroke('#eeeeee');
+      doc.font('Helvetica').fontSize(9).fillColor('#666666').text('139, Rana Bhawan, Near 23 PAC, Kanth Road, Moradabad, UP · Contact: +91-8057781350', 45, 792, { width: 500, align: 'center' });
 
       doc.end();
     } catch (err) {
