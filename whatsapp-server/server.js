@@ -98,8 +98,19 @@ function generateRegistrationPDF(data, regNumber) {
 
       // Header Banner
       doc.rect(26, 26, 543, 85).fill(primaryColor);
-      doc.fillColor('#ffffff').fontSize(18).font('Helvetica-Bold').text('ROLLER SPORTS ASSOCIATION MORADABAD', 30, 42, { align: 'center' });
-      doc.fontSize(11).font('Helvetica').text(certTitle, 30, 68, { align: 'center' });
+
+      // RSAM Logo Image inside Header
+      const logoPath = path.join(__dirname, 'rsam-logo.png');
+      if (fs.existsSync(logoPath)) {
+        try {
+          doc.image(logoPath, 36, 31, { fit: [75, 75], align: 'center', valign: 'center' });
+        } catch (logoErr) {
+          console.warn('Could not embed RSAM logo in PDF:', logoErr.message);
+        }
+      }
+
+      doc.fillColor('#ffffff').fontSize(16).font('Helvetica-Bold').text('ROLLER SPORTS ASSOCIATION MORADABAD', 115, 42, { width: 440, align: 'center' });
+      doc.fontSize(10.5).font('Helvetica').text(certTitle, 115, 68, { width: 440, align: 'center' });
 
       // Registration Number Callout Box
       doc.rect(40, 130, 320, 75).fillAndStroke('#fef3c7', accentColor);
@@ -206,7 +217,21 @@ async function sendRegistrationEmail(data, regNumber, pdfBuffer) {
   const smtpPass = process.env.SMTP_PASS;
 
   if (!smtpUser || !smtpPass) {
-    console.log('[Email] Skipping email sending: SMTP credentials (SMTP_USER & SMTP_PASS) not set in .env');
+    console.log('[Email] SMTP credentials (SMTP_USER & SMTP_PASS) not set in .env. Triggering Google Apps Script email service...');
+    const scriptUrl = process.env.GOOGLE_SHEET_SCRIPT_URL;
+    if (scriptUrl) {
+      try {
+        await fetch(scriptUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({ ...data, regNumber, action: 'send_email' })
+        });
+        console.log('[Email] Confirmation email successfully triggered via Apps Script fallback to:', data.email);
+        return { success: true, method: 'apps_script_fallback' };
+      } catch (fallbackErr) {
+        console.warn('[Email] Apps Script fallback email dispatch error:', fallbackErr.message);
+      }
+    }
     return { skipped: true, reason: 'SMTP credentials not configured in .env' };
   }
 
@@ -381,76 +406,48 @@ app.get('/api/bot-status', (req, res) => {
  * Build WhatsApp Message Text
  */
 function buildRegistrationMessage(data, regNumber) {
-  const dateStr = new Date().toLocaleDateString('en-IN', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric'
-  });
+  const isEvent = data.type === 'event_registration';
+  const isRenewal = data.isRenewal || data.type === 'renewal';
 
-  if (data.type === 'event_registration') {
-    return `🏆 *CHAMPIONSHIP ENTRY CONFIRMATION* 🏆
-__________________________________
+  if (isEvent) {
+    return `🏆 *ROLLER SPORTS ASSOCIATION MORADABAD*
+*Official Event Entry Pass Confirmation*
 
 Dear *${data.skaterName || 'Athlete'}*,
 
-You have successfully registered for the *${data.eventName || '4th District Championship 2026'}* powered by RSAM!
+Your entry for *${data.eventName || '4th District Championship 2026'}* is confirmed!
 
-🎽 *RSAM REGISTRATION NUMBER:* *${regNumber}*
+🎽 *RSAM Reg No:* *${regNumber}*
+👤 *Athlete:* ${data.skaterName}
+⛸️ *Discipline:* ${data.discipline || 'N/A'} | *Category:* ${data.ageGroup || 'N/A'}
+🏫 *School/Club:* ${data.schoolClub || 'N/A'}
+💳 *Payment ID:* ${data.paymentId || 'Verified'} (₹${data.amountPaid || '511.80'})
 
-📋 *Event Entry Details:*
-• *Event:* ${data.eventName || '4th District Championship 2026'}
-• *RSAM Reg. No.:* ${regNumber}
-• *Athlete Name:* ${data.skaterName}
-• *Discipline:* ${data.discipline || 'N/A'}
-• *Age Group:* ${data.ageGroup || 'N/A'}
-• *School / Club:* ${data.schoolClub || 'N/A'}
-• *Coach Name:* ${data.coachName || 'N/A'} (${data.coachMobile || 'N/A'})
-• *Razorpay Payment ID:* ${data.paymentId || 'Verified'}
-• *Amount Paid:* ₹${data.amountPaid || '511.80'}
-• *Date of Birth:* ${data.dob} (Age: ${data.age || 'N/A'})
-• *Mobile Number:* ${data.mobile}
-• *Submission Date:* ${dateStr}
+${data.email ? '📧 *PDF Receipt:* Confirmation email dispatched to ' + data.email : ''}
 
-${data.email ? '📧 Confirmation receipt sent to ' + data.email : ''}
-
-✅ Please bring your RSAM Registration Number & identity proof to the venue.
+📌 *Note:* Please carry your RSAM Reg No (*${regNumber}*) to the event venue.
 
 Best regards,
 *${ORG_NAME}* 🛼🏆`;
   }
 
-  return `🎉 *REGISTRATION CONFIRMATION* 🎉
-__________________________________
+  return `🛼 *ROLLER SPORTS ASSOCIATION MORADABAD*
+*Official Athlete Registration Confirmation*
 
 Dear *${data.skaterName || 'Athlete'}*,
 
-Thank you for registering with *${ORG_NAME}*! Your registration details have been received successfully.
+${isRenewal ? 'Your RSAM athlete annual registration has been successfully renewed for 2026!' : 'Thank you for registering with RSAM for the year 2026!'}
 
-🎽 *YOUR RSAM REGISTRATION NUMBER:* *${regNumber}*
-(Please preserve this Registration Number for all upcoming trials & championships)
+🎽 *RSAM Reg No:* *${regNumber}*
+👤 *Athlete:* ${data.skaterName} (${data.ageGroup || 'N/A'})
+⛸️ *Discipline:* ${data.discipline || 'N/A'}
+🏫 *School/Club:* ${data.schoolClub || 'N/A'}
+👨‍🏫 *Coach:* ${data.coachName ? `${data.coachName}` : 'N/A'}
+💳 *Payment ID:* ${data.paymentId || 'Verified'} (₹${data.amountPaid || '10.24'})
 
-📋 *Registration Details:*
-• *RSAM Reg. No.:* ${regNumber}
-• *Registration Year:* ${data.year || '2026'}
-• *Athlete Name:* ${data.skaterName}
-• *Date of Birth:* ${data.dob} (Age: ${data.age || 'N/A'})
-• *Age Group:* ${data.ageGroup || 'N/A'}
-• *School / Club:* ${data.schoolClub || 'N/A'}
-• *Discipline:* ${data.discipline || 'N/A'}
-• *Coach Name:* ${data.coachName || 'N/A'} (${data.coachMobile || 'N/A'})
-• *Razorpay Payment ID:* ${data.paymentId || 'Verified'}
-• *Amount Paid:* ₹${data.amountPaid || '10.24'}
-• *Mobile Number:* ${data.mobile}
-• *Father's Name:* ${data.fatherName || 'N/A'}
-• *Mother's Name:* ${data.motherName || 'N/A'}
-• *Address:* ${data.address || 'N/A'}
-• *Submitted Date:* ${dateStr}
+${data.email ? '📧 *PDF Certificate:* Confirmation certificate emailed to ' + data.email : ''}
 
-${data.email ? '📧 *PDF Certificate:* Your PDF Registration Certificate with your passport photo has been sent to ' + data.email : ''}
-
-✅ Your submitted documents & passport photo are under verification by RSAM admins.
-
-If you have any questions or corrections, please reply directly to this message or contact our officials.
+📌 Please preserve your RSAM Reg No (*${regNumber}*) for all future trials and championships.
 
 Best regards,
 *${ORG_NAME}* 🛼🏆`;
@@ -1180,3 +1177,9 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log('🚀 Initializing WhatsApp Web Client (Baileys WebSockets)...');
   startWhatsAppBot();
 });
+
+module.exports = {
+  generateRegistrationPDF,
+  buildRegistrationMessage,
+  sendRegistrationEmail
+};

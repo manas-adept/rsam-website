@@ -1308,6 +1308,18 @@ function renderGallery() {
     };
   });
 
+window.openGalleryFolder = function(folderId) {
+  if (typeof galleryState !== 'undefined') {
+    galleryState.currentFolderId = folderId;
+    galleryState.currentPage = 1;
+  }
+  if (typeof renderGallery === 'function') {
+    renderGallery();
+  }
+  const gSec = document.getElementById('gallery');
+  if (gSec) gSec.scrollIntoView({ behavior: 'smooth' });
+};
+
   // Mode A: Folder Overview (galleryState.currentFolderId === null)
   if (!galleryState.currentFolderId) {
     const folderCardsHTML = albums.map(album => {
@@ -1316,7 +1328,7 @@ function renderGallery() {
 
       if (photoCount === 0 || album.notFound) {
         return `
-          <div class="g-folder-card devi-folder-card visible folder-not-found-card" data-folder-id="${album.id}">
+          <div class="g-folder-card devi-folder-card visible folder-not-found-card" data-folder-id="${album.id}" onclick="openGalleryFolder('${album.id}')" style="cursor:pointer;">
             <div class="devi-folder-header-tab" style="background:#ef4444; color:#fff;">⚠️ ${album.category}</div>
             <div class="g-folder-img-wrap" style="background: rgba(239, 68, 68, 0.08); border-bottom: 1px dashed rgba(239, 68, 68, 0.3); display: flex; align-items: center; justify-content: center; flex-direction: column; padding: 2.5rem 1rem; text-align: center;">
               <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">⚠️</div>
@@ -1330,7 +1342,7 @@ function renderGallery() {
               <p class="g-folder-meta">📅 ${album.date} · 📍 ${album.location}</p>
               <p class="g-folder-desc" style="color:#f87171; font-weight: 500;">⚠️ folderID '${album.id}' not found in gallery. Please check folder ID in Admin Panel.</p>
               <div class="g-folder-action-btn" style="border-color: rgba(239, 68, 68, 0.4); background: rgba(239, 68, 68, 0.1);">
-                <span style="color: #ef4444;">folderID '${album.id}' not found in gallery</span>
+                <span style="color: #ef4444;">Click to View Event Details</span>
                 <span class="g-btn-arrow" style="color: #ef4444;">→</span>
               </div>
             </div>
@@ -1354,7 +1366,7 @@ function renderGallery() {
           </div>`;
 
       return `
-        <div class="g-folder-card devi-folder-card visible" data-folder-id="${album.id}">
+        <div class="g-folder-card devi-folder-card visible" data-folder-id="${album.id}" onclick="openGalleryFolder('${album.id}')" style="cursor:pointer;">
           <div class="devi-folder-header-tab">📂 ${album.category}</div>
           <div class="g-folder-img-wrap">
             ${stackHTML}
@@ -1396,11 +1408,9 @@ function renderGallery() {
 
     // Add folder click listeners
     document.querySelectorAll('.g-folder-card').forEach(card => {
-      card.onclick = () => {
-        galleryState.currentFolderId = card.dataset.folderId;
-        galleryState.currentPage = 1;
-        renderGallery();
-        document.getElementById('gallery').scrollIntoView({ behavior: 'smooth' });
+      card.onclick = (e) => {
+        e.preventDefault();
+        window.openGalleryFolder(card.dataset.folderId);
       };
     });
     return;

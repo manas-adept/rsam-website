@@ -570,6 +570,7 @@ function createRegistrationPdfInvoice(data, regNumber) {
     <body>
       <div class="invoice-box">
         <div class="header">
+          <img src="https://res.cloudinary.com/igjmhsju/image/upload/v1788797466/rsam_website/branding/rsam-logo.png" style="width: 65px; height: 65px; margin-bottom: 8px;" alt="RSAM Logo"><br/>
           <div class="title">ROLLER SPORTS ASSOCIATION MORADABAD</div>
           <div class="subtitle">Recognized by UPRSA &amp; RSFI (IndiaSkate) · Official Athlete Registration Slip</div>
         </div>
