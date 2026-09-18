@@ -1215,9 +1215,27 @@ let galleryState = {
   }
 };
 
+// Global Gallery Folder Opener (top-level scope for instant click availability)
+window.openGalleryFolder = function(folderId) {
+  const targetId = String(folderId || '').trim();
+  if (!targetId) return;
+
+  if (typeof galleryState !== 'undefined') {
+    galleryState.currentFolderId = targetId;
+    galleryState.currentPage = 1;
+  }
+  if (typeof renderGallery === 'function') {
+    renderGallery();
+  }
+  const gSec = document.getElementById('gallery');
+  if (gSec) {
+    gSec.scrollIntoView({ behavior: 'smooth' });
+  }
+};
+
 function getActiveGalleryFoldersConfig() {
-  // 1. Primary Source of Truth: window.GALLERY_CONFIG from data/gallery-config.json
-  const config = window.GALLERY_CONFIG || {};
+  // 1. Primary Source of Truth: site-config gallery folders or window.GALLERY_CONFIG
+  const config = (window.CONFIG && window.CONFIG.gallery) || window.GALLERY_CONFIG || {};
   if (config.folders && Array.isArray(config.folders) && config.folders.length > 0) {
     return config.folders;
   }
@@ -1245,7 +1263,7 @@ function renderGallery() {
   const liveCache = window.LIVE_GALLERY_CACHE || {};
   const discoveredFolders = window.LIVE_CLOUDINARY_DISCOVERED_FOLDERS;
 
-  // Render admin configured gallery folders as primary source of truth with flexible Cloudinary path matching
+  // Render ONLY admin configured gallery folders (data/site-config.json) as Primary Source of Truth
   let albums = [];
   const targetFolders = (galleryFolders && galleryFolders.length > 0)
     ? galleryFolders.filter(f => f.enabled !== false).sort((a, b) => (a.displayOrder || 99) - (b.displayOrder || 99))
@@ -1253,7 +1271,7 @@ function renderGallery() {
 
   albums = targetFolders.map(folder => {
     const folderId = folder.folderId || folder.id || '';
-    const subfolder = folder.cloudinarySubfolder || (folderId ? `rsam_website/gallery/${folderId}` : '');
+    const subfolder = folder.cloudinarySubfolder || (folderId ? `rsam_website/events/${folderId}` : '');
     const matchingAlbum = rawAlbums.find(a =>
       String(a.id || '').toLowerCase() === String(folderId).toLowerCase() ||
       String(a.folderId || '').toLowerCase() === String(folderId).toLowerCase()
@@ -1280,7 +1298,7 @@ function renderGallery() {
       const disc = discoveredFolders.find(df =>
         df.folderId === folderId ||
         df.cloudinarySubfolder === subfolder ||
-        df.cloudinarySubfolder === `rsam_website/gallery/${folderId}`
+        df.cloudinarySubfolder === `rsam_website/events/${folderId}`
       );
       if (disc && disc.photos && disc.photos.length > 0) {
         albumPhotos = [...disc.photos];
@@ -1319,38 +1337,6 @@ function renderGallery() {
       photos: albumPhotos
     };
   });
-
-  // Ensure all albums from data/gallery.json exist in albums array
-  rawAlbums.forEach(raw => {
-    const rawId = String(raw.id || raw.folderId || '').toLowerCase();
-    if (!rawId) return;
-    const exists = albums.some(a => String(a.id || '').toLowerCase() === rawId);
-    if (!exists) {
-      albums.push({
-        id: raw.id,
-        title: raw.title || 'Event Album',
-        date: raw.date || '',
-        location: raw.location || '',
-        category: raw.category || 'Event',
-        description: raw.description || '',
-        cloudinarySubfolder: `rsam_website/gallery/${raw.id}`,
-        notFound: !(raw.photos && raw.photos.length > 0),
-        photos: raw.photos || []
-      });
-    }
-  });
-
-window.openGalleryFolder = function(folderId) {
-  if (typeof galleryState !== 'undefined') {
-    galleryState.currentFolderId = folderId;
-    galleryState.currentPage = 1;
-  }
-  if (typeof renderGallery === 'function') {
-    renderGallery();
-  }
-  const gSec = document.getElementById('gallery');
-  if (gSec) gSec.scrollIntoView({ behavior: 'smooth' });
-};
 
   // Mode A: Folder Overview (galleryState.currentFolderId === null)
   if (!galleryState.currentFolderId) {

@@ -311,13 +311,13 @@
   ],
   "ticker": "🚀 Welcome to Roller Sports Association Moradabad (RSAM) | Annual Registrations & District Championship 2026 Entries Now Open! | Certified Track & Roller Skating Excellence",
   "gallery": {
-    "cloudinaryBasePath": "rsam_website/gallery",
+    "cloudinaryBasePath": "rsam_website/events",
     "defaultItemsPerPage": 20,
     "autoOptimizeAfterDays": 7,
     "folders": [
       {
         "folderId": "lko_uprsa_7th_2026",
-        "cloudinarySubfolder": "rsam_website/gallery/lko_uprsa_7th_2026",
+        "cloudinarySubfolder": "rsam_website/events/lko_uprsa_7th_2026",
         "title": "7th UP Open State Championship",
         "date": "May 10, 2026",
         "location": "Central Academy, Lucknow",
@@ -327,8 +327,8 @@
         "description": "High-octane moments and victory celebrations from the UPRSA State Championship in Lucknow."
       },
       {
-        "folderId": "dmr_hospital_2026",
-        "cloudinarySubfolder": "rsam_website/gallery/dmr_hospital_2026",
+        "folderId": "felicitaion_ceremony_dmr_2026",
+        "cloudinarySubfolder": "rsam_website/events/felicitaion_ceremony_dmr_2026",
         "title": "Moradabad Skaters Felicitation at DMR Hospital",
         "date": "August 2026",
         "location": "DMR Hospital, Moradabad",
@@ -336,17 +336,6 @@
         "enabled": true,
         "displayOrder": 2,
         "description": "Special felicitation ceremony hosted at DMR Hospital honoring state championship medalists."
-      },
-      {
-        "folderId": "felicitaion_ceremony_dmr_2026",
-        "cloudinarySubfolder": "rsam_website/gallery/felicitaion_ceremony_dmr_2026",
-        "title": "Felicitation Ceremony Moradabad",
-        "date": "April 18, 2026",
-        "location": "Moradabad",
-        "category": "Felicitation",
-        "enabled": true,
-        "displayOrder": 3,
-        "description": "Honoring RSAM athletes for outstanding sportsmanship and track achievements."
       }
     ]
   },
