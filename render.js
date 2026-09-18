@@ -1216,6 +1216,12 @@ let galleryState = {
 };
 
 function getActiveGalleryFoldersConfig() {
+  // 1. Primary Source of Truth: window.GALLERY_CONFIG from data/gallery-config.json
+  const config = window.GALLERY_CONFIG || {};
+  if (config.folders && Array.isArray(config.folders) && config.folders.length > 0) {
+    return config.folders;
+  }
+  // 2. Fallback: Saved admin folders in localStorage if valid
   const saved = localStorage.getItem("RSAM_ADMIN_GALLERY_FOLDERS");
   if (saved) {
     try {
@@ -1223,8 +1229,7 @@ function getActiveGalleryFoldersConfig() {
       if (Array.isArray(parsed) && parsed.length > 0) return parsed;
     } catch(e){}
   }
-  const config = window.GALLERY_CONFIG || {};
-  return config.folders || [];
+  return [];
 }
 
 function renderGallery() {
@@ -1247,19 +1252,30 @@ function renderGallery() {
     : (rawAlbums.length > 0 ? rawAlbums : []);
 
   albums = targetFolders.map(folder => {
-    const matchingAlbum = rawAlbums.find(a => a.id === folder.folderId || a.id === folder.id) || {};
     const folderId = folder.folderId || folder.id || '';
     const subfolder = folder.cloudinarySubfolder || (folderId ? `rsam_website/gallery/${folderId}` : '');
+    const matchingAlbum = rawAlbums.find(a =>
+      String(a.id || '').toLowerCase() === String(folderId).toLowerCase() ||
+      String(a.folderId || '').toLowerCase() === String(folderId).toLowerCase()
+    ) || {};
+
     let albumPhotos = [];
 
-    // 1. Live Cloudinary API cache exact key priority
-    if (folderId && liveCache[folderId] && liveCache[folderId].length > 0) {
-      albumPhotos = [...liveCache[folderId]];
-    } else if (subfolder && liveCache[subfolder] && liveCache[subfolder].length > 0) {
-      albumPhotos = [...liveCache[subfolder]];
+    // 1. Direct photos from matchingAlbum in gallery.json (PRIMARY SOURCE OF TRUTH)
+    if (matchingAlbum && Array.isArray(matchingAlbum.photos) && matchingAlbum.photos.length > 0) {
+      albumPhotos = [...matchingAlbum.photos];
     }
 
-    // 2. Discovered live Cloudinary folders exact match
+    // 2. Live Cloudinary API cache exact key priority
+    if (albumPhotos.length === 0) {
+      if (folderId && liveCache[folderId] && liveCache[folderId].length > 0) {
+        albumPhotos = [...liveCache[folderId]];
+      } else if (subfolder && liveCache[subfolder] && liveCache[subfolder].length > 0) {
+        albumPhotos = [...liveCache[subfolder]];
+      }
+    }
+
+    // 3. Discovered live Cloudinary folders exact match
     if (albumPhotos.length === 0 && discoveredFolders && Array.isArray(discoveredFolders)) {
       const disc = discoveredFolders.find(df =>
         df.folderId === folderId ||
@@ -1271,21 +1287,17 @@ function renderGallery() {
       }
     }
 
-    // 3. Exact matching photos in gallery.json & media map across all albums
+    // 4. Subfolder matching fallback across all raw photos
     if (albumPhotos.length === 0 && (folderId || subfolder)) {
       const exactSub = subfolder.toLowerCase();
       const exactId = folderId.toLowerCase();
-      const allRawPhotos = [
-        ...(matchingAlbum.photos || []),
-        ...rawAlbums.flatMap(a => a.photos || [])
-      ];
+      const allRawPhotos = rawAlbums.flatMap(a => a.photos || []);
       const subfolderMatches = allRawPhotos.filter(p => {
         if (!p.src) return false;
         const srcLower = p.src.toLowerCase();
         return srcLower.includes(exactSub) || srcLower.includes(`/${exactId}/`);
       });
       if (subfolderMatches.length > 0) {
-        // Deduplicate photos by src
         const seen = new Set();
         albumPhotos = subfolderMatches.filter(p => {
           if (seen.has(p.src)) return false;
@@ -1306,6 +1318,26 @@ function renderGallery() {
       notFound: albumPhotos.length === 0,
       photos: albumPhotos
     };
+  });
+
+  // Ensure all albums from data/gallery.json exist in albums array
+  rawAlbums.forEach(raw => {
+    const rawId = String(raw.id || raw.folderId || '').toLowerCase();
+    if (!rawId) return;
+    const exists = albums.some(a => String(a.id || '').toLowerCase() === rawId);
+    if (!exists) {
+      albums.push({
+        id: raw.id,
+        title: raw.title || 'Event Album',
+        date: raw.date || '',
+        location: raw.location || '',
+        category: raw.category || 'Event',
+        description: raw.description || '',
+        cloudinarySubfolder: `rsam_website/gallery/${raw.id}`,
+        notFound: !(raw.photos && raw.photos.length > 0),
+        photos: raw.photos || []
+      });
+    }
   });
 
 window.openGalleryFolder = function(folderId) {

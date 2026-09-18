@@ -575,18 +575,25 @@ function initBackToTop() {
 document.addEventListener('click', (e) => {
   // 1. Photo Gallery Folder Click Handler
   const folderCard = e.target.closest('.g-folder-card');
-  if (folderCard && folderCard.dataset.folderId) {
-    e.preventDefault();
-    if (typeof galleryState !== 'undefined') {
-      galleryState.currentFolderId = folderCard.dataset.folderId;
-      galleryState.currentPage = 1;
+  if (folderCard) {
+    const fid = folderCard.dataset.folderId || folderCard.getAttribute('data-folder-id');
+    if (fid !== null && fid !== undefined && fid !== '') {
+      e.preventDefault();
+      if (typeof window.openGalleryFolder === 'function') {
+        window.openGalleryFolder(fid);
+      } else {
+        if (typeof galleryState !== 'undefined') {
+          galleryState.currentFolderId = fid;
+          galleryState.currentPage = 1;
+        }
+        if (typeof renderGallery === 'function') {
+          renderGallery();
+        }
+        const gSec = document.getElementById('gallery');
+        if (gSec) gSec.scrollIntoView({ behavior: 'smooth' });
+      }
+      return;
     }
-    if (typeof renderGallery === 'function') {
-      renderGallery();
-    }
-    const gSec = document.getElementById('gallery');
-    if (gSec) gSec.scrollIntoView({ behavior: 'smooth' });
-    return;
   }
 
   // 2. Events Carousel Arrow Click Handler (News & Circulars)

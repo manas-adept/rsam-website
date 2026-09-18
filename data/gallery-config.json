@@ -26,15 +26,26 @@
       "description": "Special felicitation ceremony hosted at DMR Hospital honoring state championship medalists."
     },
     {
-      "folderId": "felicitaion_ceremony_dmr_2026",
-      "cloudinarySubfolder": "rsam_website/gallery/felicitaion_ceremony_dmr_2026",
-      "title": "Felicitation Ceremony Moradabad",
+      "folderId": "state-meet-2026",
+      "cloudinarySubfolder": "rsam_website/gallery/state-meet-2026",
+      "title": "District Roller Skating Showcase",
       "date": "April 18, 2026",
-      "location": "Moradabad",
-      "category": "Felicitation",
+      "location": "Moradabad Sports Academy",
+      "category": "District Meet",
       "enabled": true,
       "displayOrder": 3,
-      "description": "Honoring RSAM athletes for outstanding sportsmanship and track achievements."
+      "description": "Highlights from our district trials and exhibition matches in Moradabad."
+    },
+    {
+      "folderId": "national-highlights",
+      "cloudinarySubfolder": "rsam_website/gallery/national-highlights",
+      "title": "National Championship Medals",
+      "date": "March 2026",
+      "location": "New Delhi / Chennai",
+      "category": "National Meets",
+      "enabled": true,
+      "displayOrder": 4,
+      "description": "Proud national championship achievements by RSAM Moradabad skaters."
     }
   ]
 }
