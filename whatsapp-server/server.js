@@ -105,7 +105,7 @@ function generateRegistrationPDF(data, regNumber) {
       }
 
       doc.fillColor(redColor).fontSize(19).font('Helvetica-Bold').text('ROLLER SPORTS ASSOCIATION MORADABAD', 120, 48, { width: 430 });
-      doc.fillColor('#333333').fontSize(12).font('Helvetica-Bold').text(isEvent ? 'ANNUAL REGISTRATION SLIP' : 'ANNUAL REGISTRATION SLIP', 120, 72, { width: 430 });
+      doc.fillColor('#333333').fontSize(12).font('Helvetica-Bold').text(isEvent ? 'EVENT REGISTRATION SLIP' : 'ANNUAL REGISTRATION SLIP', 120, 72, { width: 430 });
 
       // 3. Green Registration Callout Badge Box(es)
       const badgeY = 120;

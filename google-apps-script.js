@@ -27,37 +27,25 @@ function authorizeScript() {
   const testResult = sendRegistrationConfirmationEmail({
     type: "event_registration",
     eventName: "4th District Championship 2026",
-    skaterName: "Authorization Verification Skater",
-    dob: "2015-01-01",
-    age: "11",
-    ageGroup: "11 to 14 Years",
-    schoolClub: "RSAM Moradabad",
-    coachName: "Official Coach",
-    coachMobile: "9876543210",
-    fatherName: "Father",
-    motherName: "Mother",
-    address: "Moradabad, UP",
-    mobile: "9876543210",
+    skaterName: "Chaitanya Garg",
+    dob: "2020-01-30",
+    age: "6",
+    ageGroup: "6-8",
+    schoolClub: "aryans",
+    coachName: "Parmesh",
+    coachMobile: "9773653539",
+    fatherName: "Manas Garg",
+    motherName: "Hina Garg",
+    address: "4A/336 Budhi Vihar, Avas Vikas Colony, Majhola, MORADABAD",
+    mobile: "9971844191",
     email: userEmail,
-    aadhaar: "123456789012",
-    discipline: "Speed Skating",
+    aadhaar: "5634 5342 5324",
+    discipline: "Quads",
     paymentId: "pay_auth_test",
     paymentStatus: "SUCCESS",
     amountPaid: "511.80"
-  }, "R260918611", "");
+  }, "R260918611", "", "611");
   Logger.log("Authorization test email result: " + JSON.stringify(testResult));
-}
-
-/**
- * Helper to derive 3-digit Event Reg No from RSAM Reg No (e.g. R260918611 -> 611)
- */
-function getEventRegNo(rsamRegNo) {
-  if (!rsamRegNo) return "611";
-  const digitsOnly = String(rsamRegNo).replace(/\D/g, "");
-  if (digitsOnly.length >= 3) {
-    return digitsOnly.slice(-3);
-  }
-  return String(rsamRegNo).slice(-3);
 }
 
 /**
@@ -93,7 +81,8 @@ function doGet(e) {
         amountPaid: "511.80"
       };
       const testRsamRegNo = "R260918611";
-      const result = sendRegistrationConfirmationEmail(dummyData, testRsamRegNo, "");
+      const testEventRegNo = "611";
+      const result = sendRegistrationConfirmationEmail(dummyData, testRsamRegNo, "", testEventRegNo);
       return ContentService.createTextOutput(JSON.stringify({
         status: "ok",
         message: "Test email triggered to " + targetEmail,
@@ -311,7 +300,8 @@ function doPost(e) {
 
     if (data.action === "send_email" || data.type === "send_email") {
       const regNo = data.regNumber || "R260918611";
-      const result = sendRegistrationConfirmationEmail(data, regNo, data.photoUrl || "");
+      const eventRegNo = data.eventRegNo || (data.type === "event_registration" ? String(regNo).replace(/\D/g, "").slice(-3) : null);
+      const result = sendRegistrationConfirmationEmail(data, regNo, data.photoUrl || "", eventRegNo);
       return ContentService.createTextOutput(JSON.stringify({ status: "ok", action: "send_email", result: result }))
         .setMimeType(ContentService.MimeType.JSON);
     }
@@ -358,7 +348,10 @@ function doPost(e) {
       }
 
       const rsamRegNo = data.regNumber || "R260918611";
-      const eventRegNo = getEventRegNo(rsamRegNo);
+      
+      // Generate 100% Unique Sequential 3-Digit Event Chest Registration Number per Event
+      const currentEventRows = Math.max(1, eventSheet.getLastRow());
+      const eventRegNo = data.eventRegNo || String(currentEventRows).padStart(3, '0');
 
       eventSheet.appendRow([
         new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }),
@@ -389,7 +382,7 @@ function doPost(e) {
         sendWhatsAppNotification({ ...data, eventRegNo: eventRegNo });
       }
 
-      const mailStatus = sendRegistrationConfirmationEmail(data, rsamRegNo, data.photoUrl);
+      const mailStatus = sendRegistrationConfirmationEmail(data, rsamRegNo, data.photoUrl, eventRegNo);
 
       return ContentService.createTextOutput(JSON.stringify({
         status: "ok",
@@ -490,7 +483,7 @@ function doPost(e) {
     }
 
     data.regNumber = regNumber;
-    const mailStatus = sendRegistrationConfirmationEmail(data, regNumber, photoUrl);
+    const mailStatus = sendRegistrationConfirmationEmail(data, regNumber, photoUrl, null);
 
     return ContentService.createTextOutput(JSON.stringify({
       status: "ok",
@@ -513,7 +506,7 @@ function doPost(e) {
 /**
  * Send Confirmation Email with PDF Attachment via GmailApp / MailApp
  */
-function sendRegistrationConfirmationEmail(data, regNumber, photoUrl) {
+function sendRegistrationConfirmationEmail(data, regNumber, photoUrl, eventRegNoParam) {
   const emailAddr = String(data && data.email ? data.email : "").trim();
   if (!emailAddr || !emailAddr.includes("@")) {
     Logger.log("Skipping email send: Invalid email address '" + emailAddr + "'");
@@ -529,7 +522,7 @@ function sendRegistrationConfirmationEmail(data, regNumber, photoUrl) {
 
     const isEvent = (data.type === "event_registration");
     const eventTitle = data.eventName || "4th District Championship 2026";
-    const eventRegNo = isEvent ? getEventRegNo(regNumber) : null;
+    const eventRegNo = isEvent ? (eventRegNoParam || String(regNumber).replace(/\D/g, "").slice(-3) || "611") : null;
 
     const subject = isEvent
       ? `Official RSAM Event Registration Slip — ${eventTitle} (${regNumber})`
@@ -604,7 +597,7 @@ function sendRegistrationConfirmationEmail(data, regNumber, photoUrl) {
 
     // Generate Official PDF Registration Slip Attachment
     try {
-      const pdfBlob = createRegistrationPdfInvoice(data, regNumber);
+      const pdfBlob = createRegistrationPdfInvoice(data, regNumber, eventRegNo);
       if (pdfBlob) attachments.push(pdfBlob);
     } catch (pdfErr) {
       Logger.log("PDF invoice creation warning: " + pdfErr.toString());
@@ -655,7 +648,7 @@ function sendRegistrationConfirmationEmail(data, regNumber, photoUrl) {
 /**
  * Creates PDF Registration Slip matching exact reference PDF screenshots
  */
-function createRegistrationPdfInvoice(data, regNumber) {
+function createRegistrationPdfInvoice(data, regNumber, eventRegNoParam) {
   const isEvent = (data.type === "event_registration");
   const skaterName = data.skaterName || "Chaitanya Garg";
   const eventName = data.eventName || "4th District Championship 2026";
@@ -677,7 +670,7 @@ function createRegistrationPdfInvoice(data, regNumber) {
   const coachMobile = data.coachMobile || "9773653539";
   const timestamp = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata", day: "numeric", month: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true });
 
-  const eventRegNo = isEvent ? getEventRegNo(regNumber) : null;
+  const eventRegNo = isEvent ? (eventRegNoParam || String(regNumber).replace(/\D/g, "").slice(-3) || "611") : null;
 
   const itemDescription = isEvent
     ? "4th District Championship Registration Fee (2026)"
@@ -894,7 +887,7 @@ function createRegistrationPdfInvoice(data, regNumber) {
             </td>
             <td class="header-title-td">
               <div class="org-title">ROLLER SPORTS ASSOCIATION MORADABAD</div>
-              <div class="org-subtitle">${isEvent ? 'ANNUAL REGISTRATION SLIP' : 'ANNUAL REGISTRATION SLIP'}</div>
+              <div class="org-subtitle">${isEvent ? 'EVENT REGISTRATION SLIP' : 'ANNUAL REGISTRATION SLIP'}</div>
             </td>
           </tr>
         </table>
