@@ -218,7 +218,7 @@ async function sendRegistrationEmail(data, regNumber, pdfBuffer) {
 
   if (!smtpUser || !smtpPass) {
     console.log('[Email] SMTP credentials (SMTP_USER & SMTP_PASS) not set in .env. Triggering Google Apps Script email service...');
-    const scriptUrl = process.env.GOOGLE_SHEET_SCRIPT_URL;
+    const scriptUrl = process.env.GOOGLE_SHEET_SCRIPT_URL || "https://script.google.com/macros/s/AKfycbyrxUIvQMXOzaBFNKwle-kOC0xMlc0ezufhIRXSyyid3Zx6Rhk9SKMZhNIoBBB290Xw/exec";
     if (scriptUrl) {
       try {
         await fetch(scriptUrl, {
@@ -677,6 +677,55 @@ app.post('/send-registration', authorizeRequest, async (req, res) => {
     });
   } catch (err) {
     console.error('[Send Registration Error]:', err);
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
+ * Endpoint: GET /api/test-email?email=user@domain.com
+ * Dispatches test confirmation email with generated PDF certificate
+ */
+app.get('/api/test-email', async (req, res) => {
+  try {
+    const targetEmail = req.query.email || 'test@rsam.in';
+    const testRegNo = 'EVT26_TEST_' + Math.floor(100 + Math.random() * 900);
+    const testData = {
+      type: 'event_registration',
+      eventName: '4th District Championship 2026',
+      skaterName: 'Test Athlete',
+      dob: '2015-05-15',
+      age: '11',
+      ageGroup: '11 to 14 Years',
+      schoolClub: 'Moradabad Skating Academy',
+      coachName: 'Rahul Sharma',
+      coachMobile: '9876543210',
+      fatherName: 'Amit Kumar',
+      motherName: 'Sunita Kumar',
+      address: '123 Civil Lines, Moradabad, UP',
+      mobile: '9876543210',
+      email: targetEmail,
+      aadhaar: '123456789012',
+      discipline: 'Inline Speed Skating',
+      paymentId: 'pay_test_' + Date.now(),
+      paymentStatus: 'SUCCESS',
+      amountPaid: '511.80'
+    };
+
+    let pdfBuffer = null;
+    try {
+      pdfBuffer = await generateRegistrationPDF(testData, testRegNo);
+    } catch (pdfErr) {
+      console.warn('[PDF Test Warning]', pdfErr.message);
+    }
+
+    const emailResult = await sendRegistrationEmail(testData, testRegNo, pdfBuffer);
+    return res.json({
+      success: true,
+      recipient: targetEmail,
+      testRegNo: testRegNo,
+      result: emailResult
+    });
+  } catch (err) {
     return res.status(500).json({ success: false, error: err.message });
   }
 });
