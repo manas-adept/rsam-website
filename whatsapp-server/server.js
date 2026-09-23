@@ -1197,10 +1197,91 @@ app.get('/api/site-config', (req, res) => {
 });
 
 /**
- * POST /api/save-site-config
- * Updates live unified site configuration across server and syncs to client files
+ * Commit data/site-config.json directly to GitHub Repository via REST API
  */
-app.post('/api/save-site-config', (req, res) => {
+async function commitSiteConfigToGitHub(mergedConfig, optionalToken) {
+  const ghToken = String(
+    optionalToken ||
+    process.env.GITHUB_PAT ||
+    process.env.GITHUB_TOKEN ||
+    ''
+  ).trim();
+
+  if (!ghToken) {
+    console.log('[GitHub Auto-Sync] GITHUB_PAT environment variable not set on server. Skipping direct GitHub commit.');
+    return { success: false, reason: 'GITHUB_PAT not configured on server environment' };
+  }
+
+  const repoOwner = process.env.GITHUB_REPO_OWNER || 'manas-adept';
+  const repoName = process.env.GITHUB_REPO_NAME || 'rsam-website';
+  const filePath = 'data/site-config.json';
+  const branch = process.env.GITHUB_BRANCH || 'main';
+
+  const getUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}?ref=${branch}`;
+
+  let currentSha = null;
+  try {
+    const getRes = await fetch(getUrl, {
+      headers: {
+        'Authorization': `Bearer ${ghToken}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'User-Agent': 'RSAM-Server-API'
+      }
+    });
+    if (getRes.ok) {
+      const fileData = await getRes.json();
+      currentSha = fileData.sha;
+    }
+  } catch (e) {
+    console.warn('[GitHub API SHA Fetch Warning]:', e.message);
+  }
+
+  const jsonStr = JSON.stringify(mergedConfig, null, 2);
+  const contentBase64 = Buffer.from(jsonStr, 'utf8').toString('base64');
+  const commitMsg = `Update data/site-config.json via Admin Portal [${new Date().toISOString().slice(0, 10)}]`;
+
+  const putUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`;
+  const putBody = {
+    message: commitMsg,
+    content: contentBase64,
+    branch: branch
+  };
+  if (currentSha) {
+    putBody.sha = currentSha;
+  }
+
+  try {
+    const putRes = await fetch(putUrl, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${ghToken}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json',
+        'User-Agent': 'RSAM-Server-API'
+      },
+      body: JSON.stringify(putBody)
+    });
+
+    const putResult = await putRes.json();
+
+    if (!putRes.ok) {
+      console.error('[GitHub API Commit Error]:', putResult);
+      return { success: false, error: putResult.message || 'GitHub commit failed', githubResponse: putResult };
+    }
+
+    console.log(`[GitHub Auto-Sync] Successfully committed updated data/site-config.json to GitHub! Commit SHA: ${putResult.commit ? putResult.commit.sha : 'success'}`);
+    return { success: true, commit: putResult.commit };
+  } catch (err) {
+    console.error('[GitHub Auto-Sync Error]:', err.message);
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * POST /api/save-site-config
+ * Updates live unified site configuration across server and syncs to client files & GitHub repository
+ */
+app.post('/api/save-site-config', async (req, res) => {
   try {
     const newConfig = req.body;
     if (!newConfig || typeof newConfig !== 'object') {
@@ -1241,6 +1322,9 @@ app.post('/api/save-site-config', (req, res) => {
       try { if (fs.existsSync(path.dirname(gPath2))) fs.writeFileSync(gPath2, gStr, 'utf8'); } catch(e) {}
       try { if (fs.existsSync(path.dirname(gPath1))) fs.writeFileSync(gPath1, gStr, 'utf8'); } catch(e) {}
     }
+
+    // Trigger background commit to GitHub repository if GITHUB_PAT is set
+    commitSiteConfigToGitHub(mergedConfig).catch(e => console.warn('[GitHub Auto-Sync Warning]:', e.message));
 
     console.log('[Site Config] Permanently updated data/site-config.json for all users.');
     return res.json({ success: true, message: 'data/site-config.json updated.', config: mergedConfig });
@@ -1326,84 +1410,21 @@ app.post('/api/sync-github-config', async (req, res) => {
       ''
     ).trim();
 
-    if (!ghToken) {
+    const ghResult = await commitSiteConfigToGitHub(mergedConfig, ghToken);
+
+    if (!ghResult.success) {
       return res.json({
         success: true,
         localOnly: true,
-        message: 'data/site-config.json updated locally on server disk. Pass githubToken / GITHUB_PAT env variable to push commit to GitHub repository.',
+        message: `data/site-config.json updated locally on server disk. GitHub Sync: ${ghResult.reason || ghResult.error || 'Failed to sync to GitHub'}`,
         config: mergedConfig
       });
     }
 
-    // GitHub API Settings
-    const repoOwner = process.env.GITHUB_REPO_OWNER || 'manas-adept';
-    const repoName = process.env.GITHUB_REPO_NAME || 'rsam-website';
-    const filePath = 'data/site-config.json';
-    const branch = process.env.GITHUB_BRANCH || 'main';
-
-    // 1. Get current SHA of data/site-config.json
-    const getUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}?ref=${branch}`;
-
-    let currentSha = null;
-    try {
-      const getRes = await fetch(getUrl, {
-        headers: {
-          'Authorization': `Bearer ${ghToken}`,
-          'Accept': 'application/vnd.github.v3+json',
-          'User-Agent': 'RSAM-Server-API'
-        }
-      });
-      if (getRes.ok) {
-        const fileData = await getRes.json();
-        currentSha = fileData.sha;
-      }
-    } catch (e) {
-      console.warn('[GitHub API SHA Fetch Warning]:', e.message);
-    }
-
-    // 2. Put updated file content to GitHub repo
-    const contentBase64 = Buffer.from(jsonStr, 'utf8').toString('base64');
-    const commitMsg = `Update data/site-config.json via Admin API [${new Date().toISOString().slice(0, 10)}]`;
-
-    const putUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`;
-    const putBody = {
-      message: commitMsg,
-      content: contentBase64,
-      branch: branch
-    };
-    if (currentSha) {
-      putBody.sha = currentSha;
-    }
-
-    const putRes = await fetch(putUrl, {
-      method: 'PUT',
-      headers: {
-        'Authorization': `Bearer ${ghToken}`,
-        'Accept': 'application/vnd.github.v3+json',
-        'Content-Type': 'application/json',
-        'User-Agent': 'RSAM-Server-API'
-      },
-      body: JSON.stringify(putBody)
-    });
-
-    const putResult = await putRes.json();
-
-    if (!putRes.ok) {
-      console.error('[GitHub API Commit Error]:', putResult);
-      return res.status(putRes.status || 500).json({
-        success: false,
-        localUpdated: true,
-        error: `GitHub API error: ${putResult.message || 'Failed to update file on GitHub repository'}`,
-        githubResponse: putResult
-      });
-    }
-
-    console.log(`[GitHub Sync API] Successfully committed & pushed data/site-config.json to GitHub (${putResult.commit ? putResult.commit.sha : 'success'}).`);
-
     return res.json({
       success: true,
       message: 'data/site-config.json updated locally and committed to GitHub repository! Netlify deployment triggered.',
-      commit: putResult.commit ? { sha: putResult.commit.sha, html_url: putResult.commit.html_url } : null,
+      commit: ghResult.commit ? { sha: ghResult.commit.sha, html_url: ghResult.commit.html_url } : null,
       config: mergedConfig
     });
 
