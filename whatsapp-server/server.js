@@ -451,50 +451,50 @@ app.get('/api/bot-status', (req, res) => {
  */
 function buildRegistrationMessage(data, regNumber) {
   const isEvent = data.type === 'event_registration';
-  const isRenewal = data.isRenewal || data.type === 'renewal';
+  const coachStr = `${data.coachName || 'N/A'}${data.coachMobile ? ` (${data.coachMobile})` : ' (N/A)'}`;
+  const paymentStr = data.paymentId
+    ? `${data.paymentId} / ${data.paymentStatus || 'SUCCESS'}`
+    : (data.paymentStatus || 'SUCCESS');
 
   if (isEvent) {
-    return `🏆 *ROLLER SPORTS ASSOCIATION MORADABAD*
-*Official Event Entry Pass Confirmation*
+    return `RSAM Event Registration Confirmation
 
-Dear *${data.skaterName || 'Athlete'}*,
+Dear ${data.skaterName || 'Athlete'},
 
-Your entry for *${data.eventName || '4th District Championship 2026'}* is confirmed!
+Your registration for ${data.eventName || '4th District Championship 2026'} has been received successfully. Please save your registration details for the championship.
 
-🎽 *RSAM Reg No:* *${regNumber}*
-👤 *Athlete:* ${data.skaterName}
-⛸️ *Discipline:* ${data.discipline || 'N/A'} | *Category:* ${data.ageGroup || 'N/A'}
-🏫 *School/Club:* ${data.schoolClub || 'N/A'}
-💳 *Payment ID:* ${data.paymentId || 'Verified'} (₹${data.amountPaid || '511.80'})
+• Reg. Number: ${regNumber}
+• Athlete Name: ${data.skaterName}
+• Date of Birth: ${data.dob || 'N/A'} (Age Group: ${data.ageGroup || 'N/A'})
+• Discipline: ${data.discipline || 'N/A'}
+• School / Club: ${data.schoolClub || 'N/A'}
+• Coach: ${coachStr}
+• Payment Status: ${paymentStr}
 
-${data.email ? '📧 *PDF Receipt:* Confirmation email dispatched to ' + data.email : ''}
-
-📌 *Note:* Please carry your RSAM Reg No (*${regNumber}*) to the event venue.
+Your PDF certificate has been sent to your registered email. Submitted documents are currently under verification.
 
 Best regards,
-*${ORG_NAME}* 🛼🏆`;
+RSAM`;
   }
 
-  return `🛼 *ROLLER SPORTS ASSOCIATION MORADABAD*
-*Official Athlete Registration Confirmation*
+  return `RSAM Skater Registration Confirmation
 
-Dear *${data.skaterName || 'Athlete'}*,
+Dear ${data.skaterName || 'Athlete'},
 
-${isRenewal ? 'Your RSAM athlete annual registration has been successfully renewed for 2026!' : 'Thank you for registering with RSAM for the year 2026!'}
+Your registration with RSAM for the year 2026 has been received successfully. Please save your registration details for all upcoming trials and championships.
 
-🎽 *RSAM Reg No:* *${regNumber}*
-👤 *Athlete:* ${data.skaterName} (${data.ageGroup || 'N/A'})
-⛸️ *Discipline:* ${data.discipline || 'N/A'}
-🏫 *School/Club:* ${data.schoolClub || 'N/A'}
-👨‍🏫 *Coach:* ${data.coachName ? `${data.coachName}` : 'N/A'}
-💳 *Payment ID:* ${data.paymentId || 'Verified'} (₹${data.amountPaid || '10.24'})
+• Reg. Number: ${regNumber}
+• Athlete Name: ${data.skaterName}
+• Date of Birth: ${data.dob || 'N/A'} (Age Group: ${data.ageGroup || 'N/A'})
+• Discipline: ${data.discipline || 'N/A'}
+• School / Club: ${data.schoolClub || 'N/A'}
+• Coach: ${coachStr}
+• Payment Status: ${paymentStr}
 
-${data.email ? '📧 *PDF Certificate:* Confirmation certificate emailed to ' + data.email : ''}
-
-📌 Please preserve your RSAM Reg No (*${regNumber}*) for all future trials and championships.
+Your PDF certificate has been sent to your registered email. Submitted documents are currently under verification.
 
 Best regards,
-*${ORG_NAME}* 🛼🏆`;
+RSAM`;
 }
 
 /**
@@ -1250,6 +1250,168 @@ app.post('/api/save-site-config', (req, res) => {
   }
 });
 
+/**
+ * POST /api/sync-github-config
+ * Updates data/site-config.json locally AND commits & pushes directly to GitHub repo via GitHub REST API.
+ * 
+ * Authentication:
+ * Requires secretKey in header (x-api-key) or body (secretKey / apiKey) matching API_SECRET_KEY.
+ * Requires GitHub Token via process.env.GITHUB_PAT, header (x-github-token), or body (githubToken / token).
+ */
+app.post('/api/sync-github-config', async (req, res) => {
+  try {
+    const keyInHeader = req.headers['x-api-key'] || req.headers['x-secret-key'];
+    const keyInBody = req.body && (req.body.secretKey || req.body.apiKey || req.body.key);
+    const providedKey = String(keyInHeader || keyInBody || '').trim();
+
+    if (providedKey !== API_SECRET_KEY) {
+      return res.status(401).json({
+        success: false,
+        error: 'Unauthorized: Invalid or missing API Secret Key.'
+      });
+    }
+
+    // Extract site config data
+    const rawConfig = req.body.config || req.body.siteConfig || req.body.data || req.body;
+    let newConfig = typeof rawConfig === 'string' ? JSON.parse(rawConfig) : { ...rawConfig };
+
+    // Clean authentication fields from config object
+    delete newConfig.secretKey;
+    delete newConfig.apiKey;
+    delete newConfig.key;
+    delete newConfig.githubToken;
+    delete newConfig.token;
+
+    if (!newConfig || typeof newConfig !== 'object' || Object.keys(newConfig).length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'Bad Request: No site configuration data provided in payload.'
+      });
+    }
+
+    // Merge with existing configuration on disk
+    const configPath2 = path.join(__dirname, '../data/site-config.json');
+    const configPath1 = path.join(__dirname, 'data/site-config.json');
+
+    let currentConfig = {};
+    if (fs.existsSync(configPath2)) {
+      try { currentConfig = JSON.parse(fs.readFileSync(configPath2, 'utf8')); } catch (e) {}
+    } else if (fs.existsSync(configPath1)) {
+      try { currentConfig = JSON.parse(fs.readFileSync(configPath1, 'utf8')); } catch (e) {}
+    }
+
+    const mergedConfig = {
+      ...currentConfig,
+      ...newConfig,
+      lastUpdated: new Date().toISOString()
+    };
+
+    const jsonStr = JSON.stringify(mergedConfig, null, 2);
+
+    // Save locally on server disk
+    try {
+      if (fs.existsSync(path.dirname(configPath2))) fs.writeFileSync(configPath2, jsonStr, 'utf8');
+    } catch (e) {}
+    try {
+      if (fs.existsSync(path.dirname(configPath1))) fs.writeFileSync(configPath1, jsonStr, 'utf8');
+    } catch (e) {}
+
+    // Extract GitHub Token
+    const ghToken = String(
+      process.env.GITHUB_PAT ||
+      process.env.GITHUB_TOKEN ||
+      req.headers['x-github-token'] ||
+      req.body.githubToken ||
+      req.body.token ||
+      ''
+    ).trim();
+
+    if (!ghToken) {
+      return res.json({
+        success: true,
+        localOnly: true,
+        message: 'data/site-config.json updated locally on server disk. Pass githubToken / GITHUB_PAT env variable to push commit to GitHub repository.',
+        config: mergedConfig
+      });
+    }
+
+    // GitHub API Settings
+    const repoOwner = process.env.GITHUB_REPO_OWNER || 'manas-adept';
+    const repoName = process.env.GITHUB_REPO_NAME || 'rsam-website';
+    const filePath = 'data/site-config.json';
+    const branch = process.env.GITHUB_BRANCH || 'main';
+
+    // 1. Get current SHA of data/site-config.json
+    const getUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}?ref=${branch}`;
+
+    let currentSha = null;
+    try {
+      const getRes = await fetch(getUrl, {
+        headers: {
+          'Authorization': `Bearer ${ghToken}`,
+          'Accept': 'application/vnd.github.v3+json',
+          'User-Agent': 'RSAM-Server-API'
+        }
+      });
+      if (getRes.ok) {
+        const fileData = await getRes.json();
+        currentSha = fileData.sha;
+      }
+    } catch (e) {
+      console.warn('[GitHub API SHA Fetch Warning]:', e.message);
+    }
+
+    // 2. Put updated file content to GitHub repo
+    const contentBase64 = Buffer.from(jsonStr, 'utf8').toString('base64');
+    const commitMsg = `Update data/site-config.json via Admin API [${new Date().toISOString().slice(0, 10)}]`;
+
+    const putUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`;
+    const putBody = {
+      message: commitMsg,
+      content: contentBase64,
+      branch: branch
+    };
+    if (currentSha) {
+      putBody.sha = currentSha;
+    }
+
+    const putRes = await fetch(putUrl, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${ghToken}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json',
+        'User-Agent': 'RSAM-Server-API'
+      },
+      body: JSON.stringify(putBody)
+    });
+
+    const putResult = await putRes.json();
+
+    if (!putRes.ok) {
+      console.error('[GitHub API Commit Error]:', putResult);
+      return res.status(putRes.status || 500).json({
+        success: false,
+        localUpdated: true,
+        error: `GitHub API error: ${putResult.message || 'Failed to update file on GitHub repository'}`,
+        githubResponse: putResult
+      });
+    }
+
+    console.log(`[GitHub Sync API] Successfully committed & pushed data/site-config.json to GitHub (${putResult.commit ? putResult.commit.sha : 'success'}).`);
+
+    return res.json({
+      success: true,
+      message: 'data/site-config.json updated locally and committed to GitHub repository! Netlify deployment triggered.',
+      commit: putResult.commit ? { sha: putResult.commit.sha, html_url: putResult.commit.html_url } : null,
+      config: mergedConfig
+    });
+
+  } catch (err) {
+    console.error('[Sync GitHub Config Error]:', err.message);
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
 
 app.get('/health', (req, res) => {
   res.json({
