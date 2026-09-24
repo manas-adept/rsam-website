@@ -28,7 +28,7 @@
       "description": "Official 4th District Championship cum State trial for all age groups & disciplines in Moradabad.",
       "body": "Official 4th District Championship cum State trial for all age groups & disciplines in Moradabad.",
       "showOnTicker": true,
-      "isRegistrationActive": true,
+      "isRegistrationActive": false,
       "archived": false
     },
     {
@@ -365,5 +365,5 @@
       }
     ]
   },
-  "lastUpdated": "2026-09-24T09:33:02.180Z"
+  "lastUpdated": "2026-09-24T13:17:42.944Z"
 }
