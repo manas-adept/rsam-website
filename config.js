@@ -30,6 +30,7 @@ window.ENV_CONFIG = {
     name: "Production (Netlify / Live)",
     backendUrl: "https://rsam-whatsapp-bot.onrender.com",
     sheetUrl: "https://script.google.com/macros/s/AKfycbyrxUIvQMXOzaBFNKwle-kOC0xMlc0ezufhIRXSyyid3Zx6Rhk9SKMZhNIoBBB290Xw/exec",
+    // ⬇️ UPDATE LIVE RAZORPAY API KEY HERE (e.g. "rzp_live_xxxxxxxxxxxxxx")
     razorpayKey: "rzp_test_TZa1vfjhrPJobv",
     openwaServerUrl: "https://rsam-whatsapp-bot.onrender.com/send-registration",
     debug: false

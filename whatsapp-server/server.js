@@ -31,12 +31,38 @@ const API_SECRET_KEY = process.env.API_SECRET_KEY || 'rsam_whatsapp_secret_key_2
 const ORG_NAME = process.env.ORGANIZATION_NAME || 'Roller Sports Association Moradabad (RSAM)';
 const COUNTER_FILE = path.join(__dirname, 'chest-counter.json');
 
+function formatDateDDMMMYY(dateStr) {
+  if (!dateStr) return 'N/A';
+  const str = String(dateStr).trim();
+  if (/^\d{2}-[A-Za-z]{3}-\d{2,4}$/.test(str)) {
+    const parts = str.split('-');
+    const day = parts[0].padStart(2, '0');
+    const m = parts[1];
+    const yearStr = parts[2];
+    const yy = yearStr.length === 4 ? yearStr.slice(2) : yearStr;
+    return `${day}-${m}-${yy}`;
+  }
+  if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
+    const [y, m, d] = str.split('-');
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const monthIndex = parseInt(m, 10) - 1;
+    if (monthIndex >= 0 && monthIndex < 12) {
+      return `${d.padStart(2, '0')}-${months[monthIndex]}-${y.slice(2)}`;
+    }
+  }
+  const d = new Date(str);
+  if (!isNaN(d.getTime())) {
+    const day = String(d.getDate()).padStart(2, '0');
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const month = months[d.getMonth()];
+    const yy = String(d.getFullYear()).slice(-2);
+    return `${day}-${month}-${yy}`;
+  }
+  return str;
+}
+
 function cleanDob(dobStr) {
-  if (!dobStr) return 'N/A';
-  let s = String(dobStr).trim();
-  if (s.includes('T')) s = s.split('T')[0];
-  if (s.includes(' ')) s = s.split(' ')[0];
-  return s;
+  return formatDateDDMMMYY(dobStr);
 }
 
 app.use(cors());

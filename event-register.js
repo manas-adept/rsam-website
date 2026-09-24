@@ -26,55 +26,99 @@ function escapeHTML(str) {
   }[match]));
 }
 
-function getActiveEventConfig() {
-  if (window.LIVE_SITE_CONFIG && Array.isArray(window.LIVE_SITE_CONFIG.events)) {
-    const active = window.LIVE_SITE_CONFIG.events.find(e => e.isRegistrationActive);
+function resolveCurrentEvent() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const targetId = urlParams.get("eventId");
+
+  let events = [];
+  if (window.LIVE_SITE_CONFIG && Array.isArray(window.LIVE_SITE_CONFIG.events) && window.LIVE_SITE_CONFIG.events.length > 0) {
+    events = window.LIVE_SITE_CONFIG.events;
+  } else {
+    const savedEvents = localStorage.getItem("RSAM_ADMIN_EVENTS");
+    if (savedEvents) {
+      try { events = JSON.parse(savedEvents); } catch (e) {}
+    }
+  }
+
+  if (targetId && Array.isArray(events) && events.length > 0) {
+    const matched = events.find(e => e.id === targetId);
+    if (matched) return matched;
+  }
+
+  if (Array.isArray(events) && events.length > 0) {
+    const active = events.find(e => e.isRegistrationActive && !e.archived && e.enabled !== false);
     if (active) return active;
   }
-  const savedEvents = localStorage.getItem("RSAM_ADMIN_EVENTS");
-  if (savedEvents) {
-    try {
-      const list = JSON.parse(savedEvents);
-      const active = list.find(e => e.isRegistrationActive);
-      if (active) return active;
-    } catch (e) {}
-  }
+
   const saved = localStorage.getItem("RSAM_ADMIN_EVENT");
   if (saved) {
     try { return JSON.parse(saved); } catch (e) {}
   }
+
   return (window.ADMIN_CONFIG && window.ADMIN_CONFIG.activeEvent) || {
-    title: "Championship Event",
+    id: "evt_district_2026",
+    title: "4th District Championship cum State Trial 2026",
     year: "2026",
     baseFee: 500.00,
     gatewayPercent: 2.0,
-    gstPercent: 18.0
+    gstPercent: 18.0,
+    isRegistrationActive: false
   };
 }
 
+function getActiveEventConfig() {
+  return resolveCurrentEvent();
+}
+
+function formatDateDDMMMYY(dateStr) {
+  if (!dateStr) return 'N/A';
+  const str = String(dateStr).trim();
+  if (/^\d{2}-[A-Za-z]{3}-\d{2,4}$/.test(str)) {
+    const parts = str.split('-');
+    const day = parts[0].padStart(2, '0');
+    const m = parts[1];
+    const yearStr = parts[2];
+    const yy = yearStr.length === 4 ? yearStr.slice(2) : yearStr;
+    return `${day}-${m}-${yy}`;
+  }
+  if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
+    const [y, m, d] = str.split('-');
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const monthIndex = parseInt(m, 10) - 1;
+    if (monthIndex >= 0 && monthIndex < 12) {
+      return `${d.padStart(2, '0')}-${months[monthIndex]}-${y.slice(2)}`;
+    }
+  }
+  const d = new Date(str);
+  if (!isNaN(d.getTime())) {
+    const day = String(d.getDate()).padStart(2, '0');
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const month = months[d.getMonth()];
+    const yy = String(d.getFullYear()).slice(-2);
+    return `${day}-${month}-${yy}`;
+  }
+  return str;
+}
+
 function cleanDob(dobStr) {
-  if (!dobStr) return 'N/A';
-  let s = String(dobStr).trim();
-  if (s.includes('T')) s = s.split('T')[0];
-  if (s.includes(' ')) s = s.split(' ')[0];
-  return s;
+  return formatDateDDMMMYY(dobStr);
 }
 
 function formatDriveImageUrl(url) {
   if (!url || typeof url !== 'string') return '';
-  const match = url.match(/\/file\/d\/([^\/]+)/) || url.match(/id=([^&]+)/);
+  const match = url.match(/\/file\/d\/([^\/]+)/) || url.match(/id=([^&]+)/) || url.match(/\/d\/([^\/]+)/);
   if (match && match[1]) {
     return `https://lh3.googleusercontent.com/d/${match[1]}`;
   }
   return url;
 }
 
-const activeEvConfig     = getActiveEventConfig();
-const BASE_FEE           = activeEvConfig.baseFee !== undefined ? parseFloat(activeEvConfig.baseFee) : 500.00;
-const GATEWAY_CHARGE     = parseFloat(((BASE_FEE * (parseFloat(activeEvConfig.gatewayPercent) || 2.0)) / 100).toFixed(2));
-const GST_CHARGE         = parseFloat(((GATEWAY_CHARGE * (parseFloat(activeEvConfig.gstPercent) || 18.0)) / 100).toFixed(2));
-const TOTAL_AMOUNT       = parseFloat((BASE_FEE + GATEWAY_CHARGE + GST_CHARGE).toFixed(2));
-const TOTAL_AMOUNT_PAISE = Math.round(TOTAL_AMOUNT * 100);
+let activeEvConfig     = resolveCurrentEvent();
+let BASE_FEE           = activeEvConfig.baseFee !== undefined ? parseFloat(activeEvConfig.baseFee) : 500.00;
+let GATEWAY_CHARGE     = parseFloat(((BASE_FEE * (parseFloat(activeEvConfig.gatewayPercent) || 2.0)) / 100).toFixed(2));
+let GST_CHARGE         = parseFloat(((GATEWAY_CHARGE * (parseFloat(activeEvConfig.gstPercent) || 18.0)) / 100).toFixed(2));
+let TOTAL_AMOUNT       = parseFloat((BASE_FEE + GATEWAY_CHARGE + GST_CHARGE).toFixed(2));
+let TOTAL_AMOUNT_PAISE = Math.round(TOTAL_AMOUNT * 100);
 
 let verifiedSkater = null;
 
@@ -102,7 +146,52 @@ async function fetchSiteConfigEvent() {
 document.addEventListener("DOMContentLoaded", async () => {
   await fetchSiteConfigEvent();
 
-  const isOrganizerPaid = activeEvConfig.feeType === 'organizer' || activeEvConfig.payToOrganizer;
+  const currentEvent = resolveCurrentEvent();
+  activeEvConfig = currentEvent;
+
+  // Check if registration is active for this specific event
+  const isRegActive = currentEvent.isRegistrationActive && !currentEvent.archived && currentEvent.enabled !== false;
+  
+  // Check event deadline if specified
+  let isDeadlinePassed = false;
+  if (currentEvent.deadline) {
+    const deadlineDate = new Date(currentEvent.deadline);
+    if (!isNaN(deadlineDate.getTime()) && new Date() > deadlineDate) {
+      isDeadlinePassed = true;
+    }
+  }
+
+  // If registration is NOT active or deadline passed -> Block registration page!
+  if (!isRegActive || isDeadlinePassed) {
+    const lookupCard = document.getElementById("lookupCard");
+    const evtForm = document.getElementById("evtForm");
+    if (evtForm) evtForm.style.display = "none";
+    if (lookupCard) {
+      const reasonText = isDeadlinePassed
+        ? `Registrations for <strong>${escapeHTML(currentEvent.title || 'this event')}</strong> closed after the deadline.`
+        : `Registrations for <strong>${escapeHTML(currentEvent.title || 'this event')}</strong> are currently disabled or not open.`;
+      
+      lookupCard.innerHTML = `
+        <div class="lookup-header" style="text-align:center; padding: 2.5rem 1rem;">
+          <div style="font-size:3.5rem; margin-bottom:0.5rem;">⛔</div>
+          <h3 style="color:#ef4444; font-size:1.6rem; margin-bottom:0.4rem;">Event Registration Closed</h3>
+          <p style="color:#d1d5db; font-size:1.05rem; max-width:540px; margin:0.5rem auto 1.5rem auto;">
+            ${reasonText}
+          </p>
+          <a href="index.html#events" class="btn-primary" style="display:inline-block; margin-top:0.5rem; padding:0.7rem 1.8rem;">&larr; Back to Website Events</a>
+        </div>
+      `;
+    }
+    return;
+  }
+
+  BASE_FEE           = currentEvent.baseFee !== undefined ? parseFloat(currentEvent.baseFee) : 500.00;
+  GATEWAY_CHARGE     = parseFloat(((BASE_FEE * (parseFloat(currentEvent.gatewayPercent) || 2.0)) / 100).toFixed(2));
+  GST_CHARGE         = parseFloat(((GATEWAY_CHARGE * (parseFloat(currentEvent.gstPercent) || 18.0)) / 100).toFixed(2));
+  TOTAL_AMOUNT       = parseFloat((BASE_FEE + GATEWAY_CHARGE + GST_CHARGE).toFixed(2));
+  TOTAL_AMOUNT_PAISE = Math.round(TOTAL_AMOUNT * 100);
+
+  const isOrganizerPaid = currentEvent.feeType === 'organizer' || currentEvent.payToOrganizer;
   const isFreeFee = BASE_FEE === 0;
 
   // Update Fee Banners & Submit Button Text dynamically from admin active event config
@@ -119,7 +208,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       feeBanner.style.borderColor = "rgba(52, 211, 153, 0.4)";
       feeBanner.style.color = "#6ee7b7";
     } else {
-      feeBanner.innerHTML = `💳 Championship Entry Fee: <strong>₹${BASE_FEE.toFixed(2)}</strong> <small>(+ ${parseFloat(activeEvConfig.gatewayPercent || 2.0)}% gateway charge &amp; ${parseFloat(activeEvConfig.gstPercent || 18.0)}% GST = ₹${TOTAL_AMOUNT.toFixed(2)} Total)</small>`;
+      feeBanner.innerHTML = `💳 Championship Entry Fee: <strong>₹${BASE_FEE.toFixed(2)}</strong> <small>(+ ${parseFloat(currentEvent.gatewayPercent || 2.0)}% gateway charge &amp; ${parseFloat(currentEvent.gstPercent || 18.0)}% GST = ₹${TOTAL_AMOUNT.toFixed(2)} Total)</small>`;
     }
   }
 
@@ -143,14 +232,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       lookupCard.innerHTML = `
         <div class="lookup-header" style="text-align:center; padding: 2rem 1rem;">
           <div style="font-size:3.5rem; margin-bottom:0.5rem;">📋</div>
-          <h3 style="color:#60a5fa; font-size:1.6rem; margin-bottom:0.5rem;">${activeEvConfig.title}</h3>
+          <h3 style="color:#60a5fa; font-size:1.6rem; margin-bottom:0.5rem;">${escapeHTML(currentEvent.title)}</h3>
           <p style="color:#d1d5db; font-size:1.05rem; max-width:560px; margin:0.5rem auto 1.5rem auto;">
-            ${activeEvConfig.body || activeEvConfig.description || 'This event is open for participation. Entry fees are payable directly to the event organizer at the venue.'}
+            ${escapeHTML(currentEvent.body || currentEvent.description || 'This event is open for participation. Entry fees are payable directly to the event organizer at the venue.')}
           </p>
           <div style="background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.3); border-radius:12px; padding:1.2rem; max-width:540px; margin:0 auto 1.5rem auto; text-align:left;">
             <div style="font-weight:600; color:#93c5fd; margin-bottom:0.4rem;">📌 Event Information:</div>
-            <div style="color:#e5e7eb; font-size:0.95rem;">📅 <strong>Date:</strong> ${activeEvConfig.date}</div>
-            <div style="color:#e5e7eb; font-size:0.95rem; margin-top:0.3rem;">📍 <strong>Venue:</strong> ${activeEvConfig.location}</div>
+            <div style="color:#e5e7eb; font-size:0.95rem;">📅 <strong>Date:</strong> ${escapeHTML(currentEvent.date)}</div>
+            <div style="color:#e5e7eb; font-size:0.95rem; margin-top:0.3rem;">📍 <strong>Venue:</strong> ${escapeHTML(currentEvent.location)}</div>
             <div style="color:#e5e7eb; font-size:0.95rem; margin-top:0.3rem;">💳 <strong>Fee Mode:</strong> Paid directly to Organizer on spot (No online payment required)</div>
           </div>
           <a href="index.html#events" class="btn-primary">&larr; Back to Website Events</a>
@@ -161,25 +250,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (evtForm) evtForm.style.display = "none";
     return;
   }
-
-  // Check event registration deadline (October 1st, 2026 23:59:59 IST)
-  const EVENT_DEADLINE = new Date("2026-10-01T23:59:59+05:30");
-  if (new Date() > EVENT_DEADLINE) {
-    const lookupCard = document.getElementById("lookupCard");
-    if (lookupCard) {
-      lookupCard.innerHTML = `
-        <div class="lookup-header" style="text-align:center; padding: 1.5rem 0;">
-          <div style="font-size:3rem; margin-bottom:0.5rem;">⛔</div>
-          <h3 style="color:#ef4444; font-size:1.6rem; margin-bottom:0.4rem;">Event Registration Closed</h3>
-          <p style="color:#d1d5db; font-size:1rem; max-width:520px; margin:0.5rem auto 1.5rem auto;">
-            Registrations for the <strong>4th District Championship 2026</strong> closed on <strong>1st October 2026</strong>. No further entries are entertained after the deadline.
-          </p>
-          <a href="index.html#events" class="btn-primary">View Upcoming Events</a>
-        </div>
-      `;
-    }
-  }
-
 
   const lookupRegNo     = document.getElementById("lookupRegNo");
   if (lookupRegNo) {
@@ -304,24 +374,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     return "Above-18";
   }
 
-  function formatDateDDMMMYYYY(dateStr) {
-    if (!dateStr) return 'N/A';
-    const str = String(dateStr).trim();
-    if (/^\d{2}-[A-Za-z]{3}-\d{4}$/.test(str)) return str;
-    const d = new Date(str);
-    if (isNaN(d.getTime())) return str;
-    const day = String(d.getDate()).padStart(2, '0');
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const month = months[d.getMonth()];
-    const year = d.getFullYear();
-    return `${day}-${month}-${year}`;
-  }
-
-  // Populate Stage 2 Auto-Filled Summary Card
   function populateSkaterCard(skater) {
     document.getElementById("displaySkaterName").textContent = skater.skaterName || "N/A";
     document.getElementById("displayRegNo").textContent      = skater.regNumber || "N/A";
-    document.getElementById("displayDob").textContent        = formatDateDDMMMYYYY(skater.dob);
+    document.getElementById("displayDob").textContent        = formatDateDDMMMYY(skater.dob);
     document.getElementById("displayAge").textContent        = skater.age || "N/A";
     const ageGrp = skater.ageGroup || calculateAgeGroup(skater.age);
     document.getElementById("displayAgeGroup").textContent   = ageGrp || "N/A";
@@ -341,8 +397,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     const photoImg = document.getElementById("evtSkaterPhoto");
     const photoPlaceholder = document.getElementById("evtPhotoPlaceholder");
 
-    if (skater.photoUrl && skater.photoUrl.startsWith("http")) {
-      photoImg.src = formatDriveImageUrl(skater.photoUrl);
+    const photoSrc = skater.photoUrl || skater.photo || skater.skaterPhoto || skater.photoFile || '';
+
+    if (photoSrc && typeof photoSrc === 'string' && photoSrc.trim() !== '') {
+      photoImg.src = formatDriveImageUrl(photoSrc);
       photoImg.onerror = () => {
         photoImg.hidden = true;
         photoPlaceholder.hidden = false;
@@ -405,11 +463,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Build event payload
     const eventPayload = {
       type: "event_registration",
+      eventId: activeEvConfig.id || "evt_district_2026",
       eventName: activeEvConfig.title || activeEvConfig.name || "Championship Event",
-      year: "2026",
+      year: activeEvConfig.year || "2026",
       regNumber: verifiedSkater.regNumber,
       skaterName: verifiedSkater.skaterName,
-      dob: verifiedSkater.dob,
+      dob: formatDateDDMMMYY(verifiedSkater.dob),
       age: verifiedSkater.age,
       ageGroup: verifiedSkater.ageGroup || calculateAgeGroup(verifiedSkater.age),
       schoolClub: verifiedSkater.schoolClub || "N/A",
@@ -422,7 +481,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       email: verifiedSkater.email,
       aadhaar: verifiedSkater.aadhaar,
       discipline: selectedDiscipline.value,
-      photoUrl: verifiedSkater.photoUrl
+      photoUrl: verifiedSkater.photoUrl || verifiedSkater.photo || verifiedSkater.skaterPhoto || ""
     };
 
     openConfirmationModal(eventPayload);
@@ -430,37 +489,37 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // 3. Pre-Submission Confirmation Modal
   function openConfirmationModal(payload) {
+    const photoSrc = payload.photoUrl ? formatDriveImageUrl(payload.photoUrl) : '';
+
     confirmSummaryBody.innerHTML = `
       <div class="confirm-photo-header">
-        ${payload.photoUrl ? `<img src="${payload.photoUrl}" class="confirm-photo-thumb" alt="Skater Photo"/>` : `<div style="font-size:30px;">📸</div>`}
+        ${photoSrc ? `<img src="${photoSrc}" class="confirm-photo-thumb" alt="Skater Photo" onerror="this.onerror=null; this.parentElement.innerHTML='<div style=\\'font-size:30px;\\'>📸</div>';"/>` : `<div style="font-size:30px;">📸</div>`}
         <div class="confirm-photo-info">
-          <h4>${payload.skaterName}</h4>
-          <p>RSAM Reg No: <strong style="color:#f59e0b;">${payload.regNumber}</strong></p>
-          <p>Event: <strong>${payload.eventName}</strong></p>
+          <h4>${escapeHTML(payload.skaterName)}</h4>
+          <p>RSAM Reg No: <strong style="color:#f59e0b;">${escapeHTML(payload.regNumber)}</strong></p>
+          <p>Event: <strong>${escapeHTML(payload.eventName)}</strong></p>
         </div>
       </div>
       <div class="confirm-grid">
         <div class="confirm-item">
           <span class="confirm-label">Championship Discipline</span>
-          <span class="confirm-value" style="color:#e01c2e; font-weight:700;">${payload.discipline}</span>
+          <span class="confirm-value" style="color:#e01c2e; font-weight:700;">${escapeHTML(payload.discipline)}</span>
         </div>
         <div class="confirm-item">
           <span class="confirm-label">Mobile Number</span>
-          <span class="confirm-value">${payload.mobile}</span>
+          <span class="confirm-value">${escapeHTML(payload.mobile)}</span>
         </div>
         <div class="confirm-item">
           <span class="confirm-label">Coach Name &amp; Contact</span>
-          <span class="confirm-value">${payload.coachName || 'N/A'} (${payload.coachMobile || 'N/A'})</span>
-        </div>
-          <span class="confirm-value">${payload.mobile}</span>
+          <span class="confirm-value">${escapeHTML(payload.coachName || 'N/A')} (${escapeHTML(payload.coachMobile || 'N/A')})</span>
         </div>
         <div class="confirm-item">
           <span class="confirm-label">Email Address</span>
-          <span class="confirm-value">${payload.email}</span>
+          <span class="confirm-value">${escapeHTML(payload.email)}</span>
         </div>
         <div class="confirm-item">
           <span class="confirm-label">Aadhaar Number</span>
-          <span class="confirm-value">${payload.aadhaar}</span>
+          <span class="confirm-value">${escapeHTML(payload.aadhaar)}</span>
         </div>
 
         <div class="confirm-fee-breakdown" style="grid-column: span 2; background: ${BASE_FEE === 0 ? 'rgba(52, 211, 153, 0.08)' : 'rgba(245, 158, 11, 0.08)'}; border: 1px solid ${BASE_FEE === 0 ? 'rgba(52, 211, 153, 0.25)' : 'rgba(245, 158, 11, 0.25)'}; border-radius: 10px; padding: 1rem; margin-top: 0.5rem;">
