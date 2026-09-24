@@ -1,36 +1,14 @@
 {
   "fees": {
-    "annualBaseFee": 0,
-    "baseFee": 0,
+    "annualBaseFee": 10,
+    "baseFee": 10,
     "gatewayPercent": 2,
     "gstPercent": 18,
-    "gatewayFee": 0,
-    "gstFee": 0,
-    "totalPayable": 0
+    "gatewayFee": 0.2,
+    "gstFee": 0.04,
+    "totalPayable": 10.24
   },
   "events": [
-    {
-      "id": "evt_1790238605955",
-      "title": "5th District 2026",
-      "category": "District Championship",
-      "year": "2026",
-      "date": "1st November 2026",
-      "startDateTime": "2026-11-01T08:00",
-      "endDateTime": "2026-11-01T15:00",
-      "deadline": "2026-10-28T13:59:00+05:30",
-      "location": "TBD",
-      "feeType": "online",
-      "payToOrganizer": false,
-      "baseFee": 500,
-      "gatewayPercent": 2,
-      "gstPercent": 18,
-      "image": "",
-      "description": "testing new event add",
-      "body": "testing new event add",
-      "showOnTicker": false,
-      "isRegistrationActive": false,
-      "archived": false
-    },
     {
       "id": "evt_district_2026",
       "title": "4th District Championship cum State Trial 2026",
@@ -96,16 +74,36 @@
       "enabled": true
     }
   ],
-  "skinsuits": [
+  "news": [
     {
-      "title": "RSAM Official Skater Skinsuit",
-      "subtitle": "Mandatory official racing uniform design for all RSAM athletes",
-      "frontImage": "https://res.cloudinary.com/igjmhsju/image/upload/v1789293116/rsam_website/branding/skinsuit_front.png.png",
-      "backImage": "https://res.cloudinary.com/igjmhsju/image/upload/v1789628080/rsam_website/branding/skinsuit_back.png.png",
-      "description": ""
+      "tag": "news",
+      "title": "Moradabad Skaters Shine at Run on Wheels 4.0 Marathon, Agra",
+      "date": "2026-05-10",
+      "location": "Agra, Uttar Pradesh",
+      "body": "We are proud to announce that our skaters from Moradabad participated in the highly anticipated Run on Wheels 4.0 Marathon, held in the city of Agra. Every single skater who took to the track gave their absolute best and completed the marathon with great courage and determination.",
+      "linkText": "View Details",
+      "linkHref": "#"
+    },
+    {
+      "tag": "news",
+      "title": "District Level Roller Skating Championship Spring",
+      "date": "2026-05-02",
+      "location": "Summer Valley School, MORADABAD",
+      "body": "Aryans International School stands at the top in Roller Speed Skating. The event took place at Summer Valley School, Moradabad.",
+      "linkText": "View Details",
+      "linkHref": "#"
+    },
+    {
+      "tag": "news",
+      "title": "District Level Roller Skating Championship Summer",
+      "date": "2026-04-19",
+      "location": "S.S Children School, MORADABAD",
+      "body": "Aryans International School won First Prize, while Golden Gate Public School and PMS Public School finished 2nd and 3rd respectively.",
+      "linkText": "View Details",
+      "linkHref": "#"
     }
   ],
-  "news": [
+  "newsItems": [
     {
       "tag": "news",
       "title": "Moradabad Skaters Shine at Run on Wheels 4.0 Marathon, Agra",
@@ -330,12 +328,22 @@
       "category": "referee"
     }
   ],
+  "skinsuit": {
+    "title": "RSAM Official Skater Skinsuit",
+    "subtitle": "Mandatory official racing uniform design for all RSAM athletes",
+    "frontImage": "https://res.cloudinary.com/igjmhsju/image/upload/v1789293116/rsam_website/branding/skinsuit_front.png.png",
+    "backImage": "https://res.cloudinary.com/igjmhsju/image/upload/v1789628080/rsam_website/branding/skinsuit_back.png.png",
+    "description": ""
+  },
   "ticker": "🚀 Welcome to Roller Sports Association Moradabad (RSAM) | Annual Registrations & District Championship 2026 Entries Now Open! | Certified Track & Roller Skating Excellence",
   "gallery": {
+    "cloudinaryBasePath": "rsam_website/events",
+    "defaultItemsPerPage": 20,
+    "autoOptimizeAfterDays": 7,
     "folders": [
       {
         "folderId": "lko_uprsa_7th_2026",
-        "cloudinarySubfolder": "rsam_website/gallery/lko_uprsa_7th_2026",
+        "cloudinarySubfolder": "rsam_website/events/lko_uprsa_7th_2026",
         "title": "7th UP Open State Championship",
         "date": "May 10, 2026",
         "location": "Central Academy, Lucknow",
@@ -345,8 +353,8 @@
         "description": "High-octane moments and victory celebrations from the UPRSA State Championship in Lucknow."
       },
       {
-        "folderId": "dmr_hospital_2026",
-        "cloudinarySubfolder": "rsam_website/gallery/dmr_hospital_2026",
+        "folderId": "felicitaion_ceremony_dmr_2026",
+        "cloudinarySubfolder": "rsam_website/events/felicitaion_ceremony_dmr_2026",
         "title": "Moradabad Skaters Felicitation at DMR Hospital",
         "date": "August 2026",
         "location": "DMR Hospital, Moradabad",
@@ -354,56 +362,8 @@
         "enabled": true,
         "displayOrder": 2,
         "description": "Special felicitation ceremony hosted at DMR Hospital honoring state championship medalists."
-      },
-      {
-        "folderId": "district-cum-state-trial",
-        "cloudinarySubfolder": "district-cum-state-trial",
-        "title": "District-cum-State Trial",
-        "category": "Championship",
-        "date": "October 11, 2026",
-        "location": "Moradabad",
-        "description": "4th district championship come state selection trial for 64th state championship powered by UPRSA, which is held at Devaswom Skating track, GB Nagar.",
-        "enabled": false
       }
     ]
   },
-  "lastUpdated": "2026-09-24T08:30:31.209Z",
-  "skinsuit": {
-    "title": "RSAM Official Skater Skinsuit",
-    "subtitle": "Mandatory official racing uniform design for all RSAM athletes",
-    "frontImage": "https://res.cloudinary.com/igjmhsju/image/upload/v1789293116/rsam_website/branding/skinsuit_front.png.png",
-    "backImage": "https://res.cloudinary.com/igjmhsju/image/upload/v1789628080/rsam_website/branding/skinsuit_back.png.png",
-    "description": ""
-  },
-  "test": "ping",
-  "ping": "test",
-  "newsItems": [
-    {
-      "tag": "news",
-      "title": "Moradabad Skaters Shine at Run on Wheels 4.0 Marathon, Agra",
-      "date": "2026-05-10",
-      "location": "Agra, Uttar Pradesh",
-      "body": "We are proud to announce that our skaters from Moradabad participated in the highly anticipated Run on Wheels 4.0 Marathon, held in the city of Agra. Every single skater who took to the track gave their absolute best and completed the marathon with great courage and determination.",
-      "linkText": "View Details",
-      "linkHref": "#"
-    },
-    {
-      "tag": "news",
-      "title": "District Level Roller Skating Championship Spring",
-      "date": "2026-05-02",
-      "location": "Summer Valley School, MORADABAD",
-      "body": "Aryans International School stands at the top in Roller Speed Skating. The event took place at Summer Valley School, Moradabad.",
-      "linkText": "View Details",
-      "linkHref": "#"
-    },
-    {
-      "tag": "news",
-      "title": "District Level Roller Skating Championship Summer",
-      "date": "2026-04-19",
-      "location": "S.S Children School, MORADABAD",
-      "body": "Aryans International School won First Prize, while Golden Gate Public School and PMS Public School finished 2nd and 3rd respectively.",
-      "linkText": "View Details",
-      "linkHref": "#"
-    }
-  ]
+  "lastUpdated": "2026-09-24T13:29:06.000Z"
 }

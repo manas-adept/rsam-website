@@ -11,26 +11,25 @@
   "events": [
     {
       "id": "evt_district_2026",
-      "title": "4th District Championship 2026",
-      "name": "4th District Championship 2026",
-      "year": "2026",
+      "title": "4th District Championship cum State Trial 2026",
       "category": "District Championship",
-      "date": "15th - 16th October 2026",
-      "startDateTime": "2026-10-15T08:00",
-      "endDateTime": "2026-10-16T18:00",
-      "deadline": "2026-10-01T23:59:59+05:30",
-      "location": "Moradabad Sports Complex, Kanth Road",
+      "year": "2026",
+      "date": "11th October 2026",
+      "startDateTime": "2026-10-11T08:00",
+      "endDateTime": "2026-10-11T15:00",
+      "deadline": "2026-10-08T23:59:00+05:30",
+      "location": "TBD",
       "feeType": "online",
+      "payToOrganizer": false,
       "baseFee": 500,
-      "fee": 500,
       "gatewayPercent": 2,
       "gstPercent": 18,
-      "image": "https://res.cloudinary.com/igjmhsju/image/upload/v1788797466/rsam_website/branding/rsam-logo.png",
-      "description": "Official 4th District Championship for all age groups & disciplines in Moradabad.",
-      "body": "Official 4th District Championship for all age groups & disciplines in Moradabad.",
+      "image": "https://res.cloudinary.com/igjmhsju/image/upload/v1788882417/event-selection-trial-rsfi-2026.jpg",
+      "description": "Official 4th District Championship cum State trial for all age groups & disciplines in Moradabad.",
+      "body": "Official 4th District Championship cum State trial for all age groups & disciplines in Moradabad.",
       "showOnTicker": true,
       "isRegistrationActive": true,
-      "enabled": true
+      "archived": false
     },
     {
       "id": "evt_up_state_2026",
@@ -49,7 +48,7 @@
       "image": "https://res.cloudinary.com/igjmhsju/image/upload/v1788797445/rsam_website/news/news_lko.jpg",
       "description": "Moradabad speeders won 5 Gold, 8 Silver and 4+ Bronze Medals at 7th UP Open-state Championship at Central Academy, Lucknow. Organized by UPRSA and hosted by LRSA.",
       "body": "Moradabad speeders won 5 Gold, 8 Silver and 4+ Bronze Medals at 7th UP Open-state Championship at Central Academy, Lucknow. Organized by UPRSA and hosted by LRSA.",
-      "showOnTicker": true,
+      "showOnTicker": false,
       "isRegistrationActive": false,
       "enabled": true
     },
@@ -70,13 +69,41 @@
       "image": "https://res.cloudinary.com/igjmhsju/image/upload/v1788797458/rsam_website/gallery/felicitaion_ceremony_dmr_2026/row-event.jpg",
       "description": "The Great Skating Marathon 2026 organized by Agra Roller Skating Welfare Association under the aegis of UPRSA.",
       "body": "The Great Skating Marathon 2026 organized by Agra Roller Skating Welfare Association under the aegis of UPRSA.",
-      "showOnTicker": true,
+      "showOnTicker": false,
       "isRegistrationActive": false,
       "enabled": true
     }
   ],
-  "skinsuits": [],
   "news": [
+    {
+      "tag": "news",
+      "title": "Moradabad Skaters Shine at Run on Wheels 4.0 Marathon, Agra",
+      "date": "2026-05-10",
+      "location": "Agra, Uttar Pradesh",
+      "body": "We are proud to announce that our skaters from Moradabad participated in the highly anticipated Run on Wheels 4.0 Marathon, held in the city of Agra. Every single skater who took to the track gave their absolute best and completed the marathon with great courage and determination.",
+      "linkText": "View Details",
+      "linkHref": "#"
+    },
+    {
+      "tag": "news",
+      "title": "District Level Roller Skating Championship Spring",
+      "date": "2026-05-02",
+      "location": "Summer Valley School, MORADABAD",
+      "body": "Aryans International School stands at the top in Roller Speed Skating. The event took place at Summer Valley School, Moradabad.",
+      "linkText": "View Details",
+      "linkHref": "#"
+    },
+    {
+      "tag": "news",
+      "title": "District Level Roller Skating Championship Summer",
+      "date": "2026-04-19",
+      "location": "S.S Children School, MORADABAD",
+      "body": "Aryans International School won First Prize, while Golden Gate Public School and PMS Public School finished 2nd and 3rd respectively.",
+      "linkText": "View Details",
+      "linkHref": "#"
+    }
+  ],
+  "newsItems": [
     {
       "tag": "news",
       "title": "Moradabad Skaters Shine at Run on Wheels 4.0 Marathon, Agra",
@@ -193,7 +220,7 @@
       "designation": "President",
       "designationClass": "president",
       "degrees": "",
-      "photo": "https://res.cloudinary.com/igjmhsju/image/upload/v1788797466/rsam_website/branding/rsam-logo.png",
+      "photo": "https://res.cloudinary.com/igjmhsju/image/upload/v1788797450/rsam_website/officials/refree_dummy.png",
       "category": "executive"
     },
     {
@@ -217,14 +244,14 @@
       "designation": "Technical / Media Person",
       "designationClass": "technical",
       "degrees": "B.Tech",
-      "photo": "https://res.cloudinary.com/igjmhsju/image/upload/v1788797435/rsam_website/officials/manas.jpg",
+      "photo": "https://res.cloudinary.com/igjmhsju/image/upload/v1788797441/rsam_website/officials/manasq.jpg",
       "category": "executive"
     },
     {
       "name": "Parmesh Charan",
       "designation": "State Referee, UPRSA",
       "designationClass": "member",
-      "degrees": "M.Com, M.P.Ed.",
+      "degrees": "",
       "photo": "https://res.cloudinary.com/igjmhsju/image/upload/v1788797452/rsam_website/officials/refree_parmesh.jpg",
       "category": "referee"
     },
@@ -258,14 +285,6 @@
       "designationClass": "member",
       "degrees": "",
       "photo": "https://res.cloudinary.com/igjmhsju/image/upload/v1788797457/rsam_website/officials/refree_vipin.jpg",
-      "category": "referee"
-    },
-    {
-      "name": "Sachin Nainwal",
-      "designation": "District Referee",
-      "designationClass": "member",
-      "degrees": "",
-      "photo": "https://res.cloudinary.com/igjmhsju/image/upload/v1788797454/rsam_website/officials/refree_sachinnainwal.jpg",
       "category": "referee"
     },
     {
@@ -309,15 +328,22 @@
       "category": "referee"
     }
   ],
+  "skinsuit": {
+    "title": "RSAM Official Skater Skinsuit",
+    "subtitle": "Mandatory official racing uniform design for all RSAM athletes",
+    "frontImage": "https://res.cloudinary.com/igjmhsju/image/upload/v1789293116/rsam_website/branding/skinsuit_front.png.png",
+    "backImage": "https://res.cloudinary.com/igjmhsju/image/upload/v1789628080/rsam_website/branding/skinsuit_back.png.png",
+    "description": ""
+  },
   "ticker": "🚀 Welcome to Roller Sports Association Moradabad (RSAM) | Annual Registrations & District Championship 2026 Entries Now Open! | Certified Track & Roller Skating Excellence",
   "gallery": {
-    "cloudinaryBasePath": "rsam_website/gallery",
+    "cloudinaryBasePath": "rsam_website/events",
     "defaultItemsPerPage": 20,
     "autoOptimizeAfterDays": 7,
     "folders": [
       {
         "folderId": "lko_uprsa_7th_2026",
-        "cloudinarySubfolder": "rsam_website/gallery/lko_uprsa_7th_2026",
+        "cloudinarySubfolder": "rsam_website/events/lko_uprsa_7th_2026",
         "title": "7th UP Open State Championship",
         "date": "May 10, 2026",
         "location": "Central Academy, Lucknow",
@@ -327,8 +353,8 @@
         "description": "High-octane moments and victory celebrations from the UPRSA State Championship in Lucknow."
       },
       {
-        "folderId": "dmr_hospital_2026",
-        "cloudinarySubfolder": "rsam_website/gallery/dmr_hospital_2026",
+        "folderId": "felicitaion_ceremony_dmr_2026",
+        "cloudinarySubfolder": "rsam_website/events/felicitaion_ceremony_dmr_2026",
         "title": "Moradabad Skaters Felicitation at DMR Hospital",
         "date": "August 2026",
         "location": "DMR Hospital, Moradabad",
@@ -336,19 +362,8 @@
         "enabled": true,
         "displayOrder": 2,
         "description": "Special felicitation ceremony hosted at DMR Hospital honoring state championship medalists."
-      },
-      {
-        "folderId": "felicitaion_ceremony_dmr_2026",
-        "cloudinarySubfolder": "rsam_website/gallery/felicitaion_ceremony_dmr_2026",
-        "title": "Felicitation Ceremony Moradabad",
-        "date": "April 18, 2026",
-        "location": "Moradabad",
-        "category": "Felicitation",
-        "enabled": true,
-        "displayOrder": 3,
-        "description": "Honoring RSAM athletes for outstanding sportsmanship and track achievements."
       }
     ]
   },
-  "lastUpdated": "2026-09-17T11:20:36.564Z"
+  "lastUpdated": "2026-09-24T13:29:06.000Z"
 }
