@@ -305,7 +305,25 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  async function persistSiteConfig(partialConfig) {
+  let unsavedTabsSet = new Set();
+  let hasUnsavedEdits = false;
+
+  function markDraftUnsaved(categoryTag) {
+    if (categoryTag) unsavedTabsSet.add(categoryTag);
+    hasUnsavedEdits = true;
+    const batchBar = document.getElementById("adminBatchBar");
+    const batchMsg = document.getElementById("batchBarMessage");
+    if (batchBar) {
+      batchBar.hidden = false;
+      batchBar.style.display = "flex";
+      if (batchMsg) {
+        const catList = Array.from(unsavedTabsSet).join(", ");
+        batchMsg.innerHTML = `<strong>Draft Changes Pending (${unsavedTabsSet.size})</strong> — You have unsaved edits in <strong>${catList || 'session'}</strong>. Click "Publish & Save All Changes" when ready to push 1 single commit to GitHub & live site.`;
+      }
+    }
+  }
+
+  async function persistSiteConfig(partialConfig, categoryTag = null, options = {}) {
     if (!window.LIVE_SITE_CONFIG) window.LIVE_SITE_CONFIG = {};
     window.LIVE_SITE_CONFIG = {
       ...window.LIVE_SITE_CONFIG,
@@ -333,19 +351,50 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    const baseUrl = getAdminApiBaseUrl();
-    try {
-      const res = await fetch(`${baseUrl}/api/save-site-config`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(partialConfig)
-      });
-      if (res.ok) {
-        console.log("[Admin] site-config updated successfully on server.");
+    if (options.isBatchPublish === true) {
+      const baseUrl = getAdminApiBaseUrl();
+      try {
+        const res = await fetch(`${baseUrl}/api/save-site-config`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(window.LIVE_SITE_CONFIG)
+        });
+        const data = await res.json();
+        if (res.ok && data && data.success) {
+          unsavedTabsSet.clear();
+          hasUnsavedEdits = false;
+          const batchBar = document.getElementById("adminBatchBar");
+          if (batchBar) {
+            batchBar.hidden = true;
+            batchBar.style.display = "none";
+          }
+          notify("✓ All admin changes published live & synced to GitHub in 1 single commit!", "success");
+        } else {
+          notify("⚠️ Saved in browser, but server sync warning: " + ((data && data.error) || "Unknown error"), "error");
+        }
+      } catch (e) {
+        console.warn("Backend save-site-config fetch warning:", e);
+        notify("⚠️ Saved in browser, but server connection warning.", "error");
       }
-    } catch (e) {
-      console.warn("Backend save-site-config fetch warning:", e);
+    } else {
+      markDraftUnsaved(categoryTag);
     }
+  }
+
+  async function publishAllSiteConfigBatch() {
+    const fullConfig = {
+      fees: (window.LIVE_SITE_CONFIG && window.LIVE_SITE_CONFIG.fees) || {},
+      events: getAdminEvents(),
+      news: getAdminNews(),
+      newsItems: getAdminNews(),
+      highlights: getAdminHighlights(),
+      officials: getAdminOfficials(),
+      skinsuit: (window.LIVE_SITE_CONFIG && window.LIVE_SITE_CONFIG.skinsuit) || {},
+      gallery: (window.LIVE_SITE_CONFIG && window.LIVE_SITE_CONFIG.gallery) || {},
+      ticker: (window.LIVE_SITE_CONFIG && window.LIVE_SITE_CONFIG.ticker) || "🚀 Welcome to Roller Sports Association Moradabad (RSAM)...",
+      lastUpdated: new Date().toISOString()
+    };
+    await persistSiteConfig(fullConfig, null, { isBatchPublish: true });
   }
 
   // 6. Data Loaders (Source of Truth: window.LIVE_SITE_CONFIG from data/site-config.json)
@@ -2139,7 +2188,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const evsStr = JSON.stringify(events);
         localStorage.setItem("RSAM_ADMIN_EVENTS", evsStr);
         updateSessionBaselineKey("events", evsStr);
-        persistSiteConfig({ events });
+        persistSiteConfig({ events }, "Events");
 
         if (isRegActive) {
           const activeStr = JSON.stringify(newEvent);
@@ -2148,7 +2197,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         renderAdminEvents();
-        notify("✓ Championship Event saved permanently for all website visitors!");
+        notify("✓ Event updated in draft! Click 'Publish & Save All Changes' when ready to deploy to live site.", "success");
       } else if (activeModalType === "news") {
         const items = getAdminNews();
         const newItem = {
@@ -2164,9 +2213,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const newsStr = JSON.stringify(items);
         localStorage.setItem("RSAM_ADMIN_NEWS", newsStr);
         updateSessionBaselineKey("news", newsStr);
-        persistSiteConfig({ news: items });
+        persistSiteConfig({ news: items }, "Circulars");
         renderAdminNews();
-        notify("✓ Circular saved permanently.");
+        notify("✓ Circular saved in draft! Click 'Publish & Save All Changes' when ready to deploy.", "success");
       } else if (activeModalType === "highlight") {
         const items = getAdminHighlights();
         const newItem = {
@@ -2183,9 +2232,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const hlStr = JSON.stringify(items);
         localStorage.setItem("RSAM_ADMIN_HIGHLIGHTS", hlStr);
         updateSessionBaselineKey("highlights", hlStr);
-        persistSiteConfig({ highlights: items });
+        persistSiteConfig({ highlights: items }, "Highlights");
         renderAdminHighlights();
-        notify("✓ Highlight saved permanently.");
+        notify("✓ Highlight saved in draft! Click 'Publish & Save All Changes' when ready to deploy.", "success");
       } else if (activeModalType === "official") {
         const items = getAdminOfficials();
         const newItem = {
@@ -2201,9 +2250,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const offStr = JSON.stringify(items);
         localStorage.setItem("RSAM_ADMIN_OFFICIALS", offStr);
         updateSessionBaselineKey("officials", offStr);
-        persistSiteConfig({ officials: items });
+        persistSiteConfig({ officials: items }, "Officials");
         renderAdminOfficials();
-        notify("✓ Official saved permanently.");
+        notify("✓ Official saved in draft! Click 'Publish & Save All Changes' when ready to deploy.", "success");
       } else if (activeModalType === "skinsuit") {
         const skinsuitConfig = {
           title: document.getElementById("mSkinTitle").value.trim(),
@@ -2215,11 +2264,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const skinStr = JSON.stringify(skinsuitConfig);
         localStorage.setItem("RSAM_ADMIN_SKINSUIT", skinStr);
         updateSessionBaselineKey("skinsuit", skinStr);
-        await persistSiteConfig({ skinsuits: [skinsuitConfig], skinsuit: skinsuitConfig });
+        persistSiteConfig({ skinsuits: [skinsuitConfig], skinsuit: skinsuitConfig }, "Skinsuit");
         if (typeof window.renderCertificate === 'function') {
           window.renderCertificate();
         }
-        notify("✓ Official Skinsuit design updated permanently!");
+        notify("✓ Official Skinsuit design saved in draft! Click 'Publish & Save All Changes' when ready to deploy.", "success");
       }
  else if (activeModalType === "galleryFolder") {
         const folders = getAdminGalleryFolders();
@@ -2240,8 +2289,9 @@ document.addEventListener("DOMContentLoaded", () => {
           folders.unshift(updatedFolder);
         }
         persistAdminGalleryFolders(folders);
+        persistSiteConfig({ gallery: { folders } }, "Gallery");
         renderAdminGalleryFolders();
-        notify("✓ Photo Gallery Folder metadata & Folder ID updated and saved for all users!");
+        notify("✓ Photo Gallery Folder saved in draft! Click 'Publish & Save All Changes' when ready to deploy.", "success");
       }
 
       closeModal();
@@ -2316,6 +2366,47 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         initDashboard();
         notify("✓ Session changes reverted to session baseline.");
+      }
+    });
+  }
+
+  const batchPublishBtn = document.getElementById("batchPublishBtn");
+  if (batchPublishBtn) {
+    batchPublishBtn.addEventListener("click", () => {
+      notify("⏳ Publishing all session changes to GitHub in 1 commit...", "info");
+      publishAllSiteConfigBatch();
+    });
+  }
+
+  const batchDiscardBtn = document.getElementById("batchDiscardBtn");
+  if (batchDiscardBtn) {
+    batchDiscardBtn.addEventListener("click", () => {
+      if (confirm("Discard all pending unsaved edits in this session? Your saved dashboard state will be restored.")) {
+        if (!sessionBaseline) snapshotSessionBaseline();
+        const keys = [
+          { prop: 'events', ls: 'RSAM_ADMIN_EVENTS' },
+          { prop: 'event', ls: 'RSAM_ADMIN_EVENT' },
+          { prop: 'news', ls: 'RSAM_ADMIN_NEWS' },
+          { prop: 'highlights', ls: 'RSAM_ADMIN_HIGHLIGHTS' },
+          { prop: 'officials', ls: 'RSAM_ADMIN_OFFICIALS' },
+          { prop: 'skinsuit', ls: 'RSAM_ADMIN_SKINSUIT' }
+        ];
+        keys.forEach(k => {
+          if (sessionBaseline[k.prop] !== null && sessionBaseline[k.prop] !== undefined) {
+            localStorage.setItem(k.ls, sessionBaseline[k.prop]);
+          } else {
+            localStorage.removeItem(k.ls);
+          }
+        });
+        unsavedTabsSet.clear();
+        hasUnsavedEdits = false;
+        const batchBar = document.getElementById("adminBatchBar");
+        if (batchBar) {
+          batchBar.hidden = true;
+          batchBar.style.display = "none";
+        }
+        initDashboard();
+        notify("✓ Pending session drafts discarded.");
       }
     });
   }

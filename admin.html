@@ -83,6 +83,22 @@
           </div>
         </div>
 
+        <!-- Single-Commit Batch Publish Bar -->
+        <div class="admin-batch-bar" id="adminBatchBar" hidden>
+          <div class="batch-bar-info">
+            <span class="batch-pulse-dot"></span>
+            <span id="batchBarMessage"><strong>Unsaved Draft Changes</strong> — You have pending admin edits in your session.</span>
+          </div>
+          <div class="batch-bar-actions">
+            <button type="button" class="btn-batch-publish" id="batchPublishBtn">
+              <i class="fa-solid fa-cloud-arrow-up"></i> 🚀 Publish &amp; Save All Changes (1 Commit)
+            </button>
+            <button type="button" class="btn-batch-discard" id="batchDiscardBtn" title="Discard Unsaved Session Drafts">
+              <i class="fa-solid fa-rotate-left"></i> Discard Drafts
+            </button>
+          </div>
+        </div>
+
         <!-- Dashboard Navigation Tabs (Trust Center Segmented Grid Track) -->
         <div class="admin-tabs" id="adminTabsTrack">
           <button type="button" class="admin-tab-btn active" data-tab="tabEvent">
