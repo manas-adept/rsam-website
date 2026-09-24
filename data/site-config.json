@@ -11,12 +11,12 @@
   "events": [
     {
       "id": "evt_district_2026",
-      "title": "4th District Championship 2026",
+      "title": "4th District Championship cum State Trial 2026",
       "category": "District Championship",
       "year": "2026",
       "date": "11th October 2026",
       "startDateTime": "2026-10-11T08:00",
-      "endDateTime": "2026-10-11T14:00",
+      "endDateTime": "2026-10-11T15:00",
       "deadline": "2026-10-08T23:59:00+05:30",
       "location": "TBD",
       "feeType": "online",
@@ -25,10 +25,10 @@
       "gatewayPercent": 2,
       "gstPercent": 18,
       "image": "https://res.cloudinary.com/igjmhsju/image/upload/v1788882417/event-selection-trial-rsfi-2026.jpg",
-      "description": "Official 4th District Championship / Trial for all age groups & disciplines in Moradabad.",
-      "body": "Official 4th District Championship / Trial for all age groups & disciplines in Moradabad.",
+      "description": "Official 4th District Championship cum State trial for all age groups & disciplines in Moradabad.",
+      "body": "Official 4th District Championship cum State trial for all age groups & disciplines in Moradabad.",
       "showOnTicker": true,
-      "isRegistrationActive": false,
+      "isRegistrationActive": true,
       "archived": false
     },
     {
@@ -328,6 +328,13 @@
       "category": "referee"
     }
   ],
+  "skinsuit": {
+    "title": "RSAM Official Skater Skinsuit",
+    "subtitle": "Mandatory official racing uniform design for all RSAM athletes",
+    "frontImage": "https://res.cloudinary.com/igjmhsju/image/upload/v1789293116/rsam_website/branding/skinsuit_front.png.png",
+    "backImage": "https://res.cloudinary.com/igjmhsju/image/upload/v1789628080/rsam_website/branding/skinsuit_back.png.png",
+    "description": ""
+  },
   "ticker": "🚀 Welcome to Roller Sports Association Moradabad (RSAM) | Annual Registrations & District Championship 2026 Entries Now Open! | Certified Track & Roller Skating Excellence",
   "gallery": {
     "cloudinaryBasePath": "rsam_website/events",
@@ -358,5 +365,5 @@
       }
     ]
   },
-  "lastUpdated": "2026-09-18T17:31:24.000Z"
+  "lastUpdated": "2026-09-24T13:29:06.000Z"
 }
