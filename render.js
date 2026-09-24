@@ -242,7 +242,7 @@ function renderNavbar() {
       const ctaLabel = ev.isRegistrationActive ? 'Register Online &rarr;' : 'View Event &rarr;';
       const evImgSrc = ev.image || 'https://res.cloudinary.com/igjmhsju/image/upload/v1788797466/rsam_website/branding/rsam-logo.png';
       const clickHandler = ev.isRegistrationActive
-        ? `href="event-register.html"`
+        ? `href="event-register.html?eventId=${ev.id}"`
         : `href="index.html#events" onclick="openImageLightbox('${evImgSrc}', '${escapeHTML(ev.title)}')"`;
 
       return `
