@@ -31,6 +31,14 @@ const API_SECRET_KEY = process.env.API_SECRET_KEY || 'rsam_whatsapp_secret_key_2
 const ORG_NAME = process.env.ORGANIZATION_NAME || 'Roller Sports Association Moradabad (RSAM)';
 const COUNTER_FILE = path.join(__dirname, 'chest-counter.json');
 
+function cleanDob(dobStr) {
+  if (!dobStr) return 'N/A';
+  let s = String(dobStr).trim();
+  if (s.includes('T')) s = s.split('T')[0];
+  if (s.includes(' ')) s = s.split(' ')[0];
+  return s;
+}
+
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
@@ -138,13 +146,13 @@ function generateRegistrationPDF(data, regNumber) {
 
       if (isEvent) {
         doc.font('Helvetica-Bold').fontSize(11).fillColor(darkText).text('CHAMPIONSHIP:', 45, y);
-        doc.font('Helvetica-Bold').fontSize(11).fillColor(redColor).text(data.eventName || '4th District Championship 2026', 150, y);
+        doc.font('Helvetica-Bold').fontSize(11).fillColor(redColor).text(data.eventName || data.eventTitle || 'Championship Event', 150, y);
         y += 20;
         doc.moveTo(45, y - 4).lineTo(545, y - 4).lineWidth(0.5).stroke(lightBorder);
       }
 
       const rows = [
-        [['Athlete Name:', data.skaterName || 'N/A'], ['Date of Birth:', data.dob || 'N/A']],
+        [['Athlete Name:', data.skaterName || 'N/A'], ['Date of Birth:', cleanDob(data.dob)]],
         [['Age & Age Group:', `${data.age || 'N/A'} yrs (${data.ageGroup || 'N/A'})`], ['Discipline:', data.discipline || 'N/A']],
         [['School / Club:', data.schoolClub || 'N/A'], ['Aadhaar Card:', data.aadhaar ? String(data.aadhaar).replace(/(\d{4})(?=\d)/g, "$1 ") : 'N/A']],
         [["Father's Name:", data.fatherName || 'N/A'], ["Mother's Name:", data.motherName || 'N/A']],
@@ -189,7 +197,7 @@ function generateRegistrationPDF(data, regNumber) {
       y += 8;
 
       const itemDesc = isEvent
-        ? `4th District Championship Registration Fee (2026)`
+        ? `${data.eventName || data.eventTitle || 'Championship Event'} Registration Fee`
         : `Base Annual Athlete Membership Fee (2026)`;
       const baseFee = isEvent ? '₹500.00' : '₹10.00';
       const gwFee = isEvent ? '+ ₹10.00' : '+ ₹0.20';
@@ -455,46 +463,52 @@ function buildRegistrationMessage(data, regNumber) {
   const paymentStr = data.paymentId
     ? `${data.paymentId} / ${data.paymentStatus || 'SUCCESS'}`
     : (data.paymentStatus || 'SUCCESS');
+  const formattedDob = cleanDob(data.dob);
+  const eventName = data.eventName || data.eventTitle || 'Championship Event';
+  const chestNo = data.eventRegNo || data.chestNo || (regNumber ? String(regNumber).replace(/\D/g, "").slice(-3) : "N/A");
 
   if (isEvent) {
-    return `RSAM Event Registration Confirmation
+    return `🏆 *RSAM Event Registration Confirmation*
 
-Dear ${data.skaterName || 'Athlete'},
+Dear *${data.skaterName || 'Athlete'}*,
 
-Your registration for ${data.eventName || '4th District Championship 2026'} has been received successfully. Please save your registration details for the championship.
+Your registration for *${eventName}* has been received successfully. Please save your registration details for the championship.
 
-• Reg. Number: ${regNumber}
-• Athlete Name: ${data.skaterName}
-• Date of Birth: ${data.dob || 'N/A'} (Age Group: ${data.ageGroup || 'N/A'})
-• Discipline: ${data.discipline || 'N/A'}
-• School / Club: ${data.schoolClub || 'N/A'}
-• Coach: ${coachStr}
-• Payment Status: ${paymentStr}
+🔢 *CHEST NUMBER:* *${chestNo}*
+🎽 _(RSAM Reg. Number: ${regNumber})_
 
-Your PDF certificate has been sent to your registered email. Submitted documents are currently under verification.
+• *Athlete Name:* ${data.skaterName || 'N/A'}
+• *Date of Birth:* ${formattedDob} (Age Group: ${data.ageGroup || 'N/A'})
+• *Discipline:* ${data.discipline || 'N/A'}
+• *School / Club:* ${data.schoolClub || 'N/A'}
+• *Coach:* ${coachStr}
+• *Payment Status:* ${paymentStr}
+
+Your PDF entry pass has been sent to your registered email. Submitted documents are currently under verification.
 
 Best regards,
-RSAM`;
+*RSAM* 🛼🏆`;
   }
 
   return `RSAM Skater Registration Confirmation
 
-Dear ${data.skaterName || 'Athlete'},
+Dear *${data.skaterName || 'Athlete'}*,
 
-Your registration with RSAM for the year 2026 has been received successfully. Please save your registration details for all upcoming trials and championships.
+Your registration with *RSAM* for the year *${data.year || '2026'}* has been received successfully. Please save your registration details for all upcoming trials and championships.
 
-• Reg. Number: ${regNumber}
-• Athlete Name: ${data.skaterName}
-• Date of Birth: ${data.dob || 'N/A'} (Age Group: ${data.ageGroup || 'N/A'})
-• Discipline: ${data.discipline || 'N/A'}
-• School / Club: ${data.schoolClub || 'N/A'}
-• Coach: ${coachStr}
-• Payment Status: ${paymentStr}
+🎽 *RSAM Registration Number:* *${regNumber}*
+
+• *Athlete Name:* ${data.skaterName || 'N/A'}
+• *Date of Birth:* ${formattedDob} (Age Group: ${data.ageGroup || 'N/A'})
+• *Discipline:* ${data.discipline || 'N/A'}
+• *School / Club:* ${data.schoolClub || 'N/A'}
+• *Coach:* ${coachStr}
+• *Payment Status:* ${paymentStr}
 
 Your PDF certificate has been sent to your registered email. Submitted documents are currently under verification.
 
 Best regards,
-RSAM`;
+*RSAM*`;
 }
 
 /**
@@ -506,6 +520,9 @@ function buildCoachRegistrationMessage(data, regNumber) {
     month: 'short',
     year: 'numeric'
   });
+  const formattedDob = cleanDob(data.dob);
+  const eventName = data.eventName || data.eventTitle || 'Championship Event';
+  const chestNo = data.eventRegNo || data.chestNo || (regNumber ? String(regNumber).replace(/\D/g, "").slice(-3) : "N/A");
 
   if (data.type === 'event_registration') {
     return `🏆 *CHAMPIONSHIP ATHLETE ENTRY NOTICE* 🏆
@@ -513,19 +530,21 @@ __________________________________
 
 Dear Coach *${data.coachName || 'Coach'}*,
 
-Your athlete *${data.skaterName}* has successfully registered for the *${data.eventName || '4th District Championship 2026'}*!
+Your athlete *${data.skaterName}* has successfully registered for *${eventName}*!
 
-🎽 *ATHLETE RSAM REGISTRATION NUMBER:* *${regNumber}*
+🔢 *CHEST NUMBER:* *${chestNo}*
+🎽 _(RSAM Reg. Number: ${regNumber})_
 
 📋 *Athlete Championship Summary:*
-• *Event:* ${data.eventName || '4th District Championship 2026'}
+• *Event:* ${eventName}
 • *Athlete Name:* ${data.skaterName}
+• *Chest Number:* ${chestNo}
 • *RSAM Reg. No.:* ${regNumber}
 • *Discipline:* ${data.discipline || 'N/A'}
 • *Age Group:* ${data.ageGroup || 'N/A'}
 • *School / Club:* ${data.schoolClub || 'N/A'}
 • *Father's Name:* ${data.fatherName || 'N/A'}
-• *Athlete Mobile:* ${data.mobile}
+• *Athlete Mobile:* ${data.mobile || 'N/A'}
 • *Submission Date:* ${dateStr}
 
 Thank you for guiding and mentoring athletes under *${ORG_NAME}*!
@@ -546,13 +565,13 @@ Your athlete *${data.skaterName}* has completed annual registration with *${ORG_
 📋 *Athlete Summary:*
 • *Athlete Name:* ${data.skaterName}
 • *RSAM Reg. No.:* ${regNumber}
-• *Date of Birth:* ${data.dob} (Age: ${data.age || 'N/A'})
+• *Date of Birth:* ${formattedDob} (Age: ${data.age || 'N/A'})
 • *Age Group:* ${data.ageGroup || 'N/A'}
 • *School / Club:* ${data.schoolClub || 'N/A'}
 • *Discipline:* ${data.discipline || 'N/A'}
 • *Father's Name:* ${data.fatherName || 'N/A'}
 • *Mother's Name:* ${data.motherName || 'N/A'}
-• *Athlete Mobile:* ${data.mobile}
+• *Athlete Mobile:* ${data.mobile || 'N/A'}
 • *Submitted Date:* ${dateStr}
 
 Thank you for your continuous mentorship and support for RSAM athletes.

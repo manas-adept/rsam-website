@@ -122,6 +122,14 @@ function getAgeGroup(age) {
   return "Above-18";
 }
 
+function cleanDob(dobStr) {
+  if (!dobStr) return 'N/A';
+  let s = String(dobStr).trim();
+  if (s.includes('T')) s = s.split('T')[0];
+  if (s.includes(' ')) s = s.split(' ')[0];
+  return s;
+}
+
 const dobInput      = document.getElementById("dob");
 const ageInput      = document.getElementById("age");
 const ageGroupInput = document.getElementById("ageGroup");
@@ -998,7 +1006,7 @@ function downloadRegistrationPdfInvoice(payloadData) {
   const age = payloadData.age || "N/A";
   const amountPaid = amountPaidVal;
   const paymentId = payloadData.paymentId || "Verified";
-  const dob = payloadData.dob || "N/A";
+  const dob = cleanDob(payloadData.dob);
   const schoolClub = payloadData.schoolClub || "N/A";
   const fatherName = payloadData.fatherName || "N/A";
   const motherName = payloadData.motherName || "N/A";
@@ -1051,7 +1059,7 @@ function downloadRegistrationPdfInvoice(payloadData) {
           <div class="subtitle">Recognized by UPRSA &amp; RSFI (IndiaSkate) · Official Athlete Registration Slip</div>
         </div>
         <div class="badge-box">
-          <span class="badge-label">OFFICIAL RSAM REGISTRATION NUMBER</span>
+          <span class="badge-label">RSAM REGISTRATION NUMBER</span>
           <span class="badge-num">${regNumber}</span>
         </div>
         <div class="section-title">Athlete Profile</div>

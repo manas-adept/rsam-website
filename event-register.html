@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>4th District Championship 2026 — Event Registration | RSAM</title>
+  <title>Championship Event Registration | RSAM</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <link rel="icon" type="image/png" href="https://res.cloudinary.com/igjmhsju/image/upload/v1788797466/rsam_website/branding/rsam-logo.png" />
@@ -58,7 +58,7 @@
     <div class="container">
       <div class="section-header">
         <span class="section-tag">Event Registration</span>
-        <h2>4th District <span class="accent">Championship 2026</span></h2>
+        <h2 id="evtPageHeader">Championship <span class="accent">Registration</span></h2>
         <p class="section-desc">Enter your 2026 RSAM Registration Number to verify and auto-fill your details.</p>
       </div>
 
@@ -185,7 +185,7 @@
           <div class="unreg-icon">⚠️</div>
           <h3>RSAM Registration Not Found</h3>
           <p id="unregModalMessage">Your RSAM Registration Number could not be found for 2026.</p>
-          <p class="unreg-sub">To participate in the <strong>4th District Championship 2026</strong>, skaters must have an active annual RSAM registration.</p>
+          <p class="unreg-sub">To participate in championship events, skaters must have an active annual RSAM registration.</p>
           <div class="unreg-actions">
             <button type="button" class="btn-modal-secondary" id="unregCloseBtn">Try Different Number</button>
             <a href="register.html" class="btn-modal-primary">📝 Complete RSAM Registration First</a>
@@ -198,12 +198,15 @@
         <div class="reg-modal success-card-modal">
           <div class="success-icon-badge">✓</div>
           <h2 class="success-title">Event Entry Confirmed!</h2>
-          <p class="success-subtitle">4th District Championship 2026 Entry Completed</p>
+          <p class="success-subtitle" id="evtSuccessSubtitle">Championship Event Entry Completed</p>
 
           <div class="success-reg-box" id="evtSuccessRegBox">
-            <span class="reg-label">RSAM Athlete Registration Number</span>
-            <span class="reg-number-val" id="evtSuccessRegNoText">R260912001</span>
-            <div class="reg-payment-row">
+            <span class="reg-label">CHEST NUMBER (EVENT ENTRY)</span>
+            <span class="reg-number-val" id="evtSuccessChestNoText" style="font-size: 2.2rem; color: #10b981; letter-spacing: 2px;">611</span>
+            <div class="reg-additional-info" style="margin-top: 6px; font-size: 0.92rem; color: #fbbf24; font-weight: 600;">
+              🎽 RSAM Reg. Number: <span id="evtSuccessRegNoText">R260918611</span>
+            </div>
+            <div class="reg-payment-row" style="margin-top: 10px;">
               <span class="pay-tag">✓ Championship Fee Paid</span>
               <span class="pay-id" id="evtSuccessPaymentIdText">(Razorpay ID: Verified)</span>
             </div>

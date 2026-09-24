@@ -44,12 +44,20 @@ function getActiveEventConfig() {
     try { return JSON.parse(saved); } catch (e) {}
   }
   return (window.ADMIN_CONFIG && window.ADMIN_CONFIG.activeEvent) || {
-    title: "4th District Championship 2026",
+    title: "Championship Event",
     year: "2026",
     baseFee: 500.00,
     gatewayPercent: 2.0,
     gstPercent: 18.0
   };
+}
+
+function cleanDob(dobStr) {
+  if (!dobStr) return 'N/A';
+  let s = String(dobStr).trim();
+  if (s.includes('T')) s = s.split('T')[0];
+  if (s.includes(' ')) s = s.split(' ')[0];
+  return s;
 }
 
 function formatDriveImageUrl(url) {
@@ -397,7 +405,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Build event payload
     const eventPayload = {
       type: "event_registration",
-      eventName: "4th District Championship 2026",
+      eventName: activeEvConfig.title || activeEvConfig.name || "Championship Event",
       year: "2026",
       regNumber: verifiedSkater.regNumber,
       skaterName: verifiedSkater.skaterName,
@@ -428,7 +436,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         <div class="confirm-photo-info">
           <h4>${payload.skaterName}</h4>
           <p>RSAM Reg No: <strong style="color:#f59e0b;">${payload.regNumber}</strong></p>
-          <p>Event: <strong>4th District Championship 2026</strong></p>
+          <p>Event: <strong>${payload.eventName}</strong></p>
         </div>
       </div>
       <div class="confirm-grid">
@@ -508,7 +516,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       currency: "INR",
       payment_capture: 1, // Auto-capture payment immediately
       name: "Roller Sports Association Moradabad",
-      description: `4th District Championship 2026 Entry – ${payload.skaterName}`,
+      description: `${payload.eventName} Entry – ${payload.skaterName}`,
       image: "https://res.cloudinary.com/igjmhsju/image/upload/v1788797466/rsam_website/branding/rsam-logo.png",
       prefill: {
         name: payload.skaterName,
@@ -588,9 +596,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     const evtSuccess = document.getElementById("evtSuccess");
     if (evtSuccess) {
       const regNoEl = document.getElementById("evtSuccessRegNoText");
+      const chestNoEl = document.getElementById("evtSuccessChestNoText");
       const payIdEl = document.getElementById("evtSuccessPaymentIdText");
-      if (regNoEl) regNoEl.textContent = payload.regNumber || 'R260912001';
+      const subtitleEl = document.getElementById("evtSuccessSubtitle");
+
+      const rsamRegNo = payload.regNumber || 'R260918611';
+      const chestNo = payload.eventRegNo || payload.chestNo || (rsamRegNo ? String(rsamRegNo).replace(/\D/g, "").slice(-3) : '611');
+
+      if (regNoEl) regNoEl.textContent = rsamRegNo;
+      if (chestNoEl) chestNoEl.textContent = chestNo;
       if (payIdEl) payIdEl.textContent = `(Razorpay ID: ${payload.paymentId || 'Verified'})`;
+      if (subtitleEl && payload.eventName) subtitleEl.textContent = `${payload.eventName} Entry Completed`;
 
       const dlBtn = document.getElementById("evtDownloadPdfBtn");
       if (dlBtn) {
@@ -613,13 +629,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   function downloadEventPdfInvoice(payload) {
     const regNumber = payload.regNumber || "EVT26_001";
     const skaterName = payload.skaterName || "Athlete";
-    const eventName = payload.eventName || "4th District Championship 2026";
+    const eventName = payload.eventName || activeEvConfig.title || activeEvConfig.name || "Championship Event";
     const discipline = payload.discipline || "Roller Skating";
     const ageGroup = payload.ageGroup || "N/A";
     const age = payload.age || "N/A";
     const amountPaid = payload.amountPaid || "511.80";
     const paymentId = payload.paymentId || "Verified";
-    const dob = payload.dob || "N/A";
+    const dob = cleanDob(payload.dob);
     const schoolClub = payload.schoolClub || "N/A";
     const fatherName = payload.fatherName || "N/A";
     const motherName = payload.motherName || "N/A";
