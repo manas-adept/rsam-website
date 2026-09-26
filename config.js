@@ -23,6 +23,8 @@ window.ENV_CONFIG = {
     sheetUrl: "https://script.google.com/macros/s/AKfycbyrxUIvQMXOzaBFNKwle-kOC0xMlc0ezufhIRXSyyid3Zx6Rhk9SKMZhNIoBBB290Xw/exec",
     razorpayKey: "rzp_test_TZa1vfjhrPJobv",
     openwaServerUrl: "http://localhost:3001/send-registration",
+    upiVpa: "9971844191@ybl",
+    upiPayeeName: "Roller Sports Association Moradabad",
     debug: true
   },
   prod: {
@@ -33,6 +35,8 @@ window.ENV_CONFIG = {
     // ⬇️ UPDATE LIVE RAZORPAY API KEY HERE (e.g. "rzp_live_xxxxxxxxxxxxxx")
     razorpayKey: "rzp_test_TZa1vfjhrPJobv",
     openwaServerUrl: "https://rsam-whatsapp-bot.onrender.com/send-registration",
+    upiVpa: "9971844191@ybl",
+    upiPayeeName: "Roller Sports Association Moradabad",
     debug: false
   },
 
@@ -58,6 +62,8 @@ window.ENV_CONFIG = {
   get sheetUrl() { return this.current.sheetUrl; },
   get razorpayKey() { return this.current.razorpayKey; },
   get openwaServerUrl() { return this.current.openwaServerUrl; },
+  get upiVpa() { return this.current.upiVpa || "9971844191@ybl"; },
+  get upiPayeeName() { return this.current.upiPayeeName || "Roller Sports Association Moradabad"; },
   get debug() { return this.current.debug; }
 };
 

@@ -783,28 +783,31 @@ function formatDateDDMMMYYYY(dateStr) {
           </div>
           
           <!-- Fee & Razorpay Payment Breakdown -->
-          <div class="confirm-fee-breakdown" style="grid-column: span 2; background: ${fee.isFree ? 'rgba(52, 211, 153, 0.08)' : 'rgba(245, 158, 11, 0.08)'}; border: 1px solid ${fee.isFree ? 'rgba(52, 211, 153, 0.25)' : 'rgba(245, 158, 11, 0.25)'}; border-radius: 10px; padding: 1rem; margin-top: 0.5rem;">
+          <div class="confirm-fee-breakdown" style="grid-column: span 2; background: ${fee.isFree ? 'rgba(52, 211, 153, 0.08)' : 'rgba(31, 41, 55, 0.6)'}; border: 1px solid ${fee.isFree ? 'rgba(52, 211, 153, 0.25)' : 'rgba(75, 85, 99, 0.4)'}; border-radius: 10px; padding: 1rem; margin-top: 0.5rem;">
             ${fee.isFree ? `
               <div style="display: flex; justify-content: space-between; font-size: 1.05rem; font-weight: 700; color: #34d399;">
                 <span>Registration Fee Status:</span>
                 <span>🎉 FREE / WAIVED (₹0.00)</span>
               </div>
             ` : `
-              <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #d1d5db; margin-bottom: 0.3rem;">
-                <span>Base Registration Fee:</span>
-                <strong>₹${fee.baseFee.toFixed(2)}</strong>
+              <div style="font-weight: 700; color: #60a5fa; margin-bottom: 0.6rem; font-size: 0.95rem;">
+                💳 Select Payment Method:
               </div>
-              <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #d1d5db; margin-bottom: 0.3rem;">
-                <span>Gateway Transaction Charge (${fee.gwPct}%):</span>
-                <span>+ ₹${fee.gatewayFee.toFixed(2)}</span>
-              </div>
-              <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #d1d5db; margin-bottom: 0.6rem;">
-                <span>GST on Transaction Fee (${fee.gstPct}%):</span>
-                <span>+ ₹${fee.gstFee.toFixed(2)}</span>
-              </div>
-              <div style="display: flex; justify-content: space-between; font-size: 1.05rem; font-weight: 700; color: #f59e0b; border-top: 1px dashed rgba(245, 158, 11, 0.3); padding-top: 0.5rem;">
-                <span>Total Payable Amount (Razorpay):</span>
-                <span style="font-size: 1.2rem;">₹${fee.totalAmount.toFixed(2)}</span>
+              <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+                <label style="display: flex; align-items: center; gap: 0.6rem; background: rgba(16, 185, 129, 0.1); padding: 0.65rem 0.85rem; border-radius: 8px; cursor: pointer; border: 1.5px solid #10b981;">
+                  <input type="radio" name="payMethodOpt" value="upi_qr" checked style="accent-color: #10b981; transform: scale(1.2);" />
+                  <div>
+                    <strong style="color: #34d399; font-size: 0.95rem;">⚡ Direct UPI QR / GPay / PhonePe / Paytm</strong>
+                    <div style="font-size: 0.8rem; color: #d1d5db;">0% Gateway Fee · Pay <strong>₹${fee.baseFee.toFixed(2)}</strong> Total</div>
+                  </div>
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.6rem; background: rgba(245, 158, 11, 0.1); padding: 0.65rem 0.85rem; border-radius: 8px; cursor: pointer; border: 1.5px solid rgba(245, 158, 11, 0.4);">
+                  <input type="radio" name="payMethodOpt" value="razorpay" style="accent-color: #f59e0b; transform: scale(1.2);" />
+                  <div>
+                    <strong style="color: #f59e0b; font-size: 0.95rem;">💳 Credit / Debit Card &amp; Netbanking (Razorpay)</strong>
+                    <div style="font-size: 0.8rem; color: #d1d5db;">+ 2% Fee &amp; GST · Pay <strong>₹${fee.totalAmount.toFixed(2)}</strong> Total</div>
+                  </div>
+                </label>
               </div>
             `}
           </div>
@@ -831,8 +834,123 @@ function formatDateDDMMMYYYY(dateStr) {
           return;
         }
 
-        // Razorpay Checkout Options
-        const rzpOptions = {
+        const selectedOpt = confirmSummaryBody.querySelector('input[name="payMethodOpt"]:checked');
+        const payMethod = selectedOpt ? selectedOpt.value : 'upi_qr';
+
+        if (payMethod === 'upi_qr') {
+          launchUpiQrCheckout(payload, currentFee.baseFee, (updPayload) => {
+            processRegistrationSubmission(updPayload);
+          }, () => {
+            submitBtn.disabled = false;
+            submitBtn.querySelector(".submit-text").hidden = false;
+            submitBtn.querySelector(".submit-spinner").hidden = true;
+          });
+        } else {
+          launchRazorpayCheckout(payload, currentFee);
+        }
+      };
+
+      function launchUpiQrCheckout(payload, baseFeeAmount, onSuccessCallback, onCancelCallback) {
+        let upiModal = document.getElementById("upiQrModal");
+        if (!upiModal) {
+          upiModal = document.createElement("div");
+          upiModal.id = "upiQrModal";
+          upiModal.className = "modal-overlay";
+          upiModal.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:999999; display:flex; align-items:center; justify-content:center; padding:1rem; overflow-y:auto;";
+          document.body.appendChild(upiModal);
+        }
+
+        const envConfig = window.ENV_CONFIG || {};
+        const vpa = envConfig.upiVpa || "9971844191@ybl";
+        const payeeName = envConfig.upiPayeeName || "Roller Sports Association Moradabad";
+        const amountStr = parseFloat(baseFeeAmount).toFixed(2);
+        const noteStr = `RSAM Annual ${payload.skaterName || 'Reg'}`.slice(0, 30);
+
+        const upiUri = `upi://pay?pa=${encodeURIComponent(vpa)}&pn=${encodeURIComponent(payeeName)}&am=${amountStr}&cu=INR&tn=${encodeURIComponent(noteStr)}`;
+        const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(upiUri)}`;
+
+        upiModal.innerHTML = `
+          <div style="background:#111827; border:2px solid #e01c2e; border-radius:16px; width:100%; max-width:480px; padding:1.5rem; color:#fff; box-shadow:0 20px 25px -5px rgba(0,0,0,0.6); font-family:sans-serif; text-align:center; position:relative; margin:auto;">
+            <button type="button" id="upiCloseBtn" style="position:absolute; top:12px; right:16px; background:none; border:none; color:#9ca3af; font-size:1.8rem; cursor:pointer; line-height:1;">&times;</button>
+            
+            <div style="display:inline-flex; align-items:center; gap:0.4rem; background:rgba(16,185,129,0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3); padding:4px 12px; border-radius:20px; font-size:0.8rem; font-weight:700; text-transform:uppercase; margin-bottom:0.8rem;">
+              ⚡ 0% Gateway Fee (Direct UPI Transfer)
+            </div>
+            
+            <h3 style="margin:0 0 0.4rem 0; font-size:1.35rem; color:#f3f4f6;">Pay via UPI (GPay / PhonePe / Paytm)</h3>
+            <p style="margin:0 0 1rem 0; color:#9ca3af; font-size:0.88rem;">Pay <strong>₹${amountStr}</strong> directly to <strong>${escapeHTML(payeeName)}</strong></p>
+            
+            <div style="display:flex; flex-direction:column; gap:0.6rem; margin-bottom:1.2rem;">
+              <a href="${upiUri}" class="btn-primary" style="display:flex; align-items:center; justify-content:center; gap:0.6rem; background:#2563eb; color:#fff; text-decoration:none; padding:0.8rem 1rem; border-radius:10px; font-weight:700; font-size:1rem; box-shadow:0 4px 12px rgba(37,99,235,0.4);">
+                📱 Open Installed UPI App &rarr;
+              </a>
+            </div>
+
+            <div style="background:#fff; border-radius:12px; padding:1rem; display:inline-block; margin-bottom:1rem; box-shadow:0 4px 6px -1px rgba(0,0,0,0.2);">
+              <img src="${qrCodeUrl}" alt="UPI Payment QR Code" style="width:190px; height:190px; display:block; margin:auto;" />
+              <div style="color:#374151; font-size:0.75rem; margin-top:0.4rem; font-weight:600;">Scan with GPay / PhonePe / Paytm / BHIM</div>
+            </div>
+
+            <div style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:0.8rem; text-align:left; margin-bottom:1.2rem; font-size:0.85rem;">
+              <div style="color:#d1d5db; margin-bottom:0.25rem;">📌 <strong>Payee VPA:</strong> <span style="color:#60a5fa; user-select:all; font-weight:600;">${vpa}</span></div>
+              <div style="color:#d1d5db;">💳 <strong>Payable Amount:</strong> <span style="color:#34d399; font-weight:700;">₹${amountStr}</span> <small style="color:#9ca3af;">(0% Gateway Fee)</small></div>
+            </div>
+
+            <div style="background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.3); border-radius:12px; padding:1rem; text-align:left;">
+              <label style="display:block; color:#93c5fd; font-size:0.85rem; font-weight:700; margin-bottom:0.4rem;">
+                Enter 12-Digit UPI UTR / Ref No. (after payment):
+              </label>
+              <input type="text" id="upiUtrInput" maxlength="12" placeholder="e.g. 426719823412" style="width:100%; padding:0.65rem 0.8rem; border-radius:8px; border:1px solid #3b82f6; background:#1f2937; color:#fff; font-size:1rem; font-weight:600; letter-spacing:1px; box-sizing:border-box; text-transform:uppercase; margin-bottom:0.4rem;" />
+              <div id="upiUtrErr" style="color:#ef4444; font-size:0.8rem; margin-bottom:0.6rem;" hidden>Please enter valid 12-digit UPI UTR number from your GPay/PhonePe success screen.</div>
+              
+              <button type="button" id="upiSubmitUtrBtn" class="btn-primary" style="width:100%; padding:0.75rem; font-size:0.95rem; font-weight:700; background:#10b981; border:none; border-radius:8px; color:#fff; cursor:pointer;">
+                ✓ Submit &amp; Get Registration Certificate
+              </button>
+            </div>
+          </div>
+        `;
+
+        upiModal.hidden = false;
+
+        const closeBtn = document.getElementById("upiCloseBtn");
+        if (closeBtn) {
+          closeBtn.onclick = () => {
+            upiModal.hidden = true;
+            if (onCancelCallback) onCancelCallback();
+          };
+        }
+
+        const utrInput = document.getElementById("upiUtrInput");
+        const utrErr = document.getElementById("upiUtrErr");
+        const submitUtrBtn = document.getElementById("upiSubmitUtrBtn");
+
+        if (utrInput) {
+          utrInput.addEventListener("input", () => {
+            utrInput.value = utrInput.value.replace(/\D/g, "").slice(0, 12);
+          });
+        }
+
+        if (submitUtrBtn) {
+          submitUtrBtn.onclick = () => {
+            const rawUtr = (utrInput.value || "").trim();
+            if (rawUtr.length < 10) {
+              utrErr.hidden = false;
+              return;
+            }
+            utrErr.hidden = true;
+            upiModal.hidden = true;
+
+            payload.paymentId = "UPI_" + rawUtr;
+            payload.paymentStatus = "SUCCESS";
+            payload.amountPaid = amountStr;
+            payload.upiUtr = rawUtr;
+
+            if (onSuccessCallback) onSuccessCallback(payload);
+          };
+        }
+      }
+
+      function launchRazorpayCheckout(payload, currentFee) {
           key: (window.ENV_CONFIG && window.ENV_CONFIG.razorpayKey) || "rzp_test_TZa1vfjhrPJobv",
           amount: currentFee.totalAmountPaise,
           currency: "INR",
