@@ -30,6 +30,11 @@ function resolveCurrentEvent() {
   const urlParams = new URLSearchParams(window.location.search);
   const targetId = urlParams.get("eventId");
 
+  if (!targetId || !targetId.trim()) {
+    return { isDirectAccessBlocked: true };
+  }
+
+  const cleanTargetId = targetId.trim();
   let events = [];
   if (window.LIVE_SITE_CONFIG && Array.isArray(window.LIVE_SITE_CONFIG.events) && window.LIVE_SITE_CONFIG.events.length > 0) {
     events = window.LIVE_SITE_CONFIG.events;
@@ -40,30 +45,28 @@ function resolveCurrentEvent() {
     }
   }
 
-  if (targetId && Array.isArray(events) && events.length > 0) {
-    const matched = events.find(e => e.id === targetId);
+  if (Array.isArray(events) && events.length > 0) {
+    const matched = events.find(e => e.id === cleanTargetId);
     if (matched) return matched;
   }
 
-  if (Array.isArray(events) && events.length > 0) {
-    const active = events.find(e => e.isRegistrationActive && !e.archived && e.enabled !== false);
-    if (active) return active;
+  if (cleanTargetId === "evt_district_2026") {
+    const saved = localStorage.getItem("RSAM_ADMIN_EVENT");
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) {}
+    }
+    return (window.ADMIN_CONFIG && window.ADMIN_CONFIG.activeEvent) || {
+      id: "evt_district_2026",
+      title: "4th District Championship cum State Trial 2026",
+      year: "2026",
+      baseFee: 500.00,
+      gatewayPercent: 2.0,
+      gstPercent: 18.0,
+      isRegistrationActive: false
+    };
   }
 
-  const saved = localStorage.getItem("RSAM_ADMIN_EVENT");
-  if (saved) {
-    try { return JSON.parse(saved); } catch (e) {}
-  }
-
-  return (window.ADMIN_CONFIG && window.ADMIN_CONFIG.activeEvent) || {
-    id: "evt_district_2026",
-    title: "4th District Championship cum State Trial 2026",
-    year: "2026",
-    baseFee: 500.00,
-    gatewayPercent: 2.0,
-    gstPercent: 18.0,
-    isRegistrationActive: false
-  };
+  return { isNotFound: true, targetId: cleanTargetId };
 }
 
 function getActiveEventConfig() {
@@ -113,12 +116,12 @@ function formatDriveImageUrl(url) {
   return url;
 }
 
-let activeEvConfig     = resolveCurrentEvent();
-let BASE_FEE           = activeEvConfig.baseFee !== undefined ? parseFloat(activeEvConfig.baseFee) : 500.00;
-let GATEWAY_CHARGE     = parseFloat(((BASE_FEE * (parseFloat(activeEvConfig.gatewayPercent) || 2.0)) / 100).toFixed(2));
-let GST_CHARGE         = parseFloat(((GATEWAY_CHARGE * (parseFloat(activeEvConfig.gstPercent) || 18.0)) / 100).toFixed(2));
-let TOTAL_AMOUNT       = parseFloat((BASE_FEE + GATEWAY_CHARGE + GST_CHARGE).toFixed(2));
-let TOTAL_AMOUNT_PAISE = Math.round(TOTAL_AMOUNT * 100);
+let activeEvConfig     = { title: "Championship Event", baseFee: 500, gatewayPercent: 2, gstPercent: 18 };
+let BASE_FEE           = 500.00;
+let GATEWAY_CHARGE     = 10.00;
+let GST_CHARGE         = 1.80;
+let TOTAL_AMOUNT       = 511.80;
+let TOTAL_AMOUNT_PAISE = 51180;
 
 let verifiedSkater = null;
 
@@ -147,9 +150,50 @@ document.addEventListener("DOMContentLoaded", async () => {
   await fetchSiteConfigEvent();
 
   const currentEvent = resolveCurrentEvent();
+
+  // 1. Direct link protection (No eventId query param in URL)
+  if (!currentEvent || currentEvent.isDirectAccessBlocked) {
+    const lookupCard = document.getElementById("lookupCard");
+    const evtForm = document.getElementById("evtForm");
+    if (evtForm) evtForm.style.display = "none";
+    if (lookupCard) {
+      lookupCard.innerHTML = `
+        <div class="lookup-header" style="text-align:center; padding: 2.5rem 1rem;">
+          <div style="font-size:3.5rem; margin-bottom:0.5rem;">🔒</div>
+          <h3 style="color:#ef4444; font-size:1.6rem; margin-bottom:0.4rem;">Direct Access Not Allowed</h3>
+          <p style="color:#d1d5db; font-size:1.05rem; max-width:540px; margin:0.5rem auto 1.5rem auto;">
+            Directly opening this registration link is not permitted. Please select a specific event from the website to proceed with registration.
+          </p>
+          <a href="index.html#events" class="btn-primary" style="display:inline-block; margin-top:0.5rem; padding:0.7rem 1.8rem;">&larr; View Events &amp; Register</a>
+        </div>
+      `;
+    }
+    return;
+  }
+
+  // 2. Invalid or non-existent eventId
+  if (currentEvent.isNotFound) {
+    const lookupCard = document.getElementById("lookupCard");
+    const evtForm = document.getElementById("evtForm");
+    if (evtForm) evtForm.style.display = "none";
+    if (lookupCard) {
+      lookupCard.innerHTML = `
+        <div class="lookup-header" style="text-align:center; padding: 2.5rem 1rem;">
+          <div style="font-size:3.5rem; margin-bottom:0.5rem;">❓</div>
+          <h3 style="color:#ef4444; font-size:1.6rem; margin-bottom:0.4rem;">Event Not Found</h3>
+          <p style="color:#d1d5db; font-size:1.05rem; max-width:540px; margin:0.5rem auto 1.5rem auto;">
+            The requested event (ID: <strong>${escapeHTML(currentEvent.targetId || '')}</strong>) could not be found or has been removed.
+          </p>
+          <a href="index.html#events" class="btn-primary" style="display:inline-block; margin-top:0.5rem; padding:0.7rem 1.8rem;">&larr; View Upcoming Events</a>
+        </div>
+      `;
+    }
+    return;
+  }
+
   activeEvConfig = currentEvent;
 
-  // Check if registration is active for this specific event
+  // 3. Check if registration is active for this specific event
   const isRegActive = currentEvent.isRegistrationActive && !currentEvent.archived && currentEvent.enabled !== false;
   
   // Check event deadline if specified
