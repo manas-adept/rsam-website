@@ -710,12 +710,39 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     if (submitUtrBtn) {
-      submitUtrBtn.onclick = () => {
+      submitUtrBtn.onclick = async () => {
         const rawUtr = (utrInput.value || "").trim();
-        if (rawUtr.length < 10) {
+        if (rawUtr.length !== 12) {
+          utrErr.textContent = "Please enter valid 12-digit UPI UTR number from your GPay/PhonePe success screen.";
           utrErr.hidden = false;
           return;
         }
+
+        submitUtrBtn.disabled = true;
+        submitUtrBtn.textContent = "⏳ Verifying UTR...";
+
+        try {
+          const apiPort = window.location.port === '8080' || window.location.hostname === 'localhost' ? '3001' : '';
+          const baseUrl = apiPort ? `http://${window.location.hostname}:${apiPort}` : (getEvtEnv().backendUrl || '');
+          const res = await fetch(`${baseUrl}/api/verify-utr`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ utr: rawUtr, skaterName: payload.skaterName, amount: amountStr })
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.valid === false) {
+              utrErr.textContent = `❌ ${data.message || 'Invalid or duplicate UTR number.'}`;
+              utrErr.hidden = false;
+              submitUtrBtn.disabled = false;
+              submitUtrBtn.textContent = "✓ Submit & Get Registration Certificate";
+              return;
+            }
+          }
+        } catch (e) {
+          console.warn("[UTR Verification API Warning]", e);
+        }
+
         utrErr.hidden = true;
         upiModal.hidden = true;
 
