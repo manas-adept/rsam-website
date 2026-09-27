@@ -1612,106 +1612,100 @@ app.post('/api/approve-payment', async (req, res) => {
     const isApprove = action === 'approve';
     const newStatus = isApprove ? 'VERIFIED' : 'REJECTED';
 
-    console.log(`[Admin Payment Approval] Reg: ${regNumber}, Action: ${action}`);
+    console.log(`[Admin Payment Approval] Reg: ${regNumber}, Action: ${action}, Sheet: ${sheetName}`);
 
-    // Update in Google Apps Script if URL available
+    // Update in Google Apps Script via GET parameter request to avoid 302 POST redirects
     const sheetUrl = process.env.SHEET_URL || process.env.GOOGLE_SHEET_SCRIPT_URL || 'https://script.google.com/macros/s/AKfycbyrxUIvQMXOzaBFNKwle-kOC0xMlc0ezufhIRXSyyid3Zx6Rhk9SKMZhNIoBBB290Xw/exec';
-    try {
-      await fetch(sheetUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'update_payment_status',
-          regNumber,
-          sheetName: sheetName || 'Registrations 2026',
-          paymentStatus: newStatus,
-          rejectReason: rejectReason || ''
-        })
-      });
-    } catch (e) {
-      console.warn('[Sheet Status Update Warning]', e.message);
-    }
+    const updateUrl = `${sheetUrl}?action=update_payment_status&regNumber=${encodeURIComponent(regNumber)}&sheetName=${encodeURIComponent(sheetName || '')}&paymentStatus=${encodeURIComponent(newStatus)}&skaterName=${encodeURIComponent(skaterName || '')}`;
 
-    // Send secondary WhatsApp Confirmation Message & PDF Email Pass upon Payment Approval!
-    if (isApprove) {
-      const athleteData = {
-        type: 'event_registration',
-        skaterName: skaterName || 'Athlete',
-        mobile: mobile,
-        coachMobile: coachMobile,
-        coachName: coachName,
-        eventName: eventName || sheetName || 'District Championship 2026',
-        eventRegNo: eventRegNo || chestNo || (regNumber ? String(regNumber).replace(/\D/g, "").slice(-3) : ""),
-        chestNo: chestNo || eventRegNo,
-        discipline: discipline,
-        ageGroup: ageGroup,
-        schoolClub: schoolClub,
-        dob: dob,
-        email: email,
-        paymentStatus: 'VERIFIED',
-        regNumber: regNumber
-      };
+    fetch(updateUrl)
+      .then(r => r.json())
+      .then(d => console.log(`[Google Sheet Update Result] Reg: ${regNumber}, Updated: ${d.updated}, Sheet: ${d.sheet}`))
+      .catch(e => console.warn('[Sheet Status Update Warning]', e.message));
 
-      if (sock && isConnected) {
-        try {
-          if (athleteData.mobile) {
-            const skaterJid = formatWhatsAppJid(athleteData.mobile);
-            if (skaterJid) {
-              const skaterMsg = buildRegistrationMessage(athleteData, regNumber);
-              console.log(`[WhatsApp Approval] Sending secondary confirmation message to ${skaterJid} for ${athleteData.skaterName}...`);
-              await sock.sendMessage(skaterJid, { text: skaterMsg });
-              console.log(`[WhatsApp Approval] Sent secondary confirmation message to ${athleteData.skaterName}!`);
-            }
-          }
-
-          if (athleteData.coachMobile && String(athleteData.coachMobile).replace(/\D/g, "").length === 10) {
-            const coachJid = formatWhatsAppJid(athleteData.coachMobile);
-            if (coachJid) {
-              const coachMsg = buildCoachRegistrationMessage(athleteData, regNumber);
-              console.log(`[WhatsApp Approval] Sending secondary coach confirmation message to ${coachJid}...`);
-              await sock.sendMessage(coachJid, { text: coachMsg });
-            }
-          }
-        } catch (waErr) {
-          console.error('[WhatsApp Approval Message Error]:', waErr.message);
-        }
-      }
-
-      // Generate PDF & Send Email upon Payment Approval
-      if (athleteData.email) {
-        try {
-          const pdfBuffer = await generateRegistrationPDF(athleteData, regNumber);
-          console.log(`[Approval Email] Sending confirmation email with PDF pass to ${athleteData.email}...`);
-          await sendRegistrationEmail(athleteData, regNumber, pdfBuffer);
-          console.log(`[Approval Email] Sent confirmation email with PDF pass to ${athleteData.email}!`);
-        } catch (eErr) {
-          console.warn('[Approval Email Warning]', eErr.message);
-        }
-      }
-    } else {
-      // Send Rejection WhatsApp Notification with Admin Note
-      if (sock && isConnected && mobile) {
-        try {
-          const skaterJid = formatWhatsAppJid(mobile);
-          if (skaterJid) {
-            const rejectMsg = buildRejectionMessage({ skaterName, eventName: eventName || sheetName }, regNumber, rejectReason);
-            console.log(`[WhatsApp Rejection] Sending rejection notice with note to ${skaterJid}...`);
-            await sock.sendMessage(skaterJid, { text: rejectMsg });
-            console.log(`[WhatsApp Rejection] Sent rejection notice to ${skaterName}!`);
-          }
-        } catch (rErr) {
-          console.error('[WhatsApp Rejection Error]:', rErr.message);
-        }
-      }
-    }
-
-    return res.json({
+    // Send HTTP response immediately so UI updates instantly without hanging
+    res.json({
       status: 'ok',
       message: isApprove 
-        ? `Payment approved for ${regNumber}! Status updated to VERIFIED, WhatsApp confirmation & PDF email pass sent.` 
-        : `Payment rejected for ${regNumber}. Rejection notification sent to skater.`,
+        ? `Payment approved for ${regNumber}! Status set to VERIFIED.` 
+        : `Payment rejected for ${regNumber}.`,
       paymentStatus: newStatus
     });
+
+    // Run secondary WhatsApp Confirmation & PDF Email Pass asynchronously in background
+    (async () => {
+      if (isApprove) {
+        const athleteData = {
+          type: 'event_registration',
+          skaterName: skaterName || 'Athlete',
+          mobile: mobile,
+          coachMobile: coachMobile,
+          coachName: coachName,
+          eventName: eventName || sheetName || 'District Championship 2026',
+          eventRegNo: eventRegNo || chestNo || (regNumber ? String(regNumber).replace(/\D/g, "").slice(-3) : ""),
+          chestNo: chestNo || eventRegNo,
+          discipline: discipline,
+          ageGroup: ageGroup,
+          schoolClub: schoolClub,
+          dob: dob,
+          email: email,
+          paymentStatus: 'VERIFIED',
+          regNumber: regNumber
+        };
+
+        if (sock && isConnected) {
+          try {
+            if (athleteData.mobile) {
+              const skaterJid = formatWhatsAppJid(athleteData.mobile);
+              if (skaterJid) {
+                const skaterMsg = buildRegistrationMessage(athleteData, regNumber);
+                console.log(`[WhatsApp Approval] Sending secondary confirmation message to ${skaterJid} for ${athleteData.skaterName}...`);
+                await sock.sendMessage(skaterJid, { text: skaterMsg });
+                console.log(`[WhatsApp Approval] Sent secondary confirmation message to ${athleteData.skaterName}!`);
+              }
+            }
+
+            if (athleteData.coachMobile && String(athleteData.coachMobile).replace(/\D/g, "").length === 10) {
+              const coachJid = formatWhatsAppJid(athleteData.coachMobile);
+              if (coachJid) {
+                const coachMsg = buildCoachRegistrationMessage(athleteData, regNumber);
+                console.log(`[WhatsApp Approval] Sending secondary coach confirmation message to ${coachJid}...`);
+                await sock.sendMessage(coachJid, { text: coachMsg });
+              }
+            }
+          } catch (waErr) {
+            console.error('[WhatsApp Approval Message Error]:', waErr.message);
+          }
+        }
+
+        // Generate PDF & Send Email upon Payment Approval
+        if (athleteData.email) {
+          try {
+            const pdfBuffer = await generateRegistrationPDF(athleteData, regNumber);
+            console.log(`[Approval Email] Sending confirmation email with PDF pass to ${athleteData.email}...`);
+            await sendRegistrationEmail(athleteData, regNumber, pdfBuffer);
+            console.log(`[Approval Email] Sent confirmation email with PDF pass to ${athleteData.email}!`);
+          } catch (eErr) {
+            console.warn('[Approval Email Warning]', eErr.message);
+          }
+        }
+      } else {
+        // Send Rejection WhatsApp Notification with Admin Note
+        if (sock && isConnected && mobile) {
+          try {
+            const skaterJid = formatWhatsAppJid(mobile);
+            if (skaterJid) {
+              const rejectMsg = buildRejectionMessage({ skaterName, eventName: eventName || sheetName }, regNumber, rejectReason);
+              console.log(`[WhatsApp Rejection] Sending rejection notice with note to ${skaterJid}...`);
+              await sock.sendMessage(skaterJid, { text: rejectMsg });
+              console.log(`[WhatsApp Rejection] Sent rejection notice to ${skaterName}!`);
+            }
+          } catch (rErr) {
+            console.error('[WhatsApp Rejection Error]:', rErr.message);
+          }
+        }
+      }
+    })().catch(bErr => console.error('[Background Notification Exception]:', bErr.message));
 
   } catch (err) {
     return res.status(500).json({ status: 'error', message: err.message });

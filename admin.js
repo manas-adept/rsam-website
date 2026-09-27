@@ -3137,7 +3137,12 @@ document.addEventListener("DOMContentLoaded", () => {
   let activePaymentFilter = "all";
   let activePaymentEventFilter = "all";
 
-  window.RSAM_PAYMENT_STATUS_OVERRIDES = window.RSAM_PAYMENT_STATUS_OVERRIDES || {};
+  try {
+    const savedOverrides = localStorage.getItem("RSAM_PAYMENT_STATUS_OVERRIDES");
+    window.RSAM_PAYMENT_STATUS_OVERRIDES = savedOverrides ? JSON.parse(savedOverrides) : (window.RSAM_PAYMENT_STATUS_OVERRIDES || {});
+  } catch (e) {
+    window.RSAM_PAYMENT_STATUS_OVERRIDES = window.RSAM_PAYMENT_STATUS_OVERRIDES || {};
+  }
 
   function getDirectImageUrl(url) {
     if (!url || url === "—" || url === "N/A") return "";
@@ -3219,7 +3224,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
 
-    // Apply local memory overrides so actions update instantly without waiting for sheet sync
+    // Apply local memory & localStorage overrides so actions update instantly without waiting for sheet sync
     allRecords.forEach(r => {
       const key = r.regNumber || r.registrationNo || r.eventRegNo || r.rsamRegNo;
       if (key && window.RSAM_PAYMENT_STATUS_OVERRIDES[key]) {
@@ -3403,10 +3408,17 @@ document.addEventListener("DOMContentLoaded", () => {
           (r.regNumber || r.registrationNo || r.eventRegNo || r.rsamRegNo) === regNo && (!sheetName || r.sheetName === sheetName)
         ) || {};
 
-        // 1. Mark in local memory overrides immediately so UI updates right away
+        // 1. Mark in local memory & localStorage overrides immediately so UI updates right away
         window.RSAM_PAYMENT_STATUS_OVERRIDES[regNo] = 'VERIFIED';
+        try {
+          localStorage.setItem("RSAM_PAYMENT_STATUS_OVERRIDES", JSON.stringify(window.RSAM_PAYMENT_STATUS_OVERRIDES));
+        } catch(e) {}
         rec.paymentStatus = 'VERIFIED';
         rec.status = 'VERIFIED';
+
+        // Direct backup GET call to Google Apps Script URL
+        const scriptUrl = (window.ENV_CONFIG && window.ENV_CONFIG.sheetUrl) || "https://script.google.com/macros/s/AKfycbyrxUIvQMXOzaBFNKwle-kOC0xMlc0ezufhIRXSyyid3Zx6Rhk9SKMZhNIoBBB290Xw/exec";
+        fetch(`${scriptUrl}?action=update_payment_status&regNumber=${encodeURIComponent(regNo)}&sheetName=${encodeURIComponent(sheetName || rec.sheetName || '')}&paymentStatus=VERIFIED&skaterName=${encodeURIComponent(rec.skaterName || rec.name || '')}`, { mode: 'no-cors' }).catch(() => {});
 
         try {
           const baseUrl = getAdminApiBaseUrl();
@@ -3459,10 +3471,17 @@ document.addEventListener("DOMContentLoaded", () => {
         btn.disabled = true;
         btn.textContent = "⏳ Rejecting...";
 
-        // 1. Mark in local memory overrides immediately so UI updates right away
+        // 1. Mark in local memory & localStorage overrides immediately so UI updates right away
         window.RSAM_PAYMENT_STATUS_OVERRIDES[regNo] = 'REJECTED';
+        try {
+          localStorage.setItem("RSAM_PAYMENT_STATUS_OVERRIDES", JSON.stringify(window.RSAM_PAYMENT_STATUS_OVERRIDES));
+        } catch(e) {}
         rec.paymentStatus = 'REJECTED';
         rec.status = 'REJECTED';
+
+        // Direct backup GET call to Google Apps Script URL
+        const scriptUrl = (window.ENV_CONFIG && window.ENV_CONFIG.sheetUrl) || "https://script.google.com/macros/s/AKfycbyrxUIvQMXOzaBFNKwle-kOC0xMlc0ezufhIRXSyyid3Zx6Rhk9SKMZhNIoBBB290Xw/exec";
+        fetch(`${scriptUrl}?action=update_payment_status&regNumber=${encodeURIComponent(regNo)}&sheetName=${encodeURIComponent(sheetName || rec.sheetName || '')}&paymentStatus=REJECTED&skaterName=${encodeURIComponent(skaterName)}`, { mode: 'no-cors' }).catch(() => {});
 
         try {
           const baseUrl = getAdminApiBaseUrl();

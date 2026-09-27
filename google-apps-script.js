@@ -124,6 +124,24 @@ function doGet(e) {
       })).setMimeType(ContentService.MimeType.JSON);
     }
 
+    // Direct Payment Status Update via GET (e.g. ?action=update_payment_status&regNumber=R260918611&paymentStatus=VERIFIED)
+    if (action === "update_payment_status") {
+      const regNo = (e.parameter.regNumber || e.parameter.regNo || "").trim();
+      const sheetName = e.parameter.sheetName || "";
+      const newStatus = e.parameter.paymentStatus || e.parameter.status || "VERIFIED";
+      const skaterName = e.parameter.skaterName || "";
+      const ss = getSpreadsheet();
+      const res = performPaymentStatusUpdate(ss, regNo, sheetName, newStatus, skaterName);
+      return ContentService.createTextOutput(JSON.stringify({
+        status: "ok",
+        action: "update_payment_status",
+        regNumber: regNo,
+        updated: res.updated,
+        sheet: res.sheet,
+        newStatus: newStatus
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+
     const ss = getSpreadsheet();
     if (!ss) {
       return ContentService.createTextOutput(JSON.stringify({ status: "error", message: "Could not access spreadsheet." }))
@@ -361,43 +379,18 @@ function doPost(e) {
     }
 
     if (data.action === "update_payment_status") {
-      const regNo = (data.regNumber || "").trim().toUpperCase();
+      const regNo = (data.regNumber || data.regNo || "").trim();
       const targetSheetName = data.sheetName || "";
-      const newStatus = data.paymentStatus || "VERIFIED";
+      const newStatus = data.paymentStatus || data.status || "VERIFIED";
+      const skaterName = data.skaterName || "";
       const ss = getSpreadsheet();
-      let updated = false;
-
-      if (ss && regNo) {
-        const targetSheet = targetSheetName ? ss.getSheetByName(targetSheetName) : null;
-        const sheetsToSearch = targetSheet ? [targetSheet] : ss.getSheets();
-        for (let sheet of sheetsToSearch) {
-          const rows = sheet.getDataRange().getValues();
-          if (rows.length < 2) continue;
-          const headers = rows[0].map(h => String(h).trim().toLowerCase());
-          
-          let regIdx = headers.findIndex(h => h.includes("rsam reg") || h.includes("reg no") || h.includes("registration no") || h.includes("event reg no"));
-          if (regIdx === -1) regIdx = 1;
-          
-          let statusIdx = headers.findIndex(h => h.includes("payment status") || h.includes("status"));
-          if (statusIdx === -1) statusIdx = 19;
-
-          for (let i = 1; i < rows.length; i++) {
-            const rowReg = String(rows[i][regIdx] || "").trim().toUpperCase();
-            if (rowReg === regNo) {
-              sheet.getRange(i + 1, statusIdx + 1).setValue(newStatus);
-              updated = true;
-              break;
-            }
-          }
-          if (updated) break;
-        }
-      }
-
+      const res = performPaymentStatusUpdate(ss, regNo, targetSheetName, newStatus, skaterName);
       return ContentService.createTextOutput(JSON.stringify({
         status: "ok",
         action: "update_payment_status",
         regNumber: regNo,
-        updated: updated,
+        updated: res.updated,
+        sheet: res.sheet,
         newStatus: newStatus
       })).setMimeType(ContentService.MimeType.JSON);
     }
@@ -1208,4 +1201,50 @@ function saveFileToDrive(fileObj, prefix) {
     Logger.log("File save error: " + err.toString());
     return "Error saving file: " + err.toString();
   }
+}
+
+function performPaymentStatusUpdate(ss, regNo, targetSheetName, newStatus, skaterName) {
+  if (!ss || !regNo) return { updated: false, reason: "No spreadsheet or regNo" };
+
+  const targetReg = String(regNo).trim().toUpperCase();
+  const cleanDigits = targetReg.replace(/\D/g, "");
+  const targetSheet = targetSheetName ? ss.getSheetByName(targetSheetName) : null;
+  const sheetsToSearch = targetSheet ? [targetSheet] : ss.getSheets();
+  let updated = false;
+  let matchedSheet = "";
+
+  for (let sheet of sheetsToSearch) {
+    const rows = sheet.getDataRange().getValues();
+    if (rows.length < 2) continue;
+
+    const headers = rows[0].map(h => String(h).trim().toLowerCase());
+    
+    let statusIdx = headers.findIndex(h => h.includes("payment status") || h === "status" || h.includes("payment_status"));
+    if (statusIdx === -1) {
+      statusIdx = headers.findIndex(h => h.includes("payment"));
+    }
+    if (statusIdx === -1) statusIdx = 17; // Default to column 18 if header not found
+
+    for (let i = 1; i < rows.length; i++) {
+      const row = rows[i];
+      const valCol1 = String(row[1] || "").trim().toUpperCase(); // Event Reg No (001, 002...)
+      const valCol2 = String(row[2] || "").trim().toUpperCase(); // RSAM Reg No (R260918611)
+      const rowName = String(row[4] || row[3] || "").trim().toUpperCase(); // Skater Name
+
+      const isMatch = (valCol1 === targetReg) || 
+                      (valCol2 === targetReg) || 
+                      (cleanDigits && cleanDigits.length >= 3 && (valCol1.replace(/\D/g, "") === cleanDigits || valCol2.replace(/\D/g, "") === cleanDigits)) ||
+                      (skaterName && skaterName.trim().toUpperCase() === rowName);
+
+      if (isMatch) {
+        sheet.getRange(i + 1, statusIdx + 1).setValue(newStatus);
+        updated = true;
+        matchedSheet = sheet.getName();
+        break;
+      }
+    }
+    if (updated) break;
+  }
+
+  return { updated: updated, sheet: matchedSheet };
 }
