@@ -3509,7 +3509,7 @@ document.addEventListener("DOMContentLoaded", () => {
               coachMobile: rec.coachMobile || '',
               coachName: rec.coachName || '',
               eventName: rec.eventName || rec.eventTitle || sheetName || 'District Championship 2026',
-              eventRegNo: rec.eventRegNo || rec.chestNo || (regNo ? String(regNo).replace(/\D/g, "").slice(-3) : ''),
+              eventRegNo: rec.eventRegNo || rec.chestNo || (regNo ? String(100 + (Number(String(regNo).replace(/\D/g, "").slice(-3)) % 900)) : '100'),
               discipline: rec.discipline || '',
               ageGroup: rec.ageGroup || cleanAgeGroup || '',
               schoolClub: rec.schoolClub || '',

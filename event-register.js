@@ -970,7 +970,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const subtitleEl = document.getElementById("evtSuccessSubtitle");
 
       const rsamRegNo = payload.regNumber || 'R260918611';
-      const chestNo = payload.eventRegNo || payload.chestNo || (rsamRegNo ? String(rsamRegNo).replace(/\D/g, "").slice(-3) : '611');
+      const chestNo = payload.eventRegNo || payload.chestNo || (rsamRegNo ? String(100 + (Number(String(rsamRegNo).replace(/\D/g, "").slice(-3)) % 900)) : '100');
 
       const rawSt = String(payload.paymentStatus || payload.status || '').toUpperCase();
       const isApproved = rawSt === 'VERIFIED' || rawSt === 'PAID' || rawSt === 'APPROVED' || rawSt === 'SUCCESS' || rawSt === 'WAIVED';

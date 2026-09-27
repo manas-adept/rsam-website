@@ -465,9 +465,10 @@ function doPost(e) {
 
       const rsamRegNo = data.regNumber || "R260918611";
       
-      // Generate 100% Unique Sequential 3-Digit Event Chest Registration Number per Event
+      // Generate 100% Unique Sequential 3-Digit Event Chest Registration Number per Event starting from 100
       const currentEventRows = Math.max(1, eventSheet.getLastRow());
-      const eventRegNo = data.eventRegNo || String(currentEventRows).padStart(3, '0');
+      const chestNum = 100 + Math.max(0, currentEventRows - 1);
+      const eventRegNo = data.eventRegNo || String(chestNum).padStart(3, '0');
 
       const photoUrl = saveFileToDrive(data.skaterPhoto, rsamRegNo + "_Photo");
       const proofUrl = saveFileToDrive(data.paymentScreenshot || data.paymentProof, rsamRegNo + "_PaymentProof");

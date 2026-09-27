@@ -116,7 +116,7 @@ function generateRegistrationPDF(data, regNumber) {
       doc.on('end', () => resolve(Buffer.concat(buffers)));
 
       const isEvent = (data.type === 'event_registration');
-      const eventRegNo = isEvent ? (String(regNumber).replace(/\D/g, "").slice(-3) || "611") : null;
+      const eventRegNo = isEvent ? (data.eventRegNo || data.chestNo || (String(regNumber).replace(/\D/g, "").slice(-3) ? String(100 + (Number(String(regNumber).replace(/\D/g, "").slice(-3)) % 900)) : "100")) : null;
 
       const redColor = '#cc001b';
       const borderRed = '#d92638';
@@ -495,7 +495,7 @@ function buildRegistrationMessage(data, regNumber) {
 
   const formattedDob = cleanDob(data.dob);
   const eventName = data.eventName || data.eventTitle || 'Championship Event';
-  const chestNo = data.eventRegNo || data.chestNo || (regNumber ? String(regNumber).replace(/\D/g, "").slice(-3) : "N/A");
+  const chestNo = data.eventRegNo || data.chestNo || (regNumber ? String(100 + (Number(String(regNumber).replace(/\D/g, "").slice(-3)) % 900)) : "100");
 
   if (isEvent) {
     if (!isVerified) {
@@ -574,7 +574,7 @@ function buildCoachRegistrationMessage(data, regNumber) {
   });
   const formattedDob = cleanDob(data.dob);
   const eventName = data.eventName || data.eventTitle || 'Championship Event';
-  const chestNo = data.eventRegNo || data.chestNo || (regNumber ? String(regNumber).replace(/\D/g, "").slice(-3) : "N/A");
+  const chestNo = data.eventRegNo || data.chestNo || (regNumber ? String(100 + (Number(String(regNumber).replace(/\D/g, "").slice(-3)) % 900)) : "100");
 
   const rawStatus = String(data.paymentStatus || data.status || '').toUpperCase();
   const isVerified = rawStatus === 'VERIFIED' || rawStatus === 'PAID' || rawStatus === 'SUCCESS' || rawStatus === 'APPROVED' || rawStatus === 'WAIVED';
@@ -1643,8 +1643,8 @@ app.post('/api/approve-payment', async (req, res) => {
           coachMobile: coachMobile,
           coachName: coachName,
           eventName: eventName || sheetName || 'District Championship 2026',
-          eventRegNo: eventRegNo || chestNo || (regNumber ? String(regNumber).replace(/\D/g, "").slice(-3) : ""),
-          chestNo: chestNo || eventRegNo,
+          eventRegNo: eventRegNo || chestNo || (regNumber ? String(100 + (Number(String(regNumber).replace(/\D/g, "").slice(-3)) % 900)) : "100"),
+          chestNo: chestNo || eventRegNo || (regNumber ? String(100 + (Number(String(regNumber).replace(/\D/g, "").slice(-3)) % 900)) : "100"),
           discipline: discipline,
           ageGroup: ageGroup,
           schoolClub: schoolClub,
