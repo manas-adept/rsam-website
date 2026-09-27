@@ -1551,10 +1551,10 @@ document.addEventListener("DOMContentLoaded", () => {
         <div style="background:linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); border:5px solid #0b192c; outline:2px solid #d97706; outline-offset:-4px; border-radius:12px; padding:1.2rem; color:#1f2937; font-family:'Outfit',sans-serif; text-align:center; position:relative; box-shadow:0 10px 30px rgba(0,0,0,0.5);">
           <!-- Top 4 Logos Header Bar (No Frame & Border) -->
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem; border-bottom:1px dashed #cbd5e1; padding-bottom:0.5rem; gap:0.4rem;">
-            <img src="assets/branding/logo_ioa_india.webp" style="height:44px; max-width:70px; object-fit:contain; border:none; background:transparent;" alt="IOA India Logo" />
-            <img src="assets/branding/logo_rsfi_indiaskate.png" style="height:44px; max-width:70px; object-fit:contain; border:none; background:transparent;" alt="RSFI Logo" />
-            <img src="assets/branding/logo_uprsa.png" style="height:44px; max-width:70px; object-fit:contain; border:none; background:transparent;" alt="UPRSA Logo" />
-            <img src="assets/branding/logo_rsam.jpg" style="height:44px; max-width:70px; object-fit:contain; border:none; background:transparent;" alt="RSAM Logo" />
+            <img src="assets/branding/logo_ioa_india.webp" style="height:36px; max-width:60px; object-fit:contain; border:none; background:transparent;" alt="IOA India Logo" />
+            <img src="assets/branding/logo_rsfi_indiaskate.png" style="height:36px; max-width:60px; object-fit:contain; border:none; background:transparent;" alt="RSFI Logo" />
+            <img src="assets/branding/logo_uprsa.png" style="height:36px; max-width:60px; object-fit:contain; border:none; background:transparent;" alt="UPRSA Logo" />
+            <img src="assets/branding/logo_rsam.jpg" style="height:36px; max-width:60px; object-fit:contain; border:none; background:transparent;" alt="RSAM Logo" />
           </div>
 
           <div style="font-family:'Cinzel',serif; font-size:1.05rem; font-weight:800; color:#dc2626; letter-spacing:0.8px; margin:0.2rem 0;">

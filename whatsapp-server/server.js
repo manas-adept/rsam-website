@@ -630,7 +630,8 @@ Your athlete *${data.skaterName}* has completed annual registration with *${ORG_
 • *Father's Name:* ${data.fatherName || 'N/A'}
 • *Mother's Name:* ${data.motherName || 'N/A'}
 • *Athlete Mobile:* ${data.mobile || 'N/A'}
-• *Submitted Date:* ${dateStr}
+• *Submitted Date:* ${dateStr}`;
+}
 
 /**
  * Build Rejection WhatsApp Message Text with Admin Note
