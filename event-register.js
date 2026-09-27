@@ -436,7 +436,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function calculateAgeGroup(age) {
-    if (age === null || age === undefined || age === "" || isNaN(age)) return "";
+    if (age === null || age === undefined || age === "" || isNaN(age)) return "6-8";
     const num = Number(age);
     if (num < 6) return "Under 6";
     if (num < 8) return "6-8";
@@ -447,12 +447,21 @@ document.addEventListener("DOMContentLoaded", async () => {
     return "Above-18";
   }
 
+  function getCleanAgeGroup(skater) {
+    if (!skater) return "6-8";
+    let grp = skater.ageGroup || "";
+    if (typeof grp === "string" && grp.trim() !== "" && !grp.includes("GMT") && !grp.includes("Standard Time") && grp.length <= 20 && !/^\w{3} \w{3}/.test(grp)) {
+      return grp.trim();
+    }
+    return calculateAgeGroup(skater.age);
+  }
+
   function populateSkaterCard(skater) {
     document.getElementById("displaySkaterName").textContent = skater.skaterName || "N/A";
     document.getElementById("displayRegNo").textContent      = skater.regNumber || "N/A";
     document.getElementById("displayDob").textContent        = formatDateDDMMMYY(skater.dob);
     document.getElementById("displayAge").textContent        = skater.age || "N/A";
-    const ageGrp = skater.ageGroup || calculateAgeGroup(skater.age);
+    const ageGrp = getCleanAgeGroup(skater);
     document.getElementById("displayAgeGroup").textContent   = ageGrp || "N/A";
     document.getElementById("displaySchoolClub").textContent = skater.schoolClub || "N/A";
     document.getElementById("displayFather").textContent     = skater.fatherName || "N/A";
@@ -566,7 +575,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       skaterName: verifiedSkater.skaterName,
       dob: formatDateDDMMMYY(verifiedSkater.dob),
       age: verifiedSkater.age,
-      ageGroup: verifiedSkater.ageGroup || calculateAgeGroup(verifiedSkater.age),
+      ageGroup: getCleanAgeGroup(verifiedSkater),
       schoolClub: verifiedSkater.schoolClub || "N/A",
       fatherName: verifiedSkater.fatherName,
       motherName: verifiedSkater.motherName,

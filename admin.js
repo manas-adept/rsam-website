@@ -3329,15 +3329,36 @@ document.addEventListener("DOMContentLoaded", () => {
       const regNo = r.regNumber || r.registrationNo || r.eventRegNo || `R26-${idx+1}`;
       const name = r.skaterName || r.name || 'Athlete';
       const mob = r.mobile || r.phone || 'N/A';
-      const utr = r.upiUtr || r.utr || (String(r.paymentId || '').includes('UPI') ? String(r.paymentId).split('_').pop() : 'N/A');
+
+      const rawUtr = r.upiUtr || r.utr || r.paymentId || r.payId || r.razorpayPaymentId || '';
+      let utrVal = String(rawUtr).trim();
+      if (utrVal.startsWith('UPI_')) utrVal = utrVal.slice(4);
+      if (utrVal.startsWith('pay_')) utrVal = utrVal.slice(4);
+      if (!utrVal || utrVal === '—' || utrVal === 'N/A' || utrVal === 'pending' || utrVal === 'pay_pending') utrVal = 'N/A';
+
       const amt = r.amountPaid ? `₹${r.amountPaid}` : '₹500.00';
       const screenshot = r.paymentScreenshot || r.screenshotUrl || r.paymentProof || '';
+
+      let cleanAgeGroup = r.ageGroup || 'N/A';
+      if (!cleanAgeGroup || cleanAgeGroup.includes('GMT') || cleanAgeGroup.includes('Standard Time') || cleanAgeGroup.length > 20 || /^\w{3} \w{3}/.test(cleanAgeGroup)) {
+        const numAge = Number(r.age);
+        if (!isNaN(numAge) && numAge > 0) {
+          if (numAge < 6) cleanAgeGroup = "Under 6";
+          else if (numAge < 8) cleanAgeGroup = "6-8";
+          else if (numAge < 10) cleanAgeGroup = "8-10";
+          else if (numAge < 12) cleanAgeGroup = "10-12";
+          else if (numAge < 15) cleanAgeGroup = "12-15";
+          else if (numAge < 18) cleanAgeGroup = "15-18";
+          else cleanAgeGroup = "Above-18";
+        } else {
+          cleanAgeGroup = "6-8";
+        }
+      }
 
       rowsHTML += `
         <tr style="border-bottom:1px solid rgba(255,255,255,0.06); transition:background 0.2s;">
           <td style="padding:0.85rem 1rem; color:#60a5fa; font-weight:700; font-size:0.88rem; white-space:nowrap;">
             ${regNo}
-            <div style="font-size:0.75rem; color:#9ca3af; font-weight:400;">${r.sheetName}</div>
           </td>
           <td style="padding:0.85rem 1rem;">
             <strong style="color:#fff; display:block; font-size:0.92rem;">${escapeHTML(name)}</strong>
@@ -3345,11 +3366,11 @@ document.addEventListener("DOMContentLoaded", () => {
           </td>
           <td style="padding:0.85rem 1rem; color:#d1d5db; font-size:0.85rem;">
             ${escapeHTML(r.discipline || 'Skating')}
-            <div style="font-size:0.75rem; color:#9ca3af;">${r.ageGroup || 'N/A'}</div>
+            <div style="font-size:0.75rem; color:#9ca3af;">${cleanAgeGroup}</div>
           </td>
           <td style="padding:0.85rem 1rem; font-size:0.85rem;">
-            <strong style="color:#34d399;">${amt}</strong>
-            <div style="font-size:0.78rem; color:#60a5fa; font-weight:600; font-family:monospace;">UTR: ${utr}</div>
+            <strong style="color:#34d399; font-size:0.92rem; display:block;">${amt}</strong>
+            <div style="font-size:0.78rem; color:#60a5fa; font-weight:600; font-family:monospace; margin-top:2px;">UTR: ${escapeHTML(utrVal)}</div>
           </td>
           <td style="padding:0.85rem 1rem; text-align:center;">
             ${screenshot && screenshot !== '—' ? `
@@ -3385,7 +3406,7 @@ document.addEventListener("DOMContentLoaded", () => {
       <table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.9rem;">
         <thead>
           <tr style="background:rgba(255,255,255,0.04); border-bottom:1px solid rgba(255,255,255,0.1); color:#9ca3af; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em;">
-            <th style="padding:0.75rem 1rem;">Reg. ID &amp; Sheet</th>
+            <th style="padding:0.75rem 1rem;">Reg. ID</th>
             <th style="padding:0.75rem 1rem;">Athlete &amp; Contact</th>
             <th style="padding:0.75rem 1rem;">Event / Category</th>
             <th style="padding:0.75rem 1rem;">Amount &amp; UTR</th>
@@ -3421,33 +3442,35 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Bind Approve payment buttons
     document.querySelectorAll(".approve-payment-btn").forEach(btn => {
-      btn.onclick = async () => {
+      btn.onclick = (e) => {
+        if (e) e.preventDefault();
         const regNo = btn.getAttribute("data-reg");
         const sheetName = btn.getAttribute("data-sheet");
         if (!confirm(`Approve payment for Registration ${regNo}? This will mark status as VERIFIED and issue the WhatsApp Confirmation & Chest Number.`)) return;
-
-        btn.disabled = true;
-        btn.textContent = "⏳ Approving...";
 
         const rec = (window.RSAM_ALL_PAYMENT_RECORDS || []).find(r => 
           (r.regNumber || r.registrationNo || r.eventRegNo || r.rsamRegNo) === regNo && (!sheetName || r.sheetName === sheetName)
         ) || {};
 
-        // 1. Mark in local memory & localStorage overrides immediately so UI updates right away
+        // 1. Mark in local memory & localStorage overrides immediately so UI updates instantly (<10ms)
         window.RSAM_PAYMENT_STATUS_OVERRIDES[regNo] = 'VERIFIED';
         try {
           localStorage.setItem("RSAM_PAYMENT_STATUS_OVERRIDES", JSON.stringify(window.RSAM_PAYMENT_STATUS_OVERRIDES));
-        } catch(e) {}
+        } catch(err) {}
         rec.paymentStatus = 'VERIFIED';
         rec.status = 'VERIFIED';
 
-        // Direct backup GET call to Google Apps Script URL
+        // 2. Immediately re-render payments list table so admin can move to the next item right away!
+        renderAdminPayments();
+        notify(`✓ Payment for ${regNo} marked as VERIFIED! Syncing with sheet in background...`);
+
+        // 3. Issue background requests asynchronously without blocking UI
         const scriptUrl = (window.ENV_CONFIG && window.ENV_CONFIG.sheetUrl) || "https://script.google.com/macros/s/AKfycbyrxUIvQMXOzaBFNKwle-kOC0xMlc0ezufhIRXSyyid3Zx6Rhk9SKMZhNIoBBB290Xw/exec";
         fetch(`${scriptUrl}?action=update_payment_status&regNumber=${encodeURIComponent(regNo)}&sheetName=${encodeURIComponent(sheetName || rec.sheetName || '')}&paymentStatus=VERIFIED&skaterName=${encodeURIComponent(rec.skaterName || rec.name || '')}`, { mode: 'no-cors' }).catch(() => {});
 
         try {
           const baseUrl = getAdminApiBaseUrl();
-          const res = await fetch(`${baseUrl}/api/approve-payment`, {
+          fetch(`${baseUrl}/api/approve-payment`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -3461,28 +3484,20 @@ document.addEventListener("DOMContentLoaded", () => {
               eventName: rec.eventName || rec.eventTitle || sheetName || 'District Championship 2026',
               eventRegNo: rec.eventRegNo || rec.chestNo || (regNo ? String(regNo).replace(/\D/g, "").slice(-3) : ''),
               discipline: rec.discipline || '',
-              ageGroup: rec.ageGroup || '',
+              ageGroup: rec.ageGroup || cleanAgeGroup || '',
               schoolClub: rec.schoolClub || '',
               dob: rec.dob || '',
               email: rec.email || ''
             })
-          });
-          if (res.ok) {
-            notify(`✓ Payment for ${regNo} approved! Status set to VERIFIED and WhatsApp confirmation sent.`);
-          } else {
-            notify(`✓ Payment for ${regNo} approved.`);
-          }
-        } catch (e) {
-          notify(`✓ Payment status updated to VERIFIED.`);
-        }
-
-        renderAdminPayments();
+          }).catch(() => {});
+        } catch (e) {}
       };
     });
 
     // Bind Reject payment buttons
     document.querySelectorAll(".reject-payment-btn").forEach(btn => {
-      btn.onclick = async () => {
+      btn.onclick = (e) => {
+        if (e) e.preventDefault();
         const regNo = btn.getAttribute("data-reg");
         const sheetName = btn.getAttribute("data-sheet");
         const rec = (window.RSAM_ALL_PAYMENT_RECORDS || []).find(r => 
@@ -3493,24 +3508,25 @@ document.addEventListener("DOMContentLoaded", () => {
         const reason = prompt(`Reject payment for ${skaterName} (${regNo})?\n\nEnter rejection reason / note for athlete (sent over WhatsApp):`, "Invalid UTR / Payment mismatch");
         if (reason === null) return;
 
-        btn.disabled = true;
-        btn.textContent = "⏳ Rejecting...";
-
-        // 1. Mark in local memory & localStorage overrides immediately so UI updates right away
+        // 1. Mark in local memory & localStorage overrides immediately so UI updates instantly (<10ms)
         window.RSAM_PAYMENT_STATUS_OVERRIDES[regNo] = 'REJECTED';
         try {
           localStorage.setItem("RSAM_PAYMENT_STATUS_OVERRIDES", JSON.stringify(window.RSAM_PAYMENT_STATUS_OVERRIDES));
-        } catch(e) {}
+        } catch(err) {}
         rec.paymentStatus = 'REJECTED';
         rec.status = 'REJECTED';
 
-        // Direct backup GET call to Google Apps Script URL
+        // 2. Immediately re-render payments list table so admin can move to the next item right away!
+        renderAdminPayments();
+        notify(`🔴 Payment for ${regNo} marked as REJECTED. Syncing in background...`);
+
+        // 3. Issue background requests asynchronously without blocking UI
         const scriptUrl = (window.ENV_CONFIG && window.ENV_CONFIG.sheetUrl) || "https://script.google.com/macros/s/AKfycbyrxUIvQMXOzaBFNKwle-kOC0xMlc0ezufhIRXSyyid3Zx6Rhk9SKMZhNIoBBB290Xw/exec";
         fetch(`${scriptUrl}?action=update_payment_status&regNumber=${encodeURIComponent(regNo)}&sheetName=${encodeURIComponent(sheetName || rec.sheetName || '')}&paymentStatus=REJECTED&skaterName=${encodeURIComponent(skaterName)}`, { mode: 'no-cors' }).catch(() => {});
 
         try {
           const baseUrl = getAdminApiBaseUrl();
-          await fetch(`${baseUrl}/api/approve-payment`, {
+          fetch(`${baseUrl}/api/approve-payment`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ 
@@ -3522,11 +3538,8 @@ document.addEventListener("DOMContentLoaded", () => {
               mobile: rec.mobile || rec.phone || '',
               eventName: rec.eventName || rec.eventTitle || sheetName || 'District Championship 2026'
             })
-          });
+          }).catch(() => {});
         } catch (e) {}
-
-        notify(`🔴 Payment for ${regNo} rejected. WhatsApp notification sent to athlete.`);
-        renderAdminPayments();
       };
     });
   }

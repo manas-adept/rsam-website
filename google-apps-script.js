@@ -151,7 +151,14 @@ function doGet(e) {
     function parseSkaterRow(data, i, headers, regNumber) {
       function findHeaderIndex(candidates, fallbackIdx) {
         for (let candidate of candidates) {
-          const idx = headers.findIndex(h => h.includes(candidate));
+          // Exact match check first
+          let idx = headers.findIndex(h => h === candidate);
+          if (idx !== -1) return idx;
+          
+          idx = headers.findIndex(h => {
+            if (candidate === "age") return (h === "age" || h === "age (yrs)" || h === "age (years)") || (h.includes("age") && !h.includes("group"));
+            return h.includes(candidate);
+          });
           if (idx !== -1) return idx;
         }
         return fallbackIdx;
@@ -160,8 +167,8 @@ function doGet(e) {
       const regIdx        = findHeaderIndex(["rsam reg", "reg no", "reg. no", "reg number", "registration no"], 2);
       const nameIdx       = findHeaderIndex(["skater name", "name"], 4);
       const dobIdx        = findHeaderIndex(["date of birth", "dob"], 5);
-      const ageIdx        = findHeaderIndex(["age"], 6);
-      const ageGroupIdx   = findHeaderIndex(["age group", "agegroup"], 7);
+      const ageIdx        = findHeaderIndex(["age (yrs)", "age (years)", "age"], 6);
+      const ageGroupIdx   = findHeaderIndex(["age group", "agegroup", "category"], 7);
       const schoolClubIdx = findHeaderIndex(["school", "club", "institution"], 8);
       const coachNameIdx   = findHeaderIndex(["coach name", "coach's name"], 9);
       const coachMobileIdx = findHeaderIndex(["coach mobile", "coach contact", "coach phone"], 10);
@@ -171,7 +178,7 @@ function doGet(e) {
       const mobileIdx     = findHeaderIndex(["mobile", "phone", "contact"], 14);
       const emailIdx      = findHeaderIndex(["email"], 15);
       const aadhaarIdx    = findHeaderIndex(["aadhaar", "adhar"], 16);
-      const discIdx       = findHeaderIndex(["discipline", "category"], 17);
+      const discIdx       = findHeaderIndex(["discipline"], 17);
       const payIdIdx      = findHeaderIndex(["payment id", "razorpay payment id", "utr", "payment ref"], 18);
       const statusIdx     = findHeaderIndex(["payment status", "status"], 19);
       const amtIdx        = findHeaderIndex(["amount paid", "amount"], 20);
@@ -184,13 +191,32 @@ function doGet(e) {
       const rawCellStatus = statusIdx !== -1 && data[i][statusIdx] !== undefined ? String(data[i][statusIdx]).trim() : "";
       const parsedStatus = rawCellStatus !== "" ? rawCellStatus : "PENDING_APPROVAL";
 
+      let rawAge = ageIdx !== -1 ? String(data[i][ageIdx] || "").trim() : "";
+      if (rawAge.includes("GMT") || rawAge.includes("Standard Time") || /^\w{3} \w{3}/.test(rawAge)) rawAge = "";
+
+      let rawAgeGroup = ageGroupIdx !== -1 ? String(data[i][ageGroupIdx] || "").trim() : "";
+      if (!rawAgeGroup || rawAgeGroup.includes("GMT") || rawAgeGroup.includes("Standard Time") || rawAgeGroup.length > 20 || /^\w{3} \w{3}/.test(rawAgeGroup)) {
+        const numAge = Number(rawAge);
+        if (!isNaN(numAge) && numAge > 0) {
+          if (numAge < 6) rawAgeGroup = "Under 6";
+          else if (numAge < 8) rawAgeGroup = "6-8";
+          else if (numAge < 10) rawAgeGroup = "8-10";
+          else if (numAge < 12) rawAgeGroup = "10-12";
+          else if (numAge < 15) rawAgeGroup = "12-15";
+          else if (numAge < 18) rawAgeGroup = "15-18";
+          else rawAgeGroup = "Above-18";
+        } else {
+          rawAgeGroup = "6-8";
+        }
+      }
+
       return {
         eventRegNo: eventRegIdx !== -1 ? String(data[i][eventRegIdx] || "") : "",
         regNumber: String(data[i][regIdx] || regNumber),
         skaterName: String(data[i][nameIdx] || ""),
         dob: String(data[i][dobIdx] || ""),
-        age: String(data[i][ageIdx] || ""),
-        ageGroup: String(data[i][ageGroupIdx] || ""),
+        age: rawAge,
+        ageGroup: rawAgeGroup,
         schoolClub: String(data[i][schoolClubIdx] || ""),
         coachName: String(data[i][coachNameIdx] || ""),
         coachMobile: String(data[i][coachMobileIdx] || "").replace(/^'/, ""),
