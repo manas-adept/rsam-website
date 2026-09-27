@@ -1536,35 +1536,67 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       certPreviewWrap.innerHTML = `
-        <div style="background:#ffffff; border:6px solid #0b192c; border-radius:12px; padding:1.2rem; color:#1f2937; font-family:'Outfit',sans-serif; text-align:center; position:relative; box-shadow:0 10px 30px rgba(0,0,0,0.5);">
+        <div style="background:linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); border:5px solid #0b192c; outline:2px solid #d97706; outline-offset:-4px; border-radius:12px; padding:1.2rem; color:#1f2937; font-family:'Outfit',sans-serif; text-align:center; position:relative; box-shadow:0 10px 30px rgba(0,0,0,0.5);">
           <!-- Top 4 Logos Header Bar -->
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem; border-bottom:2px solid #0b192c; padding-bottom:0.5rem; gap:0.4rem;">
-            <img src="https://res.cloudinary.com/igjmhsju/image/upload/v1788797466/rsam_website/branding/rsam-logo.png" style="height:34px; object-fit:contain;" alt="RSAM Logo" />
-            <div style="font-family:'Rajdhani',sans-serif; font-size:0.75rem; font-weight:800; color:#0b192c; line-height:1.2; text-align:center;">
-              ROLLER SPORTS ASSOCIATION MORADABAD (REGD.)<br/>
-              <span style="font-size:0.62rem; color:#4b5563;">AFFILIATED TO U.P. ROLLER SKATING ASSOCIATION</span>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem; border-bottom:1px dashed #cbd5e1; padding-bottom:0.5rem; gap:0.4rem;">
+            <div style="text-align:center;">
+              <img src="https://res.cloudinary.com/igjmhsju/image/upload/v1788797466/rsam_website/branding/rsam-logo.png" style="height:34px; max-width:55px; object-fit:contain;" alt="RSAM Logo" />
+              <div style="font-size:0.6rem; font-weight:800; color:#0b192c;">RSAM</div>
             </div>
-            <div style="display:flex; gap:0.3rem; align-items:center;">
-              <span style="font-weight:800; font-size:0.7rem; color:#d32f2f;">UPRSA</span>
-              <span style="font-weight:800; font-size:0.7rem; color:#0b192c;">RSFI</span>
+            <div style="text-align:center;">
+              <img src="https://res.cloudinary.com/igjmhsju/image/upload/v1788797352/rsam_website/affiliations/affil2.jpg" style="height:34px; max-width:55px; object-fit:contain; border-radius:4px; padding:1px; background:#fff;" alt="UPRSA Logo" />
+              <div style="font-size:0.6rem; font-weight:800; color:#0b192c;">UPRSA</div>
+            </div>
+            <div style="text-align:center;">
+              <img src="https://res.cloudinary.com/igjmhsju/image/upload/v1788797351/rsam_website/affiliations/affil1.jpg" style="height:34px; max-width:55px; object-fit:contain; border-radius:4px; padding:1px; background:#fff;" alt="RSFI Logo" />
+              <div style="font-size:0.6rem; font-weight:800; color:#0b192c;">RSFI</div>
+            </div>
+            <div style="text-align:center;">
+              <img src="https://res.cloudinary.com/igjmhsju/image/upload/v1788797353/rsam_website/affiliations/affil3.jpg" style="height:34px; max-width:55px; object-fit:contain; border-radius:4px; padding:1px; background:#fff;" alt="World Skate Logo" />
+              <div style="font-size:0.6rem; font-weight:800; color:#0b192c;">WORLD SKATE</div>
             </div>
           </div>
 
-          <div style="font-family:'Cinzel',serif; font-size:1.05rem; font-weight:800; color:#d32f2f; letter-spacing:1px; margin:0.3rem 0;">
-            OFFICIAL CERTIFICATE OF MERIT &amp; PARTICIPATION
+          <div style="font-family:'Cinzel',serif; font-size:1.05rem; font-weight:800; color:#dc2626; letter-spacing:0.8px; margin:0.2rem 0;">
+            ${escapeHTML(c.eventName)}
+          </div>
+          <div style="font-size:0.68rem; font-weight:700; color:#4b5563; text-transform:uppercase;">
+            RECOGNIZED BY UPRSA · AFFILIATED TO RSFI &amp; WORLD SKATE
           </div>
 
-          <div style="font-size:0.78rem; color:#374151; margin:0.5rem 0; line-height:1.4;">
-            This is to proudly certify that <strong>${escapeHTML(c.skaterName || 'SKATER NAME')}</strong> Son/Daughter of <strong>${escapeHTML(c.fatherName || 'FATHER NAME')}</strong> representing <strong>${escapeHTML(c.schoolClub || 'SCHOOL/CLUB')}</strong> participated in <strong>${escapeHTML(c.eventName)}</strong> in discipline <strong>${escapeHTML(c.discipline || 'Discipline')}</strong>.
+          <div style="font-family:'Cinzel',serif; font-size:0.95rem; font-weight:800; color:#1e3a8a; letter-spacing:1px; margin:0.5rem 0; background:rgba(30,58,138,0.08); padding:4px 12px; border-radius:20px; display:inline-block;">
+            OFFICIAL CERTIFICATE OF MERIT &amp; PERFORMANCE
+          </div>
+
+          <!-- Athlete Card -->
+          <div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:0.8rem; margin:0.6rem 0; text-align:left; font-size:0.82rem;">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.4rem;">
+              <div>
+                <span style="color:#64748b; font-size:0.65rem; font-weight:700; display:block;">ATHLETE NAME</span>
+                <strong style="color:#0f172a; font-size:0.95rem;">${escapeHTML(c.skaterName || 'SKATER NAME')}</strong>
+              </div>
+              <div>
+                <span style="color:#64748b; font-size:0.65rem; font-weight:700; display:block;">FATHER / PARENT NAME</span>
+                <strong style="color:#0f172a; font-size:0.95rem;">${escapeHTML(c.fatherName || 'FATHER NAME')}</strong>
+              </div>
+              <div style="grid-column:span 2;">
+                <span style="color:#64748b; font-size:0.65rem; font-weight:700; display:block;">SCHOOL / CLUB</span>
+                <strong style="color:#0f172a;">${escapeHTML(c.schoolClub || 'SCHOOL/CLUB')}</strong>
+              </div>
+              <div>
+                <span style="color:#64748b; font-size:0.65rem; font-weight:700; display:block;">DISCIPLINE / CATEGORY</span>
+                <strong style="color:#1e3a8a;">${escapeHTML(c.discipline || 'Quads')}</strong>
+              </div>
+            </div>
           </div>
 
           <!-- Award Ribbon Badge -->
-          <div style="display:inline-block; background:${awardBadgeBg}; border:1.5px solid ${awardBorder}; color:${awardBadgeColor}; padding:4px 14px; border-radius:20px; font-weight:800; font-size:0.85rem; margin:0.4rem 0; text-transform:uppercase;">
+          <div style="display:inline-block; background:${awardBadgeBg}; border:1.5px solid ${awardBorder}; color:${awardBadgeColor}; padding:4px 14px; border-radius:20px; font-weight:800; font-size:0.85rem; margin:0.3rem 0; text-transform:uppercase;">
             ${escapeHTML(c.resultText || '🥇 GOLD MEDAL (1st Position)')}
           </div>
 
           <!-- 3 Bottom Executive Signatories -->
-          <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:0.4rem; margin-top:1rem; border-top:1px solid #e5e7eb; padding-top:0.6rem; font-size:0.68rem; text-align:center;">
+          <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:0.4rem; margin-top:0.8rem; border-top:1px solid #e5e7eb; padding-top:0.5rem; font-size:0.68rem; text-align:center;">
             <div>
               <div style="font-family:'Great Vibes',cursive; font-size:1.1rem; color:#0b192c; font-weight:700;">Ashok Singhal</div>
               <strong style="display:block; color:#0b192c; font-size:0.68rem;">ASHOK SINGHAL</strong>
@@ -3067,6 +3099,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // ── Direct UPI Payment Approvals & Verification ──
   let cachedPaymentsData = null;
   let activePaymentFilter = "all";
+  let activePaymentEventFilter = "all";
 
   async function renderAdminPayments() {
     const tableWrap = document.getElementById("paymentsListTableWrap");
@@ -3108,6 +3141,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
     cachedPaymentsData = sheetsData;
 
+    // Populate Event Dropdown Filter dynamically
+    const evtFilterSelect = document.getElementById("paymentEventFilterSelect");
+    if (evtFilterSelect && sheetsData.length > 0) {
+      const curVal = activePaymentEventFilter || "all";
+      evtFilterSelect.innerHTML = `<option value="all"${curVal === 'all' ? ' selected' : ''}>🎟️ All Event Sheets &amp; Annual Registrations</option>` +
+        sheetsData.map(s => `<option value="${escapeHTML(s.sheetName)}"${s.sheetName === curVal ? ' selected' : ''}>🎟️ ${escapeHTML(s.sheetName)} (${s.count} skaters)</option>`).join('');
+
+      evtFilterSelect.onchange = () => {
+        activePaymentEventFilter = evtFilterSelect.value;
+        renderAdminPayments();
+      };
+    }
+
     let allRecords = [];
     sheetsData.forEach(s => {
       const isRegSheet = s.sheetName.toLowerCase().includes("registrations");
@@ -3145,8 +3191,11 @@ document.addEventListener("DOMContentLoaded", () => {
       badgeEl.style.color = cntPending > 0 ? "#fbbf24" : "#34d399";
     }
 
-    // Filter records
+    // Filter records by Event Sheet & Status Filter
     let filteredRecords = allRecords.filter(r => {
+      if (activePaymentEventFilter !== "all" && r.sheetName !== activePaymentEventFilter) {
+        return false;
+      }
       const st = String(r.paymentStatus || r.status || '').toUpperCase();
       if (activePaymentFilter === "PENDING_APPROVAL") {
         return st.includes('PENDING') || st === 'UPI_PENDING' || st === 'APPROVAL_PENDING';
@@ -3165,7 +3214,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <div style="text-align:center; padding:3rem 1.5rem; color:#9ca3af;">
           <div style="font-size:2.5rem; margin-bottom:0.5rem;">💳</div>
           <h4 style="color:#f3f4f6; margin:0 0 0.4rem 0;">No Payment Records Found</h4>
-          <p style="margin:0; font-size:0.88rem;">No skater registrations match the selected filter category (${activePaymentFilter}).</p>
+          <p style="margin:0; font-size:0.88rem;">No skater registrations match the selected event sheet (${activePaymentEventFilter}) and filter category (${activePaymentFilter}).</p>
         </div>
       `;
       return;

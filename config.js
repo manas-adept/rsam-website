@@ -111,7 +111,7 @@ const CONFIG = {
     badge:       "Recognised by UPRSA · RSFI - IndiaSkate",
     titleLine1:  "Rolling",      // displayed in handwriting font (Pacifico)
     titleLine2:  "Moradabad",    // displayed in racing font (Racing Sans One)
-    description: "Promoting excellence in roller sports across Moradabad since our founding. Affiliated with Roller Sports Federation of India under the Government of India.",
+    description: "Promoting excellence in roller sports across Moradabad since our founding. Affiliated with Roller Skating Federation of India under the Government of India.",
     skaterImage: "https://res.cloudinary.com/igjmhsju/image/upload/v1788797469/rsam_website/branding/skater-boy.png",
     cta: [
       { label: "Latest News",     href: "#news",       style: "primary" },
@@ -122,7 +122,7 @@ const CONFIG = {
   /* ── About section ──────────────────────────────── */
   about: {
     paragraphs: [
-      "The <strong>Roller Sports Association Moradabad (RSAM)</strong> is the apex body governing roller sports in Moradabad district, Uttar Pradesh. We are officially recognized by UPRSA (Uttar Pradesh Roller Sports Association) recognized by the <strong>Roller Sports Federation of India (RSFI)</strong>, operating under the Ministry of Youth Affairs &amp; Sports, Government of India.",
+      "The <strong>Roller Sports Association Moradabad (RSAM)</strong> is the apex body governing roller sports in Moradabad district, Uttar Pradesh. We are officially recognized by UPRSA (Uttar Pradesh Roller Sports Association) recognized by the <strong>Roller Skating Federation of India (RSFI)</strong>, operating under the Ministry of Youth Affairs &amp; Sports, Government of India.",
       "Our mission is to identify, nurture, and develop talent in disciplines such as inline skating, artistic skating, speed skating, and roller hockey — and to represent Moradabad athletes at state, national, and international competitions.",
     ],
     stats: [

@@ -496,6 +496,16 @@
               </button>
             </div>
 
+            <!-- Event / Registration Sheet Filter Dropdown -->
+            <div style="margin-top: 1rem; margin-bottom: 0.8rem; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 0.8rem 1rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.8rem;">
+              <div style="display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap; flex: 1;">
+                <label style="color:#9ca3af; font-size:0.85rem; font-weight:600; white-space:nowrap;">Filter by Event Sheet:</label>
+                <select id="paymentEventFilterSelect" style="flex:1; max-width: 380px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.18); color:#fff; padding:0.5rem 0.8rem; border-radius:8px; font-size:0.88rem;">
+                  <option value="all">🎟️ All Event Sheets &amp; Registrations</option>
+                </select>
+              </div>
+            </div>
+
             <!-- Filter Status Bar -->
             <div style="display:flex; gap:0.6rem; margin:1.2rem 0; flex-wrap:wrap;" id="paymentFilterTrack">
               <button type="button" class="btn-filter-status active" data-filter="all" style="padding:0.45rem 1rem; border-radius:8px; border:1px solid rgba(255,255,255,0.2); background:rgba(255,255,255,0.08); color:#fff; cursor:pointer; font-weight:600; font-size:0.85rem;">All Records (<span id="cntFilterAll">0</span>)</button>
