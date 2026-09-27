@@ -2,7 +2,7 @@
   "fees": {
     "annualBaseFee": 0,
     "baseFee": 0,
-    "gatewayPercent": 3,
+    "gatewayPercent": 2,
     "gstPercent": 18,
     "gatewayFee": 0,
     "gstFee": 0,
@@ -22,7 +22,7 @@
       "feeType": "online",
       "payToOrganizer": false,
       "baseFee": 500,
-      "gatewayPercent": 3,
+      "gatewayPercent": 2,
       "gstPercent": 18,
       "image": "https://res.cloudinary.com/igjmhsju/image/upload/v1788882417/event-selection-trial-rsfi-2026.jpg",
       "description": "Official 4th District Championship cum State trial for all age groups & disciplines in Moradabad.",
@@ -365,5 +365,5 @@
       }
     ]
   },
-  "lastUpdated": "2026-09-24T14:56:49.351Z"
+  "lastUpdated": "2026-09-27T08:40:44.756Z"
 }
