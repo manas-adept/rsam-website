@@ -22,6 +22,7 @@ window.ENV_CONFIG = {
     backendUrl: "http://localhost:3001",
     sheetUrl: "https://script.google.com/macros/s/AKfycbyrxUIvQMXOzaBFNKwle-kOC0xMlc0ezufhIRXSyyid3Zx6Rhk9SKMZhNIoBBB290Xw/exec",
     razorpayKey: "rzp_test_TZa1vfjhrPJobv",
+    enableRazorpay: false, // 👈 Kept in code, disabled for now (Direct UPI QR active)
     openwaServerUrl: "http://localhost:3001/send-registration",
     upiVpa: "9971844191@ybl",
     upiPayeeName: "Roller Sports Association Moradabad",
@@ -34,6 +35,7 @@ window.ENV_CONFIG = {
     sheetUrl: "https://script.google.com/macros/s/AKfycbyrxUIvQMXOzaBFNKwle-kOC0xMlc0ezufhIRXSyyid3Zx6Rhk9SKMZhNIoBBB290Xw/exec",
     // ⬇️ UPDATE LIVE RAZORPAY API KEY HERE (e.g. "rzp_live_xxxxxxxxxxxxxx")
     razorpayKey: "rzp_test_TZa1vfjhrPJobv",
+    enableRazorpay: false, // 👈 Kept in code, disabled for now (Direct UPI QR active)
     openwaServerUrl: "https://rsam-whatsapp-bot.onrender.com/send-registration",
     upiVpa: "9971844191@ybl",
     upiPayeeName: "Roller Sports Association Moradabad",
@@ -61,6 +63,7 @@ window.ENV_CONFIG = {
   get backendUrl() { return this.current.backendUrl; },
   get sheetUrl() { return this.current.sheetUrl; },
   get razorpayKey() { return this.current.razorpayKey; },
+  get enableRazorpay() { return !!this.current.enableRazorpay; },
   get openwaServerUrl() { return this.current.openwaServerUrl; },
   get upiVpa() { return this.current.upiVpa || "9971844191@ybl"; },
   get upiPayeeName() { return this.current.upiPayeeName || "Roller Sports Association Moradabad"; },

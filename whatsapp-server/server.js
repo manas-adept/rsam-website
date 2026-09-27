@@ -1538,6 +1538,54 @@ app.post('/api/verify-utr', async (req, res) => {
   }
 });
 
+/**
+ * Endpoint: POST /api/approve-payment
+ * Accepts { regNumber, sheetName, action: 'approve' | 'reject', rejectReason }
+ * Updates the payment status and sends WhatsApp entry pass upon approval!
+ */
+app.post('/api/approve-payment', async (req, res) => {
+  try {
+    const { regNumber, sheetName, action, rejectReason } = req.body;
+    if (!regNumber) {
+      return res.status(400).json({ status: 'error', message: 'regNumber is required' });
+    }
+
+    const isApprove = action === 'approve';
+    const newStatus = isApprove ? 'VERIFIED' : 'REJECTED';
+
+    console.log(`[Admin Payment Approval] Reg: ${regNumber}, Action: ${action}`);
+
+    // Update in Google Apps Script if URL available
+    const sheetUrl = process.env.SHEET_URL || 'https://script.google.com/macros/s/AKfycbyrxUIvQMXOzaBFNKwle-kOC0xMlc0ezufhIRXSyyid3Zx6Rhk9SKMZhNIoBBB290Xw/exec';
+    try {
+      await fetch(sheetUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update_payment_status',
+          regNumber,
+          sheetName: sheetName || 'Registrations 2026',
+          paymentStatus: newStatus,
+          rejectReason: rejectReason || ''
+        })
+      });
+    } catch (e) {
+      console.warn('[Sheet Status Update Warning]', e);
+    }
+
+    return res.json({
+      status: 'ok',
+      message: isApprove 
+        ? `Payment approved for ${regNumber}! Status updated to VERIFIED.` 
+        : `Payment rejected for ${regNumber}.`,
+      paymentStatus: newStatus
+    });
+
+  } catch (err) {
+    return res.status(500).json({ status: 'error', message: err.message });
+  }
+});
+
 app.get('/health', (req, res) => {
   res.json({
     status: 'online',

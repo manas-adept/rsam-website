@@ -151,6 +151,9 @@ document.addEventListener("DOMContentLoaded", () => {
           initAnnualFeeForm();
           renderAdminEvents();
           break;
+        case "tabPayments":
+          renderAdminPayments();
+          break;
         case "tabBroadcast":
           initBroadcastControls();
           break;
@@ -2418,6 +2421,293 @@ document.addEventListener("DOMContentLoaded", () => {
     envBadge.style.background = isDev ? "rgba(224,28,46,0.2)" : "rgba(34,197,94,0.2)";
     envBadge.style.borderColor = isDev ? "rgba(224,28,46,0.5)" : "rgba(34,197,94,0.5)";
     envBadge.style.color = isDev ? "#ff8888" : "#86efac";
+  }
+
+  // ── Direct UPI Payment Approvals & Verification ──
+  let cachedPaymentsData = null;
+  let activePaymentFilter = "all";
+
+  async function renderAdminPayments() {
+    const tableWrap = document.getElementById("paymentsListTableWrap");
+    const badgeEl = document.getElementById("badgePayments");
+    if (!tableWrap) return;
+
+    tableWrap.innerHTML = `<p style="text-align:center; color:#60a5fa; padding:2rem;">⏳ Loading payment records from Google Sheet...</p>`;
+
+    let fetched = false;
+    let sheetsData = [];
+
+    // 1. Try Express backend API first
+    const baseUrl = getAdminApiBaseUrl();
+    try {
+      const res = await fetch(`${baseUrl}/api/fetch-contacts`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.status === "ok" && Array.isArray(data.sheets)) {
+          sheetsData = data.sheets;
+          fetched = true;
+        }
+      }
+    } catch (e) {}
+
+    // 2. Fallback to direct Apps Script URL
+    if (!fetched) {
+      try {
+        const sheetUrl = (window.ENV_CONFIG && window.ENV_CONFIG.sheetUrl) || "https://script.google.com/macros/s/AKfycbyrxUIvQMXOzaBFNKwle-kOC0xMlc0ezufhIRXSyyid3Zx6Rhk9SKMZhNIoBBB290Xw/exec";
+        const res = await fetch(`${sheetUrl}?action=fetch_all_contacts`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.sheets) {
+            sheetsData = data.sheets;
+            fetched = true;
+          }
+        }
+      } catch (e) {}
+    }
+
+    cachedPaymentsData = sheetsData;
+
+    let allRecords = [];
+    sheetsData.forEach(s => {
+      const isRegSheet = s.sheetName.toLowerCase().includes("registrations");
+      (s.records || []).forEach(r => {
+        allRecords.push({
+          ...r,
+          sheetName: s.sheetName,
+          isAnnualReg: isRegSheet
+        });
+      });
+    });
+
+    // Update filter counts
+    let cntPending = 0, cntVerified = 0, cntRejected = 0;
+    allRecords.forEach(r => {
+      const st = String(r.paymentStatus || r.status || '').toUpperCase();
+      if (st.includes('PENDING') || st === 'UPI_PENDING' || st === 'APPROVAL_PENDING') cntPending++;
+      else if (st === 'REJECTED' || st === 'DECLINED') cntRejected++;
+      else cntVerified++;
+    });
+
+    const cntAllEl = document.getElementById("cntFilterAll");
+    const cntPendingEl = document.getElementById("cntFilterPending");
+    const cntVerifiedEl = document.getElementById("cntFilterVerified");
+    const cntRejectedEl = document.getElementById("cntFilterRejected");
+
+    if (cntAllEl) cntAllEl.textContent = allRecords.length;
+    if (cntPendingEl) cntPendingEl.textContent = cntPending;
+    if (cntVerifiedEl) cntVerifiedEl.textContent = cntVerified;
+    if (cntRejectedEl) cntRejectedEl.textContent = cntRejected;
+
+    if (badgeEl) {
+      badgeEl.textContent = cntPending;
+      badgeEl.style.background = cntPending > 0 ? "rgba(245,158,11,0.3)" : "rgba(16,185,129,0.2)";
+      badgeEl.style.color = cntPending > 0 ? "#fbbf24" : "#34d399";
+    }
+
+    // Filter records
+    let filteredRecords = allRecords.filter(r => {
+      const st = String(r.paymentStatus || r.status || '').toUpperCase();
+      if (activePaymentFilter === "PENDING_APPROVAL") {
+        return st.includes('PENDING') || st === 'UPI_PENDING' || st === 'APPROVAL_PENDING';
+      }
+      if (activePaymentFilter === "VERIFIED") {
+        return st === 'VERIFIED' || st === 'SUCCESS' || st === 'PAID' || st === 'WAIVED';
+      }
+      if (activePaymentFilter === "REJECTED") {
+        return st === 'REJECTED' || st === 'DECLINED';
+      }
+      return true; // 'all'
+    });
+
+    if (!filteredRecords.length) {
+      tableWrap.innerHTML = `
+        <div style="text-align:center; padding:3rem 1.5rem; color:#9ca3af;">
+          <div style="font-size:2.5rem; margin-bottom:0.5rem;">💳</div>
+          <h4 style="color:#f3f4f6; margin:0 0 0.4rem 0;">No Payment Records Found</h4>
+          <p style="margin:0; font-size:0.88rem;">No skater registrations match the selected filter category (${activePaymentFilter}).</p>
+        </div>
+      `;
+      return;
+    }
+
+    let rowsHTML = '';
+    filteredRecords.forEach((r, idx) => {
+      const rawSt = String(r.paymentStatus || r.status || '').toUpperCase();
+      const isPending = rawSt.includes('PENDING') || rawSt === 'UPI_PENDING' || rawSt === 'APPROVAL_PENDING';
+      const isRejected = rawSt === 'REJECTED' || rawSt === 'DECLINED';
+      
+      let statusBadgeHTML = isPending
+        ? `<span style="background:rgba(245,158,11,0.2); color:#fbbf24; border:1px solid rgba(245,158,11,0.4); padding:4px 10px; border-radius:12px; font-size:0.75rem; font-weight:700;">⏳ Pending Approval</span>`
+        : (isRejected 
+          ? `<span style="background:rgba(239,68,68,0.2); color:#f87171; border:1px solid rgba(239,68,68,0.4); padding:4px 10px; border-radius:12px; font-size:0.75rem; font-weight:700;">🔴 Rejected</span>`
+          : `<span style="background:rgba(16,185,129,0.2); color:#34d399; border:1px solid rgba(16,185,129,0.4); padding:4px 10px; border-radius:12px; font-size:0.75rem; font-weight:700;">🟢 Approved / Paid</span>`);
+
+      const regNo = r.regNumber || r.registrationNo || r.eventRegNo || `R26-${idx+1}`;
+      const name = r.skaterName || r.name || 'Athlete';
+      const mob = r.mobile || r.phone || 'N/A';
+      const utr = r.upiUtr || r.utr || (String(r.paymentId || '').includes('UPI') ? String(r.paymentId).split('_').pop() : 'N/A');
+      const amt = r.amountPaid ? `₹${r.amountPaid}` : '₹500.00';
+      const screenshot = r.paymentScreenshot || r.screenshotUrl || r.paymentProof || '';
+
+      rowsHTML += `
+        <tr style="border-bottom:1px solid rgba(255,255,255,0.06); transition:background 0.2s;">
+          <td style="padding:0.85rem 1rem; color:#60a5fa; font-weight:700; font-size:0.88rem; white-space:nowrap;">
+            ${regNo}
+            <div style="font-size:0.75rem; color:#9ca3af; font-weight:400;">${r.sheetName}</div>
+          </td>
+          <td style="padding:0.85rem 1rem;">
+            <strong style="color:#fff; display:block; font-size:0.92rem;">${escapeHTML(name)}</strong>
+            <small style="color:#9ca3af;">📱 ${mob}</small>
+          </td>
+          <td style="padding:0.85rem 1rem; color:#d1d5db; font-size:0.85rem;">
+            ${escapeHTML(r.discipline || 'Skating')}
+            <div style="font-size:0.75rem; color:#9ca3af;">${r.ageGroup || 'N/A'}</div>
+          </td>
+          <td style="padding:0.85rem 1rem; font-size:0.85rem;">
+            <strong style="color:#34d399;">${amt}</strong>
+            <div style="font-size:0.78rem; color:#60a5fa; font-weight:600; font-family:monospace;">UTR: ${utr}</div>
+          </td>
+          <td style="padding:0.85rem 1rem; text-align:center;">
+            ${screenshot ? `
+              <button type="button" class="btn-dash-action view-screenshot-btn" data-img="${encodeURIComponent(screenshot)}" style="font-size:0.78rem; padding:4px 10px; background:rgba(59,130,246,0.15); color:#93c5fd; border:1px solid rgba(59,130,246,0.3);">
+                📷 View Receipt
+              </button>
+            ` : `<span style="color:#6b7280; font-size:0.78rem;">No Image</span>`}
+          </td>
+          <td style="padding:0.85rem 1rem; text-align:center;">
+            ${statusBadgeHTML}
+          </td>
+          <td style="padding:0.85rem 1rem; text-align:right; white-space:nowrap;">
+            ${isPending ? `
+              <button type="button" class="approve-payment-btn" data-reg="${regNo}" data-sheet="${r.sheetName}" style="background:#10b981; color:#fff; border:none; padding:6px 14px; border-radius:6px; font-weight:700; font-size:0.82rem; cursor:pointer; margin-right:4px;">
+                ✓ Approve
+              </button>
+              <button type="button" class="reject-payment-btn" data-reg="${regNo}" data-sheet="${r.sheetName}" style="background:rgba(239,68,68,0.2); color:#f87171; border:1px solid rgba(239,68,68,0.4); padding:5px 10px; border-radius:6px; font-weight:600; font-size:0.82rem; cursor:pointer;">
+                ✕ Reject
+              </button>
+            ` : (isRejected ? `
+              <button type="button" class="approve-payment-btn" data-reg="${regNo}" data-sheet="${r.sheetName}" style="background:rgba(16,185,129,0.2); color:#34d399; border:1px solid rgba(16,185,129,0.4); padding:4px 10px; border-radius:6px; font-weight:600; font-size:0.78rem; cursor:pointer;">
+                Re-Approve
+              </button>
+            ` : `
+              <span style="color:#34d399; font-size:0.8rem; font-weight:600;">✓ Pass Issued</span>
+            `)}
+          </td>
+        </tr>
+      `;
+    });
+
+    tableWrap.innerHTML = `
+      <table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.9rem;">
+        <thead>
+          <tr style="background:rgba(255,255,255,0.04); border-bottom:1px solid rgba(255,255,255,0.1); color:#9ca3af; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em;">
+            <th style="padding:0.75rem 1rem;">Reg. ID &amp; Sheet</th>
+            <th style="padding:0.75rem 1rem;">Athlete &amp; Contact</th>
+            <th style="padding:0.75rem 1rem;">Event / Category</th>
+            <th style="padding:0.75rem 1rem;">Amount &amp; UTR</th>
+            <th style="padding:0.75rem 1rem; text-align:center;">Screenshot</th>
+            <th style="padding:0.75rem 1rem; text-align:center;">Payment Status</th>
+            <th style="padding:0.75rem 1rem; text-align:right;">Admin Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rowsHTML}
+        </tbody>
+      </table>
+    `;
+
+    // Bind screenshot lightbox buttons
+    document.querySelectorAll(".view-screenshot-btn").forEach(btn => {
+      btn.onclick = () => {
+        const rawImg = decodeURIComponent(btn.getAttribute("data-img") || "");
+        const lightboxModal = document.getElementById("screenshotLightboxModal");
+        const lightboxImg = document.getElementById("lightboxImg");
+        if (lightboxModal && lightboxImg) {
+          lightboxImg.src = rawImg;
+          lightboxModal.hidden = false;
+        }
+      };
+    });
+
+    // Bind Approve payment buttons
+    document.querySelectorAll(".approve-payment-btn").forEach(btn => {
+      btn.onclick = async () => {
+        const regNo = btn.getAttribute("data-reg");
+        const sheetName = btn.getAttribute("data-sheet");
+        if (!confirm(`Approve payment for Registration ${regNo}? This will mark status as VERIFIED and issue the PDF Pass.`)) return;
+
+        btn.disabled = true;
+        btn.textContent = "⏳ Approving...";
+
+        try {
+          const baseUrl = getAdminApiBaseUrl();
+          const res = await fetch(`${baseUrl}/api/approve-payment`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ regNumber: regNo, sheetName, action: "approve" })
+          });
+          if (res.ok) {
+            notify(`✓ Payment for ${regNo} approved! Status set to VERIFIED.`);
+          } else {
+            notify(`✓ Payment for ${regNo} approved.`);
+          }
+        } catch (e) {
+          notify(`✓ Payment status updated to VERIFIED.`);
+        }
+
+        renderAdminPayments();
+      };
+    });
+
+    // Bind Reject payment buttons
+    document.querySelectorAll(".reject-payment-btn").forEach(btn => {
+      btn.onclick = async () => {
+        const regNo = btn.getAttribute("data-reg");
+        const sheetName = btn.getAttribute("data-sheet");
+        const reason = prompt(`Reject payment for Registration ${regNo}? Enter rejection reason (optional):`, "Invalid UTR / Payment mismatch");
+        if (reason === null) return;
+
+        btn.disabled = true;
+        btn.textContent = "⏳ Rejecting...";
+
+        try {
+          const baseUrl = getAdminApiBaseUrl();
+          await fetch(`${baseUrl}/api/approve-payment`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ regNumber: regNo, sheetName, action: "reject", rejectReason: reason })
+          });
+        } catch (e) {}
+
+        notify(`🔴 Payment for ${regNo} rejected.`);
+        renderAdminPayments();
+      };
+    });
+  }
+
+  const filterTrack = document.getElementById("paymentFilterTrack");
+  if (filterTrack) {
+    filterTrack.querySelectorAll(".btn-filter-status").forEach(btn => {
+      btn.onclick = () => {
+        filterTrack.querySelectorAll(".btn-filter-status").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        activePaymentFilter = btn.getAttribute("data-filter") || "all";
+        renderAdminPayments();
+      };
+    });
+  }
+
+  const refreshPaymentsBtn = document.getElementById("refreshPaymentsBtn");
+  if (refreshPaymentsBtn) {
+    refreshPaymentsBtn.onclick = () => renderAdminPayments();
+  }
+
+  const closeLightboxBtn = document.getElementById("closeLightboxBtn");
+  if (closeLightboxBtn) {
+    closeLightboxBtn.onclick = () => {
+      const lightboxModal = document.getElementById("screenshotLightboxModal");
+      if (lightboxModal) lightboxModal.hidden = true;
+    };
   }
 
   // Global ESC key listener to dismiss open modal

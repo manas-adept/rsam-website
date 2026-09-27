@@ -782,7 +782,7 @@ function formatDateDDMMMYYYY(dateStr) {
             <span class="confirm-file-badge">✓ DOB Proof (${dobFileName})</span>
           </div>
           
-          <!-- Fee & Razorpay Payment Breakdown -->
+          <!-- Fee & Payment Method Breakdown -->
           <div class="confirm-fee-breakdown" style="grid-column: span 2; background: ${fee.isFree ? 'rgba(52, 211, 153, 0.08)' : 'rgba(31, 41, 55, 0.6)'}; border: 1px solid ${fee.isFree ? 'rgba(52, 211, 153, 0.25)' : 'rgba(75, 85, 99, 0.4)'}; border-radius: 10px; padding: 1rem; margin-top: 0.5rem;">
             ${fee.isFree ? `
               <div style="display: flex; justify-content: space-between; font-size: 1.05rem; font-weight: 700; color: #34d399;">
@@ -791,16 +791,17 @@ function formatDateDDMMMYYYY(dateStr) {
               </div>
             ` : `
               <div style="font-weight: 700; color: #60a5fa; margin-bottom: 0.6rem; font-size: 0.95rem;">
-                💳 Select Payment Method:
+                💳 Selected Payment Method:
               </div>
               <div style="display: flex; flex-direction: column; gap: 0.6rem;">
                 <label style="display: flex; align-items: center; gap: 0.6rem; background: rgba(16, 185, 129, 0.1); padding: 0.65rem 0.85rem; border-radius: 8px; cursor: pointer; border: 1.5px solid #10b981;">
                   <input type="radio" name="payMethodOpt" value="upi_qr" checked style="accent-color: #10b981; transform: scale(1.2);" />
                   <div>
-                    <strong style="color: #34d399; font-size: 0.95rem;">⚡ Direct UPI QR / GPay / PhonePe / Paytm</strong>
-                    <div style="font-size: 0.8rem; color: #d1d5db;">0% Gateway Fee · Pay <strong>₹${fee.baseFee.toFixed(2)}</strong> Total</div>
+                    <strong style="color: #34d399; font-size: 0.95rem;">⚡ Direct UPI QR Code (GPay / PhonePe / Paytm)</strong>
+                    <div style="font-size: 0.8rem; color: #d1d5db;">0% Gateway Fee · Direct Transfer to RSAM Account · Pay <strong>₹${fee.baseFee.toFixed(2)}</strong></div>
                   </div>
                 </label>
+                ${(window.ENV_CONFIG && window.ENV_CONFIG.enableRazorpay) ? `
                 <label style="display: flex; align-items: center; gap: 0.6rem; background: rgba(245, 158, 11, 0.1); padding: 0.65rem 0.85rem; border-radius: 8px; cursor: pointer; border: 1.5px solid rgba(245, 158, 11, 0.4);">
                   <input type="radio" name="payMethodOpt" value="razorpay" style="accent-color: #f59e0b; transform: scale(1.2);" />
                   <div>
@@ -808,6 +809,7 @@ function formatDateDDMMMYYYY(dateStr) {
                     <div style="font-size: 0.8rem; color: #d1d5db;">+ 2% Fee &amp; GST · Pay <strong>₹${fee.totalAmount.toFixed(2)}</strong> Total</div>
                   </div>
                 </label>
+                ` : ''}
               </div>
             `}
           </div>
@@ -869,12 +871,14 @@ function formatDateDDMMMYYYY(dateStr) {
         const upiUri = `upi://pay?pa=${encodeURIComponent(vpa)}&pn=${encodeURIComponent(payeeName)}&am=${amountStr}&cu=INR&tn=${encodeURIComponent(noteStr)}`;
         const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(upiUri)}`;
 
+        let selectedScreenshotBase64 = "";
+
         upiModal.innerHTML = `
-          <div style="background:#111827; border:2px solid #e01c2e; border-radius:16px; width:100%; max-width:480px; padding:1.5rem; color:#fff; box-shadow:0 20px 25px -5px rgba(0,0,0,0.6); font-family:sans-serif; text-align:center; position:relative; margin:auto;">
+          <div style="background:#111827; border:2px solid #e01c2e; border-radius:16px; width:100%; max-width:500px; padding:1.5rem; color:#fff; box-shadow:0 20px 25px -5px rgba(0,0,0,0.6); font-family:sans-serif; text-align:center; position:relative; margin:auto;">
             <button type="button" id="upiCloseBtn" style="position:absolute; top:12px; right:16px; background:none; border:none; color:#9ca3af; font-size:1.8rem; cursor:pointer; line-height:1;">&times;</button>
             
             <div style="display:inline-flex; align-items:center; gap:0.4rem; background:rgba(16,185,129,0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3); padding:4px 12px; border-radius:20px; font-size:0.8rem; font-weight:700; text-transform:uppercase; margin-bottom:0.8rem;">
-              ⚡ 0% Gateway Fee (Direct UPI Transfer)
+              ⚡ Direct UPI QR Transfer (0% Gateway Fee)
             </div>
             
             <h3 style="margin:0 0 0.4rem 0; font-size:1.35rem; color:#f3f4f6;">Pay via UPI (GPay / PhonePe / Paytm)</h3>
@@ -893,18 +897,29 @@ function formatDateDDMMMYYYY(dateStr) {
 
             <div style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:0.8rem; text-align:left; margin-bottom:1.2rem; font-size:0.85rem;">
               <div style="color:#d1d5db; margin-bottom:0.25rem;">📌 <strong>Payee VPA:</strong> <span style="color:#60a5fa; user-select:all; font-weight:600;">${vpa}</span></div>
-              <div style="color:#d1d5db;">💳 <strong>Payable Amount:</strong> <span style="color:#34d399; font-weight:700;">₹${amountStr}</span> <small style="color:#9ca3af;">(0% Gateway Fee)</small></div>
+              <div style="color:#d1d5db;">💳 <strong>Payable Amount:</strong> <span style="color:#34d399; font-weight:700;">₹${amountStr}</span> <small style="color:#9ca3af;">(Direct Bank Account)</small></div>
             </div>
 
             <div style="background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.3); border-radius:12px; padding:1rem; text-align:left;">
-              <label style="display:block; color:#93c5fd; font-size:0.85rem; font-weight:700; margin-bottom:0.4rem;">
-                Enter 12-Digit UPI UTR / Ref No. (after payment):
+              <label style="display:block; color:#93c5fd; font-size:0.85rem; font-weight:700; margin-bottom:0.3rem;">
+                1. Enter 12-Digit UPI UTR / Ref No. <span style="color:#ef4444;">*</span>
               </label>
-              <input type="text" id="upiUtrInput" maxlength="12" placeholder="e.g. 426719823412" style="width:100%; padding:0.65rem 0.8rem; border-radius:8px; border:1px solid #3b82f6; background:#1f2937; color:#fff; font-size:1rem; font-weight:600; letter-spacing:1px; box-sizing:border-box; text-transform:uppercase; margin-bottom:0.4rem;" />
-              <div id="upiUtrErr" style="color:#ef4444; font-size:0.8rem; margin-bottom:0.6rem;" hidden>Please enter valid 12-digit UPI UTR number from your GPay/PhonePe success screen.</div>
+              <input type="text" id="upiUtrInput" maxlength="12" placeholder="e.g. 426719823412" style="width:100%; padding:0.65rem 0.8rem; border-radius:8px; border:1px solid #3b82f6; background:#1f2937; color:#fff; font-size:1rem; font-weight:600; letter-spacing:1px; box-sizing:border-box; text-transform:uppercase; margin-bottom:0.8rem;" />
+
+              <label style="display:block; color:#93c5fd; font-size:0.85rem; font-weight:700; margin-bottom:0.3rem;">
+                2. Upload Payment Receipt Screenshot <span style="color:#ef4444;">*</span>
+              </label>
+              <input type="file" id="upiScreenshotInput" accept="image/*" style="width:100%; padding:0.5rem; border-radius:8px; border:1px solid rgba(255,255,255,0.2); background:#1f2937; color:#fff; font-size:0.85rem; box-sizing:border-box; margin-bottom:0.5rem;" />
+              
+              <div id="upiScreenshotPreviewBox" style="margin-bottom:0.8rem; text-align:center;" hidden>
+                <img id="upiScreenshotPreviewImg" style="max-height:120px; border-radius:8px; border:1.5px solid #10b981; display:inline-block; box-shadow:0 4px 10px rgba(0,0,0,0.5);" />
+                <div style="font-size:0.75rem; color:#34d399; margin-top:0.25rem;">✓ Payment Screenshot Attached</div>
+              </div>
+
+              <div id="upiUtrErr" style="color:#ef4444; font-size:0.8rem; margin-bottom:0.6rem;" hidden>Please enter valid 12-digit UPI UTR number and attach payment screenshot.</div>
               
               <button type="button" id="upiSubmitUtrBtn" class="btn-primary" style="width:100%; padding:0.75rem; font-size:0.95rem; font-weight:700; background:#10b981; border:none; border-radius:8px; color:#fff; cursor:pointer;">
-                ✓ Submit &amp; Get Registration Certificate
+                ✓ Submit Payment for Admin Approval
               </button>
             </div>
           </div>
@@ -921,6 +936,9 @@ function formatDateDDMMMYYYY(dateStr) {
         }
 
         const utrInput = document.getElementById("upiUtrInput");
+        const screenshotInput = document.getElementById("upiScreenshotInput");
+        const previewBox = document.getElementById("upiScreenshotPreviewBox");
+        const previewImg = document.getElementById("upiScreenshotPreviewImg");
         const utrErr = document.getElementById("upiUtrErr");
         const submitUtrBtn = document.getElementById("upiSubmitUtrBtn");
 
@@ -930,21 +948,52 @@ function formatDateDDMMMYYYY(dateStr) {
           });
         }
 
+        if (screenshotInput) {
+          screenshotInput.addEventListener("change", () => {
+            const file = screenshotInput.files[0];
+            if (file) {
+              if (file.size > 10 * 1024 * 1024) {
+                alert("Payment screenshot file size must be less than 10MB.");
+                screenshotInput.value = "";
+                if (previewBox) previewBox.hidden = true;
+                selectedScreenshotBase64 = "";
+                return;
+              }
+              const reader = new FileReader();
+              reader.onload = (e) => {
+                selectedScreenshotBase64 = e.target.result;
+                if (previewImg) previewImg.src = selectedScreenshotBase64;
+                if (previewBox) previewBox.hidden = false;
+              };
+              reader.readAsDataURL(file);
+            } else {
+              if (previewBox) previewBox.hidden = true;
+              selectedScreenshotBase64 = "";
+            }
+          });
+        }
+
         if (submitUtrBtn) {
           submitUtrBtn.onclick = async () => {
             const rawUtr = (utrInput.value || "").trim();
             if (rawUtr.length !== 12) {
-              utrErr.textContent = "Please enter valid 12-digit UPI UTR number from your GPay/PhonePe success screen.";
+              utrErr.textContent = "Please enter a valid 12-digit UPI UTR / Ref Number from your payment receipt.";
+              utrErr.hidden = false;
+              return;
+            }
+
+            if (!selectedScreenshotBase64) {
+              utrErr.textContent = "Please attach your payment receipt screenshot before submitting.";
               utrErr.hidden = false;
               return;
             }
 
             submitUtrBtn.disabled = true;
-            submitUtrBtn.textContent = "⏳ Verifying UTR...";
+            submitUtrBtn.textContent = "⏳ Submitting for Approval...";
 
             try {
               const apiPort = window.location.port === '8080' || window.location.hostname === 'localhost' ? '3001' : '';
-              const baseUrl = apiPort ? `http://${window.location.hostname}:${apiPort}` : (getEnvConfig().backendUrl || '');
+              const baseUrl = apiPort ? `http://${window.location.hostname}:${apiPort}` : ((window.ENV_CONFIG && window.ENV_CONFIG.backendUrl) || '');
               const res = await fetch(`${baseUrl}/api/verify-utr`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -953,10 +1002,10 @@ function formatDateDDMMMYYYY(dateStr) {
               if (res.ok) {
                 const data = await res.json();
                 if (data && data.valid === false) {
-                  utrErr.textContent = `❌ ${data.message || 'Invalid or duplicate UTR number.'}`;
+                  utrErr.textContent = `❌ ${data.message || 'Duplicate UTR number.'}`;
                   utrErr.hidden = false;
                   submitUtrBtn.disabled = false;
-                  submitUtrBtn.textContent = "✓ Submit & Get Registration Certificate";
+                  submitUtrBtn.textContent = "✓ Submit Payment for Admin Approval";
                   return;
                 }
               }
@@ -967,10 +1016,11 @@ function formatDateDDMMMYYYY(dateStr) {
             utrErr.hidden = true;
             upiModal.hidden = true;
 
-            payload.paymentId = "UPI_" + rawUtr;
-            payload.paymentStatus = "SUCCESS";
+            payload.paymentId = "UPI_PENDING_" + rawUtr;
+            payload.paymentStatus = "PENDING_APPROVAL";
             payload.amountPaid = amountStr;
             payload.upiUtr = rawUtr;
+            payload.paymentScreenshot = selectedScreenshotBase64;
 
             if (onSuccessCallback) onSuccessCallback(payload);
           };

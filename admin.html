@@ -105,6 +105,10 @@
             <span>🎟️ Events &amp; Fees</span>
             <span class="tab-badge" id="badgeEvents">3</span>
           </button>
+          <button type="button" class="admin-tab-btn" data-tab="tabPayments">
+            <span>💳 Payment Approvals</span>
+            <span class="tab-badge" id="badgePayments" style="background:rgba(245,158,11,0.3); color:#fbbf24;">0</span>
+          </button>
           <button type="button" class="admin-tab-btn" data-tab="tabBroadcast">
             <span>💬 Broadcast</span>
             <span class="tab-badge" id="badgeBroadcast">Bot</span>
@@ -352,10 +356,50 @@
           </div>
         </div>
 
+        <!-- Tab 5: Direct UPI Payment Verification & 1-Click Approvals -->
+        <div class="tab-pane" id="tabPayments">
+          <div class="dash-card">
+            <div class="card-title-row" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+              <div>
+                <h3>💳 Direct UPI Payment Verification &amp; 1-Click Approvals</h3>
+                <p class="card-desc" style="color:#9ca3af; margin:0.25rem 0 0 0; font-size:0.88rem;">Review submitted 12-digit UTR numbers and payment receipt screenshots. Click Approve to issue the entry pass and trigger automated WhatsApp confirmation.</p>
+              </div>
+              <button type="button" class="btn-dash-action" id="refreshPaymentsBtn">
+                <i class="fa-solid fa-arrows-rotate"></i> Refresh Payments
+              </button>
+            </div>
+
+            <!-- Filter Status Bar -->
+            <div style="display:flex; gap:0.6rem; margin:1.2rem 0; flex-wrap:wrap;" id="paymentFilterTrack">
+              <button type="button" class="btn-filter-status active" data-filter="all" style="padding:0.45rem 1rem; border-radius:8px; border:1px solid rgba(255,255,255,0.2); background:rgba(255,255,255,0.08); color:#fff; cursor:pointer; font-weight:600; font-size:0.85rem;">All Records (<span id="cntFilterAll">0</span>)</button>
+              <button type="button" class="btn-filter-status" data-filter="PENDING_APPROVAL" style="padding:0.45rem 1rem; border-radius:8px; border:1px solid rgba(245,158,11,0.4); background:rgba(245,158,11,0.15); color:#fbbf24; cursor:pointer; font-weight:600; font-size:0.85rem;">⏳ Pending Approval (<span id="cntFilterPending">0</span>)</button>
+              <button type="button" class="btn-filter-status" data-filter="VERIFIED" style="padding:0.45rem 1rem; border-radius:8px; border:1px solid rgba(16,185,129,0.4); background:rgba(16,185,129,0.15); color:#34d399; cursor:pointer; font-weight:600; font-size:0.85rem;">🟢 Approved / Paid (<span id="cntFilterVerified">0</span>)</button>
+              <button type="button" class="btn-filter-status" data-filter="REJECTED" style="padding:0.45rem 1rem; border-radius:8px; border:1px solid rgba(239,68,68,0.4); background:rgba(239,68,68,0.15); color:#f87171; cursor:pointer; font-weight:600; font-size:0.85rem;">🔴 Rejected (<span id="cntFilterRejected">0</span>)</button>
+            </div>
+
+            <!-- Payments Table Container -->
+            <div id="paymentsListTableWrap" style="overflow-x:auto; background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.08); border-radius:10px; min-height:200px;">
+              <p style="text-align:center; color:#60a5fa; padding:2rem;">⏳ Fetching payment records...</p>
+            </div>
+          </div>
+        </div>
 
       </div>
     </div>
   </main>
+
+  <!-- Payment Screenshot Lightbox Modal -->
+  <div class="admin-modal-overlay" id="screenshotLightboxModal" hidden>
+    <div class="admin-modal" style="max-width:550px; text-align:center; padding:1.5rem; background:#111827; border:2px solid #3b82f6; border-radius:16px;">
+      <h3 style="color:#fff; margin:0 0 0.8rem 0; font-size:1.25rem;">📷 Payment Receipt Screenshot</h3>
+      <div style="background:#000; border-radius:10px; padding:0.5rem; display:inline-block; max-width:100%;">
+        <img id="lightboxImg" src="" alt="Payment Receipt Screenshot" style="max-width:100%; max-height:480px; border-radius:8px; display:block; margin:auto;" />
+      </div>
+      <div style="margin-top:1.2rem; display:flex; justify-content:center; gap:1rem;">
+        <button type="button" class="btn-dash-action" id="closeLightboxBtn" style="padding:0.6rem 1.5rem; font-weight:700;">Close Lightbox</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Generic Item Modal (for Add/Edit Events, News, Highlights, Officials) -->
   <div class="admin-modal-overlay" id="itemModal" hidden>
