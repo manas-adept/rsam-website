@@ -319,27 +319,33 @@ document.addEventListener("DOMContentLoaded", () => {
 
       let data = null;
 
-      // Try 1: Express Backend
+      // Try 1: Direct Google Sheet URL (Instant response from Apps Script)
       try {
-        const res = await fetch(`${backendUrl}/api/lookup-skater?action=renew_lookup&query=${encodeURIComponent(query)}`);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 4000);
+        const res = await fetch(`${sheetUrl}?action=renew_lookup&query=${encodeURIComponent(query)}`, { signal: controller.signal });
+        clearTimeout(timeoutId);
         if (res.ok) {
           const text = await res.text();
           try { data = JSON.parse(text); } catch (e) {}
         }
       } catch (e) {
-        console.warn("[Renewal Lookup Backend Warning]", e);
+        console.warn("[Renewal Lookup Sheet Warning]", e);
       }
 
-      // Try 2: Direct Google Sheet URL Fallback
+      // Try 2: Express Backend Fallback (with 3s timeout)
       if (!data || data.status === "not_found" || !data.skater) {
         try {
-          const res = await fetch(`${sheetUrl}?action=renew_lookup&query=${encodeURIComponent(query)}`);
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 3000);
+          const res = await fetch(`${backendUrl}/api/lookup-skater?action=renew_lookup&query=${encodeURIComponent(query)}`, { signal: controller.signal });
+          clearTimeout(timeoutId);
           if (res.ok) {
             const text = await res.text();
             try { data = JSON.parse(text); } catch (e) {}
           }
         } catch (e) {
-          console.warn("[Renewal Lookup Sheet Warning]", e);
+          console.warn("[Renewal Lookup Backend Warning]", e);
         }
       }
 
