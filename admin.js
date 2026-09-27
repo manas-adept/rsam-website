@@ -1649,30 +1649,55 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!certSkatersList) return;
       certSkatersList.innerHTML = `<p style="color:#60a5fa; text-align:center; padding:1.5rem;"><i class="fa-solid fa-spin fa-spinner"></i> Fetching event sheets &amp; results from Google Sheets...</p>`;
 
+      let fetched = false;
+      let sheetsData = [];
+
+      // 1. Try Express backend API first
+      const baseUrl = getAdminApiBaseUrl();
       try {
-        const envConfig = window.ENV_CONFIG || {};
-        const sheetUrl = envConfig.sheetUrl || (typeof SHEET_URL !== 'undefined' ? SHEET_URL : '');
-        const res = await fetch(`${sheetUrl}?action=fetch_all_contacts`);
-        const data = await res.json();
-
-        if (data.status === "ok" && Array.isArray(data.sheets) && data.sheets.length > 0) {
-          cachedSheets = data.sheets;
-
-          // Update dropdown dynamically if new sheets are found
-          if (certSheetSelect) {
-            const currentSelected = certSheetSelect.value;
-            certSheetSelect.innerHTML = cachedSheets.map(s => 
-              `<option value="${escapeHTML(s.sheetName)}"${s.sheetName === currentSelected ? ' selected' : ''}>🎟️ ${escapeHTML(s.sheetName)} (${s.count} skaters)</option>`
-            ).join('');
+        const res = await fetch(`${baseUrl}/api/fetch-contacts`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.status === "ok" && Array.isArray(data.sheets) && data.sheets.length > 0) {
+            sheetsData = data.sheets;
+            fetched = true;
           }
-
-          loadSelectedSheet();
-        } else {
-          certSkatersList.innerHTML = `<p style="color:#f87171; text-align:center; padding:1.5rem;">Could not load sheets or no records found in Google Sheet.</p>`;
         }
-      } catch (err) {
-        console.error("[Fetch Event Cert Records Error]", err);
-        certSkatersList.innerHTML = `<p style="color:#f87171; text-align:center; padding:1.5rem;">⚠️ Error connecting to Google Sheet API. Please check your network connection.</p>`;
+      } catch (e) {
+        console.warn("[Cert Fetch Backend Error]", e);
+      }
+
+      // 2. Fallback to direct Apps Script URL
+      if (!fetched) {
+        try {
+          const sheetUrl = (window.ENV_CONFIG && window.ENV_CONFIG.sheetUrl) || (typeof SHEET_URL !== 'undefined' ? SHEET_URL : '') || "https://script.google.com/macros/s/AKfycbyrxUIvQMXOzaBFNKwle-kOC0xMlc0ezufhIRXSyyid3Zx6Rhk9SKMZhNIoBBB290Xw/exec";
+          const res = await fetch(`${sheetUrl}?action=fetch_all_contacts`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data && (data.sheets || (data.status === "ok" && data.sheets))) {
+              sheetsData = data.sheets;
+              fetched = true;
+            }
+          }
+        } catch (e) {
+          console.warn("[Cert Fetch Direct AppsScript Error]", e);
+        }
+      }
+
+      if (fetched && sheetsData.length > 0) {
+        cachedSheets = sheetsData;
+
+        // Update dropdown dynamically if new sheets are found
+        if (certSheetSelect) {
+          const currentSelected = certSheetSelect.value;
+          certSheetSelect.innerHTML = cachedSheets.map(s => 
+            `<option value="${escapeHTML(s.sheetName)}"${s.sheetName === currentSelected ? ' selected' : ''}>🎟️ ${escapeHTML(s.sheetName)} (${s.count} skaters)</option>`
+          ).join('');
+        }
+
+        loadSelectedSheet();
+      } else {
+        certSkatersList.innerHTML = `<p style="color:#f87171; text-align:center; padding:1.5rem;">⚠️ Could not load sheets from Google Sheet API. Please check your network connection.</p>`;
       }
     }
 
