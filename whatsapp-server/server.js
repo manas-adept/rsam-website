@@ -486,19 +486,46 @@ app.get('/api/bot-status', (req, res) => {
 function buildRegistrationMessage(data, regNumber) {
   const isEvent = data.type === 'event_registration';
   const coachStr = `${data.coachName || 'N/A'}${data.coachMobile ? ` (${data.coachMobile})` : ' (N/A)'}`;
-  const paymentStr = data.paymentId
-    ? `${data.paymentId} / ${data.paymentStatus || 'SUCCESS'}`
-    : (data.paymentStatus || 'SUCCESS');
+  
+  const rawStatus = String(data.paymentStatus || data.status || '').toUpperCase();
+  const isVerified = rawStatus === 'VERIFIED' || rawStatus === 'PAID' || rawStatus === 'SUCCESS' || rawStatus === 'APPROVED' || rawStatus === 'WAIVED';
+
+  const paymentStr = isVerified
+    ? (data.paymentId ? `${data.paymentId} / VERIFIED` : 'VERIFIED')
+    : 'UNDER REVIEW / PENDING VERIFICATION';
+
   const formattedDob = cleanDob(data.dob);
   const eventName = data.eventName || data.eventTitle || 'Championship Event';
   const chestNo = data.eventRegNo || data.chestNo || (regNumber ? String(regNumber).replace(/\D/g, "").slice(-3) : "N/A");
 
   if (isEvent) {
+    if (!isVerified) {
+      return `🏆 *RSAM Event Registration Started*
+
+Dear *${data.skaterName || 'Athlete'}*,
+
+Your registration for *${eventName}* has been received and is currently under review.
+
+🎽 _(RSAM Reg. Number: ${regNumber})_
+
+• *Athlete Name:* ${data.skaterName || 'N/A'}
+• *Date of Birth:* ${formattedDob} (Age Group: ${data.ageGroup || 'N/A'})
+• *Discipline:* ${data.discipline || 'N/A'}
+• *School / Club:* ${data.schoolClub || 'N/A'}
+• *Coach:* ${coachStr}
+• *Payment Status:* ${paymentStr}
+
+Your payment proof and submitted details are currently under review by the RSAM team. Once your payment is verified by admin, you will receive another WhatsApp message (*RSAM Event Registration Confirmation*) along with your assigned Chest Number and Entry Pass.
+
+Best regards,
+*RSAM* 🛼🏆`;
+    }
+
     return `🏆 *RSAM Event Registration Confirmation*
 
 Dear *${data.skaterName || 'Athlete'}*,
 
-Your registration for *${eventName}* has been received successfully. Please save your registration details for the championship.
+Your registration for *${eventName}* has been verified and confirmed!
 
 🔢 *CHEST NUMBER:* *${chestNo}*
 🎽 _(RSAM Reg. Number: ${regNumber})_
@@ -510,7 +537,7 @@ Your registration for *${eventName}* has been received successfully. Please save
 • *Coach:* ${coachStr}
 • *Payment Status:* ${paymentStr}
 
-Your PDF entry pass has been sent to your registered email. Submitted documents are currently under verification.
+Your payment is verified. Please save your Chest Number for championship entry and trials.
 
 Best regards,
 *RSAM* 🛼🏆`;
@@ -550,27 +577,33 @@ function buildCoachRegistrationMessage(data, regNumber) {
   const eventName = data.eventName || data.eventTitle || 'Championship Event';
   const chestNo = data.eventRegNo || data.chestNo || (regNumber ? String(regNumber).replace(/\D/g, "").slice(-3) : "N/A");
 
+  const rawStatus = String(data.paymentStatus || data.status || '').toUpperCase();
+  const isVerified = rawStatus === 'VERIFIED' || rawStatus === 'PAID' || rawStatus === 'SUCCESS' || rawStatus === 'APPROVED' || rawStatus === 'WAIVED';
+
   if (data.type === 'event_registration') {
-    return `🏆 *CHAMPIONSHIP ATHLETE ENTRY NOTICE* 🏆
+    const titleText = isVerified ? '🏆 *CHAMPIONSHIP ATHLETE ENTRY CONFIRMATION* 🏆' : '🏆 *CHAMPIONSHIP ATHLETE ENTRY NOTICE (UNDER REVIEW)* 🏆';
+    const chestDisplay = isVerified ? `*${chestNo}*` : '*Under Review*';
+    const statusText = isVerified ? 'VERIFIED' : 'UNDER REVIEW / PENDING VERIFICATION';
+
+    return `${titleText}
 __________________________________
 
 Dear Coach *${data.coachName || 'Coach'}*,
 
-Your athlete *${data.skaterName}* has successfully registered for *${eventName}*!
+Your athlete *${data.skaterName}* has registered for *${eventName}*!
 
-🔢 *CHEST NUMBER:* *${chestNo}*
+🔢 *CHEST NUMBER:* ${chestDisplay}
 🎽 _(RSAM Reg. Number: ${regNumber})_
 
 📋 *Athlete Championship Summary:*
 • *Event:* ${eventName}
 • *Athlete Name:* ${data.skaterName}
-• *Chest Number:* ${chestNo}
+• *Chest Number:* ${chestDisplay}
 • *RSAM Reg. No.:* ${regNumber}
 • *Discipline:* ${data.discipline || 'N/A'}
 • *Age Group:* ${data.ageGroup || 'N/A'}
 • *School / Club:* ${data.schoolClub || 'N/A'}
-• *Father's Name:* ${data.fatherName || 'N/A'}
-• *Athlete Mobile:* ${data.mobile || 'N/A'}
+• *Payment Status:* ${statusText}
 • *Submission Date:* ${dateStr}
 
 Thank you for guiding and mentoring athletes under *${ORG_NAME}*!
@@ -1545,7 +1578,8 @@ app.post('/api/verify-utr', async (req, res) => {
  */
 app.post('/api/approve-payment', async (req, res) => {
   try {
-    const { regNumber, sheetName, action, rejectReason } = req.body;
+    const payload = req.body || {};
+    const { regNumber, sheetName, action, rejectReason, skaterName, mobile, coachMobile, coachName, eventName, eventRegNo, chestNo, discipline, ageGroup, schoolClub, dob, email } = payload;
     if (!regNumber) {
       return res.status(400).json({ status: 'error', message: 'regNumber is required' });
     }
@@ -1556,7 +1590,7 @@ app.post('/api/approve-payment', async (req, res) => {
     console.log(`[Admin Payment Approval] Reg: ${regNumber}, Action: ${action}`);
 
     // Update in Google Apps Script if URL available
-    const sheetUrl = process.env.SHEET_URL || 'https://script.google.com/macros/s/AKfycbyrxUIvQMXOzaBFNKwle-kOC0xMlc0ezufhIRXSyyid3Zx6Rhk9SKMZhNIoBBB290Xw/exec';
+    const sheetUrl = process.env.SHEET_URL || process.env.GOOGLE_SHEET_SCRIPT_URL || 'https://script.google.com/macros/s/AKfycbyrxUIvQMXOzaBFNKwle-kOC0xMlc0ezufhIRXSyyid3Zx6Rhk9SKMZhNIoBBB290Xw/exec';
     try {
       await fetch(sheetUrl, {
         method: 'POST',
@@ -1570,13 +1604,57 @@ app.post('/api/approve-payment', async (req, res) => {
         })
       });
     } catch (e) {
-      console.warn('[Sheet Status Update Warning]', e);
+      console.warn('[Sheet Status Update Warning]', e.message);
+    }
+
+    // Send secondary WhatsApp Confirmation Message upon Payment Approval!
+    if (isApprove && sock && isConnected) {
+      try {
+        const athleteData = {
+          type: 'event_registration',
+          skaterName: skaterName || 'Athlete',
+          mobile: mobile,
+          coachMobile: coachMobile,
+          coachName: coachName,
+          eventName: eventName || sheetName || 'District Championship 2026',
+          eventRegNo: eventRegNo || chestNo || (regNumber ? String(regNumber).replace(/\D/g, "").slice(-3) : ""),
+          chestNo: chestNo || eventRegNo,
+          discipline: discipline,
+          ageGroup: ageGroup,
+          schoolClub: schoolClub,
+          dob: dob,
+          email: email,
+          paymentStatus: 'VERIFIED',
+          regNumber: regNumber
+        };
+
+        if (athleteData.mobile) {
+          const skaterJid = formatWhatsAppJid(athleteData.mobile);
+          if (skaterJid) {
+            const skaterMsg = buildRegistrationMessage(athleteData, regNumber);
+            console.log(`[WhatsApp Approval] Sending secondary confirmation message to ${skaterJid} for ${athleteData.skaterName}...`);
+            await sock.sendMessage(skaterJid, { text: skaterMsg });
+            console.log(`[WhatsApp Approval] Sent secondary confirmation message to ${athleteData.skaterName}!`);
+          }
+        }
+
+        if (athleteData.coachMobile && String(athleteData.coachMobile).replace(/\D/g, "").length === 10) {
+          const coachJid = formatWhatsAppJid(athleteData.coachMobile);
+          if (coachJid) {
+            const coachMsg = buildCoachRegistrationMessage(athleteData, regNumber);
+            console.log(`[WhatsApp Approval] Sending secondary coach confirmation message to ${coachJid}...`);
+            await sock.sendMessage(coachJid, { text: coachMsg });
+          }
+        }
+      } catch (waErr) {
+        console.error('[WhatsApp Approval Message Error]:', waErr.message);
+      }
     }
 
     return res.json({
       status: 'ok',
       message: isApprove 
-        ? `Payment approved for ${regNumber}! Status updated to VERIFIED.` 
+        ? `Payment approved for ${regNumber}! Status updated to VERIFIED and WhatsApp confirmation sent.` 
         : `Payment rejected for ${regNumber}.`,
       paymentStatus: newStatus
     });

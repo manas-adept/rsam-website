@@ -346,6 +346,48 @@ function doPost(e) {
         .setMimeType(ContentService.MimeType.JSON);
     }
 
+    if (data.action === "update_payment_status") {
+      const regNo = (data.regNumber || "").trim().toUpperCase();
+      const targetSheetName = data.sheetName || "";
+      const newStatus = data.paymentStatus || "VERIFIED";
+      const ss = getSpreadsheet();
+      let updated = false;
+
+      if (ss && regNo) {
+        const targetSheet = targetSheetName ? ss.getSheetByName(targetSheetName) : null;
+        const sheetsToSearch = targetSheet ? [targetSheet] : ss.getSheets();
+        for (let sheet of sheetsToSearch) {
+          const rows = sheet.getDataRange().getValues();
+          if (rows.length < 2) continue;
+          const headers = rows[0].map(h => String(h).trim().toLowerCase());
+          
+          let regIdx = headers.findIndex(h => h.includes("rsam reg") || h.includes("reg no") || h.includes("registration no") || h.includes("event reg no"));
+          if (regIdx === -1) regIdx = 1;
+          
+          let statusIdx = headers.findIndex(h => h.includes("payment status") || h.includes("status"));
+          if (statusIdx === -1) statusIdx = 19;
+
+          for (let i = 1; i < rows.length; i++) {
+            const rowReg = String(rows[i][regIdx] || "").trim().toUpperCase();
+            if (rowReg === regNo) {
+              sheet.getRange(i + 1, statusIdx + 1).setValue(newStatus);
+              updated = true;
+              break;
+            }
+          }
+          if (updated) break;
+        }
+      }
+
+      return ContentService.createTextOutput(JSON.stringify({
+        status: "ok",
+        action: "update_payment_status",
+        regNumber: regNo,
+        updated: updated,
+        newStatus: newStatus
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+
     const ss = getSpreadsheet();
     if (!ss) {
       return ContentService.createTextOutput(JSON.stringify({ status: "error", message: "Could not access spreadsheet." }))

@@ -3166,6 +3166,8 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
 
+    window.RSAM_ALL_PAYMENT_RECORDS = allRecords;
+
     // Update filter counts
     let cntPending = 0, cntVerified = 0, cntRejected = 0;
     allRecords.forEach(r => {
@@ -3324,20 +3326,39 @@ document.addEventListener("DOMContentLoaded", () => {
       btn.onclick = async () => {
         const regNo = btn.getAttribute("data-reg");
         const sheetName = btn.getAttribute("data-sheet");
-        if (!confirm(`Approve payment for Registration ${regNo}? This will mark status as VERIFIED and issue the PDF Pass.`)) return;
+        if (!confirm(`Approve payment for Registration ${regNo}? This will mark status as VERIFIED and issue the WhatsApp Confirmation & Chest Number.`)) return;
 
         btn.disabled = true;
         btn.textContent = "⏳ Approving...";
+
+        const rec = (window.RSAM_ALL_PAYMENT_RECORDS || []).find(r => 
+          (r.regNumber || r.registrationNo || r.eventRegNo || r.rsamRegNo) === regNo && (!sheetName || r.sheetName === sheetName)
+        ) || {};
 
         try {
           const baseUrl = getAdminApiBaseUrl();
           const res = await fetch(`${baseUrl}/api/approve-payment`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ regNumber: regNo, sheetName, action: "approve" })
+            body: JSON.stringify({
+              regNumber: regNo,
+              sheetName: sheetName || rec.sheetName,
+              action: "approve",
+              skaterName: rec.skaterName || rec.name || 'Athlete',
+              mobile: rec.mobile || rec.phone || '',
+              coachMobile: rec.coachMobile || '',
+              coachName: rec.coachName || '',
+              eventName: rec.eventName || rec.eventTitle || sheetName || 'District Championship 2026',
+              eventRegNo: rec.eventRegNo || rec.chestNo || (regNo ? String(regNo).replace(/\D/g, "").slice(-3) : ''),
+              discipline: rec.discipline || '',
+              ageGroup: rec.ageGroup || '',
+              schoolClub: rec.schoolClub || '',
+              dob: rec.dob || '',
+              email: rec.email || ''
+            })
           });
           if (res.ok) {
-            notify(`✓ Payment for ${regNo} approved! Status set to VERIFIED.`);
+            notify(`✓ Payment for ${regNo} approved! Status set to VERIFIED and WhatsApp confirmation sent.`);
           } else {
             notify(`✓ Payment for ${regNo} approved.`);
           }
