@@ -712,7 +712,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     const envConfig = window.ENV_CONFIG || {};
-    const vpa = envConfig.upiVpa || "9971844191@ybl";
+    const vpa = envConfig.upiVpa || "9045865056@ybl";
     const payeeName = envConfig.upiPayeeName || "Roller Sports Association Moradabad";
     const amountStr = parseFloat(baseFeeAmount).toFixed(2);
     const noteStr = `RSAM ${payload.regNumber || payload.skaterName || 'Registration'}`.slice(0, 30);
