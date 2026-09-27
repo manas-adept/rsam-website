@@ -487,6 +487,22 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
+  const decConsentChk = document.getElementById("declarationConsentCheckbox");
+
+  function syncEvtSubmitBtnState() {
+    if (!evtSubmitBtn) return;
+    const isChecked = !!(decConsentChk && decConsentChk.checked);
+    evtSubmitBtn.disabled = !isChecked;
+    evtSubmitBtn.style.opacity = isChecked ? "1" : "0.5";
+    evtSubmitBtn.style.cursor = isChecked ? "pointer" : "not-allowed";
+    evtSubmitBtn.title = isChecked ? "" : "Please read and check the Terms & Conditions declaration to proceed";
+  }
+
+  if (decConsentChk) {
+    decConsentChk.addEventListener("change", syncEvtSubmitBtnState);
+  }
+  syncEvtSubmitBtnState();
+
   // 2. Handle Event Registration Form Submission
   evtForm.addEventListener("submit", (e) => {
     e.preventDefault();
@@ -496,10 +512,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    const decConsentChk = document.getElementById("declarationConsentCheckbox");
-    if (decConsentChk && !decConsentChk.checked) {
+    if (!decConsentChk || !decConsentChk.checked) {
       alert("Please read and agree to the RSAM Terms & Conditions declaration box to proceed.");
-      decConsentChk.scrollIntoView({ behavior: "smooth", block: "center" });
+      if (decConsentChk) decConsentChk.scrollIntoView({ behavior: "smooth", block: "center" });
+      syncEvtSubmitBtnState();
       return;
     }
 
@@ -532,6 +548,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       email: verifiedSkater.email,
       aadhaar: verifiedSkater.aadhaar,
       discipline: selectedDiscipline.value,
+      declarationAgreed: true,
+      declarationTimestamp: new Date().toISOString(),
       photoUrl: verifiedSkater.photoUrl || verifiedSkater.photo || verifiedSkater.skaterPhoto || ""
     };
 

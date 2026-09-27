@@ -567,17 +567,29 @@ if (cropApplyBtn) {
   });
 }
 
-/* ── Nav toggle (mobile) ───────────────────────────── */
-const navToggle = document.getElementById("navToggle");
-const navLinks  = document.getElementById("navLinks");
-if (navToggle) navToggle.addEventListener("click", () => navLinks.classList.toggle("open"));
+/* ── Declaration Consent Checkbox Switcher ────────────────── */
+const decConsentChk = document.getElementById("declarationConsentCheckbox");
+const submitBtn = document.getElementById("submitBtn");
+
+function syncSubmitBtnState() {
+  if (!submitBtn) return;
+  const isChecked = !!(decConsentChk && decConsentChk.checked);
+  submitBtn.disabled = !isChecked;
+  submitBtn.style.opacity = isChecked ? "1" : "0.5";
+  submitBtn.style.cursor = isChecked ? "pointer" : "not-allowed";
+  submitBtn.title = isChecked ? "" : "Please read and check the Terms & Conditions declaration to proceed";
+}
+
+if (decConsentChk) {
+  decConsentChk.addEventListener("change", syncSubmitBtnState);
+}
+syncSubmitBtnState();
 
 /* ── Form submit ───────────────────────────────────── */
 document.getElementById("regForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const form      = e.target;
-  const submitBtn = document.getElementById("submitBtn");
   const discError = document.getElementById("discError");
 
   /* Comprehensive validation */
@@ -676,6 +688,14 @@ document.getElementById("regForm").addEventListener("submit", async (e) => {
       if (submitRow) submitRow.parentNode.insertBefore(formErrorAlert, submitRow);
     }
 
+    if (!decConsentChk || !decConsentChk.checked) {
+      formErrorAlert.innerHTML = `⚠️ <strong>Declaration Agreement Required</strong><br/><span style="font-size:0.85rem; color:#d1d5db;">Please read and check the Terms &amp; Conditions declaration checkbox at the bottom to enable registration.</span>`;
+      formErrorAlert.hidden = false;
+      if (decConsentChk) decConsentChk.scrollIntoView({ behavior: "smooth", block: "center" });
+      syncSubmitBtnState();
+      return;
+    }
+
     if (!valid) {
       formErrorAlert.innerHTML = `⚠️ <strong>Incomplete Form Details</strong><br/><span style="font-size:0.85rem; color:#d1d5db;">Please fill in all required fields highlighted in red (including coach details), upload passport photo &amp; required document proofs, and select a discipline.</span>`;
       formErrorAlert.hidden = false;
@@ -733,6 +753,8 @@ document.getElementById("regForm").addEventListener("submit", async (e) => {
         email:        form.email.value.trim(),
         aadhaar:      aadhaarRaw,
         discipline:   discipline.value,
+        declarationAgreed: true,
+        declarationTimestamp: new Date().toISOString(),
         skaterPhoto:  photoPayload,
         aadhaarProof: aadhaarFile,
         dobProof:     dobFile,
