@@ -1067,6 +1067,7 @@ function formatDateDDMMMYYYY(dateStr) {
       }
 
       function launchRazorpayCheckout(payload, currentFee) {
+        const rzpOptions = {
           key: (window.ENV_CONFIG && window.ENV_CONFIG.razorpayKey) || "rzp_test_TZa1vfjhrPJobv",
           amount: currentFee.totalAmountPaise,
           currency: "INR",
