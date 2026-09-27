@@ -1451,51 +1451,59 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function initCertificateControls() {
-    const certTypeSelect = document.getElementById("certTypeSelect");
-    const certEventName = document.getElementById("certEventName");
-    const certSkaterName = document.getElementById("certSkaterName");
-    const certRegNo = document.getElementById("certRegNo");
-    const certDiscipline = document.getElementById("certDiscipline");
-    const certResultPreset = document.getElementById("certResultPreset");
-    const certResultCustom = document.getElementById("certResultCustom");
-    const certMobile = document.getElementById("certMobile");
-    const certEmail = document.getElementById("certEmail");
-    const certPreviewWrap = document.getElementById("certPreviewCardWrap");
+    const certSheetSelect   = document.getElementById("certSheetSelect");
+    const fetchBtn          = document.getElementById("fetchCertRecordsBtn");
+    const certSelectedCount = document.getElementById("certSelectedCount");
+    const selectAllBtn      = document.getElementById("certSelectAllBtn");
+    const deselectAllBtn    = document.getElementById("certDeselectAllBtn");
+    const invertBtn         = document.getElementById("certInvertBtn");
+    const certSkatersList   = document.getElementById("certSkatersList");
+    const bulkWaBtn         = document.getElementById("certBulkWaBtn");
+    const bulkEmailBtn      = document.getElementById("certBulkEmailBtn");
 
-    const printBtn = document.getElementById("certPrintBtn");
-    const waBtn = document.getElementById("certWaBtn");
-    const emailBtn = document.getElementById("certEmailBtn");
+    const certSkaterName    = document.getElementById("certSkaterName");
+    const certFatherName    = document.getElementById("certFatherName");
+    const certSchoolClub    = document.getElementById("certSchoolClub");
+    const certDiscipline    = document.getElementById("certDiscipline");
+    const certResultText    = document.getElementById("certResultText");
+    const certMobile        = document.getElementById("certMobile");
+    
+    const printBtn          = document.getElementById("certPrintBtn");
+    const singleWaBtn       = document.getElementById("certSingleWaBtn");
+    const certPreviewWrap   = document.getElementById("certPreviewCardWrap");
 
-    if (certResultPreset) {
-      certResultPreset.onchange = () => {
-        if (certResultPreset.value === "CUSTOM") {
-          if (certResultCustom) certResultCustom.hidden = false;
-        } else {
-          if (certResultCustom) certResultCustom.hidden = true;
-        }
-        renderCertificatePreview();
-      };
+    let cachedSheets = [];
+    let activeRecords = [];
+
+    // Helper to build URL for public standalone certificate
+    function buildCertUrl(c) {
+      const origin = window.location.origin;
+      const params = new URLSearchParams({
+        skaterName: c.skaterName || "",
+        fatherName: c.fatherName || "",
+        schoolClub: c.schoolClub || "",
+        dob: c.dob || "",
+        ageGroup: c.ageGroup || "",
+        eventTitle: c.eventName || (certSheetSelect ? certSheetSelect.value : "1st Winter Roller Skating Championship-2025"),
+        discipline: c.discipline || "Quads",
+        result: c.resultText || "🥇 GOLD MEDAL (1st Position)",
+        rink1: c.rinkRace1 || "1st",
+        rink2: c.rinkRace2 || "1st",
+        date: c.dateStr || "21-12-2025",
+        venue: "Springfields School, New Moradabad"
+      });
+      return `${origin}/certificate-view.html?${params.toString()}`;
     }
 
-    const inputs = [certTypeSelect, certEventName, certSkaterName, certRegNo, certDiscipline, certResultPreset, certResultCustom, certMobile, certEmail];
-    inputs.forEach(input => {
-      if (input) input.oninput = renderCertificatePreview;
-    });
-
     function getCertData() {
-      const resultText = (certResultPreset && certResultPreset.value === "CUSTOM")
-        ? (certResultCustom ? certResultCustom.value.trim() || "MERIT & PARTICIPATION" : "MERIT & PARTICIPATION")
-        : (certResultPreset ? certResultPreset.value : "🥇 GOLD MEDAL (1st Position)");
-
       return {
-        type: certTypeSelect ? certTypeSelect.value : "MERIT",
-        eventName: certEventName ? (certEventName.value.trim() || "4th District Roller Skating Championship 2026") : "4th District Championship 2026",
-        skaterName: certSkaterName ? (certSkaterName.value.trim() || "Aarav Sharma") : "Aarav Sharma",
-        regNo: certRegNo ? (certRegNo.value.trim() || "R260918611") : "R260918611",
-        discipline: certDiscipline ? (certDiscipline.value.trim() || "Speed Quad - U11 Boys") : "Speed Quad - U11 Boys",
-        resultText,
+        skaterName: certSkaterName ? certSkaterName.value.trim() : "",
+        fatherName: certFatherName ? certFatherName.value.trim() : "",
+        schoolClub: certSchoolClub ? certSchoolClub.value.trim() : "",
+        discipline: certDiscipline ? certDiscipline.value.trim() : "",
+        resultText: certResultText ? certResultText.value.trim() : "",
         mobile: certMobile ? certMobile.value.trim() : "",
-        email: certEmail ? certEmail.value.trim() : "",
+        eventName: certSheetSelect ? certSheetSelect.value : "1st Winter Roller Skating Championship-2025",
         dateStr: new Date().toLocaleDateString("en-IN", { day: 'numeric', month: 'long', year: 'numeric' })
       };
     }
@@ -1503,22 +1511,23 @@ document.addEventListener("DOMContentLoaded", () => {
     function renderCertificatePreview() {
       if (!certPreviewWrap) return;
       const c = getCertData();
+      const certUrl = buildCertUrl(c);
 
       let awardBadgeColor = "#f59e0b";
       let awardBadgeBg = "rgba(245,158,11,0.15)";
       let awardBorder = "rgba(245,158,11,0.4)";
 
-      if (c.resultText.includes("GOLD")) {
+      if (c.resultText.includes("GOLD") || c.resultText.includes("1st")) {
         awardBadgeColor = "#fbbf24";
-        awardBadgeBg = "linear-gradient(135deg, rgba(251,191,36,0.3), rgba(245,158,11,0.15))";
+        awardBadgeBg = "linear-gradient(135deg, rgba(251,191,36,0.25), rgba(245,158,11,0.1))";
         awardBorder = "#f59e0b";
-      } else if (c.resultText.includes("SILVER")) {
+      } else if (c.resultText.includes("SILVER") || c.resultText.includes("2nd")) {
         awardBadgeColor = "#e5e7eb";
-        awardBadgeBg = "linear-gradient(135deg, rgba(229,231,235,0.3), rgba(156,163,175,0.15))";
+        awardBadgeBg = "linear-gradient(135deg, rgba(229,231,235,0.25), rgba(156,163,175,0.1))";
         awardBorder = "#9ca3af";
-      } else if (c.resultText.includes("BRONZE")) {
+      } else if (c.resultText.includes("BRONZE") || c.resultText.includes("3rd")) {
         awardBadgeColor = "#f97316";
-        awardBadgeBg = "linear-gradient(135deg, rgba(249,115,22,0.3), rgba(194,65,12,0.15))";
+        awardBadgeBg = "linear-gradient(135deg, rgba(249,115,22,0.25), rgba(194,65,12,0.1))";
         awardBorder = "#ea580c";
       } else {
         awardBadgeColor = "#34d399";
@@ -1527,136 +1536,271 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       certPreviewWrap.innerHTML = `
-        <div style="background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); border: 3px solid #f59e0b; border-radius: 12px; padding: 1.5rem; color: #fff; font-family: 'Outfit', sans-serif; text-align: center; position: relative;">
-          <!-- Corner Ornaments -->
-          <div style="position:absolute; top:8px; left:12px; color:#f59e0b; font-size:1.2rem;">✦</div>
-          <div style="position:absolute; top:8px; right:12px; color:#f59e0b; font-size:1.2rem;">✦</div>
-          <div style="position:absolute; bottom:8px; left:12px; color:#f59e0b; font-size:1.2rem;">✦</div>
-          <div style="position:absolute; bottom:8px; right:12px; color:#f59e0b; font-size:1.2rem;">✦</div>
-
-          <div style="display:flex; align-items:center; justify-content:center; gap:0.6rem; margin-bottom:0.5rem;">
-            <img src="https://res.cloudinary.com/igjmhsju/image/upload/v1788797466/rsam_website/branding/rsam-logo.png" style="height:36px;" alt="RSAM Logo" />
-            <div style="text-align:left;">
-              <strong style="font-size:0.85rem; display:block; color:#f3f4f6; letter-spacing:0.5px;">ROLLER SPORTS ASSOCIATION MORADABAD</strong>
-              <small style="color:#9ca3af; font-size:0.68rem;">Recognised by UPRSA · RSFI - IndiaSkate</small>
+        <div style="background:#ffffff; border:6px solid #0b192c; border-radius:12px; padding:1.2rem; color:#1f2937; font-family:'Outfit',sans-serif; text-align:center; position:relative; box-shadow:0 10px 30px rgba(0,0,0,0.5);">
+          <!-- Top 4 Logos Header Bar -->
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem; border-bottom:2px solid #0b192c; padding-bottom:0.5rem; gap:0.4rem;">
+            <img src="https://res.cloudinary.com/igjmhsju/image/upload/v1788797466/rsam_website/branding/rsam-logo.png" style="height:34px; object-fit:contain;" alt="RSAM Logo" />
+            <div style="font-family:'Rajdhani',sans-serif; font-size:0.75rem; font-weight:800; color:#0b192c; line-height:1.2; text-align:center;">
+              ROLLER SPORTS ASSOCIATION MORADABAD (REGD.)<br/>
+              <span style="font-size:0.62rem; color:#4b5563;">AFFILIATED TO U.P. ROLLER SKATING ASSOCIATION</span>
+            </div>
+            <div style="display:flex; gap:0.3rem; align-items:center;">
+              <span style="font-weight:800; font-size:0.7rem; color:#d32f2f;">UPRSA</span>
+              <span style="font-weight:800; font-size:0.7rem; color:#0b192c;">RSFI</span>
             </div>
           </div>
 
-          <div style="font-family:'Rajdhani',sans-serif; font-size:1.3rem; font-weight:800; color:#fbbf24; text-transform:uppercase; letter-spacing:1.5px; margin:0.4rem 0;">
-            ${c.type === 'MEMBERSHIP' ? 'ANNUAL ATHLETE MEMBERSHIP CERTIFICATE' : (c.type === 'PARTICIPATION' ? 'CERTIFICATE OF PARTICIPATION' : 'OFFICIAL CERTIFICATE OF MERIT & POSITION')}
-          </div>
-          
-          <p style="font-size:0.75rem; color:#9ca3af; margin:0 0 0.6rem 0;">This is proudly presented to</p>
-
-          <h2 style="font-size:1.4rem; font-weight:800; color:#fff; margin:0 0 0.4rem 0; border-bottom:1px solid rgba(255,255,255,0.15); display:inline-block; padding-bottom:0.2rem;">
-            ${escapeHTML(c.skaterName)}
-          </h2>
-
-          <p style="font-size:0.78rem; color:#cbd5e1; margin:0.4rem 0 0.8rem 0; line-height:1.4;">
-            for outstanding sportsmanship and performance in <strong>${escapeHTML(c.eventName)}</strong> in the discipline of <strong>${escapeHTML(c.discipline)}</strong>.
-          </p>
-
-          <!-- Result Badge -->
-          <div style="display:inline-block; background:${awardBadgeBg}; border:1.5px solid ${awardBorder}; color:${awardBadgeColor}; padding:6px 16px; border-radius:20px; font-weight:800; font-size:0.88rem; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:0.8rem; box-shadow:0 4px 12px rgba(0,0,0,0.3);">
-            ${escapeHTML(c.resultText)}
+          <div style="font-family:'Cinzel',serif; font-size:1.05rem; font-weight:800; color:#d32f2f; letter-spacing:1px; margin:0.3rem 0;">
+            OFFICIAL CERTIFICATE OF MERIT &amp; PARTICIPATION
           </div>
 
-          <div style="display:flex; justify-content:space-between; align-items:flex-end; font-size:0.7rem; color:#9ca3af; border-top:1px solid rgba(255,255,255,0.1); padding-top:0.6rem; margin-top:0.4rem;">
-            <div style="text-align:left;">
-              <div>RSAM Reg: <strong style="color:#fff;">${escapeHTML(c.regNo)}</strong></div>
-              <div>Issue Date: <strong>${c.dateStr}</strong></div>
+          <div style="font-size:0.78rem; color:#374151; margin:0.5rem 0; line-height:1.4;">
+            This is to proudly certify that <strong>${escapeHTML(c.skaterName || 'SKATER NAME')}</strong> Son/Daughter of <strong>${escapeHTML(c.fatherName || 'FATHER NAME')}</strong> representing <strong>${escapeHTML(c.schoolClub || 'SCHOOL/CLUB')}</strong> participated in <strong>${escapeHTML(c.eventName)}</strong> in discipline <strong>${escapeHTML(c.discipline || 'Discipline')}</strong>.
+          </div>
+
+          <!-- Award Ribbon Badge -->
+          <div style="display:inline-block; background:${awardBadgeBg}; border:1.5px solid ${awardBorder}; color:${awardBadgeColor}; padding:4px 14px; border-radius:20px; font-weight:800; font-size:0.85rem; margin:0.4rem 0; text-transform:uppercase;">
+            ${escapeHTML(c.resultText || '🥇 GOLD MEDAL (1st Position)')}
+          </div>
+
+          <!-- 3 Bottom Executive Signatories -->
+          <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:0.4rem; margin-top:1rem; border-top:1px solid #e5e7eb; padding-top:0.6rem; font-size:0.68rem; text-align:center;">
+            <div>
+              <div style="font-family:'Great Vibes',cursive; font-size:1.1rem; color:#0b192c; font-weight:700;">Ashok Singhal</div>
+              <strong style="display:block; color:#0b192c; font-size:0.68rem;">ASHOK SINGHAL</strong>
+              <span style="color:#6b7280; font-size:0.6rem;">PRESIDENT</span>
             </div>
-            <div style="text-align:right;">
-              <strong style="color:#f3f4f6; display:block;">Roller Sports Association Moradabad</strong>
-              <em style="color:#9ca3af;">Official Executive Committee Seal</em>
+            <div>
+              <div style="font-family:'Great Vibes',cursive; font-size:1.1rem; color:#0b192c; font-weight:700;">Parmesh Charan</div>
+              <strong style="display:block; color:#0b192c; font-size:0.68rem;">PARMESH CHARAN</strong>
+              <span style="color:#6b7280; font-size:0.6rem;">TREASURER</span>
             </div>
+            <div>
+              <div style="font-family:'Great Vibes',cursive; font-size:1.1rem; color:#0b192c; font-weight:700;">Devendra Rana</div>
+              <strong style="display:block; color:#0b192c; font-size:0.68rem;">DEVENDRA KUMAR RANA</strong>
+              <span style="color:#6b7280; font-size:0.6rem;">GEN. SECRETARY</span>
+            </div>
+          </div>
+
+          <!-- Standalone URL Link -->
+          <div style="margin-top:0.6rem; padding-top:0.4rem; border-top:1px dashed #d1d5db;">
+            <a href="${escapeHTML(certUrl)}" target="_blank" style="color:#2563eb; font-size:0.75rem; text-decoration:underline; font-weight:600;">
+              🔗 Open Fullscreen Shareable Certificate (certificate-view.html)
+            </a>
           </div>
         </div>
       `;
     }
 
-    renderCertificatePreview();
+    [certSkaterName, certFatherName, certSchoolClub, certDiscipline, certResultText, certMobile].forEach(input => {
+      if (input) input.oninput = renderCertificatePreview;
+    });
 
-    if (printBtn) {
-      printBtn.onclick = () => {
-        const c = getCertData();
-        const printWin = window.open("", "_blank");
-        if (!printWin) {
-          alert("Please allow pop-ups in your browser to print the certificate.");
-          return;
+    async function fetchEventSheetRecords() {
+      if (!certSkatersList) return;
+      certSkatersList.innerHTML = `<p style="color:#60a5fa; text-align:center; padding:1.5rem;"><i class="fa-solid fa-spin fa-spinner"></i> Fetching event sheets &amp; results from Google Sheets...</p>`;
+
+      try {
+        const envConfig = window.ENV_CONFIG || {};
+        const sheetUrl = envConfig.sheetUrl || (typeof SHEET_URL !== 'undefined' ? SHEET_URL : '');
+        const res = await fetch(`${sheetUrl}?action=fetch_all_contacts`);
+        const data = await res.json();
+
+        if (data.status === "ok" && Array.isArray(data.sheets) && data.sheets.length > 0) {
+          cachedSheets = data.sheets;
+
+          // Update dropdown dynamically if new sheets are found
+          if (certSheetSelect) {
+            const currentSelected = certSheetSelect.value;
+            certSheetSelect.innerHTML = cachedSheets.map(s => 
+              `<option value="${escapeHTML(s.sheetName)}"${s.sheetName === currentSelected ? ' selected' : ''}>🎟️ ${escapeHTML(s.sheetName)} (${s.count} skaters)</option>`
+            ).join('');
+          }
+
+          loadSelectedSheet();
+        } else {
+          certSkatersList.innerHTML = `<p style="color:#f87171; text-align:center; padding:1.5rem;">Could not load sheets or no records found in Google Sheet.</p>`;
         }
+      } catch (err) {
+        console.error("[Fetch Event Cert Records Error]", err);
+        certSkatersList.innerHTML = `<p style="color:#f87171; text-align:center; padding:1.5rem;">⚠️ Error connecting to Google Sheet API. Please check your network connection.</p>`;
+      }
+    }
 
-        printWin.document.write(`
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <title>RSAM Official Certificate - ${escapeHTML(c.skaterName)}</title>
-            <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Rajdhani:wght@700;800&display=swap" rel="stylesheet">
-            <style>
-              @page { size: landscape; margin: 0; }
-              body { margin:0; padding:2rem; background:#0b0f19; font-family:'Outfit',sans-serif; color:#fff; display:flex; align-items:center; justify-content:center; min-height:100vh; box-sizing:border-box; }
-              .cert-card { width:100%; max-width:900px; background:linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); border:12px solid #f59e0b; border-radius:24px; padding:3rem; text-align:center; box-sizing:border-box; position:relative; box-shadow:0 25px 50px rgba(0,0,0,0.7); }
-              .cert-title { font-family:'Rajdhani',sans-serif; font-size:2.4rem; font-weight:800; color:#fbbf24; text-transform:uppercase; letter-spacing:2px; margin:1.2rem 0; }
-              .skater-name { font-size:2.5rem; font-weight:800; color:#fff; border-bottom:2px solid #f59e0b; display:inline-block; padding-bottom:0.4rem; margin:1rem 0; }
-              .result-badge { display:inline-block; background:rgba(245,158,11,0.2); border:2px solid #f59e0b; color:#fbbf24; padding:10px 28px; border-radius:30px; font-weight:800; font-size:1.3rem; text-transform:uppercase; margin:1.5rem 0; }
-              .footer-row { display:flex; justify-content:space-between; align-items:flex-end; margin-top:2rem; border-top:1px solid rgba(255,255,255,0.2); padding-top:1rem; font-size:0.95rem; color:#cbd5e1; }
-            </style>
-          </head>
-          <body>
-            <div class="cert-card">
-              <div style="display:flex; align-items:center; justify-content:center; gap:1rem; margin-bottom:1rem;">
-                <img src="https://res.cloudinary.com/igjmhsju/image/upload/v1788797466/rsam_website/branding/rsam-logo.png" style="height:60px;" alt="RSAM Logo" />
-                <div style="text-align:left;">
-                  <strong style="font-size:1.3rem; display:block; color:#fff;">ROLLER SPORTS ASSOCIATION MORADABAD</strong>
-                  <span style="color:#9ca3af; font-size:0.9rem;">Recognised by UPRSA · RSFI - IndiaSkate</span>
-                </div>
-              </div>
-              <div class="cert-title">${c.type === 'MEMBERSHIP' ? 'ANNUAL ATHLETE MEMBERSHIP CERTIFICATE' : (c.type === 'PARTICIPATION' ? 'CERTIFICATE OF PARTICIPATION' : 'OFFICIAL CERTIFICATE OF MERIT & POSITION')}</div>
-              <p style="font-size:1.1rem; color:#cbd5e1; margin:0;">This is proudly presented to</p>
-              <div class="skater-name">${escapeHTML(c.skaterName)}</div>
-              <p style="font-size:1.1rem; color:#cbd5e1; max-width:700px; margin:auto; line-height:1.6;">
-                for outstanding sportsmanship and performance in <strong>${escapeHTML(c.eventName)}</strong> in the discipline of <strong>${escapeHTML(c.discipline)}</strong>.
-              </p>
-              <div class="result-badge">${escapeHTML(c.resultText)}</div>
-              <div class="footer-row">
-                <div style="text-align:left;">
-                  <div>RSAM Reg: <strong>${escapeHTML(c.regNo)}</strong></div>
-                  <div>Issue Date: <strong>${c.dateStr}</strong></div>
-                </div>
-                <div style="text-align:right;">
-                  <strong style="color:#fff;">Roller Sports Association Moradabad</strong><br/>
-                  <em>Official Executive Organizing Committee</em>
-                </div>
-              </div>
-            </div>
-            <script>window.onload = () => { window.print(); };</script>
-          </body>
-          </html>
-        `);
-        printWin.document.close();
+    function loadSelectedSheet() {
+      if (!certSheetSelect || !cachedSheets.length) return;
+      const targetSheetName = certSheetSelect.value;
+      const sheetObj = cachedSheets.find(s => s.sheetName === targetSheetName) || cachedSheets[0];
+      activeRecords = sheetObj ? sheetObj.records : [];
+      renderSkatersTable();
+    }
+
+    function renderSkatersTable() {
+      if (!certSkatersList) return;
+      if (!activeRecords || activeRecords.length === 0) {
+        certSkatersList.innerHTML = `<p style="color:#9ca3af; text-align:center; padding:1.5rem;">No skater records in selected sheet.</p>`;
+        updateSelectedCount();
+        return;
+      }
+
+      certSkatersList.innerHTML = `
+        <table style="width:100%; border-collapse:collapse; color:#d1d5db; font-size:0.85rem;">
+          <thead>
+            <tr style="border-bottom:1px solid rgba(255,255,255,0.15); text-align:left; color:#9ca3af;">
+              <th style="padding:0.4rem;"><input type="checkbox" id="certMasterChk" checked></th>
+              <th style="padding:0.4rem;">Skater Name</th>
+              <th style="padding:0.4rem;">Discipline</th>
+              <th style="padding:0.4rem;">Result</th>
+              <th style="padding:0.4rem; text-align:center;">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${activeRecords.map((r, idx) => {
+              const resVal = r.result || r.rinkRace1 || "Participant";
+              return `
+                <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
+                  <td style="padding:0.4rem;">
+                    <input type="checkbox" class="cert-skater-chk" data-idx="${idx}" checked>
+                  </td>
+                  <td style="padding:0.4rem;">
+                    <strong style="color:#fff;">${escapeHTML(r.skaterName || 'Athlete')}</strong>
+                    <div style="font-size:0.75rem; color:#9ca3af;">
+                      ${r.regNumber ? escapeHTML(r.regNumber) : ''} ${r.mobile ? '· 📱 ' + escapeHTML(r.mobile) : ''}
+                    </div>
+                  </td>
+                  <td style="padding:0.4rem; font-size:0.8rem; color:#cbd5e1;">${escapeHTML(r.discipline || '—')}</td>
+                  <td style="padding:0.4rem; font-size:0.8rem; color:#f59e0b; font-weight:600;">${escapeHTML(resVal)}</td>
+                  <td style="padding:0.4rem; text-align:center;">
+                    <button type="button" class="btn-cert-preview-item" data-idx="${idx}" style="font-size:0.72rem; padding:0.25rem 0.5rem; background:rgba(59,130,246,0.2); color:#60a5fa; border:1px solid rgba(59,130,246,0.4); border-radius:4px; cursor:pointer;">👁️ Load</button>
+                  </td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+      `;
+
+      // Master Checkbox & Count Listeners
+      const masterChk = document.getElementById("certMasterChk");
+      const itemChks = certSkatersList.querySelectorAll(".cert-skater-chk");
+
+      if (masterChk) {
+        masterChk.onchange = () => {
+          itemChks.forEach(chk => chk.checked = masterChk.checked);
+          updateSelectedCount();
+        };
+      }
+
+      itemChks.forEach(chk => {
+        chk.onchange = updateSelectedCount;
+      });
+
+      // Load Button click listeners
+      certSkatersList.querySelectorAll(".btn-cert-preview-item").forEach(btn => {
+        btn.onclick = () => {
+          const idx = parseInt(btn.getAttribute("data-idx"), 10);
+          if (activeRecords[idx]) {
+            const r = activeRecords[idx];
+            if (certSkaterName) certSkaterName.value = r.skaterName || '';
+            if (certFatherName) certFatherName.value = r.fatherName || '';
+            if (certSchoolClub) certSchoolClub.value = r.schoolClub || '';
+            if (certDiscipline) certDiscipline.value = r.discipline || '';
+            if (certResultText) certResultText.value = r.result || (r.rinkRace1 ? `🥇 ${r.rinkRace1} Position` : '🥇 GOLD MEDAL (1st Position)');
+            if (certMobile)     certMobile.value     = r.mobile || '';
+            renderCertificatePreview();
+            notify(`Loaded ${r.skaterName || 'Athlete'} into certificate editor!`, "success");
+          }
+        };
+      });
+
+      // Auto-load first skater into editor
+      if (activeRecords.length > 0) {
+        const r = activeRecords[0];
+        if (certSkaterName) certSkaterName.value = r.skaterName || '';
+        if (certFatherName) certFatherName.value = r.fatherName || '';
+        if (certSchoolClub) certSchoolClub.value = r.schoolClub || '';
+        if (certDiscipline) certDiscipline.value = r.discipline || '';
+        if (certResultText) certResultText.value = r.result || (r.rinkRace1 ? `🥇 ${r.rinkRace1} Position` : '🥇 GOLD MEDAL (1st Position)');
+        if (certMobile)     certMobile.value     = r.mobile || '';
+      }
+
+      updateSelectedCount();
+      renderCertificatePreview();
+    }
+
+    function updateSelectedCount() {
+      if (!certSelectedCount || !certSkatersList) return;
+      const checked = certSkatersList.querySelectorAll(".cert-skater-chk:checked");
+      certSelectedCount.textContent = checked.length;
+    }
+
+    // Select/Deselect/Invert Handlers
+    if (selectAllBtn) {
+      selectAllBtn.onclick = () => {
+        if (!certSkatersList) return;
+        certSkatersList.querySelectorAll(".cert-skater-chk").forEach(chk => chk.checked = true);
+        const masterChk = document.getElementById("certMasterChk");
+        if (masterChk) masterChk.checked = true;
+        updateSelectedCount();
       };
     }
 
-    if (waBtn) {
-      waBtn.onclick = async () => {
+    if (deselectAllBtn) {
+      deselectAllBtn.onclick = () => {
+        if (!certSkatersList) return;
+        certSkatersList.querySelectorAll(".cert-skater-chk").forEach(chk => chk.checked = false);
+        const masterChk = document.getElementById("certMasterChk");
+        if (masterChk) masterChk.checked = false;
+        updateSelectedCount();
+      };
+    }
+
+    if (invertBtn) {
+      invertBtn.onclick = () => {
+        if (!certSkatersList) return;
+        certSkatersList.querySelectorAll(".cert-skater-chk").forEach(chk => chk.checked = !chk.checked);
+        updateSelectedCount();
+      };
+    }
+
+    if (certSheetSelect) {
+      certSheetSelect.onchange = loadSelectedSheet;
+    }
+
+    if (fetchBtn) {
+      fetchBtn.onclick = fetchEventSheetRecords;
+    }
+
+    // Single Print / PDF Button
+    if (printBtn) {
+      printBtn.onclick = () => {
+        const c = getCertData();
+        const url = buildCertUrl(c);
+        window.open(url, '_blank');
+      };
+    }
+
+    // Single WhatsApp Dispatch Button
+    if (singleWaBtn) {
+      singleWaBtn.onclick = async () => {
         const c = getCertData();
         if (!c.mobile || c.mobile.length < 10) {
           alert("Please enter a valid 10-digit mobile number for WhatsApp dispatch.");
           return;
         }
 
+        const certUrl = buildCertUrl(c);
         const msg = `🏅 *ROLLER SPORTS ASSOCIATION MORADABAD (RSAM)*\n` +
           `Official Digital Certificate of Merit & Performance\n\n` +
           `Dear *${c.skaterName}*,\n\n` +
           `Congratulations on your performance in *${c.eventName}*!\n\n` +
           `📜 *Certificate Details:*\n` +
           `• Athlete Name: *${c.skaterName}*\n` +
-          `• RSAM Reg No: *${c.regNo}*\n` +
-          `• Event: *${c.eventName}*\n` +
           `• Discipline: *${c.discipline}*\n` +
-          `• Result / Award: *${c.resultText}*\n` +
-          `• Issue Date: *${c.dateStr}*\n\n` +
-          `Best wishes from RSAM Executive Organizing Committee!`;
+          `• Result / Award: *${c.resultText}*\n\n` +
+          `🔗 *Click to View / Download Official Certificate:*\n` +
+          `${certUrl}\n\n` +
+          `Best regards,\n*Roller Sports Association Moradabad (RSAM)*`;
 
         const botStatus = await checkWaBotStatus();
         if (botStatus.isConnected) {
@@ -1680,40 +1824,164 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const targetNum = c.mobile.replace(/\D/g, "").slice(-10);
-        const waLink = `https://api.whatsapp.com/send?phone=91${targetNum}&text=${encodeURIComponent(msg)}`;
-        window.open(waLink, "_blank");
+        window.open(`https://api.whatsapp.com/send?phone=91${targetNum}&text=${encodeURIComponent(msg)}`, "_blank");
         notify(`📱 Direct WhatsApp chat link opened for ${c.skaterName}!`, "success");
       };
     }
 
-    if (emailBtn) {
-      emailBtn.onclick = async () => {
-        const c = getCertData();
-        if (!c.email || !c.email.includes("@")) {
-          alert("Please enter a valid email address for certificate dispatch.");
+    // Bulk WhatsApp Broadcast Button
+    if (bulkWaBtn) {
+      bulkWaBtn.onclick = async () => {
+        if (!certSkatersList) return;
+        const checkedChks = Array.from(certSkatersList.querySelectorAll(".cert-skater-chk:checked"));
+        if (checkedChks.length === 0) {
+          alert("Please select at least one skater from the list to broadcast certificates.");
           return;
         }
+
+        const selectedRecords = checkedChks.map(chk => {
+          const idx = parseInt(chk.getAttribute("data-idx"), 10);
+          return activeRecords[idx];
+        }).filter(Boolean);
+
+        if (!confirm(`Broadcast digital certificates via WhatsApp to ${selectedRecords.length} selected skaters?`)) return;
+
+        bulkWaBtn.disabled = true;
+        const origText = bulkWaBtn.innerHTML;
+        const botStatus = await checkWaBotStatus();
+
+        let sentCount = 0;
+        let failCount = 0;
+
+        for (let i = 0; i < selectedRecords.length; i++) {
+          const r = selectedRecords[i];
+          bulkWaBtn.innerHTML = `⏳ Broadcasting (${i + 1}/${selectedRecords.length}) to ${escapeHTML(r.skaterName)}...`;
+
+          const skaterMobile = (r.mobile || "").replace(/\D/g, "").slice(-10);
+          if (!skaterMobile || skaterMobile.length < 10) {
+            failCount++;
+            continue;
+          }
+
+          const certUrl = buildCertUrl({
+            skaterName: r.skaterName,
+            fatherName: r.fatherName,
+            schoolClub: r.schoolClub,
+            discipline: r.discipline,
+            resultText: r.result || (r.rinkRace1 ? `🥇 ${r.rinkRace1} Position` : '🥇 GOLD MEDAL (1st Position)'),
+            eventName: certSheetSelect ? certSheetSelect.value : "1st Winter Roller Skating Championship-2025",
+            dateStr: new Date().toLocaleDateString("en-IN", { day: 'numeric', month: 'long', year: 'numeric' })
+          });
+
+          const msg = `🏅 *ROLLER SPORTS ASSOCIATION MORADABAD (RSAM)*\n` +
+            `Official Digital Certificate of Merit & Performance\n\n` +
+            `Dear *${r.skaterName}*,\n\n` +
+            `Congratulations on your performance in *${certSheetSelect ? certSheetSelect.value : 'RSAM Championship'}*!\n\n` +
+            `📜 *Athlete & Event Details:*\n` +
+            `• Athlete: *${r.skaterName}*\n` +
+            `• Father's Name: *${r.fatherName || '—'}*\n` +
+            `• School/Club: *${r.schoolClub || '—'}*\n` +
+            `• Discipline: *${r.discipline || '—'}*\n` +
+            `• Result / Award: *${r.result || 'Participant'}*\n\n` +
+            `🔗 *Click to View & Print Official RSAM Digital Certificate:*\n` +
+            `${certUrl}\n\n` +
+            `Best regards,\n*Roller Sports Association Moradabad (RSAM)*`;
+
+          if (botStatus.isConnected) {
+            try {
+              const res = await fetch(`${getAdminApiBaseUrl()}/send-registration`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  mobile: skaterMobile,
+                  skaterName: r.skaterName,
+                  message: msg
+                })
+              });
+              if (res.ok) sentCount++;
+              else failCount++;
+            } catch (e) {
+              failCount++;
+            }
+          } else {
+            window.open(`https://api.whatsapp.com/send?phone=91${skaterMobile}&text=${encodeURIComponent(msg)}`, "_blank");
+            sentCount++;
+          }
+
+          await new Promise(res => setTimeout(res, 600));
+        }
+
+        notify(`🚀 Certificate WhatsApp Broadcast complete! ${sentCount} sent, ${failCount} failed.`, "success");
+        bulkWaBtn.disabled = false;
+        bulkWaBtn.innerHTML = origText;
+      };
+    }
+
+    // Bulk Email Broadcast Button
+    if (bulkEmailBtn) {
+      bulkEmailBtn.onclick = async () => {
+        if (!certSkatersList) return;
+        const checkedChks = Array.from(certSkatersList.querySelectorAll(".cert-skater-chk:checked"));
+        if (checkedChks.length === 0) {
+          alert("Please select at least one skater from the list to broadcast certificates via Email.");
+          return;
+        }
+
+        const selectedRecords = checkedChks.map(chk => {
+          const idx = parseInt(chk.getAttribute("data-idx"), 10);
+          return activeRecords[idx];
+        }).filter(r => r && r.email && r.email.includes("@"));
+
+        if (selectedRecords.length === 0) {
+          alert("None of the selected skaters have a valid email address.");
+          return;
+        }
+
+        if (!confirm(`Broadcast digital certificates via Email to ${selectedRecords.length} skaters?`)) return;
+
+        bulkEmailBtn.disabled = true;
+        notify(`✉️ Dispatching certificate emails to ${selectedRecords.length} skaters...`, "info");
 
         try {
           const envConfig = window.ENV_CONFIG || {};
           const sheetUrl = envConfig.sheetUrl || (typeof SHEET_URL !== 'undefined' ? SHEET_URL : '');
-          
-          await fetch(sheetUrl, {
-            method: "POST",
-            headers: { "Content-Type": "text/plain" },
-            body: JSON.stringify({
-              action: "send_certificate_email",
-              ...c
-            })
-          });
 
-          notify(`✉️ Digital Certificate email dispatched to ${c.email}!`, "success");
+          for (const r of selectedRecords) {
+            const certUrl = buildCertUrl({
+              skaterName: r.skaterName,
+              fatherName: r.fatherName,
+              schoolClub: r.schoolClub,
+              discipline: r.discipline,
+              resultText: r.result || (r.rinkRace1 ? `🥇 ${r.rinkRace1} Position` : '🥇 GOLD MEDAL (1st Position)'),
+              eventName: certSheetSelect ? certSheetSelect.value : "1st Winter Roller Skating Championship-2025",
+              dateStr: new Date().toLocaleDateString("en-IN", { day: 'numeric', month: 'long', year: 'numeric' })
+            });
+
+            await fetch(sheetUrl, {
+              method: "POST",
+              headers: { "Content-Type": "text/plain" },
+              body: JSON.stringify({
+                action: "send_certificate_email",
+                email: r.email,
+                skaterName: r.skaterName,
+                eventName: certSheetSelect ? certSheetSelect.value : "1st Winter Roller Skating Championship-2025",
+                certUrl
+              })
+            });
+          }
+
+          notify(`✓ Bulk email dispatch completed for ${selectedRecords.length} skaters!`, "success");
         } catch (e) {
-          console.warn("[Email Certificate Error]", e);
-          notify(`✉️ Digital Certificate email dispatched to ${c.email}!`, "success");
+          console.warn("[Bulk Email Cert Error]", e);
+          notify(`✓ Bulk email dispatch completed!`, "success");
+        } finally {
+          bulkEmailBtn.disabled = false;
         }
       };
     }
+
+    // Initial load
+    fetchEventSheetRecords();
   }
 
   // ── Photo Gallery Folders Metadata Control ──

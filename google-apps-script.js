@@ -154,6 +154,9 @@ function doGet(e) {
       const aadhaarIdx    = findHeaderIndex(["aadhaar", "adhar"], 15);
       const discIdx       = findHeaderIndex(["discipline", "category"], 16);
       const photoIdx      = findHeaderIndex(["photo", "picture", "avatar"], 20);
+      const resultIdx     = findHeaderIndex(["result", "award", "position", "rank", "medal"], -1);
+      const rink1Idx      = findHeaderIndex(["rink race 1", "race 1", "rink 1"], -1);
+      const rink2Idx      = findHeaderIndex(["rink race 2", "race 2", "rink 2"], -1);
 
       return {
         regNumber: String(data[i][regIdx] || regNumber),
@@ -171,7 +174,10 @@ function doGet(e) {
         email: String(data[i][emailIdx] || ""),
         aadhaar: String(data[i][aadhaarIdx] || "").replace(/^'/, ""),
         discipline: String(data[i][discIdx] || ""),
-        photoUrl: String(data[i][photoIdx] || "")
+        photoUrl: String(data[i][photoIdx] || ""),
+        result: resultIdx !== -1 ? String(data[i][resultIdx] || "") : "",
+        rinkRace1: rink1Idx !== -1 ? String(data[i][rink1Idx] || "") : "",
+        rinkRace2: rink2Idx !== -1 ? String(data[i][rink2Idx] || "") : ""
       };
     }
 
