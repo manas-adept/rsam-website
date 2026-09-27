@@ -113,7 +113,7 @@
       z-index: 2;
     }
 
-    /* Header Logos Grid */
+    /* Header Logos Grid (No Frame & Border) */
     .cert-header-logos {
       display: flex;
       justify-content: space-between;
@@ -123,27 +123,16 @@
       border-bottom: 1.5px dashed rgba(15, 23, 42, 0.12);
       padding-bottom: 0.8rem;
     }
-    .cert-logo-box {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-    }
-    .cert-logo-item {
-      height: 60px;
-      max-width: 95px;
+    .cert-top-logo {
+      height: 65px;
+      max-width: 160px;
       object-fit: contain;
-      filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.1));
-      border-radius: 6px;
-      background: #fff;
-      padding: 3px;
-    }
-    .cert-logo-sub {
-      font-size: 0.68rem;
-      font-weight: 800;
-      color: var(--navy-dark);
-      margin-top: 3px;
-      letter-spacing: 0.5px;
+      border: none !important;
+      outline: none !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      border-radius: 0 !important;
+      padding: 0 !important;
     }
 
     /* Championship Title & Organizers */
@@ -268,48 +257,40 @@
       margin-bottom: 1rem;
     }
 
-    /* Race Results Matrix Table */
-    .cert-results-table {
-      width: 100%;
-      border-collapse: collapse;
+    /* Two Race Results Boxes */
+    .cert-race-boxes-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
       margin-bottom: 1.2rem;
-      text-align: center;
-      background: #fff;
-      border-radius: 8px;
+    }
+    .cert-race-box {
+      background: #ffffff;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 10px;
       overflow: hidden;
-      border: 1px solid #e2e8f0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+      text-align: center;
     }
-    .cert-results-table th {
-      font-size: 0.85rem;
-      font-weight: 800;
-      color: var(--navy-dark);
-      padding: 8px;
+    .race-box-title {
       background: #f1f5f9;
-      border-bottom: 1.5px solid #cbd5e1;
-      text-transform: uppercase;
-    }
-    .cert-results-table td {
-      font-size: 0.92rem;
-      padding: 8px;
-      color: #1e293b;
-      font-weight: 600;
-      border-bottom: 1px solid #f1f5f9;
-    }
-
-    /* Overall Award Medal Badge */
-    .cert-result-badge {
-      display: inline-block;
-      background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
-      color: #fff;
-      padding: 8px 26px;
-      border-radius: 30px;
-      font-family: 'Rajdhani', sans-serif;
+      color: var(--navy-dark);
+      font-size: 0.8rem;
       font-weight: 800;
-      font-size: 1.25rem;
+      padding: 6px 12px;
+      border-bottom: 1.5px solid #cbd5e1;
       letter-spacing: 1px;
       text-transform: uppercase;
-      box-shadow: 0 4px 15px rgba(217, 119, 6, 0.35);
-      margin-bottom: 1.2rem;
+    }
+    .race-box-val {
+      min-height: 54px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #0f172a;
     }
 
     /* Bottom 3 Executive Signatories Layout */
@@ -406,30 +387,24 @@
           <img src="https://res.cloudinary.com/igjmhsju/image/upload/v1788797466/rsam_website/branding/rsam-logo.png" class="cert-logo-item" alt="RSAM Logo" />
           <span class="cert-logo-sub">RSAM</span>
         </div>
-        <div class="cert-logo-box">
-          <img src="https://res.cloudinary.com/igjmhsju/image/upload/v1788797352/rsam_website/affiliations/affil2.jpg" class="cert-logo-item" alt="UPRSA Logo" />
-          <span class="cert-logo-sub">UPRSA</span>
-        </div>
-        <div class="cert-logo-box">
-          <img src="https://res.cloudinary.com/igjmhsju/image/upload/v1788797351/rsam_website/affiliations/affil1.jpg" class="cert-logo-item" alt="RSFI IndiaSkate Logo" />
-          <span class="cert-logo-sub">RSFI · IndiaSkate</span>
-        </div>
-        <div class="cert-logo-box">
-          <img src="https://res.cloudinary.com/igjmhsju/image/upload/v1788797353/rsam_website/affiliations/affil3.jpg" class="cert-logo-item" alt="World Skate Logo" />
-          <span class="cert-logo-sub">WORLD SKATE</span>
-        </div>
+      <!-- Top 4 Logos Row (No frame & border) -->
+      <div class="cert-header-logos">
+        <img src="assets/branding/logo_ioa_india.webp" class="cert-top-logo" alt="IOA India Logo" />
+        <img src="assets/branding/logo_rsfi_indiaskate.png" class="cert-top-logo" alt="RSFI IndiaSkate Logo" />
+        <img src="assets/branding/logo_uprsa.png" class="cert-top-logo" alt="UPRSA Logo" />
+        <img src="assets/branding/logo_rsam.jpg" class="cert-top-logo" alt="RSAM Logo" />
       </div>
 
       <!-- Championship Title & Organizers -->
       <div class="cert-title-block">
-        <h1 class="cert-event-title" id="cEventTitle">1st Winter Roller Skating Championship-2025</h1>
+        <h1 class="cert-event-title" id="cEventTitle">4th District Championship 2026</h1>
         <div class="cert-org-text">ORGANIZED BY : ROLLER SPORTS ASSOCIATION MORADABAD</div>
         <div class="cert-affiliation-text">
           RECOGNIZED BY : UTTAR PRADESH ROLLER SPORTS ASSOCIATION (UPRSA)<br/>
           AFFILIATED TO : ROLLER SKATING FEDERATION OF INDIA (RSFI) · WORLD SKATE
         </div>
         <div>
-          <h2 class="cert-main-badge-heading" id="cHeaderHeading">Certificate Of Merit &amp; Participation</h2>
+          <h2 class="cert-main-badge-heading" id="cHeaderHeading">Certificate Of Merit &amp; Performance</h2>
         </div>
       </div>
 
@@ -464,41 +439,22 @@
         </div>
       </div>
 
-      <!-- Date & Venue Bar -->
+      <!-- Date & Venue Bar (Venue placed FIRST, then Event Date) -->
       <div class="cert-meta-bar">
-        <div>📅 Event Date: <strong id="cDate" style="color:#0f172a;">21-12-2025</strong></div>
-        <div>📍 Venue: <strong id="cVenue" style="color:#0f172a;">Springfields School, New Moradabad</strong></div>
+        <div>📍 Venue: <strong id="cVenue" style="color:#0f172a;">Moradabad Sports Complex, Kanth Road, Moradabad</strong></div>
+        <div>📅 Event Date: <strong id="cDate" style="color:#0f172a;">15th - 16th October 2026</strong></div>
       </div>
 
-      <!-- Race Results Matrix -->
-      <table class="cert-results-table">
-        <thead>
-          <tr>
-            <th>Adjustable</th>
-            <th>Inline Toy</th>
-            <th>Quads</th>
-            <th>Professional Inline</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Rink Race 1 : <span id="rAdj1">✕</span></td>
-            <td>Rink Race 1 : <span id="rToy1">✕</span></td>
-            <td>Rink Race 1 : <strong id="rQuad1" style="color:#b91c1c;">1st</strong></td>
-            <td>Rink Race 1 : <span id="rInline1">✕</span></td>
-          </tr>
-          <tr>
-            <td>Rink Race 2 : <span id="rAdj2">✕</span></td>
-            <td>Rink Race 2 : <span id="rToy2">✕</span></td>
-            <td>Rink Race 2 : <strong id="rQuad2" style="color:#b91c1c;">1st</strong></td>
-            <td>Rink Race 2 : <span id="rInline2">✕</span></td>
-          </tr>
-        </tbody>
-      </table>
-
-      <!-- Overall Result Ribbon Badge -->
-      <div style="text-align:center;">
-        <div class="cert-result-badge" id="cResultBadge">🥇 GOLD MEDAL (1st Position)</div>
+      <!-- Two Race Results Boxes -->
+      <div class="cert-race-boxes-row">
+        <div class="cert-race-box">
+          <div class="race-box-title">RACE 1 RESULT</div>
+          <div class="race-box-val" id="cRace1Val"></div>
+        </div>
+        <div class="cert-race-box">
+          <div class="race-box-title">RACE 2 RESULT</div>
+          <div class="race-box-val" id="cRace2Val"></div>
+        </div>
       </div>
 
       <!-- Bottom 3 Signatories Row -->
@@ -531,6 +487,26 @@
   </div>
 
   <script>
+    function formatRaceRank(str) {
+      if (!str) return "";
+      const s = str.trim().toLowerCase();
+      if (s.includes("participant") || s.includes("participation") || s === "-" || s === "n/a" || s === "null" || s === "none") {
+        return "";
+      }
+      if (s === "1" || s.includes("1st") || s.includes("first") || s.includes("gold")) {
+        return "🥇 1st Position";
+      }
+      if (s === "2" || s.includes("2nd") || s.includes("second") || s.includes("silver")) {
+        return "🥈 2nd Position";
+      }
+      if (s === "3" || s.includes("3rd") || s.includes("third") || s.includes("bronze")) {
+        return "🥉 3rd Position";
+      }
+      if (s.includes("4th")) return "4th Position";
+      if (s.includes("5th")) return "5th Position";
+      return str.trim();
+    }
+
     // URL Query Parameter Dynamic Auto-Filler
     document.addEventListener("DOMContentLoaded", () => {
       const p = new URLSearchParams(window.location.search);
@@ -540,13 +516,13 @@
       const schoolClub = p.get("schoolClub") || p.get("school") || "KIDS SAVVY (ARYANS PANTHERS)";
       const dob        = p.get("dob") || "30/01/2020";
       const ageGroup   = p.get("ageGroup") || "4-6 yrs";
-      const eventTitle = p.get("eventTitle") || p.get("eventName") || "1st Winter Roller Skating Championship-2025";
+      const eventTitle = p.get("eventTitle") || p.get("eventName") || "4th District Championship 2026";
       const discipline = p.get("discipline") || p.get("category") || "Quads";
-      const resultText = p.get("result") || p.get("resultText") || "🥇 GOLD MEDAL (1st Position)";
-      const rink1      = p.get("rink1") || "1st";
-      const rink2      = p.get("rink2") || "1st";
-      const date       = p.get("date") || "21-12-2025";
-      const venue      = p.get("venue") || "Springfields School, New Moradabad";
+      const rawResult  = p.get("result") || p.get("results") || "";
+      let race1        = p.get("race1") || p.get("rink1") || "";
+      let race2        = p.get("race2") || p.get("rink2") || "";
+      const date       = p.get("date") || "15th - 16th October 2026";
+      const venue      = p.get("venue") || "Moradabad Sports Complex, Kanth Road, Moradabad";
 
       document.getElementById("cSkaterName").textContent = skaterName.toUpperCase();
       document.getElementById("cFatherName").textContent = fatherName.toUpperCase();
@@ -554,9 +530,8 @@
       document.getElementById("cDob").textContent        = dob;
       document.getElementById("cAgeGroup").textContent   = ageGroup;
       document.getElementById("cEventTitle").textContent = eventTitle;
-      document.getElementById("cDate").textContent       = date;
       document.getElementById("cVenue").textContent      = venue;
-      document.getElementById("cResultBadge").textContent = resultText;
+      document.getElementById("cDate").textContent       = date;
 
       // Equipment Checkbox Sync
       const discLower = discipline.toLowerCase();
@@ -565,40 +540,30 @@
       const elQuad = document.getElementById("chkQuads");
       const elInline = document.getElementById("chkInline");
 
-      if (elAdj) {
-        if (discLower.includes("adjustable")) elAdj.classList.add("active"), elAdj.textContent = "✓ Adjustable";
-        else elAdj.classList.remove("active"), elAdj.textContent = "Adjustable";
-      }
-      if (elToy) {
-        if (discLower.includes("toy")) elToy.classList.add("active"), elToy.textContent = "✓ Inline Toy";
-        else elToy.classList.remove("active"), elToy.textContent = "Inline Toy";
-      }
-      if (elQuad) {
-        if (discLower.includes("quad") || (!discLower.includes("adjustable") && !discLower.includes("toy") && !discLower.includes("inline"))) {
-          elQuad.classList.add("active"), elQuad.textContent = "✓ Quads";
-        } else {
-          elQuad.classList.remove("active"), elQuad.textContent = "Quads";
+      if (elAdj) elAdj.className = discLower.includes("adjustable") ? "equip-badge active" : "equip-badge", elAdj.textContent = discLower.includes("adjustable") ? "✓ Adjustable" : "Adjustable";
+      if (elToy) elToy.className = discLower.includes("toy") ? "equip-badge active" : "equip-badge", elToy.textContent = discLower.includes("toy") ? "✓ Inline Toy" : "Inline Toy";
+      if (elQuad) elQuad.className = (discLower.includes("quad") || (!discLower.includes("adjustable") && !discLower.includes("toy") && !discLower.includes("inline"))) ? "equip-badge active" : "equip-badge", elQuad.textContent = (discLower.includes("quad") || (!discLower.includes("adjustable") && !discLower.includes("toy") && !discLower.includes("inline"))) ? "✓ Quads" : "Quads";
+      if (elInline) elInline.className = (discLower.includes("inline") && !discLower.includes("toy")) ? "equip-badge active" : "equip-badge", elInline.textContent = (discLower.includes("inline") && !discLower.includes("toy")) ? "✓ Professional Inline" : "Professional Inline";
+
+      // If race1/race2 not individually specified, try splitting rawResult
+      if (rawResult && !race1 && !race2) {
+        const parts = rawResult.split(/,|\/|\||&|;|\n/).map(s => s.trim()).filter(Boolean);
+        if (parts.length >= 2) {
+          race1 = parts[0];
+          race2 = parts[1];
+        } else if (parts.length === 1) {
+          race1 = parts[0];
         }
       }
-      if (elInline) {
-        if (discLower.includes("inline") && !discLower.includes("toy")) elInline.classList.add("active"), elInline.textContent = "✓ Professional Inline";
-        else elInline.classList.remove("active"), elInline.textContent = "Professional Inline";
-      }
 
-      // Results Sync
-      if (discLower.includes("quad") || (!discLower.includes("adjustable") && !discLower.includes("toy") && !discLower.includes("inline"))) {
-        document.getElementById("rQuad1").textContent = rink1;
-        document.getElementById("rQuad2").textContent = rink2;
-      } else if (discLower.includes("adjustable")) {
-        document.getElementById("rAdj1").textContent = rink1;
-        document.getElementById("rAdj2").textContent = rink2;
-      } else if (discLower.includes("toy")) {
-        document.getElementById("rToy1").textContent = rink1;
-        document.getElementById("rToy2").textContent = rink2;
-      } else if (discLower.includes("inline")) {
-        document.getElementById("rInline1").textContent = rink1;
-        document.getElementById("rInline2").textContent = rink2;
-      }
+      const formattedR1 = formatRaceRank(race1);
+      const formattedR2 = formatRaceRank(race2);
+
+      const elRace1 = document.getElementById("cRace1Val");
+      const elRace2 = document.getElementById("cRace2Val");
+
+      if (elRace1) elRace1.innerHTML = formattedR1 ? `<strong>${formattedR1}</strong>` : `<span style="color:#cbd5e1; font-size:1.5rem;">—</span>`;
+      if (elRace2) elRace2.innerHTML = formattedR2 ? `<strong>${formattedR2}</strong>` : `<span style="color:#cbd5e1; font-size:1.5rem;">—</span>`;
     });
   </script>
 </body>

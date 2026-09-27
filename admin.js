@@ -1465,7 +1465,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const certFatherName    = document.getElementById("certFatherName");
     const certSchoolClub    = document.getElementById("certSchoolClub");
     const certDiscipline    = document.getElementById("certDiscipline");
-    const certResultText    = document.getElementById("certResultText");
+    const certRace1Text     = document.getElementById("certRace1Text");
+    const certRace2Text     = document.getElementById("certRace2Text");
+    const certVenueText     = document.getElementById("certVenueText");
+    const certDateText      = document.getElementById("certDateText");
     const certMobile        = document.getElementById("certMobile");
     
     const printBtn          = document.getElementById("certPrintBtn");
@@ -1475,24 +1478,24 @@ document.addEventListener("DOMContentLoaded", () => {
     let cachedSheets = [];
     let activeRecords = [];
 
-    function formatResultString(rawResult) {
-      if (!rawResult || !rawResult.trim()) return "🏅 Participant (Certificate of Merit)";
-      const str = rawResult.trim();
-      const lower = str.toLowerCase();
-
-      if (lower.includes("gold") || lower.includes("1st") || lower.includes("first") || lower === "1") {
-        return "🥇 GOLD MEDAL (1st Position)";
+    function formatRaceRank(str) {
+      if (!str) return "";
+      const s = String(str).trim().toLowerCase();
+      if (s.includes("participant") || s.includes("participation") || s === "-" || s === "n/a" || s === "null" || s === "none") {
+        return "";
       }
-      if (lower.includes("silver") || lower.includes("2nd") || lower.includes("second") || lower === "2") {
-        return "🥈 SILVER MEDAL (2nd Position)";
+      if (s === "1" || s.includes("1st") || s.includes("first") || s.includes("gold")) {
+        return "🥇 1st Position";
       }
-      if (lower.includes("bronze") || lower.includes("3rd") || lower.includes("third") || lower === "3") {
-        return "🥉 BRONZE MEDAL (3rd Position)";
+      if (s === "2" || s.includes("2nd") || s.includes("second") || s.includes("silver")) {
+        return "🥈 2nd Position";
       }
-      if (lower.includes("participant") || lower.includes("participation")) {
-        return "🏅 Participant (Certificate of Merit)";
+      if (s === "3" || s.includes("3rd") || s.includes("third") || s.includes("bronze")) {
+        return "🥉 3rd Position";
       }
-      return str.startsWith("🥇") || str.startsWith("🥈") || str.startsWith("🥉") || str.startsWith("🏅") ? str : `🏅 ${str}`;
+      if (s.includes("4th")) return "4th Position";
+      if (s.includes("5th")) return "5th Position";
+      return String(str).trim();
     }
 
     // Helper to build URL for public standalone certificate
@@ -1504,27 +1507,35 @@ document.addEventListener("DOMContentLoaded", () => {
         schoolClub: c.schoolClub || "",
         dob: c.dob || "",
         ageGroup: c.ageGroup || "",
-        eventTitle: c.eventName || (certSheetSelect ? certSheetSelect.value : "District Championship 2026"),
+        eventTitle: c.eventName || (certSheetSelect ? certSheetSelect.value : "4th District Championship 2026"),
         discipline: c.discipline || "Quads",
-        result: c.resultText || formatResultString(c.result),
-        rink1: c.rinkRace1 || "1st",
-        rink2: c.rinkRace2 || "1st",
-        date: c.dateStr || new Date().toLocaleDateString("en-IN", { day: 'numeric', month: 'long', year: 'numeric' }),
-        venue: "Moradabad"
+        race1: c.race1 || "",
+        race2: c.race2 || "",
+        rink1: c.race1 || "",
+        rink2: c.race2 || "",
+        venue: c.venue || "Moradabad Sports Complex, Kanth Road, Moradabad",
+        date: c.dateStr || "15th - 16th October 2026"
       });
       return `${origin}/certificate-view.html?${params.toString()}`;
     }
 
     function getCertData() {
+      const elR1 = document.getElementById("certRace1Text");
+      const elR2 = document.getElementById("certRace2Text");
+      const elVen = document.getElementById("certVenueText");
+      const elDat = document.getElementById("certDateText");
+
       return {
         skaterName: certSkaterName ? certSkaterName.value.trim() : "",
         fatherName: certFatherName ? certFatherName.value.trim() : "",
         schoolClub: certSchoolClub ? certSchoolClub.value.trim() : "",
         discipline: certDiscipline ? certDiscipline.value.trim() : "",
-        resultText: certResultText ? certResultText.value.trim() : "",
+        race1: elR1 ? elR1.value.trim() : "",
+        race2: elR2 ? elR2.value.trim() : "",
+        venue: elVen && elVen.value.trim() ? elVen.value.trim() : "Moradabad Sports Complex, Kanth Road, Moradabad",
+        dateStr: elDat && elDat.value.trim() ? elDat.value.trim() : "15th - 16th October 2026",
         mobile: certMobile ? certMobile.value.trim() : "",
-        eventName: certSheetSelect ? certSheetSelect.value : "District Championship 2026",
-        dateStr: new Date().toLocaleDateString("en-IN", { day: 'numeric', month: 'long', year: 'numeric' })
+        eventName: certSheetSelect ? certSheetSelect.value : "4th District Championship 2026"
       };
     }
 
@@ -1533,48 +1544,17 @@ document.addEventListener("DOMContentLoaded", () => {
       const c = getCertData();
       const certUrl = buildCertUrl(c);
 
-      let awardBadgeColor = "#f59e0b";
-      let awardBadgeBg = "rgba(245,158,11,0.15)";
-      let awardBorder = "rgba(245,158,11,0.4)";
-
-      if (c.resultText.includes("GOLD") || c.resultText.includes("1st")) {
-        awardBadgeColor = "#fbbf24";
-        awardBadgeBg = "linear-gradient(135deg, rgba(251,191,36,0.25), rgba(245,158,11,0.1))";
-        awardBorder = "#f59e0b";
-      } else if (c.resultText.includes("SILVER") || c.resultText.includes("2nd")) {
-        awardBadgeColor = "#e5e7eb";
-        awardBadgeBg = "linear-gradient(135deg, rgba(229,231,235,0.25), rgba(156,163,175,0.1))";
-        awardBorder = "#9ca3af";
-      } else if (c.resultText.includes("BRONZE") || c.resultText.includes("3rd")) {
-        awardBadgeColor = "#f97316";
-        awardBadgeBg = "linear-gradient(135deg, rgba(249,115,22,0.25), rgba(194,65,12,0.1))";
-        awardBorder = "#ea580c";
-      } else {
-        awardBadgeColor = "#34d399";
-        awardBadgeBg = "rgba(16,185,129,0.15)";
-        awardBorder = "rgba(16,185,129,0.4)";
-      }
+      const formattedR1 = formatRaceRank(c.race1);
+      const formattedR2 = formatRaceRank(c.race2);
 
       certPreviewWrap.innerHTML = `
         <div style="background:linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); border:5px solid #0b192c; outline:2px solid #d97706; outline-offset:-4px; border-radius:12px; padding:1.2rem; color:#1f2937; font-family:'Outfit',sans-serif; text-align:center; position:relative; box-shadow:0 10px 30px rgba(0,0,0,0.5);">
-          <!-- Top 4 Logos Header Bar -->
+          <!-- Top 4 Logos Header Bar (No Frame & Border) -->
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem; border-bottom:1px dashed #cbd5e1; padding-bottom:0.5rem; gap:0.4rem;">
-            <div style="text-align:center;">
-              <img src="https://res.cloudinary.com/igjmhsju/image/upload/v1788797466/rsam_website/branding/rsam-logo.png" style="height:34px; max-width:55px; object-fit:contain;" alt="RSAM Logo" />
-              <div style="font-size:0.6rem; font-weight:800; color:#0b192c;">RSAM</div>
-            </div>
-            <div style="text-align:center;">
-              <img src="https://res.cloudinary.com/igjmhsju/image/upload/v1788797352/rsam_website/affiliations/affil2.jpg" style="height:34px; max-width:55px; object-fit:contain; border-radius:4px; padding:1px; background:#fff;" alt="UPRSA Logo" />
-              <div style="font-size:0.6rem; font-weight:800; color:#0b192c;">UPRSA</div>
-            </div>
-            <div style="text-align:center;">
-              <img src="https://res.cloudinary.com/igjmhsju/image/upload/v1788797351/rsam_website/affiliations/affil1.jpg" style="height:34px; max-width:55px; object-fit:contain; border-radius:4px; padding:1px; background:#fff;" alt="RSFI Logo" />
-              <div style="font-size:0.6rem; font-weight:800; color:#0b192c;">RSFI</div>
-            </div>
-            <div style="text-align:center;">
-              <img src="https://res.cloudinary.com/igjmhsju/image/upload/v1788797353/rsam_website/affiliations/affil3.jpg" style="height:34px; max-width:55px; object-fit:contain; border-radius:4px; padding:1px; background:#fff;" alt="World Skate Logo" />
-              <div style="font-size:0.6rem; font-weight:800; color:#0b192c;">WORLD SKATE</div>
-            </div>
+            <img src="assets/branding/logo_ioa_india.webp" style="height:44px; max-width:70px; object-fit:contain; border:none; background:transparent;" alt="IOA India Logo" />
+            <img src="assets/branding/logo_rsfi_indiaskate.png" style="height:44px; max-width:70px; object-fit:contain; border:none; background:transparent;" alt="RSFI Logo" />
+            <img src="assets/branding/logo_uprsa.png" style="height:44px; max-width:70px; object-fit:contain; border:none; background:transparent;" alt="UPRSA Logo" />
+            <img src="assets/branding/logo_rsam.jpg" style="height:44px; max-width:70px; object-fit:contain; border:none; background:transparent;" alt="RSAM Logo" />
           </div>
 
           <div style="font-family:'Cinzel',serif; font-size:1.05rem; font-weight:800; color:#dc2626; letter-spacing:0.8px; margin:0.2rem 0;">
@@ -1610,12 +1590,29 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
           </div>
 
-          <!-- Award Ribbon Badge -->
-          <div style="display:inline-block; background:${awardBadgeBg}; border:1.5px solid ${awardBorder}; color:${awardBadgeColor}; padding:4px 14px; border-radius:20px; font-weight:800; font-size:0.85rem; margin:0.3rem 0; text-transform:uppercase;">
-            ${escapeHTML(c.resultText || '🥇 GOLD MEDAL (1st Position)')}
+          <!-- Venue (First) and Date (Second) -->
+          <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:0.5rem 0.8rem; border-radius:6px; font-size:0.75rem; color:#334155; display:flex; justify-content:space-between; margin-bottom:0.6rem;">
+            <div>📍 Venue: <strong style="color:#0f172a;">${escapeHTML(c.venue)}</strong></div>
+            <div>📅 Date: <strong style="color:#0f172a;">${escapeHTML(c.dateStr)}</strong></div>
           </div>
 
-          <!-- 3 Bottom Executive Signatories -->
+          <!-- Two Race Result Boxes -->
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.6rem; margin-bottom:0.6rem;">
+            <div style="background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; overflow:hidden; text-align:center;">
+              <div style="background:#f1f5f9; color:#0b192c; font-size:0.68rem; font-weight:800; padding:4px 8px; border-bottom:1px solid #cbd5e1; letter-spacing:0.5px;">RACE 1 RESULT</div>
+              <div style="min-height:38px; padding:6px; font-size:0.95rem; font-weight:800; color:#0f172a; display:flex; align-items:center; justify-content:center;">
+                ${formattedR1 ? `<strong>${escapeHTML(formattedR1)}</strong>` : `<span style="color:#cbd5e1;">—</span>`}
+              </div>
+            </div>
+            <div style="background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; overflow:hidden; text-align:center;">
+              <div style="background:#f1f5f9; color:#0b192c; font-size:0.68rem; font-weight:800; padding:4px 8px; border-bottom:1px solid #cbd5e1; letter-spacing:0.5px;">RACE 2 RESULT</div>
+              <div style="min-height:38px; padding:6px; font-size:0.95rem; font-weight:800; color:#0f172a; display:flex; align-items:center; justify-content:center;">
+                ${formattedR2 ? `<strong>${escapeHTML(formattedR2)}</strong>` : `<span style="color:#cbd5e1;">—</span>`}
+              </div>
+            </div>
+          </div>
+
+          <!-- 3 Bottom Executive Signatories (No Participant Badge) -->
           <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:0.4rem; margin-top:0.8rem; border-top:1px solid #e5e7eb; padding-top:0.5rem; font-size:0.68rem; text-align:center;">
             <div>
               <div style="font-family:'Great Vibes',cursive; font-size:1.1rem; color:#0b192c; font-weight:700;">Ashok Singhal</div>
@@ -1644,7 +1641,7 @@ document.addEventListener("DOMContentLoaded", () => {
       `;
     }
 
-    [certSkaterName, certFatherName, certSchoolClub, certDiscipline, certResultText, certMobile].forEach(input => {
+    [certSkaterName, certFatherName, certSchoolClub, certDiscipline, certMobile, document.getElementById("certRace1Text"), document.getElementById("certRace2Text"), document.getElementById("certVenueText"), document.getElementById("certDateText")].forEach(input => {
       if (input) input.oninput = renderCertificatePreview;
     });
 
@@ -1747,33 +1744,50 @@ document.addEventListener("DOMContentLoaded", () => {
         chk.onchange = updateSelectedCount;
       });
 
+      // Helper to extract Race 1 & Race 2 from record
+      function populateSkaterInEditor(r) {
+        if (!r) return;
+        if (certSkaterName) certSkaterName.value = r.skaterName || r.name || '';
+        if (certFatherName) certFatherName.value = r.fatherName || r.father_name || '';
+        if (certSchoolClub) certSchoolClub.value = r.schoolClub || r.school_club || '';
+        if (certDiscipline) certDiscipline.value = r.discipline || r.category || '';
+        if (certMobile)     certMobile.value     = r.mobile || r.phone || '';
+
+        const elR1 = document.getElementById("certRace1Text");
+        const elR2 = document.getElementById("certRace2Text");
+        const elVen = document.getElementById("certVenueText");
+        const elDat = document.getElementById("certDateText");
+
+        let r1 = r.race1 || r.rinkRace1 || r.rink1 || '';
+        let r2 = r.race2 || r.rinkRace2 || r.rink2 || '';
+        if (!r1 && !r2 && (r.result || r.results)) {
+          const resStr = String(r.result || r.results || '');
+          const parts = resStr.split(/,|\/|\||&|;|\n/).map(s => s.trim()).filter(Boolean);
+          if (parts.length >= 2) { r1 = parts[0]; r2 = parts[1]; }
+          else if (parts.length === 1) { r1 = parts[0]; }
+        }
+
+        if (elR1) elR1.value = formatRaceRank(r1);
+        if (elR2) elR2.value = formatRaceRank(r2);
+        if (elVen && r.venue) elVen.value = r.venue;
+        if (elDat && r.date) elDat.value = r.date;
+      }
+
       // Load Button click listeners
       certSkatersList.querySelectorAll(".btn-cert-preview-item").forEach(btn => {
         btn.onclick = () => {
           const idx = parseInt(btn.getAttribute("data-idx"), 10);
           if (activeRecords[idx]) {
-            const r = activeRecords[idx];
-            if (certSkaterName) certSkaterName.value = r.skaterName || '';
-            if (certFatherName) certFatherName.value = r.fatherName || '';
-            if (certSchoolClub) certSchoolClub.value = r.schoolClub || '';
-            if (certDiscipline) certDiscipline.value = r.discipline || '';
-            if (certResultText) certResultText.value = formatResultString(r.result || r.rinkRace1);
-            if (certMobile)     certMobile.value     = r.mobile || '';
+            populateSkaterInEditor(activeRecords[idx]);
             renderCertificatePreview();
-            notify(`Loaded ${r.skaterName || 'Athlete'} into certificate editor!`, "success");
+            notify(`Loaded ${activeRecords[idx].skaterName || 'Athlete'} into certificate editor!`, "success");
           }
         };
       });
 
       // Auto-load first skater into editor
       if (activeRecords.length > 0) {
-        const r = activeRecords[0];
-        if (certSkaterName) certSkaterName.value = r.skaterName || '';
-        if (certFatherName) certFatherName.value = r.fatherName || '';
-        if (certSchoolClub) certSchoolClub.value = r.schoolClub || '';
-        if (certDiscipline) certDiscipline.value = r.discipline || '';
-        if (certResultText) certResultText.value = formatResultString(r.result || r.rinkRace1);
-        if (certMobile)     certMobile.value     = r.mobile || '';
+        populateSkaterInEditor(activeRecords[0]);
       }
 
       updateSelectedCount();
