@@ -1067,18 +1067,12 @@ document.addEventListener("DOMContentLoaded", async () => {
               <tr><th>Description</th><th>Gateway Rate</th><th style="text-align:right;">Amount (INR)</th></tr>
             </thead>
             <tbody>
-              ${(paymentId && paymentId.startsWith("pay_")) ? `
-                <tr><td>Championship Event Registration Fee</td><td>Base Fee</td><td style="text-align:right;">₹${BASE_FEE.toFixed(2)}</td></tr>
-                <tr><td>Payment Gateway Service Charge</td><td>2.00%</td><td style="text-align:right;">+ ₹${GATEWAY_CHARGE.toFixed(2)}</td></tr>
-                <tr><td>GST on Gateway Transaction Fee</td><td>18.00%</td><td style="text-align:right;">+ ₹${GST_CHARGE.toFixed(2)}</td></tr>
-                <tr class="total-row"><td>Total Entry Fee Paid (Razorpay)</td><td>Status: ${payload.paymentStatus || 'SUCCESS'}</td><td style="text-align:right;">₹${parseFloat(amountPaid).toFixed(2)}</td></tr>
-              ` : (paymentId === "WAIVED_FREE" || BASE_FEE === 0) ? `
+              ${(paymentId === "WAIVED_FREE" || BASE_FEE === 0) ? `
                 <tr><td>Championship Event Registration Fee</td><td>Waived / Free</td><td style="text-align:right;">₹0.00</td></tr>
                 <tr class="total-row"><td>Total Entry Fee Paid</td><td>Status: WAIVED</td><td style="text-align:right;">₹0.00</td></tr>
               ` : `
                 <tr><td>Championship Event Registration Fee</td><td>Direct UPI Transfer</td><td style="text-align:right;">₹${parseFloat(amountPaid).toFixed(2)}</td></tr>
-                <tr><td>Gateway Service Charge (Direct UPI)</td><td>0.0%</td><td style="text-align:right;">₹0.00</td></tr>
-                <tr class="total-row"><td>Total Entry Fee Paid (Direct UPI)</td><td>Status: ${payload.paymentStatus || 'VERIFIED'}</td><td style="text-align:right;">₹${parseFloat(amountPaid).toFixed(2)}</td></tr>
+                <tr class="total-row"><td>Total Entry Fee Paid (Direct UPI)</td><td>Status: ${payload.paymentStatus || 'PENDING_APPROVAL'}</td><td style="text-align:right;">₹${parseFloat(amountPaid).toFixed(2)}</td></tr>
               `}
             </tbody>
           </table>

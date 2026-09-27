@@ -1475,6 +1475,26 @@ document.addEventListener("DOMContentLoaded", () => {
     let cachedSheets = [];
     let activeRecords = [];
 
+    function formatResultString(rawResult) {
+      if (!rawResult || !rawResult.trim()) return "🏅 Participant (Certificate of Merit)";
+      const str = rawResult.trim();
+      const lower = str.toLowerCase();
+
+      if (lower.includes("gold") || lower.includes("1st") || lower.includes("first") || lower === "1") {
+        return "🥇 GOLD MEDAL (1st Position)";
+      }
+      if (lower.includes("silver") || lower.includes("2nd") || lower.includes("second") || lower === "2") {
+        return "🥈 SILVER MEDAL (2nd Position)";
+      }
+      if (lower.includes("bronze") || lower.includes("3rd") || lower.includes("third") || lower === "3") {
+        return "🥉 BRONZE MEDAL (3rd Position)";
+      }
+      if (lower.includes("participant") || lower.includes("participation")) {
+        return "🏅 Participant (Certificate of Merit)";
+      }
+      return str.startsWith("🥇") || str.startsWith("🥈") || str.startsWith("🥉") || str.startsWith("🏅") ? str : `🏅 ${str}`;
+    }
+
     // Helper to build URL for public standalone certificate
     function buildCertUrl(c) {
       const origin = window.location.origin;
@@ -1484,13 +1504,13 @@ document.addEventListener("DOMContentLoaded", () => {
         schoolClub: c.schoolClub || "",
         dob: c.dob || "",
         ageGroup: c.ageGroup || "",
-        eventTitle: c.eventName || (certSheetSelect ? certSheetSelect.value : "1st Winter Roller Skating Championship-2025"),
+        eventTitle: c.eventName || (certSheetSelect ? certSheetSelect.value : "District Championship 2026"),
         discipline: c.discipline || "Quads",
-        result: c.resultText || "🥇 GOLD MEDAL (1st Position)",
+        result: c.resultText || formatResultString(c.result),
         rink1: c.rinkRace1 || "1st",
         rink2: c.rinkRace2 || "1st",
-        date: c.dateStr || "21-12-2025",
-        venue: "Springfields School, New Moradabad"
+        date: c.dateStr || new Date().toLocaleDateString("en-IN", { day: 'numeric', month: 'long', year: 'numeric' }),
+        venue: "Moradabad"
       });
       return `${origin}/certificate-view.html?${params.toString()}`;
     }
@@ -1503,7 +1523,7 @@ document.addEventListener("DOMContentLoaded", () => {
         discipline: certDiscipline ? certDiscipline.value.trim() : "",
         resultText: certResultText ? certResultText.value.trim() : "",
         mobile: certMobile ? certMobile.value.trim() : "",
-        eventName: certSheetSelect ? certSheetSelect.value : "1st Winter Roller Skating Championship-2025",
+        eventName: certSheetSelect ? certSheetSelect.value : "District Championship 2026",
         dateStr: new Date().toLocaleDateString("en-IN", { day: 'numeric', month: 'long', year: 'numeric' })
       };
     }
@@ -1688,7 +1708,7 @@ document.addEventListener("DOMContentLoaded", () => {
           </thead>
           <tbody>
             ${activeRecords.map((r, idx) => {
-              const resVal = r.result || r.rinkRace1 || "Participant";
+              const resVal = formatResultString(r.result || r.rinkRace1);
               return `
                 <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
                   <td style="padding:0.4rem;">
@@ -1737,7 +1757,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (certFatherName) certFatherName.value = r.fatherName || '';
             if (certSchoolClub) certSchoolClub.value = r.schoolClub || '';
             if (certDiscipline) certDiscipline.value = r.discipline || '';
-            if (certResultText) certResultText.value = r.result || (r.rinkRace1 ? `🥇 ${r.rinkRace1} Position` : '🥇 GOLD MEDAL (1st Position)');
+            if (certResultText) certResultText.value = formatResultString(r.result || r.rinkRace1);
             if (certMobile)     certMobile.value     = r.mobile || '';
             renderCertificatePreview();
             notify(`Loaded ${r.skaterName || 'Athlete'} into certificate editor!`, "success");
@@ -1752,7 +1772,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (certFatherName) certFatherName.value = r.fatherName || '';
         if (certSchoolClub) certSchoolClub.value = r.schoolClub || '';
         if (certDiscipline) certDiscipline.value = r.discipline || '';
-        if (certResultText) certResultText.value = r.result || (r.rinkRace1 ? `🥇 ${r.rinkRace1} Position` : '🥇 GOLD MEDAL (1st Position)');
+        if (certResultText) certResultText.value = formatResultString(r.result || r.rinkRace1);
         if (certMobile)     certMobile.value     = r.mobile || '';
       }
 
@@ -1895,13 +1915,15 @@ document.addEventListener("DOMContentLoaded", () => {
             continue;
           }
 
+          const formattedResult = formatResultString(r.result || r.rinkRace1);
+
           const certUrl = buildCertUrl({
             skaterName: r.skaterName,
             fatherName: r.fatherName,
             schoolClub: r.schoolClub,
             discipline: r.discipline,
-            resultText: r.result || (r.rinkRace1 ? `🥇 ${r.rinkRace1} Position` : '🥇 GOLD MEDAL (1st Position)'),
-            eventName: certSheetSelect ? certSheetSelect.value : "1st Winter Roller Skating Championship-2025",
+            resultText: formattedResult,
+            eventName: certSheetSelect ? certSheetSelect.value : "District Championship 2026",
             dateStr: new Date().toLocaleDateString("en-IN", { day: 'numeric', month: 'long', year: 'numeric' })
           });
 
@@ -1914,7 +1936,7 @@ document.addEventListener("DOMContentLoaded", () => {
             `• Father's Name: *${r.fatherName || '—'}*\n` +
             `• School/Club: *${r.schoolClub || '—'}*\n` +
             `• Discipline: *${r.discipline || '—'}*\n` +
-            `• Result / Award: *${r.result || 'Participant'}*\n\n` +
+            `• Result / Award: *${formattedResult}*\n\n` +
             `🔗 *Click to View & Print Official RSAM Digital Certificate:*\n` +
             `${certUrl}\n\n` +
             `Best regards,\n*Roller Sports Association Moradabad (RSAM)*`;

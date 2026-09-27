@@ -138,27 +138,36 @@ function doGet(e) {
         }
         return fallbackIdx;
       }
-      const regIdx        = findHeaderIndex(["rsam reg", "reg no", "reg. no", "reg number", "registration no"], 1);
-      const nameIdx       = findHeaderIndex(["skater name", "name"], 3);
-      const dobIdx        = findHeaderIndex(["date of birth", "dob"], 4);
-      const ageIdx        = findHeaderIndex(["age"], 5);
-      const ageGroupIdx   = findHeaderIndex(["age group", "agegroup"], 6);
-      const schoolClubIdx = findHeaderIndex(["school", "club", "institution"], 7);
-      const coachNameIdx   = findHeaderIndex(["coach name", "coach's name"], 8);
-      const coachMobileIdx = findHeaderIndex(["coach mobile", "coach contact", "coach phone"], 9);
-      const fatherIdx     = findHeaderIndex(["father"], 10);
-      const motherIdx     = findHeaderIndex(["mother"], 11);
-      const addressIdx    = findHeaderIndex(["address"], 12);
-      const mobileIdx     = findHeaderIndex(["mobile", "phone", "contact"], 13);
-      const emailIdx      = findHeaderIndex(["email"], 14);
-      const aadhaarIdx    = findHeaderIndex(["aadhaar", "adhar"], 15);
-      const discIdx       = findHeaderIndex(["discipline", "category"], 16);
-      const photoIdx      = findHeaderIndex(["photo", "picture", "avatar"], 20);
-      const resultIdx     = findHeaderIndex(["result", "award", "position", "rank", "medal"], -1);
+      const eventRegIdx   = findHeaderIndex(["event reg no", "chest no", "chest number", "bib"], 1);
+      const regIdx        = findHeaderIndex(["rsam reg", "reg no", "reg. no", "reg number", "registration no"], 2);
+      const nameIdx       = findHeaderIndex(["skater name", "name"], 4);
+      const dobIdx        = findHeaderIndex(["date of birth", "dob"], 5);
+      const ageIdx        = findHeaderIndex(["age"], 6);
+      const ageGroupIdx   = findHeaderIndex(["age group", "agegroup"], 7);
+      const schoolClubIdx = findHeaderIndex(["school", "club", "institution"], 8);
+      const coachNameIdx   = findHeaderIndex(["coach name", "coach's name"], 9);
+      const coachMobileIdx = findHeaderIndex(["coach mobile", "coach contact", "coach phone"], 10);
+      const fatherIdx     = findHeaderIndex(["father"], 11);
+      const motherIdx     = findHeaderIndex(["mother"], 12);
+      const addressIdx    = findHeaderIndex(["address"], 13);
+      const mobileIdx     = findHeaderIndex(["mobile", "phone", "contact"], 14);
+      const emailIdx      = findHeaderIndex(["email"], 15);
+      const aadhaarIdx    = findHeaderIndex(["aadhaar", "adhar"], 16);
+      const discIdx       = findHeaderIndex(["discipline", "category"], 17);
+      const payIdIdx      = findHeaderIndex(["payment id", "razorpay payment id", "utr", "payment ref"], 18);
+      const statusIdx     = findHeaderIndex(["payment status", "status"], 19);
+      const amtIdx        = findHeaderIndex(["amount paid", "amount"], 20);
+      const photoIdx      = findHeaderIndex(["photo", "picture", "avatar"], 21);
+      const proofIdx      = findHeaderIndex(["screenshot", "payment proof", "proof url", "receipt"], -1);
+      const resultIdx     = findHeaderIndex(["result", "results", "award", "position", "rank", "medal", "performance"], -1);
       const rink1Idx      = findHeaderIndex(["rink race 1", "race 1", "rink 1"], -1);
       const rink2Idx      = findHeaderIndex(["rink race 2", "race 2", "rink 2"], -1);
 
+      const rawCellStatus = statusIdx !== -1 && data[i][statusIdx] !== undefined ? String(data[i][statusIdx]).trim() : "";
+      const parsedStatus = rawCellStatus !== "" ? rawCellStatus : "PENDING_APPROVAL";
+
       return {
+        eventRegNo: eventRegIdx !== -1 ? String(data[i][eventRegIdx] || "") : "",
         regNumber: String(data[i][regIdx] || regNumber),
         skaterName: String(data[i][nameIdx] || ""),
         dob: String(data[i][dobIdx] || ""),
@@ -174,8 +183,13 @@ function doGet(e) {
         email: String(data[i][emailIdx] || ""),
         aadhaar: String(data[i][aadhaarIdx] || "").replace(/^'/, ""),
         discipline: String(data[i][discIdx] || ""),
-        photoUrl: String(data[i][photoIdx] || ""),
-        result: resultIdx !== -1 ? String(data[i][resultIdx] || "") : "",
+        paymentId: payIdIdx !== -1 ? String(data[i][payIdIdx] || "") : "",
+        paymentStatus: parsedStatus,
+        status: parsedStatus,
+        amountPaid: amtIdx !== -1 ? String(data[i][amtIdx] || "").replace(/[^0-9.]/g, "") : "",
+        paymentScreenshot: proofIdx !== -1 ? String(data[i][proofIdx] || "") : "",
+        photoUrl: photoIdx !== -1 ? String(data[i][photoIdx] || "") : "",
+        result: resultIdx !== -1 ? String(data[i][resultIdx] || "").trim() : "",
         rinkRace1: rink1Idx !== -1 ? String(data[i][rink1Idx] || "") : "",
         rinkRace2: rink2Idx !== -1 ? String(data[i][rink2Idx] || "") : ""
       };
@@ -454,9 +468,9 @@ function doPost(e) {
         data.email || "N/A",
         "'" + data.aadhaar,
         data.discipline,
-        data.paymentId || "pay_verified",
-        data.paymentStatus || "SUCCESS",
-        "₹" + (data.amountPaid || "511.80"),
+        data.paymentId || "pay_pending",
+        data.paymentStatus || "PENDING_APPROVAL",
+        "₹" + (data.amountPaid || "500.00"),
         data.photoUrl || ""
       ]);
 
@@ -464,7 +478,14 @@ function doPost(e) {
         sendWhatsAppNotification({ ...data, eventRegNo: eventRegNo });
       }
 
-      const mailStatus = sendRegistrationConfirmationEmail(data, rsamRegNo, data.photoUrl, eventRegNo);
+      // Only send confirmation email if payment is verified
+      const rawStatus = String(data.paymentStatus || "").toUpperCase();
+      const isVerified = rawStatus === 'VERIFIED' || rawStatus === 'PAID' || rawStatus === 'SUCCESS' || rawStatus === 'APPROVED' || rawStatus === 'WAIVED';
+
+      let mailStatus = { skipped: true, reason: "Payment pending approval" };
+      if (isVerified) {
+        mailStatus = sendRegistrationConfirmationEmail(data, rsamRegNo, data.photoUrl, eventRegNo);
+      }
 
       return ContentService.createTextOutput(JSON.stringify({
         status: "ok",
@@ -1065,21 +1086,11 @@ function createRegistrationPdfInvoice(data, regNumber, eventRegNoParam) {
           <tbody>
             <tr>
               <td>${itemDescription}</td>
-              <td>Base Fee</td>
-              <td style="text-align:right;">${baseFeeVal}</td>
-            </tr>
-            <tr>
-              <td>Payment Gateway Service Charge</td>
-              <td>2.00%</td>
-              <td style="text-align:right;">${gatewayFeeVal}</td>
-            </tr>
-            <tr>
-              <td>GST on Gateway Transaction Fee</td>
-              <td>18.00%</td>
-              <td style="text-align:right;">${gstFeeVal}</td>
+              <td>${isEvent ? 'Direct UPI Transfer' : 'Base Fee'}</td>
+              <td style="text-align:right;">₹${amountPaid}</td>
             </tr>
             <tr class="total-row">
-              <td class="total-lbl">Total Amount Paid (Razorpay)</td>
+              <td class="total-lbl">${isEvent ? 'Total Entry Fee Paid (Direct UPI)' : 'Total Amount Paid'}</td>
               <td class="${paymentStatus === 'FAILED' ? 'status-failed' : 'status-success'}">
                 Status: ${paymentStatus}
               </td>

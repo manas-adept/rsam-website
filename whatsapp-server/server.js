@@ -225,16 +225,15 @@ function generateRegistrationPDF(data, regNumber) {
       const itemDesc = isEvent
         ? `${data.eventName || data.eventTitle || 'Championship Event'} Registration Fee`
         : `Base Annual Athlete Membership Fee (2026)`;
-      const baseFee = isEvent ? '₹500.00' : '₹10.00';
-      const gwFee = isEvent ? '+ ₹10.00' : '+ ₹0.20';
-      const gstFee = isEvent ? '+ ₹1.80' : '+ ₹0.04';
-      const totalFee = isEvent ? '₹511.80' : '₹10.24';
+      const totalFeeStr = `₹${parseFloat(data.amountPaid || (isEvent ? 500 : 10.24)).toFixed(2)}`;
 
-      const lineItems = [
-        [itemDesc, 'Base Fee', baseFee],
-        ['Payment Gateway Service Charge', '2.00%', gwFee],
-        ['GST on Gateway Transaction Fee', '18.00%', gstFee]
-      ];
+      const lineItems = isEvent
+        ? [[itemDesc, 'Direct UPI Transfer', totalFeeStr]]
+        : [
+            [itemDesc, 'Base Fee', '₹10.00'],
+            ['Payment Gateway Service Charge', '2.00%', '+ ₹0.20'],
+            ['GST on Gateway Transaction Fee', '18.00%', '+ ₹0.04']
+          ];
 
       doc.font('Helvetica').fontSize(10).fillColor(grayText);
       lineItems.forEach(([desc, rate, amt]) => {
@@ -248,21 +247,21 @@ function generateRegistrationPDF(data, regNumber) {
       // Total Row
       y += 2;
       doc.moveTo(45, y - 4).lineTo(545, y - 4).lineWidth(1.2).stroke(redColor);
-      doc.font('Helvetica-Bold').fontSize(11).fillColor(redColor).text('Total Amount Paid (Razorpay)', 45, y);
+      doc.font('Helvetica-Bold').fontSize(11).fillColor(redColor).text(isEvent ? 'Total Entry Fee Paid (Direct UPI)' : 'Total Amount Paid (Razorpay)', 45, y);
       
       const paymentStatus = (data.paymentStatus || 'SUCCESS').toUpperCase();
       const statusText = `Status: ${paymentStatus}`;
       const statusColor = (paymentStatus === 'FAILED') ? redColor : greenColor;
       doc.font('Helvetica-Bold').fontSize(11).fillColor(statusColor).text(statusText, 300, y);
-      doc.font('Helvetica-Bold').fontSize(11).fillColor(redColor).text(totalFee, 460, y, { width: 85, align: 'right' });
+      doc.font('Helvetica-Bold').fontSize(11).fillColor(redColor).text(totalFeeStr, 460, y, { width: 85, align: 'right' });
       
       y += 18;
       doc.moveTo(45, y).lineTo(545, y).lineWidth(1.2).stroke(redColor);
 
       // Payment Ref & Date
       y += 16;
-      doc.font('Helvetica-Bold').fontSize(10).fillColor(darkText).text('Razorpay Payment ID:', 45, y);
-      doc.font('Helvetica').fontSize(10).fillColor(grayText).text(data.paymentId || 'pay_TdR7X0unAUMomw', 160, y);
+      doc.font('Helvetica-Bold').fontSize(10).fillColor(darkText).text(isEvent ? 'UPI UTR / Ref Number:' : 'Razorpay Payment ID:', 45, y);
+      doc.font('Helvetica').fontSize(10).fillColor(grayText).text(data.upiUtr || data.paymentId || 'pay_TdR7X0unAUMomw', 160, y);
 
       doc.font('Helvetica-Bold').fontSize(10).fillColor(darkText).text('Registration Date:', 330, y);
       const timestampStr = new Date().toLocaleString('en-IN', { day: 'numeric', month: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
@@ -775,8 +774,12 @@ app.post('/send-registration', authorizeRequest, async (req, res) => {
         console.error(`[WhatsApp Error] Could not send message to ${payload.skaterName}:`, waErr.message);
       }
 
-      // 3. ISOLATED CHANNEL 2: PDF Generation & Email Delivery
-      if (payload.email) {
+      // 3. ISOLATED CHANNEL 2: PDF Generation & Email Delivery (Only for approved registrations or annual registrations)
+      const rawStatus = String(payload.paymentStatus || payload.status || '').toUpperCase();
+      const isVerified = rawStatus === 'VERIFIED' || rawStatus === 'PAID' || rawStatus === 'SUCCESS' || rawStatus === 'APPROVED' || rawStatus === 'WAIVED';
+      const isEvent = payload.type === 'event_registration';
+
+      if (payload.email && (!isEvent || isVerified)) {
         let pdfBuffer = null;
         try {
           pdfBuffer = await generateRegistrationPDF(payload, regNumber);
@@ -795,6 +798,8 @@ app.post('/send-registration', authorizeRequest, async (req, res) => {
         } catch (emailErr) {
           console.error(`[Email Error] Could not send email to ${payload.email}:`, emailErr.message);
         }
+      } else if (isEvent && !isVerified) {
+        console.log(`[Email/PDF Deferred] Athlete ${payload.skaterName} event registration is UNDER REVIEW. PDF & Email will be sent upon payment approval.`);
       }
     });
   } catch (err) {
@@ -1607,54 +1612,68 @@ app.post('/api/approve-payment', async (req, res) => {
       console.warn('[Sheet Status Update Warning]', e.message);
     }
 
-    // Send secondary WhatsApp Confirmation Message upon Payment Approval!
-    if (isApprove && sock && isConnected) {
-      try {
-        const athleteData = {
-          type: 'event_registration',
-          skaterName: skaterName || 'Athlete',
-          mobile: mobile,
-          coachMobile: coachMobile,
-          coachName: coachName,
-          eventName: eventName || sheetName || 'District Championship 2026',
-          eventRegNo: eventRegNo || chestNo || (regNumber ? String(regNumber).replace(/\D/g, "").slice(-3) : ""),
-          chestNo: chestNo || eventRegNo,
-          discipline: discipline,
-          ageGroup: ageGroup,
-          schoolClub: schoolClub,
-          dob: dob,
-          email: email,
-          paymentStatus: 'VERIFIED',
-          regNumber: regNumber
-        };
+    // Send secondary WhatsApp Confirmation Message & PDF Email Pass upon Payment Approval!
+    if (isApprove) {
+      const athleteData = {
+        type: 'event_registration',
+        skaterName: skaterName || 'Athlete',
+        mobile: mobile,
+        coachMobile: coachMobile,
+        coachName: coachName,
+        eventName: eventName || sheetName || 'District Championship 2026',
+        eventRegNo: eventRegNo || chestNo || (regNumber ? String(regNumber).replace(/\D/g, "").slice(-3) : ""),
+        chestNo: chestNo || eventRegNo,
+        discipline: discipline,
+        ageGroup: ageGroup,
+        schoolClub: schoolClub,
+        dob: dob,
+        email: email,
+        paymentStatus: 'VERIFIED',
+        regNumber: regNumber
+      };
 
-        if (athleteData.mobile) {
-          const skaterJid = formatWhatsAppJid(athleteData.mobile);
-          if (skaterJid) {
-            const skaterMsg = buildRegistrationMessage(athleteData, regNumber);
-            console.log(`[WhatsApp Approval] Sending secondary confirmation message to ${skaterJid} for ${athleteData.skaterName}...`);
-            await sock.sendMessage(skaterJid, { text: skaterMsg });
-            console.log(`[WhatsApp Approval] Sent secondary confirmation message to ${athleteData.skaterName}!`);
+      if (sock && isConnected) {
+        try {
+          if (athleteData.mobile) {
+            const skaterJid = formatWhatsAppJid(athleteData.mobile);
+            if (skaterJid) {
+              const skaterMsg = buildRegistrationMessage(athleteData, regNumber);
+              console.log(`[WhatsApp Approval] Sending secondary confirmation message to ${skaterJid} for ${athleteData.skaterName}...`);
+              await sock.sendMessage(skaterJid, { text: skaterMsg });
+              console.log(`[WhatsApp Approval] Sent secondary confirmation message to ${athleteData.skaterName}!`);
+            }
           }
-        }
 
-        if (athleteData.coachMobile && String(athleteData.coachMobile).replace(/\D/g, "").length === 10) {
-          const coachJid = formatWhatsAppJid(athleteData.coachMobile);
-          if (coachJid) {
-            const coachMsg = buildCoachRegistrationMessage(athleteData, regNumber);
-            console.log(`[WhatsApp Approval] Sending secondary coach confirmation message to ${coachJid}...`);
-            await sock.sendMessage(coachJid, { text: coachMsg });
+          if (athleteData.coachMobile && String(athleteData.coachMobile).replace(/\D/g, "").length === 10) {
+            const coachJid = formatWhatsAppJid(athleteData.coachMobile);
+            if (coachJid) {
+              const coachMsg = buildCoachRegistrationMessage(athleteData, regNumber);
+              console.log(`[WhatsApp Approval] Sending secondary coach confirmation message to ${coachJid}...`);
+              await sock.sendMessage(coachJid, { text: coachMsg });
+            }
           }
+        } catch (waErr) {
+          console.error('[WhatsApp Approval Message Error]:', waErr.message);
         }
-      } catch (waErr) {
-        console.error('[WhatsApp Approval Message Error]:', waErr.message);
+      }
+
+      // Generate PDF & Send Email upon Payment Approval
+      if (athleteData.email) {
+        try {
+          const pdfBuffer = await generateRegistrationPDF(athleteData, regNumber);
+          console.log(`[Approval Email] Sending confirmation email with PDF pass to ${athleteData.email}...`);
+          await sendRegistrationEmail(athleteData, regNumber, pdfBuffer);
+          console.log(`[Approval Email] Sent confirmation email with PDF pass to ${athleteData.email}!`);
+        } catch (eErr) {
+          console.warn('[Approval Email Warning]', eErr.message);
+        }
       }
     }
 
     return res.json({
       status: 'ok',
       message: isApprove 
-        ? `Payment approved for ${regNumber}! Status updated to VERIFIED and WhatsApp confirmation sent.` 
+        ? `Payment approved for ${regNumber}! Status updated to VERIFIED, WhatsApp confirmation & PDF email pass sent.` 
         : `Payment rejected for ${regNumber}.`,
       paymentStatus: newStatus
     });
