@@ -1498,10 +1498,36 @@ document.addEventListener("DOMContentLoaded", () => {
       return String(str).trim();
     }
 
+    function generateCertSignatureSync(skaterName, regNo, race1, race2, discipline) {
+      const salt = "RSAM_SECURE_VERIFIED_CERTIFICATE_HASH_SALT_2026";
+      const str = [
+        String(skaterName || "").trim().toLowerCase(),
+        String(regNo || "").trim().toLowerCase(),
+        String(race1 || "").trim().toLowerCase(),
+        String(race2 || "").trim().toLowerCase(),
+        String(discipline || "").trim().toLowerCase(),
+        salt
+      ].join("::");
+      
+      let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+      for (let i = 0; i < str.length; i++) {
+        const ch = str.charCodeAt(i);
+        h1 = Math.imul(h1 ^ ch, 2654435761);
+        h2 = Math.imul(h2 ^ ch, 1597334677);
+      }
+      h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+      h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+      return ((h1 >>> 0).toString(16).padStart(8, '0') + (h2 >>> 0).toString(16).padStart(8, '0')).slice(0, 16);
+    }
+
     // Helper to build URL for public standalone certificate
     function buildCertUrl(c) {
       const origin = window.location.origin;
+      const regNo = c.regNumber || c.registrationNo || c.eventRegNo || c.rsamRegNo || c.regNo || "";
+      const sig = generateCertSignatureSync(c.skaterName, regNo, c.race1, c.race2, c.discipline);
+
       const params = new URLSearchParams({
+        regNo: regNo,
         skaterName: c.skaterName || "",
         fatherName: c.fatherName || "",
         schoolClub: c.schoolClub || "",
@@ -1514,7 +1540,8 @@ document.addEventListener("DOMContentLoaded", () => {
         rink1: c.race1 || "",
         rink2: c.race2 || "",
         venue: c.venue || "Moradabad Sports Complex, Kanth Road, Moradabad",
-        date: c.dateStr || "15th - 16th October 2026"
+        date: c.dateStr || "15th - 16th October 2026",
+        sig: sig
       });
       return `${origin}/certificate-view.html?${params.toString()}`;
     }

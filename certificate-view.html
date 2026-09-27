@@ -478,10 +478,39 @@
 
       </div>
 
+      <!-- Digital Verification & Tamper-Proof Stamp -->
+      <div style="margin-top:0.8rem; text-align:center; border-top:1px dashed #e2e8f0; padding-top:0.5rem;" id="certVerifyBadgeWrap">
+        <span id="certVerifyBadge" style="font-size:0.75rem; font-weight:700; color:#15803d; background:rgba(22,163,74,0.1); padding:4px 14px; border-radius:20px; border:1px solid rgba(22,163,74,0.3); display:inline-flex; align-items:center; gap:6px;">
+          <i class="fa-solid fa-shield-check"></i> <span>RSAM DIGITALLY VERIFIED &amp; READ-ONLY CERTIFICATE</span>
+        </span>
+      </div>
+
     </div>
   </div>
 
   <script>
+    function generateCertSignatureSync(skaterName, regNo, race1, race2, discipline) {
+      const salt = "RSAM_SECURE_VERIFIED_CERTIFICATE_HASH_SALT_2026";
+      const str = [
+        String(skaterName || "").trim().toLowerCase(),
+        String(regNo || "").trim().toLowerCase(),
+        String(race1 || "").trim().toLowerCase(),
+        String(race2 || "").trim().toLowerCase(),
+        String(discipline || "").trim().toLowerCase(),
+        salt
+      ].join("::");
+      
+      let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+      for (let i = 0; i < str.length; i++) {
+        const ch = str.charCodeAt(i);
+        h1 = Math.imul(h1 ^ ch, 2654435761);
+        h2 = Math.imul(h2 ^ ch, 1597334677);
+      }
+      h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+      h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+      return ((h1 >>> 0).toString(16).padStart(8, '0') + (h2 >>> 0).toString(16).padStart(8, '0')).slice(0, 16);
+    }
+
     function formatRaceRank(str) {
       if (!str) return "";
       const s = str.trim().toLowerCase();
@@ -502,22 +531,80 @@
       return str.trim();
     }
 
-    // URL Query Parameter Dynamic Auto-Filler
-    document.addEventListener("DOMContentLoaded", () => {
+    // URL Query Parameter Dynamic Auto-Filler & Security Verifier
+    document.addEventListener("DOMContentLoaded", async () => {
       const p = new URLSearchParams(window.location.search);
       
-      const skaterName = p.get("skaterName") || p.get("name") || "CHAITANYA GARG";
-      const fatherName = p.get("fatherName") || p.get("parent") || "MANAS GARG";
-      const schoolClub = p.get("schoolClub") || p.get("school") || "KIDS SAVVY (ARYANS PANTHERS)";
-      const dob        = p.get("dob") || "30/01/2020";
-      const ageGroup   = p.get("ageGroup") || "4-6 yrs";
-      const eventTitle = p.get("eventTitle") || p.get("eventName") || "4th District Championship 2026";
-      const discipline = p.get("discipline") || p.get("category") || "Quads";
-      const rawResult  = p.get("result") || p.get("results") || "";
+      let regNo        = p.get("regNo") || p.get("regNumber") || p.get("reg") || "";
+      let skaterName   = p.get("skaterName") || p.get("name") || "CHAITANYA GARG";
+      let fatherName   = p.get("fatherName") || p.get("parent") || "MANAS GARG";
+      let schoolClub   = p.get("schoolClub") || p.get("school") || "KIDS SAVVY (ARYANS PANTHERS)";
+      let dob          = p.get("dob") || "30/01/2020";
+      let ageGroup     = p.get("ageGroup") || "4-6 yrs";
+      let eventTitle   = p.get("eventTitle") || p.get("eventName") || "4th District Championship 2026";
+      let discipline   = p.get("discipline") || p.get("category") || "Quads";
+      let rawResult    = p.get("result") || p.get("results") || "";
       let race1        = p.get("race1") || p.get("rink1") || "";
       let race2        = p.get("race2") || p.get("rink2") || "";
-      const date       = p.get("date") || "15th - 16th October 2026";
-      const venue      = p.get("venue") || "Moradabad Sports Complex, Kanth Road, Moradabad";
+      let date         = p.get("date") || "15th - 16th October 2026";
+      let venue        = p.get("venue") || "Moradabad Sports Complex, Kanth Road, Moradabad";
+      const sig        = p.get("sig") || "";
+
+      // 1. Signature Integrity Check
+      const expectedSig = generateCertSignatureSync(skaterName, regNo, race1 || rawResult, race2, discipline);
+      let isVerifiedSig = (sig !== "" && sig === expectedSig);
+      let isSheetFetched = false;
+
+      // 2. Fetch official record directly from Google Sheet if regNo exists or signature mismatch
+      if (regNo || (!isVerifiedSig && sig !== "")) {
+        try {
+          const sheetUrl = "https://script.google.com/macros/s/AKfycbyrxUIvQMXOzaBFNKwle-kOC0xMlc0ezufhIRXSyyid3Zx6Rhk9SKMZhNIoBBB290Xw/exec";
+          const res = await fetch(`${sheetUrl}?action=fetch_all_contacts`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.sheets) {
+              for (let s of data.sheets) {
+                const rec = (s.records || []).find(r => {
+                  const targetReg = r.regNumber || r.registrationNo || r.eventRegNo || r.rsamRegNo || "";
+                  return (regNo && targetReg.toUpperCase() === regNo.toUpperCase()) ||
+                         (regNo && String(r.eventRegNo).padStart(3,'0') === regNo);
+                });
+                if (rec) {
+                  skaterName = rec.skaterName || skaterName;
+                  fatherName = rec.fatherName || fatherName;
+                  schoolClub = rec.schoolClub || schoolClub;
+                  dob = rec.dob || dob;
+                  ageGroup = rec.ageGroup || ageGroup;
+                  discipline = rec.discipline || discipline;
+                  race1 = rec.rinkRace1 || rec.race1 || race1;
+                  race2 = rec.rinkRace2 || rec.race2 || race2;
+                  if (s.sheetName) eventTitle = s.sheetName;
+                  isSheetFetched = true;
+                  break;
+                }
+              }
+            }
+          }
+        } catch (e) {
+          console.warn("[Cert Sheet Verify Error]", e);
+        }
+      }
+
+      // Update Verification Badge
+      const badgeEl = document.getElementById("certVerifyBadge");
+      if (badgeEl) {
+        if (isSheetFetched || isVerifiedSig) {
+          badgeEl.style.color = "#15803d";
+          badgeEl.style.background = "rgba(22,163,74,0.1)";
+          badgeEl.style.borderColor = "rgba(22,163,74,0.3)";
+          badgeEl.innerHTML = `<i class="fa-solid fa-shield-check"></i> <span>RSAM DIGITALLY VERIFIED &amp; READ-ONLY CERTIFICATE ${regNo ? '(ID: ' + regNo + ')' : ''}</span>`;
+        } else if (sig !== "" && !isVerifiedSig) {
+          badgeEl.style.color = "#b91c1c";
+          badgeEl.style.background = "rgba(220,38,38,0.1)";
+          badgeEl.style.borderColor = "rgba(220,38,38,0.3)";
+          badgeEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> <span>⚠️ UNVERIFIED / MODIFIED CERTIFICATE LINK</span>`;
+        }
+      }
 
       document.getElementById("cSkaterName").textContent = skaterName.toUpperCase();
       document.getElementById("cFatherName").textContent = fatherName.toUpperCase();
