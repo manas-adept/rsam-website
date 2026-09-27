@@ -113,6 +113,10 @@
             <span>💬 Broadcast</span>
             <span class="tab-badge" id="badgeBroadcast">Bot</span>
           </button>
+          <button type="button" class="admin-tab-btn" data-tab="tabCertificates">
+            <span>🏅 Certificates</span>
+            <span class="tab-badge" id="badgeCertificates" style="background:rgba(16,185,129,0.3); color:#34d399;">New</span>
+          </button>
           <button type="button" class="admin-tab-btn" data-tab="tabGallery">
             <span>🖼️ Gallery</span>
             <span class="tab-badge" id="badgeGallery">3</span>
@@ -235,8 +239,15 @@
 
             <!-- Recipient List Preview Box -->
             <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 1rem; margin-bottom: 1.5rem;">
-              <h4 style="color:#34d399; font-size:0.95rem; margin-bottom:0.6rem;">📋 Recipient Preview List</h4>
-              <div id="bcRecipientList" style="max-height:180px; overflow-y:auto; font-size:0.85rem; color:#d1d5db;">
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.6rem; margin-bottom:0.6rem;">
+                <h4 style="color:#34d399; font-size:0.95rem; margin:0;">📋 Recipient Preview List</h4>
+                <div style="display:flex; gap:0.4rem; flex-wrap:wrap; align-items:center;" id="bcSelectActions">
+                  <button type="button" class="btn-dash-action btn-sm" id="bcSelectAllBtn" style="font-size:0.75rem; padding:0.25rem 0.6rem; background:rgba(59,130,246,0.15); color:#60a5fa; border-color:rgba(59,130,246,0.3);">☑️ Select All</button>
+                  <button type="button" class="btn-dash-action btn-sm" id="bcDeselectAllBtn" style="font-size:0.75rem; padding:0.25rem 0.6rem; background:rgba(239,68,68,0.15); color:#f87171; border-color:rgba(239,68,68,0.3);">🔲 Deselect All</button>
+                  <button type="button" class="btn-dash-action btn-sm" id="bcInvertBtn" style="font-size:0.75rem; padding:0.25rem 0.6rem; background:rgba(245,158,11,0.15); color:#fbbf24; border-color:rgba(245,158,11,0.3);">🔄 Invert</button>
+                </div>
+              </div>
+              <div id="bcRecipientList" style="max-height:220px; overflow-y:auto; font-size:0.85rem; color:#d1d5db;">
                 <p style="color:#9ca3af; text-align:center; padding:1rem;">Click "Fetch &amp; Preview Recipient List" to load recipient contacts from Google Sheet.</p>
               </div>
             </div>
@@ -290,6 +301,98 @@
               </div>
             </div>
 
+          </div>
+        </div>
+
+        <!-- Tab: Digital Certificate Generator & Broadcaster -->
+        <div class="tab-pane" id="tabCertificates">
+          <div class="dash-card">
+            <div class="card-title-row" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+              <div>
+                <h3>🏅 Digital Certificate Generator &amp; Automated Broadcaster</h3>
+                <p class="card-desc" style="color:#9ca3af; margin:0.2rem 0 0 0; font-size:0.88rem;">Create custom event certificates, enter skater results/positions, preview live certificate badges, and dispatch high-res digital certificates via WhatsApp or Email.</p>
+              </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap:1.5rem; margin-top:1.2rem;">
+              
+              <!-- Left Column: Certificate Configuration Form -->
+              <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:1.2rem;">
+                <h4 style="color:#fbbf24; font-size:1rem; margin:0 0 1rem 0; font-family:'Rajdhani',sans-serif;">1. Certificate Details &amp; Skater Result</h4>
+
+                <div style="margin-bottom:0.8rem;">
+                  <label style="display:block; color:#9ca3af; font-size:0.82rem; margin-bottom:0.3rem;">Certificate Type</label>
+                  <select id="certTypeSelect" style="width:100%; background:#111827; border:1px solid rgba(255,255,255,0.2); color:#fff; padding:0.6rem; border-radius:8px; font-size:0.9rem;">
+                    <option value="MERIT">🥇 Certificate of Merit &amp; Position</option>
+                    <option value="PARTICIPATION">📜 Certificate of Participation</option>
+                    <option value="MEMBERSHIP">🎖️ Annual Athlete Membership Certificate</option>
+                  </select>
+                </div>
+
+                <div style="margin-bottom:0.8rem;">
+                  <label style="display:block; color:#9ca3af; font-size:0.82rem; margin-bottom:0.3rem;">Event Title / Championship Name</label>
+                  <input type="text" id="certEventName" value="4th District Roller Skating Championship 2026" placeholder="e.g. 4th District Championship 2026" style="width:100%; background:#111827; border:1px solid rgba(255,255,255,0.2); color:#fff; padding:0.6rem; border-radius:8px; font-size:0.9rem;" />
+                </div>
+
+                <div style="margin-bottom:0.8rem;">
+                  <label style="display:block; color:#9ca3af; font-size:0.82rem; margin-bottom:0.3rem;">Skater Name</label>
+                  <input type="text" id="certSkaterName" placeholder="e.g. Aarav Sharma" style="width:100%; background:#111827; border:1px solid rgba(255,255,255,0.2); color:#fff; padding:0.6rem; border-radius:8px; font-size:0.9rem;" />
+                </div>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.8rem; margin-bottom:0.8rem;">
+                  <div>
+                    <label style="display:block; color:#9ca3af; font-size:0.82rem; margin-bottom:0.3rem;">RSAM Reg / Chest No.</label>
+                    <input type="text" id="certRegNo" placeholder="e.g. R260918611" style="width:100%; background:#111827; border:1px solid rgba(255,255,255,0.2); color:#fff; padding:0.6rem; border-radius:8px; font-size:0.9rem;" />
+                  </div>
+                  <div>
+                    <label style="display:block; color:#9ca3af; font-size:0.82rem; margin-bottom:0.3rem;">Discipline &amp; Category</label>
+                    <input type="text" id="certDiscipline" placeholder="e.g. Speed Quad - U11 Boys" style="width:100%; background:#111827; border:1px solid rgba(255,255,255,0.2); color:#fff; padding:0.6rem; border-radius:8px; font-size:0.9rem;" />
+                  </div>
+                </div>
+
+                <div style="margin-bottom:0.8rem;">
+                  <label style="display:block; color:#9ca3af; font-size:0.82rem; margin-bottom:0.3rem;">Skater Result / Award / Position</label>
+                  <select id="certResultPreset" style="width:100%; background:#111827; border:1px solid rgba(255,255,255,0.2); color:#fff; padding:0.6rem; border-radius:8px; font-size:0.9rem; margin-bottom:0.4rem;">
+                    <option value="🥇 GOLD MEDAL (1st Position)">🥇 GOLD MEDAL (1st Position)</option>
+                    <option value="🥈 SILVER MEDAL (2nd Position)">🥈 SILVER MEDAL (2nd Position)</option>
+                    <option value="🥉 BRONZE MEDAL (3rd Position)">🥉 BRONZE MEDAL (3rd Position)</option>
+                    <option value="MERIT & PARTICIPATION">📜 MERIT & PARTICIPATION</option>
+                    <option value="CUSTOM">✏️ Custom Result / Achievement Text...</option>
+                  </select>
+                  <input type="text" id="certResultCustom" placeholder="Enter custom result text..." style="width:100%; background:#111827; border:1px solid rgba(255,255,255,0.2); color:#fff; padding:0.6rem; border-radius:8px; font-size:0.9rem;" hidden />
+                </div>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.8rem; margin-bottom:1rem;">
+                  <div>
+                    <label style="display:block; color:#9ca3af; font-size:0.82rem; margin-bottom:0.3rem;">Mobile (WhatsApp)</label>
+                    <input type="tel" id="certMobile" placeholder="e.g. 9971844191" style="width:100%; background:#111827; border:1px solid rgba(255,255,255,0.2); color:#fff; padding:0.6rem; border-radius:8px; font-size:0.9rem;" />
+                  </div>
+                  <div>
+                    <label style="display:block; color:#9ca3af; font-size:0.82rem; margin-bottom:0.3rem;">Email Address</label>
+                    <input type="email" id="certEmail" placeholder="e.g. athlete@gmail.com" style="width:100%; background:#111827; border:1px solid rgba(255,255,255,0.2); color:#fff; padding:0.6rem; border-radius:8px; font-size:0.9rem;" />
+                  </div>
+                </div>
+
+                <!-- Certificate Dispatch Buttons -->
+                <div style="display:flex; flex-direction:column; gap:0.6rem;">
+                  <button type="button" class="btn-primary" id="certPrintBtn" style="background:#2563eb; color:#fff;">🖨️ Open &amp; Print PDF Certificate</button>
+                  <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.6rem;">
+                    <button type="button" class="btn-dash-action" id="certWaBtn" style="background:rgba(16,185,129,0.2); color:#34d399; border-color:rgba(16,185,129,0.4);"><i class="fa-brands fa-whatsapp"></i> Send WhatsApp</button>
+                    <button type="button" class="btn-dash-action" id="certEmailBtn" style="background:rgba(245,158,11,0.2); color:#fbbf24; border-color:rgba(245,158,11,0.4);"><i class="fa-regular fa-envelope"></i> Send Email</button>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Right Column: Live Sample Certificate Preview Container -->
+              <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:1.2rem; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                <h4 style="color:#60a5fa; font-size:1rem; margin:0 0 1rem 0; width:100%; text-align:left; font-family:'Rajdhani',sans-serif;">2. Live Sample Digital Certificate Preview</h4>
+                <div id="certPreviewCardWrap" style="width:100%; max-width:520px; box-shadow:0 15px 35px rgba(0,0,0,0.8); border-radius:12px; overflow:hidden;">
+                  <!-- Live Certificate SVG/HTML Injected Here -->
+                </div>
+              </div>
+
+            </div>
           </div>
         </div>
 
