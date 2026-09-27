@@ -963,10 +963,36 @@ document.addEventListener("DOMContentLoaded", async () => {
       const rsamRegNo = payload.regNumber || 'R260918611';
       const chestNo = payload.eventRegNo || payload.chestNo || (rsamRegNo ? String(rsamRegNo).replace(/\D/g, "").slice(-3) : '611');
 
+      const rawSt = String(payload.paymentStatus || payload.status || '').toUpperCase();
+      const isApproved = rawSt === 'VERIFIED' || rawSt === 'PAID' || rawSt === 'APPROVED' || rawSt === 'SUCCESS' || rawSt === 'WAIVED';
+
       if (regNoEl) regNoEl.textContent = rsamRegNo;
-      if (chestNoEl) chestNoEl.textContent = chestNo;
-      if (payIdEl) payIdEl.textContent = `(Razorpay ID: ${payload.paymentId || 'Verified'})`;
-      if (subtitleEl && payload.eventName) subtitleEl.textContent = `${payload.eventName} Entry Completed`;
+      if (chestNoEl) {
+        if (isApproved) {
+          chestNoEl.textContent = chestNo;
+          chestNoEl.style.fontSize = "2.2rem";
+          chestNoEl.style.color = "#10b981";
+        } else {
+          chestNoEl.textContent = "Under Review (Issued upon payment approval)";
+          chestNoEl.style.fontSize = "1.05rem";
+          chestNoEl.style.color = "#fbbf24";
+        }
+      }
+      if (payIdEl) payIdEl.textContent = `(Ref / UTR: ${payload.upiUtr || payload.paymentId || 'Pending'})`;
+      if (subtitleEl && payload.eventName) subtitleEl.textContent = `${payload.eventName} Entry Submitted`;
+
+      const payTagEl = evtSuccess.querySelector(".pay-tag");
+      if (payTagEl) {
+        if (isApproved) {
+          payTagEl.textContent = "✓ Championship Fee Paid";
+          payTagEl.style.background = "rgba(16,185,129,0.2)";
+          payTagEl.style.color = "#34d399";
+        } else {
+          payTagEl.textContent = "⏳ Payment Under Review by Admin";
+          payTagEl.style.background = "rgba(245,158,11,0.2)";
+          payTagEl.style.color = "#fbbf24";
+        }
+      }
 
       const dlBtn = document.getElementById("evtDownloadPdfBtn");
       if (dlBtn) {

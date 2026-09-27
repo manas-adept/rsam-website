@@ -439,7 +439,8 @@ function doPost(e) {
           "Razorpay Payment ID",
           "Payment Status",
           "Amount Paid",
-          "Skater Photo URL"
+          "Skater Photo URL",
+          "Payment Screenshot URL"
         ]);
       }
 
@@ -448,6 +449,9 @@ function doPost(e) {
       // Generate 100% Unique Sequential 3-Digit Event Chest Registration Number per Event
       const currentEventRows = Math.max(1, eventSheet.getLastRow());
       const eventRegNo = data.eventRegNo || String(currentEventRows).padStart(3, '0');
+
+      const photoUrl = saveFileToDrive(data.skaterPhoto, rsamRegNo + "_Photo");
+      const proofUrl = saveFileToDrive(data.paymentScreenshot || data.paymentProof, rsamRegNo + "_PaymentProof");
 
       eventSheet.appendRow([
         new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }),
@@ -468,10 +472,11 @@ function doPost(e) {
         data.email || "N/A",
         "'" + data.aadhaar,
         data.discipline,
-        data.paymentId || "pay_pending",
+        data.upiUtr || data.paymentId || "pay_pending",
         data.paymentStatus || "PENDING_APPROVAL",
         "₹" + (data.amountPaid || "500.00"),
-        data.photoUrl || ""
+        photoUrl,
+        proofUrl
       ]);
 
       if (OPENWA_SERVER_URL && !OPENWA_SERVER_URL.includes("localhost")) {
@@ -1151,6 +1156,32 @@ function sendWhatsAppNotification(payload) {
 
 function saveFileToDrive(fileObj, prefix) {
   try {
+    if (!fileObj) return "—";
+    let base64Data = "";
+    let mimeType = "image/png";
+    let fileName = prefix + ".png";
+
+    if (typeof fileObj === "string") {
+      if (fileObj.startsWith("http://") || fileObj.startsWith("https://")) {
+        return fileObj;
+      }
+      if (fileObj.startsWith("data:")) {
+        const parts = fileObj.split(",");
+        const meta = parts[0];
+        base64Data = parts[1] || "";
+        const match = meta.match(/data:(.*?);/);
+        if (match) mimeType = match[1];
+      } else {
+        base64Data = fileObj;
+      }
+    } else if (typeof fileObj === "object" && fileObj.data) {
+      base64Data = fileObj.data;
+      mimeType = fileObj.type || "application/octet-stream";
+      fileName = prefix + "_" + (fileObj.name || "file");
+    }
+
+    if (!base64Data) return "—";
+
     let folder = null;
     if (DRIVE_FOLDER_ID) {
       try {
@@ -1163,8 +1194,9 @@ function saveFileToDrive(fileObj, prefix) {
       const folders = DriveApp.getFoldersByName("RSAM_Registration_Proofs_2026");
       folder = folders.hasNext() ? folders.next() : DriveApp.createFolder("RSAM_Registration_Proofs_2026");
     }
-    const decoded = Utilities.base64Decode(fileObj.data);
-    const blob = Utilities.newBlob(decoded, fileObj.type || "application/octet-stream", prefix + "_" + (fileObj.name || "file"));
+
+    const decoded = Utilities.base64Decode(base64Data);
+    const blob = Utilities.newBlob(decoded, mimeType, fileName);
     const file = folder.createFile(blob);
     try {
       file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);

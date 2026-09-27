@@ -3123,6 +3123,23 @@ document.addEventListener("DOMContentLoaded", () => {
   let activePaymentFilter = "all";
   let activePaymentEventFilter = "all";
 
+  window.RSAM_PAYMENT_STATUS_OVERRIDES = window.RSAM_PAYMENT_STATUS_OVERRIDES || {};
+
+  function getDirectImageUrl(url) {
+    if (!url || url === "—" || url === "N/A") return "";
+    url = String(url).trim();
+    let fileId = "";
+    const match1 = url.match(/\/file\/d\/([^\/]+)/);
+    if (match1) fileId = match1[1];
+    const match2 = url.match(/[?&]id=([^&]+)/);
+    if (!fileId && match2) fileId = match2[1];
+
+    if (fileId) {
+      return `https://drive.google.com/uc?export=view&id=${fileId}`;
+    }
+    return url;
+  }
+
   async function renderAdminPayments() {
     const tableWrap = document.getElementById("paymentsListTableWrap");
     const badgeEl = document.getElementById("badgePayments");
@@ -3186,6 +3203,15 @@ document.addEventListener("DOMContentLoaded", () => {
           isAnnualReg: isRegSheet
         });
       });
+    });
+
+    // Apply local memory overrides so actions update instantly without waiting for sheet sync
+    allRecords.forEach(r => {
+      const key = r.regNumber || r.registrationNo || r.eventRegNo || r.rsamRegNo;
+      if (key && window.RSAM_PAYMENT_STATUS_OVERRIDES[key]) {
+        r.paymentStatus = window.RSAM_PAYMENT_STATUS_OVERRIDES[key];
+        r.status = window.RSAM_PAYMENT_STATUS_OVERRIDES[key];
+      }
     });
 
     window.RSAM_ALL_PAYMENT_RECORDS = allRecords;
@@ -3282,7 +3308,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <div style="font-size:0.78rem; color:#60a5fa; font-weight:600; font-family:monospace;">UTR: ${utr}</div>
           </td>
           <td style="padding:0.85rem 1rem; text-align:center;">
-            ${screenshot ? `
+            ${screenshot && screenshot !== '—' ? `
               <button type="button" class="btn-dash-action view-screenshot-btn" data-img="${encodeURIComponent(screenshot)}" style="font-size:0.78rem; padding:4px 10px; background:rgba(59,130,246,0.15); color:#93c5fd; border:1px solid rgba(59,130,246,0.3);">
                 📷 View Receipt
               </button>
@@ -3334,10 +3360,16 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll(".view-screenshot-btn").forEach(btn => {
       btn.onclick = () => {
         const rawImg = decodeURIComponent(btn.getAttribute("data-img") || "");
+        const directImg = getDirectImageUrl(rawImg);
         const lightboxModal = document.getElementById("screenshotLightboxModal");
         const lightboxImg = document.getElementById("lightboxImg");
+        const lightboxOriginalLink = document.getElementById("lightboxOriginalLink");
         if (lightboxModal && lightboxImg) {
-          lightboxImg.src = rawImg;
+          lightboxImg.src = directImg || rawImg;
+          if (lightboxOriginalLink) {
+            lightboxOriginalLink.href = rawImg;
+            lightboxOriginalLink.style.display = rawImg ? "inline-flex" : "none";
+          }
           lightboxModal.hidden = false;
         }
       };
@@ -3356,6 +3388,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const rec = (window.RSAM_ALL_PAYMENT_RECORDS || []).find(r => 
           (r.regNumber || r.registrationNo || r.eventRegNo || r.rsamRegNo) === regNo && (!sheetName || r.sheetName === sheetName)
         ) || {};
+
+        // 1. Mark in local memory overrides immediately so UI updates right away
+        window.RSAM_PAYMENT_STATUS_OVERRIDES[regNo] = 'VERIFIED';
+        rec.paymentStatus = 'VERIFIED';
+        rec.status = 'VERIFIED';
 
         try {
           const baseUrl = getAdminApiBaseUrl();
@@ -3397,22 +3434,40 @@ document.addEventListener("DOMContentLoaded", () => {
       btn.onclick = async () => {
         const regNo = btn.getAttribute("data-reg");
         const sheetName = btn.getAttribute("data-sheet");
-        const reason = prompt(`Reject payment for Registration ${regNo}? Enter rejection reason (optional):`, "Invalid UTR / Payment mismatch");
+        const rec = (window.RSAM_ALL_PAYMENT_RECORDS || []).find(r => 
+          (r.regNumber || r.registrationNo || r.eventRegNo || r.rsamRegNo) === regNo && (!sheetName || r.sheetName === sheetName)
+        ) || {};
+
+        const skaterName = rec.skaterName || rec.name || 'Athlete';
+        const reason = prompt(`Reject payment for ${skaterName} (${regNo})?\n\nEnter rejection reason / note for athlete (sent over WhatsApp):`, "Invalid UTR / Payment mismatch");
         if (reason === null) return;
 
         btn.disabled = true;
         btn.textContent = "⏳ Rejecting...";
+
+        // 1. Mark in local memory overrides immediately so UI updates right away
+        window.RSAM_PAYMENT_STATUS_OVERRIDES[regNo] = 'REJECTED';
+        rec.paymentStatus = 'REJECTED';
+        rec.status = 'REJECTED';
 
         try {
           const baseUrl = getAdminApiBaseUrl();
           await fetch(`${baseUrl}/api/approve-payment`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ regNumber: regNo, sheetName, action: "reject", rejectReason: reason })
+            body: JSON.stringify({ 
+              regNumber: regNo, 
+              sheetName: sheetName || rec.sheetName, 
+              action: "reject", 
+              rejectReason: reason,
+              skaterName: skaterName,
+              mobile: rec.mobile || rec.phone || '',
+              eventName: rec.eventName || rec.eventTitle || sheetName || 'District Championship 2026'
+            })
           });
         } catch (e) {}
 
-        notify(`🔴 Payment for ${regNo} rejected.`);
+        notify(`🔴 Payment for ${regNo} rejected. WhatsApp notification sent to athlete.`);
         renderAdminPayments();
       };
     });

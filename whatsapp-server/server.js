@@ -632,10 +632,30 @@ Your athlete *${data.skaterName}* has completed annual registration with *${ORG_
 • *Athlete Mobile:* ${data.mobile || 'N/A'}
 • *Submitted Date:* ${dateStr}
 
-Thank you for your continuous mentorship and support for RSAM athletes.
+/**
+ * Build Rejection WhatsApp Message Text with Admin Note
+ */
+function buildRejectionMessage(data, regNumber, rejectReason) {
+  const eventName = data.eventName || data.eventTitle || 'Championship Event';
+  const reasonText = rejectReason || 'Payment verification failed or invalid UTR / receipt submitted.';
+
+  return `🔴 *RSAM Payment Status Update: REJECTED*
+
+Dear *${data.skaterName || 'Athlete'}*,
+
+Your registration payment for *${eventName}* could not be verified by the RSAM admin team.
+
+🎽 _(RSAM Reg. Number: ${regNumber})_
+
+• *Athlete Name:* ${data.skaterName || 'N/A'}
+• *Event:* ${eventName}
+• *Payment Status:* REJECTED ❌
+• *Admin Note / Reason:* ${reasonText}
+
+⚠️ *Action Required:* Please check your payment UTR / screenshot and re-submit your registration on the website or contact RSAM support.
 
 Best regards,
-*${ORG_NAME}* 🛼🏆`;
+*RSAM Support Team* 🛼`;
 }
 
 function authorizeRequest(req, res, next) {
@@ -1668,13 +1688,28 @@ app.post('/api/approve-payment', async (req, res) => {
           console.warn('[Approval Email Warning]', eErr.message);
         }
       }
+    } else {
+      // Send Rejection WhatsApp Notification with Admin Note
+      if (sock && isConnected && mobile) {
+        try {
+          const skaterJid = formatWhatsAppJid(mobile);
+          if (skaterJid) {
+            const rejectMsg = buildRejectionMessage({ skaterName, eventName: eventName || sheetName }, regNumber, rejectReason);
+            console.log(`[WhatsApp Rejection] Sending rejection notice with note to ${skaterJid}...`);
+            await sock.sendMessage(skaterJid, { text: rejectMsg });
+            console.log(`[WhatsApp Rejection] Sent rejection notice to ${skaterName}!`);
+          }
+        } catch (rErr) {
+          console.error('[WhatsApp Rejection Error]:', rErr.message);
+        }
+      }
     }
 
     return res.json({
       status: 'ok',
       message: isApprove 
         ? `Payment approved for ${regNumber}! Status updated to VERIFIED, WhatsApp confirmation & PDF email pass sent.` 
-        : `Payment rejected for ${regNumber}.`,
+        : `Payment rejected for ${regNumber}. Rejection notification sent to skater.`,
       paymentStatus: newStatus
     });
 
