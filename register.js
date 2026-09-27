@@ -64,14 +64,23 @@ function getFeeBreakdown() {
   };
 }
 
-function updateFeeDisplayUI() {
+function updateFeeDisplayUI(selectedPayMethod = 'upi_qr') {
   const fee = getFeeBreakdown();
+  const isRazorpayEnabled = !!(window.ENV_CONFIG && window.ENV_CONFIG.enableRazorpay);
+  const isDirectUpi = !isRazorpayEnabled || selectedPayMethod === 'upi_qr';
+  const displayAmount = isDirectUpi ? fee.baseFee.toFixed(2) : fee.totalAmount.toFixed(2);
+
   const feeBanner = document.querySelector(".reg-fee-banner");
   if (feeBanner) {
     if (fee.isFree) {
       feeBanner.innerHTML = `🎉 Annual Registration Fee: <strong>FREE / WAIVED (₹0.00)</strong> <small>(No online payment required)</small>`;
       feeBanner.style.background = "rgba(52, 211, 153, 0.15)";
       feeBanner.style.borderColor = "rgba(52, 211, 153, 0.4)";
+      feeBanner.style.color = "#6ee7b7";
+    } else if (isDirectUpi) {
+      feeBanner.innerHTML = `💳 Registration Fee: <strong>₹${fee.baseFee.toFixed(2)}</strong> <small>(⚡ 0% Gateway Fee · Direct UPI QR Transfer)</small>`;
+      feeBanner.style.background = "rgba(16, 185, 129, 0.15)";
+      feeBanner.style.borderColor = "rgba(16, 185, 129, 0.4)";
       feeBanner.style.color = "#6ee7b7";
     } else {
       feeBanner.innerHTML = `💳 Registration Fee: <strong>₹${fee.baseFee.toFixed(2)}</strong> <small>(+ ${fee.gwPct}% gateway charge &amp; ${fee.gstPct}% GST = ₹${fee.totalAmount.toFixed(2)} Total)</small>`;
@@ -86,7 +95,7 @@ function updateFeeDisplayUI() {
     if (fee.isFree) {
       submitBtnText.textContent = "Submit Registration (Free / Waived)";
     } else {
-      submitBtnText.textContent = `Confirm & Pay ₹${fee.totalAmount.toFixed(2)}`;
+      submitBtnText.textContent = `Confirm & Pay ₹${displayAmount}`;
     }
   }
 
@@ -95,7 +104,7 @@ function updateFeeDisplayUI() {
     if (fee.isFree) {
       confirmProceedBtn.textContent = "✓ Submit Registration (Free)";
     } else {
-      confirmProceedBtn.textContent = `💳 Pay ₹${fee.totalAmount.toFixed(2)} & Register`;
+      confirmProceedBtn.textContent = `💳 Pay ₹${displayAmount} & Register`;
     }
   }
 }
@@ -252,6 +261,37 @@ document.addEventListener("DOMContentLoaded", () => {
   if (tabNewReg) tabNewReg.addEventListener("click", () => setMode("new"));
   if (tabRenewReg) tabRenewReg.addEventListener("click", () => setMode("renew"));
 
+  function formatToInputDate(dateStr) {
+    if (!dateStr) return "";
+    const cleaned = String(dateStr).trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(cleaned)) return cleaned;
+    
+    const d = new Date(cleaned);
+    if (!isNaN(d.getTime())) {
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd}`;
+    }
+    
+    const parts = cleaned.split(/[\/\.-]/);
+    if (parts.length === 3) {
+      if (parts[2].length === 4) {
+        return `${parts[2]}-${String(parts[1]).padStart(2, '0')}-${String(parts[0]).padStart(2, '0')}`;
+      }
+    }
+    return "";
+  }
+
+  function formatDriveImageUrl(url) {
+    if (!url || typeof url !== 'string') return '';
+    const match = url.match(/\/file\/d\/([^\/]+)/) || url.match(/id=([^&]+)/);
+    if (match && match[1]) {
+      return `https://lh3.googleusercontent.com/d/${match[1]}`;
+    }
+    return url;
+  }
+
   async function performRenewalLookup() {
     const query = (renewQueryInput.value || "").trim().toUpperCase();
     if (renewAlert) {
@@ -273,50 +313,39 @@ document.addEventListener("DOMContentLoaded", () => {
     if (renewSpinner) renewSpinner.hidden = false;
 
     try {
-      const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-      const targetUrl = isLocal
-        ? `http://${window.location.hostname}:3001/api/lookup-skater?action=renew_lookup&query=${encodeURIComponent(query)}`
-        : `${SHEET_URL}?action=renew_lookup&query=${encodeURIComponent(query)}`;
+      const envConfig = window.ENV_CONFIG || {};
+      const backendUrl = envConfig.backendUrl || (window.location.port === '3001' || window.location.port === '8080' ? `http://${window.location.hostname}:3001` : 'https://rsam-whatsapp-bot.onrender.com');
+      const sheetUrl = envConfig.sheetUrl || SHEET_URL;
 
-      const res = await fetch(targetUrl);
-      const text = await res.text();
       let data = null;
-      try { data = JSON.parse(text); } catch (e) {}
+
+      // Try 1: Express Backend
+      try {
+        const res = await fetch(`${backendUrl}/api/lookup-skater?action=renew_lookup&query=${encodeURIComponent(query)}`);
+        if (res.ok) {
+          const text = await res.text();
+          try { data = JSON.parse(text); } catch (e) {}
+        }
+      } catch (e) {
+        console.warn("[Renewal Lookup Backend Warning]", e);
+      }
+
+      // Try 2: Direct Google Sheet URL Fallback
+      if (!data || data.status === "not_found" || !data.skater) {
+        try {
+          const res = await fetch(`${sheetUrl}?action=renew_lookup&query=${encodeURIComponent(query)}`);
+          if (res.ok) {
+            const text = await res.text();
+            try { data = JSON.parse(text); } catch (e) {}
+          }
+        } catch (e) {
+          console.warn("[Renewal Lookup Sheet Warning]", e);
+        }
+      }
 
       if (data && data.status === "found" && data.skater) {
         const s = data.skater;
         const form = document.getElementById("regForm");
-
-function formatToInputDate(dateStr) {
-  if (!dateStr) return "";
-  const cleaned = String(dateStr).trim();
-  if (/^\d{4}-\d{2}-\d{2}$/.test(cleaned)) return cleaned;
-  
-  const d = new Date(cleaned);
-  if (!isNaN(d.getTime())) {
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    const dd = String(d.getDate()).padStart(2, '0');
-    return `${yyyy}-${mm}-${dd}`;
-  }
-  
-  const parts = cleaned.split(/[\/\.-]/);
-  if (parts.length === 3) {
-    if (parts[2].length === 4) {
-      return `${parts[2]}-${String(parts[1]).padStart(2, '0')}-${String(parts[0]).padStart(2, '0')}`;
-    }
-  }
-  return "";
-}
-
-function formatDriveImageUrl(url) {
-  if (!url || typeof url !== 'string') return '';
-  const match = url.match(/\/file\/d\/([^\/]+)/) || url.match(/id=([^&]+)/);
-  if (match && match[1]) {
-    return `https://lh3.googleusercontent.com/d/${match[1]}`;
-  }
-  return url;
-}
 
         if (form.skaterName && s.skaterName) form.skaterName.value = s.skaterName;
         if (form.dob && s.dob) {
@@ -352,7 +381,10 @@ function formatDriveImageUrl(url) {
           if (radio) radio.checked = true;
         }
 
-        if (s.photoUrl && s.photoUrl.startsWith("http")) {
+        const photoPreview = document.getElementById("photoPreview");
+        const photoFrame = document.getElementById("photoFrame");
+
+        if (photoPreview && s.photoUrl && String(s.photoUrl).startsWith("http")) {
           croppedPhotoDataUrl = null;
           photoPreview.src = formatDriveImageUrl(s.photoUrl);
           const previewWrap = document.getElementById("photoPreviewWrap");
@@ -868,8 +900,9 @@ function formatDateDDMMMYYYY(dateStr) {
         const amountStr = parseFloat(baseFeeAmount).toFixed(2);
         const noteStr = `RSAM Annual ${payload.skaterName || 'Reg'}`.slice(0, 30);
 
+        const rawUpiUri = `upi://pay?pa=${vpa}&pn=${payeeName}&am=${amountStr}&cu=INR&tn=${noteStr}`;
         const upiUri = `upi://pay?pa=${encodeURIComponent(vpa)}&pn=${encodeURIComponent(payeeName)}&am=${amountStr}&cu=INR&tn=${encodeURIComponent(noteStr)}`;
-        const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(upiUri)}`;
+        const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(rawUpiUri)}`;
 
         let selectedScreenshotBase64 = "";
 

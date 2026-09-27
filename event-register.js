@@ -654,8 +654,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     const amountStr = parseFloat(baseFeeAmount).toFixed(2);
     const noteStr = `RSAM ${payload.regNumber || payload.skaterName || 'Registration'}`.slice(0, 30);
 
+    const rawUpiUri = `upi://pay?pa=${vpa}&pn=${payeeName}&am=${amountStr}&cu=INR&tn=${noteStr}`;
     const upiUri = `upi://pay?pa=${encodeURIComponent(vpa)}&pn=${encodeURIComponent(payeeName)}&am=${amountStr}&cu=INR&tn=${encodeURIComponent(noteStr)}`;
-    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(upiUri)}`;
+    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(rawUpiUri)}`;
 
     let selectedScreenshotBase64 = "";
 
