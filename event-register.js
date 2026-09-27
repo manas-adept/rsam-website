@@ -125,6 +125,60 @@ let TOTAL_AMOUNT_PAISE = 51180;
 
 let verifiedSkater = null;
 
+function updateEvtFeeDisplayUI(selectedPayMethod = 'upi_qr') {
+  const isRazorpayEnabled = !!(window.ENV_CONFIG && window.ENV_CONFIG.enableRazorpay);
+  const isDirectUpi = !isRazorpayEnabled || selectedPayMethod === 'upi_qr';
+  const isOrganizerPaid = activeEvConfig && (activeEvConfig.feeType === 'organizer' || activeEvConfig.payToOrganizer);
+  const isFreeFee = BASE_FEE === 0;
+
+  const displayAmount = isDirectUpi ? BASE_FEE.toFixed(2) : TOTAL_AMOUNT.toFixed(2);
+
+  const feeBanner = document.querySelector(".reg-fee-banner");
+  if (feeBanner) {
+    if (isOrganizerPaid) {
+      feeBanner.innerHTML = `ℹ️ Entry Fee: <strong>Paid Directly to Organizer on Spot</strong> <small>(No online payment required on this portal)</small>`;
+      feeBanner.style.background = "rgba(245, 158, 11, 0.15)";
+      feeBanner.style.borderColor = "rgba(245, 158, 11, 0.4)";
+      feeBanner.style.color = "#fef08a";
+    } else if (isFreeFee) {
+      feeBanner.innerHTML = `🎉 Championship Entry Fee: <strong>Free (₹0.00)</strong> <small>(Fee waived for this event)</small>`;
+      feeBanner.style.background = "rgba(52, 211, 153, 0.15)";
+      feeBanner.style.borderColor = "rgba(52, 211, 153, 0.4)";
+      feeBanner.style.color = "#6ee7b7";
+    } else if (isDirectUpi) {
+      feeBanner.innerHTML = `💳 Championship Entry Fee: <strong>₹${BASE_FEE.toFixed(2)}</strong> <small>(⚡ 0% Gateway Fee · Direct UPI QR Transfer)</small>`;
+      feeBanner.style.background = "rgba(16, 185, 129, 0.15)";
+      feeBanner.style.borderColor = "rgba(16, 185, 129, 0.4)";
+      feeBanner.style.color = "#6ee7b7";
+    } else {
+      const gwPct = activeEvConfig ? parseFloat(activeEvConfig.gatewayPercent || 2.0) : 2.0;
+      const gstPct = activeEvConfig ? parseFloat(activeEvConfig.gstPercent || 18.0) : 18.0;
+      feeBanner.innerHTML = `💳 Championship Entry Fee: <strong>₹${BASE_FEE.toFixed(2)}</strong> <small>(+ ${gwPct}% gateway charge &amp; ${gstPct}% GST = ₹${TOTAL_AMOUNT.toFixed(2)} Total)</small>`;
+      feeBanner.style.background = "rgba(245, 158, 11, 0.15)";
+      feeBanner.style.borderColor = "rgba(245, 158, 11, 0.4)";
+      feeBanner.style.color = "#fef08a";
+    }
+  }
+
+  const submitText = document.querySelector("#evtSubmitBtn .submit-text");
+  if (submitText) {
+    if (isOrganizerPaid || isFreeFee) {
+      submitText.textContent = `Submit Event Registration`;
+    } else {
+      submitText.textContent = `Confirm & Pay ₹${displayAmount}`;
+    }
+  }
+
+  const confirmProceedBtn = document.getElementById("confirmProceedBtn");
+  if (confirmProceedBtn) {
+    if (isOrganizerPaid || isFreeFee) {
+      confirmProceedBtn.textContent = `✓ Submit Event Registration`;
+    } else {
+      confirmProceedBtn.textContent = `💳 Pay ₹${displayAmount} & Register`;
+    }
+  }
+}
+
 async function fetchSiteConfigEvent() {
   try {
     const cacheBust = `?v=${Date.now()}`;
@@ -238,32 +292,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const isOrganizerPaid = currentEvent.feeType === 'organizer' || currentEvent.payToOrganizer;
   const isFreeFee = BASE_FEE === 0;
 
-  // Update Fee Banners & Submit Button Text dynamically from admin active event config
-  const feeBanner = document.querySelector(".reg-fee-banner");
-  if (feeBanner) {
-    if (isOrganizerPaid) {
-      feeBanner.innerHTML = `ℹ️ Entry Fee: <strong>Paid Directly to Organizer on Spot</strong> <small>(No online payment required on this portal)</small>`;
-      feeBanner.style.background = "rgba(245, 158, 11, 0.15)";
-      feeBanner.style.borderColor = "rgba(245, 158, 11, 0.4)";
-      feeBanner.style.color = "#fef08a";
-    } else if (isFreeFee) {
-      feeBanner.innerHTML = `🎉 Championship Entry Fee: <strong>Free (₹0.00)</strong> <small>(Fee waived for this event)</small>`;
-      feeBanner.style.background = "rgba(52, 211, 153, 0.15)";
-      feeBanner.style.borderColor = "rgba(52, 211, 153, 0.4)";
-      feeBanner.style.color = "#6ee7b7";
-    } else {
-      feeBanner.innerHTML = `💳 Championship Entry Fee: <strong>₹${BASE_FEE.toFixed(2)}</strong> <small>(+ ${parseFloat(currentEvent.gatewayPercent || 2.0)}% gateway charge &amp; ${parseFloat(currentEvent.gstPercent || 18.0)}% GST = ₹${TOTAL_AMOUNT.toFixed(2)} Total)</small>`;
-    }
-  }
-
-  const submitText = document.querySelector("#evtSubmitBtn .submit-text");
-  if (submitText) {
-    if (isOrganizerPaid || isFreeFee) {
-      submitText.textContent = `Submit Event Registration`;
-    } else {
-      submitText.textContent = `Confirm & Pay ₹${TOTAL_AMOUNT.toFixed(2)}`;
-    }
-  }
+  updateEvtFeeDisplayUI('upi_qr');
 
   // Ticker banner is hidden specifically on championship registration page
   document.body.classList.remove("has-ticker");
@@ -625,6 +654,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     `;
 
     confirmModal.hidden = false;
+    updateEvtFeeDisplayUI('upi_qr');
+
+    confirmSummaryBody.querySelectorAll('input[name="payMethodOpt"]').forEach(radio => {
+      radio.onchange = () => {
+        updateEvtFeeDisplayUI(radio.value);
+      };
+    });
 
     confirmEditBtn.onclick = () => { confirmModal.hidden = true; };
 
@@ -878,7 +914,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       console.warn("Razorpay SDK script not found. Proceeding in test mode.");
       payload.paymentId = "pay_evt_test_" + Date.now();
       payload.paymentStatus = "SUCCESS";
-      payload.amountPaid = "511.80";
+      payload.amountPaid = TOTAL_AMOUNT.toFixed(2);
       submitEventRegistration(payload);
     }
   }
@@ -957,7 +993,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const discipline = payload.discipline || "Roller Skating";
     const ageGroup = payload.ageGroup || "N/A";
     const age = payload.age || "N/A";
-    const amountPaid = payload.amountPaid || "511.80";
+    const amountPaid = payload.amountPaid || BASE_FEE.toFixed(2);
     const paymentId = payload.paymentId || "Verified";
     const dob = cleanDob(payload.dob);
     const schoolClub = payload.schoolClub || "N/A";
@@ -1031,10 +1067,19 @@ document.addEventListener("DOMContentLoaded", async () => {
               <tr><th>Description</th><th>Gateway Rate</th><th style="text-align:right;">Amount (INR)</th></tr>
             </thead>
             <tbody>
-              <tr><td>Championship Event Registration Fee</td><td>Base Fee</td><td style="text-align:right;">₹500.00</td></tr>
-              <tr><td>Payment Gateway Service Charge</td><td>2.00%</td><td style="text-align:right;">+ ₹10.00</td></tr>
-              <tr><td>GST on Gateway Transaction Fee</td><td>18.00%</td><td style="text-align:right;">+ ₹1.80</td></tr>
-              <tr class="total-row"><td>Total Entry Fee Paid (Razorpay)</td><td>Status: ${payload.paymentStatus || 'SUCCESS'}</td><td style="text-align:right;">₹${amountPaid}</td></tr>
+              ${(paymentId && paymentId.startsWith("pay_")) ? `
+                <tr><td>Championship Event Registration Fee</td><td>Base Fee</td><td style="text-align:right;">₹${BASE_FEE.toFixed(2)}</td></tr>
+                <tr><td>Payment Gateway Service Charge</td><td>2.00%</td><td style="text-align:right;">+ ₹${GATEWAY_CHARGE.toFixed(2)}</td></tr>
+                <tr><td>GST on Gateway Transaction Fee</td><td>18.00%</td><td style="text-align:right;">+ ₹${GST_CHARGE.toFixed(2)}</td></tr>
+                <tr class="total-row"><td>Total Entry Fee Paid (Razorpay)</td><td>Status: ${payload.paymentStatus || 'SUCCESS'}</td><td style="text-align:right;">₹${parseFloat(amountPaid).toFixed(2)}</td></tr>
+              ` : (paymentId === "WAIVED_FREE" || BASE_FEE === 0) ? `
+                <tr><td>Championship Event Registration Fee</td><td>Waived / Free</td><td style="text-align:right;">₹0.00</td></tr>
+                <tr class="total-row"><td>Total Entry Fee Paid</td><td>Status: WAIVED</td><td style="text-align:right;">₹0.00</td></tr>
+              ` : `
+                <tr><td>Championship Event Registration Fee</td><td>Direct UPI Transfer</td><td style="text-align:right;">₹${parseFloat(amountPaid).toFixed(2)}</td></tr>
+                <tr><td>Gateway Service Charge (Direct UPI)</td><td>0.0%</td><td style="text-align:right;">₹0.00</td></tr>
+                <tr class="total-row"><td>Total Entry Fee Paid (Direct UPI)</td><td>Status: ${payload.paymentStatus || 'VERIFIED'}</td><td style="text-align:right;">₹${parseFloat(amountPaid).toFixed(2)}</td></tr>
+              `}
             </tbody>
           </table>
           <table class="details-table" style="margin-top:10px;">
