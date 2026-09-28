@@ -15,6 +15,60 @@ function escapeHTML(str) {
   }[match]));
 }
 
+function parseDeadlineDate(deadline, dateText, startDT) {
+  let target = deadline || startDT || dateText;
+  if (!target) return null;
+  target = String(target).trim();
+
+  let d = new Date(target);
+  if (!isNaN(d.getTime())) {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(target)) {
+      d.setHours(23, 59, 59, 999);
+    }
+    return d;
+  }
+
+  let cleaned = target.replace(/(\d+)(st|nd|rd|th)/gi, '$1');
+  if (cleaned.includes('-')) {
+    const parts = cleaned.split('-');
+    cleaned = parts[parts.length - 1].trim();
+  }
+
+  d = new Date(cleaned);
+  if (!isNaN(d.getTime())) {
+    d.setHours(23, 59, 59, 999);
+    return d;
+  }
+  return null;
+}
+
+function formatDeadlineForDisplay(deadlineStr, fallbackStr) {
+  const val = deadlineStr || fallbackStr;
+  if (!val) return 'Event Date';
+  const parsed = parseDeadlineDate(val);
+  if (parsed) {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const dayNum = parsed.getDate();
+    let suffix = 'th';
+    if (dayNum % 10 === 1 && dayNum !== 11) suffix = 'st';
+    else if (dayNum % 10 === 2 && dayNum !== 12) suffix = 'nd';
+    else if (dayNum % 10 === 3 && dayNum !== 13) suffix = 'rd';
+    const monthStr = months[parsed.getMonth()];
+    const year = parsed.getFullYear();
+    
+    const hasExplicitTime = typeof deadlineStr === 'string' && (deadlineStr.includes('T') || deadlineStr.includes(':'));
+    if (hasExplicitTime) {
+      let hours = parsed.getHours();
+      const mins = String(parsed.getMinutes()).padStart(2, '0');
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      hours = hours % 12 || 12;
+      return `${dayNum}${suffix} ${monthStr} ${year}, ${hours}:${mins} ${ampm}`;
+    }
+    return `${dayNum}${suffix} ${monthStr} ${year}`;
+  }
+  return String(val);
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const SESSION_KEY = "RSAM_ADMIN_SESSION";
 
@@ -635,7 +689,7 @@ document.addEventListener("DOMContentLoaded", () => {
               ${ev.isRegistrationActive ? `<span class="badge-active-reg">Active Online Reg</span>` : ''}
             </div>
             <div class="admin-item-sub">
-              Date: ${ev.date} · Venue: ${ev.location} · Base Fee: <strong>₹${base.toFixed(2)}</strong> ${ev.feeType === 'organizer' ? '<span style="color:#fbbf24;">(Pay to Organizer)</span>' : `(Total Payable: <strong style="color:#f59e0b;">₹${total.toFixed(2)}</strong>)`}
+              Date: ${ev.date} · Deadline: <strong style="color:#60a5fa;">${formatDeadlineForDisplay(ev.deadline, ev.date)}</strong> · Venue: ${ev.location} · Base Fee: <strong>₹${base.toFixed(2)}</strong> ${ev.feeType === 'organizer' ? '<span style="color:#fbbf24;">(Pay to Organizer)</span>' : `(Total Payable: <strong style="color:#f59e0b;">₹${total.toFixed(2)}</strong>)`}
             </div>
             ${(ev.description || ev.body) ? `<div style="font-size:0.85rem; color:#d1d5db; margin-top:0.3rem;">${(ev.description || ev.body).slice(0, 120)}...</div>` : ''}
           </div>
@@ -2351,7 +2405,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="form-group"><label>End Date &amp; Time</label><input type="datetime-local" id="mEvEndDT" value="${formatForDatetimeLocal(ev.endDateTime)}" /></div>
         </div>
         <div class="form-row">
-          <div class="form-group"><label>Registration Deadline</label><input type="datetime-local" id="mEvDeadline" value="${formatForDatetimeLocal(ev.deadline)}" required /></div>
+          <div class="form-group"><label>Registration Deadline <small style="font-weight:400; color:#9ca3af;">(Optional - Defaults to Event Date)</small></label><input type="datetime-local" id="mEvDeadline" value="${formatForDatetimeLocal(ev.deadline)}" placeholder="Defaults to Event Date" /></div>
           <div class="form-group"><label>Event Location / Venue</label><input type="text" id="mEvLoc" value="${ev.location || ''}" required /></div>
         </div>
       </div>
@@ -2911,7 +2965,16 @@ document.addEventListener("DOMContentLoaded", () => {
         const feeTypeVal = document.getElementById("mEvFeeType").value;
 
         let deadlineVal = document.getElementById("mEvDeadline").value.trim();
-        if (deadlineVal && !deadlineVal.includes('+') && !deadlineVal.includes('Z')) {
+        const dateText = document.getElementById("mEvDateText") ? document.getElementById("mEvDateText").value.trim() : "";
+        const startDT = document.getElementById("mEvStartDT") ? document.getElementById("mEvStartDT").value.trim() : "";
+        if (!deadlineVal) {
+          if (startDT) {
+            const datePart = startDT.split('T')[0];
+            deadlineVal = `${datePart}T23:59:59+05:30`;
+          } else if (dateText) {
+            deadlineVal = dateText;
+          }
+        } else if (!deadlineVal.includes('+') && !deadlineVal.includes('Z')) {
           if (deadlineVal.length === 16) {
             deadlineVal = deadlineVal + ':00+05:30';
           } else if (deadlineVal.length === 19) {

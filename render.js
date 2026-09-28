@@ -15,6 +15,60 @@ function escapeHTML(str) {
   }[match]));
 }
 
+function parseDeadlineDate(deadline, dateText, startDT) {
+  let target = deadline || startDT || dateText;
+  if (!target) return null;
+  target = String(target).trim();
+
+  let d = new Date(target);
+  if (!isNaN(d.getTime())) {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(target)) {
+      d.setHours(23, 59, 59, 999);
+    }
+    return d;
+  }
+
+  let cleaned = target.replace(/(\d+)(st|nd|rd|th)/gi, '$1');
+  if (cleaned.includes('-')) {
+    const parts = cleaned.split('-');
+    cleaned = parts[parts.length - 1].trim();
+  }
+
+  d = new Date(cleaned);
+  if (!isNaN(d.getTime())) {
+    d.setHours(23, 59, 59, 999);
+    return d;
+  }
+  return null;
+}
+
+function formatDeadlineForDisplay(deadlineStr, fallbackStr) {
+  const val = deadlineStr || fallbackStr;
+  if (!val) return 'Event Date';
+  const parsed = parseDeadlineDate(val);
+  if (parsed) {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const dayNum = parsed.getDate();
+    let suffix = 'th';
+    if (dayNum % 10 === 1 && dayNum !== 11) suffix = 'st';
+    else if (dayNum % 10 === 2 && dayNum !== 12) suffix = 'nd';
+    else if (dayNum % 10 === 3 && dayNum !== 13) suffix = 'rd';
+    const monthStr = months[parsed.getMonth()];
+    const year = parsed.getFullYear();
+    
+    const hasExplicitTime = typeof deadlineStr === 'string' && (deadlineStr.includes('T') || deadlineStr.includes(':'));
+    if (hasExplicitTime) {
+      let hours = parsed.getHours();
+      const mins = String(parsed.getMinutes()).padStart(2, '0');
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      hours = hours % 12 || 12;
+      return `${dayNum}${suffix} ${monthStr} ${year}, ${hours}:${mins} ${ampm}`;
+    }
+    return `${dayNum}${suffix} ${monthStr} ${year}`;
+  }
+  return String(val);
+}
+
 function mount(id, html) {
   const el = document.getElementById(id);
   if (el) el.innerHTML = html;
@@ -526,8 +580,13 @@ function imgStyle(entry) {
 
 /* ── Event status helper (IST-aware) ──────────────── */
 function getEventStatus(ev) {
+  const deadlineObj = parseDeadlineDate(ev.deadline, ev.date, ev.startDateTime);
+  const now = new Date();
+  if (deadlineObj && now > deadlineObj) {
+    return { label: 'Deadline Passed', cls: 'status-ended' };
+  }
   if (!ev.startDateTime && !ev.endDateTime) {
-    return { label: ev.category, cls: 'status-default' };
+    return { label: ev.category || 'Championship Event', cls: 'status-default' };
   }
   /* IST = UTC + 5h 30m */
   const nowIST = new Date(Date.now() + (5.5 * 60 - new Date().getTimezoneOffset()) * 60000);
@@ -559,7 +618,9 @@ function renderNews() {
         </div>`;
     const status = getEventStatus(ev);
     const descText = ev.description || ev.body || '';
-    const isRegActive = !!ev.isRegistrationActive;
+    const isRegActive = !!ev.isRegistrationActive && status.label !== 'Deadline Passed';
+    const deadlineText = formatDeadlineForDisplay(ev.deadline, ev.date);
+    const deadlineBadge = deadlineText ? `<span class="news-deadline" style="color:#f87171; font-weight:600; background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.25); border-radius:6px; padding:0.2rem 0.5rem; font-size:0.82rem;">⏰ Deadline: ${deadlineText}</span>` : '';
 
     const actionBtn = isRegActive
       ? `<a href="event-register.html?eventId=${ev.id}" class="btn-primary" style="display:inline-flex; align-items:center; gap:0.5rem; padding:0.6rem 1.4rem; font-size:0.9rem; margin-top:1rem; text-decoration:none;">📝 Register for Event &rarr;</a>`
@@ -573,9 +634,10 @@ function renderNews() {
             <div class="news-cat ${status.cls}">${status.label}</div>
           </div>
           <div class="news-card-body">
-            <div class="news-meta">
+            <div class="news-meta" style="display:flex; flex-wrap:wrap; gap:0.8rem; align-items:center; margin-bottom:0.5rem;">
               <span class="news-date">📅 ${ev.date}</span>
               <span class="news-location">📍 ${ev.location}</span>
+              ${deadlineBadge}
             </div>
             <h3>${ev.title}</h3>
             <p>${descText}</p>

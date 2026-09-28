@@ -26,6 +26,60 @@ function escapeHTML(str) {
   }[match]));
 }
 
+function parseDeadlineDate(deadline, dateText, startDT) {
+  let target = deadline || startDT || dateText;
+  if (!target) return null;
+  target = String(target).trim();
+
+  let d = new Date(target);
+  if (!isNaN(d.getTime())) {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(target)) {
+      d.setHours(23, 59, 59, 999);
+    }
+    return d;
+  }
+
+  let cleaned = target.replace(/(\d+)(st|nd|rd|th)/gi, '$1');
+  if (cleaned.includes('-')) {
+    const parts = cleaned.split('-');
+    cleaned = parts[parts.length - 1].trim();
+  }
+
+  d = new Date(cleaned);
+  if (!isNaN(d.getTime())) {
+    d.setHours(23, 59, 59, 999);
+    return d;
+  }
+  return null;
+}
+
+function formatDeadlineForDisplay(deadlineStr, fallbackStr) {
+  const val = deadlineStr || fallbackStr;
+  if (!val) return 'Event Date';
+  const parsed = parseDeadlineDate(val);
+  if (parsed) {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const dayNum = parsed.getDate();
+    let suffix = 'th';
+    if (dayNum % 10 === 1 && dayNum !== 11) suffix = 'st';
+    else if (dayNum % 10 === 2 && dayNum !== 12) suffix = 'nd';
+    else if (dayNum % 10 === 3 && dayNum !== 13) suffix = 'rd';
+    const monthStr = months[parsed.getMonth()];
+    const year = parsed.getFullYear();
+    
+    const hasExplicitTime = typeof deadlineStr === 'string' && (deadlineStr.includes('T') || deadlineStr.includes(':'));
+    if (hasExplicitTime) {
+      let hours = parsed.getHours();
+      const mins = String(parsed.getMinutes()).padStart(2, '0');
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      hours = hours % 12 || 12;
+      return `${dayNum}${suffix} ${monthStr} ${year}, ${hours}:${mins} ${ampm}`;
+    }
+    return `${dayNum}${suffix} ${monthStr} ${year}`;
+  }
+  return String(val);
+}
+
 function resolveCurrentEvent() {
   const urlParams = new URLSearchParams(window.location.search);
   const targetId = urlParams.get("eventId");
@@ -250,13 +304,22 @@ document.addEventListener("DOMContentLoaded", async () => {
   // 3. Check if registration is active for this specific event
   const isRegActive = currentEvent.isRegistrationActive && !currentEvent.archived && currentEvent.enabled !== false;
   
-  // Check event deadline if specified
+  // Check event deadline if specified or defaulted to event date
   let isDeadlinePassed = false;
-  if (currentEvent.deadline) {
-    const deadlineDate = new Date(currentEvent.deadline);
-    if (!isNaN(deadlineDate.getTime()) && new Date() > deadlineDate) {
-      isDeadlinePassed = true;
-    }
+  const deadlineObj = parseDeadlineDate(currentEvent.deadline, currentEvent.date, currentEvent.startDateTime);
+  if (deadlineObj && new Date() > deadlineObj) {
+    isDeadlinePassed = true;
+  }
+
+  // Update page header and section description with dynamic event details & deadline
+  const evtHeader = document.getElementById("evtPageHeader");
+  if (evtHeader && currentEvent.title) {
+    evtHeader.innerHTML = `${escapeHTML(currentEvent.title)} <span class="accent">Registration</span>`;
+  }
+  const sectionDesc = document.querySelector(".evt-main .section-desc");
+  if (sectionDesc) {
+    const deadlineText = formatDeadlineForDisplay(currentEvent.deadline, currentEvent.date);
+    sectionDesc.innerHTML = `📅 <strong>Date:</strong> ${escapeHTML(currentEvent.date || 'TBD')} &nbsp;·&nbsp; 📍 <strong>Venue:</strong> ${escapeHTML(currentEvent.location || 'Moradabad')} &nbsp;·&nbsp; ⏰ <strong>Deadline:</strong> ${escapeHTML(deadlineText)}`;
   }
 
   // If registration is NOT active or deadline passed -> Block registration page!
