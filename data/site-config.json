@@ -18,7 +18,7 @@
       "startDateTime": "2026-10-11T08:00",
       "endDateTime": "2026-10-11T15:00",
       "deadline": "2026-10-08T23:59:00+05:30",
-      "location": "Springfields School, New Moradabad",
+      "location": "TBD",
       "feeType": "online",
       "payToOrganizer": false,
       "baseFee": 500,
@@ -365,5 +365,5 @@
       }
     ]
   },
-  "lastUpdated": "2026-09-27T13:33:10.690Z"
+  "lastUpdated": "2026-09-28T10:30:52.269Z"
 }
