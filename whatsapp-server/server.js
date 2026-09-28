@@ -34,6 +34,33 @@ const COUNTER_FILE = path.join(__dirname, 'chest-counter.json');
 function formatDateDDMMMYY(dateStr) {
   if (!dateStr) return 'N/A';
   const str = String(dateStr).trim();
+
+  // 1. Direct YYYY-MM-DD or YYYY-MM-DDT... match (preserves exact date without UTC shift)
+  const isoMatch = str.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (isoMatch) {
+    const y = isoMatch[1];
+    const m = isoMatch[2];
+    const d = isoMatch[3];
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const monthIndex = parseInt(m, 10) - 1;
+    if (monthIndex >= 0 && monthIndex < 12) {
+      return `${d.padStart(2, '0')}-${months[monthIndex]}-${y.slice(2)}`;
+    }
+  }
+
+  // 2. Direct DD/MM/YYYY or DD-MM-YYYY match
+  const dmyMatch = str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);
+  if (dmyMatch && !/^\d{4}/.test(str)) {
+    const day = dmyMatch[1].padStart(2, '0');
+    const m = parseInt(dmyMatch[2], 10) - 1;
+    const yearStr = dmyMatch[3];
+    const yy = yearStr.length === 4 ? yearStr.slice(2) : yearStr;
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    if (m >= 0 && m < 12) {
+      return `${day}-${months[m]}-${yy}`;
+    }
+  }
+
   if (/^\d{2}-[A-Za-z]{3}-\d{2,4}$/.test(str)) {
     const parts = str.split('-');
     const day = parts[0].padStart(2, '0');
@@ -42,16 +69,13 @@ function formatDateDDMMMYY(dateStr) {
     const yy = yearStr.length === 4 ? yearStr.slice(2) : yearStr;
     return `${day}-${m}-${yy}`;
   }
-  if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
-    const [y, m, d] = str.split('-');
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const monthIndex = parseInt(m, 10) - 1;
-    if (monthIndex >= 0 && monthIndex < 12) {
-      return `${d.padStart(2, '0')}-${months[monthIndex]}-${y.slice(2)}`;
-    }
-  }
-  const d = new Date(str);
+
+  // 3. Fallback: Parse with IST offset adjustment if ISO timestamp
+  let d = new Date(str);
   if (!isNaN(d.getTime())) {
+    if (str.includes('T') || str.includes('Z')) {
+      d = new Date(d.getTime() + (5.5 * 60 + d.getTimezoneOffset()) * 60000);
+    }
     const day = String(d.getDate()).padStart(2, '0');
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const month = months[d.getMonth()];
@@ -583,6 +607,28 @@ function buildCoachRegistrationMessage(data, regNumber) {
     const titleText = isVerified ? '🏆 *CHAMPIONSHIP ATHLETE ENTRY CONFIRMATION* 🏆' : '🏆 *CHAMPIONSHIP ATHLETE ENTRY NOTICE (UNDER REVIEW)* 🏆';
     const chestDisplay = isVerified ? `*${chestNo}*` : '*Under Review*';
     const statusText = isVerified ? 'VERIFIED' : 'UNDER REVIEW / PENDING VERIFICATION';
+
+    if (!isVerified) {
+      return `${titleText}
+__________________________________
+
+Dear Coach *${data.coachName || 'Coach'}*,
+
+Your athlete *${data.skaterName}* has registered for *${eventName}* and the payment is currently under review by RSAM.
+
+🎽 _(RSAM Reg. Number: ${regNumber})_
+
+• *Athlete Name:* ${data.skaterName}
+• *Event:* ${eventName}
+• *Discipline:* ${data.discipline || 'N/A'}
+• *Age Group:* ${data.ageGroup || 'N/A'}
+• *Payment Status:* ${statusText}
+
+Once payment is verified by RSAM admin, the official Athlete Championship Summary and assigned Chest Number will be sent.
+
+Best regards,
+*${ORG_NAME}* 🛼🏆`;
+    }
 
     return `${titleText}
 __________________________________

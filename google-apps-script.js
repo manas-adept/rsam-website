@@ -365,12 +365,75 @@ function doGet(e) {
       })).setMimeType(ContentService.MimeType.JSON);
     }
 
+    if (action === "check_duplicate") {
+      const sName = e && e.parameter.skaterName ? e.parameter.skaterName : "";
+      const sAge = e && e.parameter.age ? e.parameter.age : "";
+      const sMob = e && e.parameter.mobile ? e.parameter.mobile : "";
+      const dup = findDuplicateRegistration(ss, sName, sAge, sMob);
+      if (dup) {
+        return ContentService.createTextOutput(JSON.stringify({
+          status: "duplicate",
+          exists: true,
+          skater: dup
+        })).setMimeType(ContentService.MimeType.JSON);
+      }
+      return ContentService.createTextOutput(JSON.stringify({
+        status: "ok",
+        exists: false
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+
     return ContentService.createTextOutput(JSON.stringify({ status: "ok", service: "RSAM API 2026" }))
       .setMimeType(ContentService.MimeType.JSON);
   } catch (err) {
     return ContentService.createTextOutput(JSON.stringify({ status: "error", message: err.toString() }))
       .setMimeType(ContentService.MimeType.JSON);
   }
+}
+
+function findDuplicateRegistration(ss, skaterName, age, mobile) {
+  if (!ss || !skaterName || !mobile) return null;
+  const cleanName = String(skaterName).trim().toLowerCase();
+  const cleanMob = String(mobile).replace(/\D/g, "").slice(-10);
+  const cleanAge = String(age || "").trim();
+
+  if (!cleanName || cleanMob.length < 10) return null;
+
+  const sheets = ss.getSheets();
+  for (let s = 0; s < sheets.length; s++) {
+    const sheet = sheets[s];
+    const data = sheet.getDataRange().getValues();
+    if (data.length <= 1) continue;
+
+    const headers = data[0].map(h => String(h).trim().toLowerCase());
+    const nameIdx = headers.findIndex(h => h.includes("skater name") || h.includes("athlete name") || h === "name");
+    const mobIdx = headers.findIndex(h => h.includes("mobile number") || h.includes("contact") || h.includes("phone"));
+    const ageIdx = headers.findIndex(h => h === "age" || h.includes("age group"));
+    const regNoIdx = headers.findIndex(h => h.includes("rsam reg") || h.includes("reg no") || h.includes("registration no"));
+
+    if (nameIdx === -1 || mobIdx === -1) continue;
+
+    for (let r = 1; r < data.length; r++) {
+      const row = data[r];
+      const rName = String(row[nameIdx] || "").trim().toLowerCase();
+      const rMob = String(row[mobIdx] || "").replace(/\D/g, "").slice(-10);
+      const rAge = ageIdx !== -1 ? String(row[ageIdx] || "").trim() : "";
+      const rRegNo = regNoIdx !== -1 ? String(row[regNoIdx] || "").trim() : "";
+
+      if (rName === cleanName && rMob === cleanMob) {
+        if (!cleanAge || !rAge || cleanAge === rAge || Math.abs(parseFloat(cleanAge) - parseFloat(rAge)) <= 1) {
+          return {
+            sheetName: sheet.getName(),
+            skaterName: row[nameIdx],
+            mobile: row[mobIdx],
+            age: row[ageIdx],
+            regNumber: rRegNo
+          };
+        }
+      }
+    }
+  }
+  return null;
 }
 
 function getSpreadsheet() {
@@ -523,6 +586,18 @@ function doPost(e) {
     }
 
     // Standard Annual Registration
+    if (!data.isRenewal && !data.allowDuplicate) {
+      const dup = findDuplicateRegistration(ss, data.skaterName, data.age, data.mobile);
+      if (dup) {
+        return ContentService.createTextOutput(JSON.stringify({
+          status: "error",
+          errorType: "duplicate",
+          regNumber: dup.regNumber,
+          message: "⚠️ Registration Error: A skater with Name '" + data.skaterName + "', Age '" + data.age + "', and Contact Number '" + data.mobile + "' is already registered in RSAM (" + dup.sheetName + ", Reg No: " + (dup.regNumber || "N/A") + "). Multiple registrations for the same skater are not allowed."
+        })).setMimeType(ContentService.MimeType.JSON);
+      }
+    }
+
     const year = String(data.year || "2026");
     const targetTabName = "Registrations " + year;
     let sheet = ss.getSheetByName(targetTabName);

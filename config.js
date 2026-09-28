@@ -147,7 +147,7 @@ const CONFIG = {
     instagram:       "https://www.instagram.com/rsam_mbd_official",
     whatsappChannel: "https://whatsapp.com/channel/0029VbCcTGfCHDynFKrFTV07",
     whatsappNumber:  "+91-8057781350",
-    email:           "contact@rsam.in",
+    email:           "rsam.moradabad@gmail.com",
     phone:           "+91-8057781350",
     address:         "139, Rana Bhawan, Near 23 PAC, Kanth Road, Moradabad, Uttar Pradesh, India",
   },

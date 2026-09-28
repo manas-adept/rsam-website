@@ -266,6 +266,7 @@
               <div style="margin-bottom:0.8rem;">
                 <span style="color:#9ca3af; font-size:0.8rem; display:block; margin-bottom:0.4rem;">Click to Insert Dynamic Variables:</span>
                 <div style="display:flex; gap:0.4rem; flex-wrap:wrap;" id="bcVarButtons">
+                  <button type="button" class="btn-dash-action btn-sm btn-var-tag" data-var="{chestNo}">{chestNo}</button>
                   <button type="button" class="btn-dash-action btn-sm btn-var-tag" data-var="{coachName}">{coachName}</button>
                   <button type="button" class="btn-dash-action btn-sm btn-var-tag" data-var="{skaterList}">{skaterList}</button>
                   <button type="button" class="btn-dash-action btn-sm btn-var-tag" data-var="{skaterName}">{skaterName}</button>
@@ -393,14 +394,44 @@
                   </div>
                 </div>
 
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.6rem; margin-bottom:0.6rem;">
-                  <div>
-                    <label style="display:block; color:#9ca3af; font-size:0.75rem; margin-bottom:0.2rem;">Race 1 Result</label>
-                    <input type="text" id="certRace1Text" placeholder="e.g. 1st Position (or leave empty)" style="width:100%; background:#111827; border:1px solid rgba(255,255,255,0.2); color:#fff; padding:0.5rem; border-radius:6px; font-size:0.85rem;" />
+                <div style="background:rgba(59,130,246,0.08); border:1px solid rgba(59,130,246,0.25); border-radius:8px; padding:0.8rem; margin-bottom:0.8rem;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                    <label style="color:#93c5fd; font-size:0.82rem; font-weight:700;">🏁 Certificate Races Configuration (Max 3 Races)</label>
+                    <select id="certRaceCount" style="background:#111827; border:1px solid rgba(255,255,255,0.2); color:#fbbf24; padding:0.3rem 0.6rem; border-radius:6px; font-size:0.82rem; font-weight:700;">
+                      <option value="1">1 Race</option>
+                      <option value="2" selected>2 Races (Default)</option>
+                      <option value="3">3 Races (Max)</option>
+                    </select>
                   </div>
-                  <div>
-                    <label style="display:block; color:#9ca3af; font-size:0.75rem; margin-bottom:0.2rem;">Race 2 Result</label>
-                    <input type="text" id="certRace2Text" placeholder="e.g. 2nd Position (or leave empty)" style="width:100%; background:#111827; border:1px solid rgba(255,255,255,0.2); color:#fff; padding:0.5rem; border-radius:6px; font-size:0.85rem;" />
+                  
+                  <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap:0.5rem; margin-bottom:0.6rem;">
+                    <div>
+                      <label style="display:block; color:#9ca3af; font-size:0.7rem;">Race 1 Title</label>
+                      <input type="text" id="certRace1Title" value="Race 1 (200m)" style="width:100%; background:#111827; border:1px solid rgba(255,255,255,0.2); color:#fff; padding:0.35rem 0.5rem; border-radius:6px; font-size:0.78rem;" />
+                    </div>
+                    <div>
+                      <label style="display:block; color:#9ca3af; font-size:0.7rem;">Race 2 Title</label>
+                      <input type="text" id="certRace2Title" value="Race 2 (500m)" style="width:100%; background:#111827; border:1px solid rgba(255,255,255,0.2); color:#fff; padding:0.35rem 0.5rem; border-radius:6px; font-size:0.78rem;" />
+                    </div>
+                    <div>
+                      <label style="display:block; color:#9ca3af; font-size:0.7rem;">Race 3 Title</label>
+                      <input type="text" id="certRace3Title" value="Race 3 (1000m)" style="width:100%; background:#111827; border:1px solid rgba(255,255,255,0.2); color:#fff; padding:0.35rem 0.5rem; border-radius:6px; font-size:0.78rem;" />
+                    </div>
+                  </div>
+
+                  <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap:0.5rem;">
+                    <div>
+                      <label style="display:block; color:#9ca3af; font-size:0.7rem;">Race 1 Result</label>
+                      <input type="text" id="certRace1Text" placeholder="e.g. 1st Position" style="width:100%; background:#111827; border:1px solid rgba(255,255,255,0.2); color:#fff; padding:0.35rem 0.5rem; border-radius:6px; font-size:0.78rem;" />
+                    </div>
+                    <div>
+                      <label style="display:block; color:#9ca3af; font-size:0.7rem;">Race 2 Result</label>
+                      <input type="text" id="certRace2Text" placeholder="e.g. 2nd Position" style="width:100%; background:#111827; border:1px solid rgba(255,255,255,0.2); color:#fff; padding:0.35rem 0.5rem; border-radius:6px; font-size:0.78rem;" />
+                    </div>
+                    <div>
+                      <label style="display:block; color:#9ca3af; font-size:0.7rem;">Race 3 Result</label>
+                      <input type="text" id="certRace3Text" placeholder="e.g. 3rd Position" style="width:100%; background:#111827; border:1px solid rgba(255,255,255,0.2); color:#fff; padding:0.35rem 0.5rem; border-radius:6px; font-size:0.78rem;" />
+                    </div>
                   </div>
                 </div>
 
@@ -507,9 +538,14 @@
                 <h3>💳 Direct UPI Payment Verification &amp; 1-Click Approvals</h3>
                 <p class="card-desc" style="color:#9ca3af; margin:0.25rem 0 0 0; font-size:0.88rem;">Review submitted 12-digit UTR numbers and payment receipt screenshots. Click Approve to issue the entry pass and trigger automated WhatsApp confirmation.</p>
               </div>
-              <button type="button" class="btn-dash-action" id="refreshPaymentsBtn">
-                <i class="fa-solid fa-arrows-rotate"></i> Refresh Payments
-              </button>
+              <div style="display:flex; gap:0.6rem; align-items:center; flex-wrap:wrap;">
+                <button type="button" class="btn-dash-action" id="generateChestNumbersPdfBtn" style="background:rgba(139,92,246,0.25); color:#a78bfa; border:1px solid rgba(139,92,246,0.4);">
+                  <i class="fa-solid fa-id-badge"></i> 🎽 Generate Printable Chest Numbers PDF
+                </button>
+                <button type="button" class="btn-dash-action" id="refreshPaymentsBtn">
+                  <i class="fa-solid fa-arrows-rotate"></i> Refresh Payments
+                </button>
+              </div>
             </div>
 
             <!-- Event / Registration Sheet Filter Dropdown -->

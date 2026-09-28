@@ -1440,19 +1440,24 @@ document.addEventListener("DOMContentLoaded", () => {
           if (progressStatus) progressStatus.textContent = `Sending ${i + 1} of ${recipients.length}: ${r.name} (${r.mobile})...`;
           if (progressBar) progressBar.style.width = `${pct}%`;
 
-          // Candidate list formatting for coach
+          // Candidate list formatting for coach (includes Chest Number)
+          const chestNoVal = r.data.eventRegNo || r.data.chestNo || r.data.chestNumber || r.data.bib || 'N/A';
           let skaterListStr = "";
           if (r.role === "Coach") {
             if (r.candidates && r.candidates.length > 0) {
-              skaterListStr = r.candidates.map(c => `• ${c.skaterName || 'Athlete'} - ${c.regNumber || 'N/A'}`).join('\n');
+              skaterListStr = r.candidates.map(c => {
+                const cChest = c.eventRegNo || c.chestNo || c.chestNumber || c.bib || 'N/A';
+                return `• ${c.skaterName || 'Athlete'} - Reg: ${c.regNumber || 'N/A'} (Chest No: ${cChest})`;
+              }).join('\n');
             } else {
-              skaterListStr = `• ${r.data.skaterName || 'Athlete'} - ${r.data.regNumber || 'N/A'}`;
+              skaterListStr = `• ${r.data.skaterName || 'Athlete'} - Reg: ${r.data.regNumber || 'N/A'} (Chest No: ${chestNoVal})`;
             }
           } else {
-            skaterListStr = `• ${r.data.skaterName || r.name} - ${r.data.regNumber || 'N/A'}`;
+            skaterListStr = `• ${r.data.skaterName || r.name} - Reg: ${r.data.regNumber || 'N/A'} (Chest No: ${chestNoVal})`;
           }
 
           let parsedMsg = rawTemplate
+            .replace(/{chestNo}/g, chestNoVal)
             .replace(/{skaterList}/g, skaterListStr)
             .replace(/{skaterName} - {regNumber}/g, skaterListStr)
             .replace(/{skaterName}/g, r.data.skaterName || r.name)
@@ -1552,13 +1557,14 @@ document.addEventListener("DOMContentLoaded", () => {
       return String(str).trim();
     }
 
-    function generateCertSignatureSync(skaterName, regNo, race1, race2, discipline) {
+    function generateCertSignatureSync(skaterName, regNo, race1, race2, discipline, race3) {
       const salt = "RSAM_SECURE_VERIFIED_CERTIFICATE_HASH_SALT_2026";
       const str = [
         String(skaterName || "").trim().toLowerCase(),
         String(regNo || "").trim().toLowerCase(),
         String(race1 || "").trim().toLowerCase(),
         String(race2 || "").trim().toLowerCase(),
+        String(race3 || "").trim().toLowerCase(),
         String(discipline || "").trim().toLowerCase(),
         salt
       ].join("::");
@@ -1578,7 +1584,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function buildCertUrl(c) {
       const origin = window.location.origin;
       const regNo = c.regNumber || c.registrationNo || c.eventRegNo || c.rsamRegNo || c.regNo || "";
-      const sig = generateCertSignatureSync(c.skaterName, regNo, c.race1, c.race2, c.discipline);
+      const sig = generateCertSignatureSync(c.skaterName, regNo, c.race1, c.race2, c.discipline, c.race3);
 
       const params = new URLSearchParams({
         regNo: regNo,
@@ -1589,10 +1595,16 @@ document.addEventListener("DOMContentLoaded", () => {
         ageGroup: c.ageGroup || "",
         eventTitle: c.eventName || (certSheetSelect ? certSheetSelect.value : "4th District Championship 2026"),
         discipline: c.discipline || "Quads",
+        raceCount: String(c.raceCount || 2),
+        race1Title: c.race1Title || "Race 1 (200m)",
+        race2Title: c.race2Title || "Race 2 (500m)",
+        race3Title: c.race3Title || "Race 3 (1000m)",
         race1: c.race1 || "",
         race2: c.race2 || "",
+        race3: c.race3 || "",
         rink1: c.race1 || "",
         rink2: c.race2 || "",
+        rink3: c.race3 || "",
         venue: c.venue || "Moradabad Sports Complex, Kanth Road, Moradabad",
         date: c.dateStr || "15th - 16th October 2026",
         sig: sig
@@ -1603,6 +1615,11 @@ document.addEventListener("DOMContentLoaded", () => {
     function getCertData() {
       const elR1 = document.getElementById("certRace1Text");
       const elR2 = document.getElementById("certRace2Text");
+      const elR3 = document.getElementById("certRace3Text");
+      const elRCount = document.getElementById("certRaceCount");
+      const elR1Title = document.getElementById("certRace1Title");
+      const elR2Title = document.getElementById("certRace2Title");
+      const elR3Title = document.getElementById("certRace3Title");
       const elVen = document.getElementById("certVenueText");
       const elDat = document.getElementById("certDateText");
 
@@ -1611,8 +1628,13 @@ document.addEventListener("DOMContentLoaded", () => {
         fatherName: certFatherName ? certFatherName.value.trim() : "",
         schoolClub: certSchoolClub ? certSchoolClub.value.trim() : "",
         discipline: certDiscipline ? certDiscipline.value.trim() : "",
+        raceCount: elRCount ? parseInt(elRCount.value, 10) : 2,
+        race1Title: elR1Title ? elR1Title.value.trim() : "Race 1 (200m)",
+        race2Title: elR2Title ? elR2Title.value.trim() : "Race 2 (500m)",
+        race3Title: elR3Title ? elR3Title.value.trim() : "Race 3 (1000m)",
         race1: elR1 ? elR1.value.trim() : "",
         race2: elR2 ? elR2.value.trim() : "",
+        race3: elR3 ? elR3.value.trim() : "",
         venue: elVen && elVen.value.trim() ? elVen.value.trim() : "Moradabad Sports Complex, Kanth Road, Moradabad",
         dateStr: elDat && elDat.value.trim() ? elDat.value.trim() : "15th - 16th October 2026",
         mobile: certMobile ? certMobile.value.trim() : "",
@@ -1625,24 +1647,26 @@ document.addEventListener("DOMContentLoaded", () => {
       const c = getCertData();
       const certUrl = buildCertUrl(c);
 
+      const raceCount = c.raceCount || 2;
       const formattedR1 = formatRaceRank(c.race1);
       const formattedR2 = formatRaceRank(c.race2);
+      const formattedR3 = formatRaceRank(c.race3);
 
       certPreviewWrap.innerHTML = `
         <div style="background:linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); border:5px solid #0b192c; outline:2px solid #d97706; outline-offset:-4px; border-radius:12px; padding:1.2rem; color:#1f2937; font-family:'Outfit',sans-serif; text-align:center; position:relative; box-shadow:0 10px 30px rgba(0,0,0,0.5);">
-          <!-- Top 4 Logos Header Bar (No Frame & Border) -->
+          <!-- Top 4 Logos Header Bar (Ordered: RSAM, UPRSA, RSFI, INDIA OLYMPICS) -->
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem; border-bottom:1px dashed #cbd5e1; padding-bottom:0.5rem; gap:0.4rem;">
-            <img src="assets/branding/logo_ioa_india.webp" style="height:36px; max-width:60px; object-fit:contain; border:none; background:transparent;" alt="IOA India Logo" />
-            <img src="assets/branding/logo_rsfi_indiaskate.png" style="height:36px; max-width:60px; object-fit:contain; border:none; background:transparent;" alt="RSFI Logo" />
-            <img src="assets/branding/logo_uprsa.png" style="height:36px; max-width:60px; object-fit:contain; border:none; background:transparent;" alt="UPRSA Logo" />
             <img src="assets/branding/logo_rsam.jpg" style="height:36px; max-width:60px; object-fit:contain; border:none; background:transparent;" alt="RSAM Logo" />
+            <img src="assets/branding/logo_uprsa.png" style="height:36px; max-width:60px; object-fit:contain; border:none; background:transparent;" alt="UPRSA Logo" />
+            <img src="assets/branding/logo_rsfi_indiaskate.png" style="height:36px; max-width:60px; object-fit:contain; border:none; background:transparent;" alt="RSFI Logo" />
+            <img src="assets/branding/logo_ioa_india.webp" style="height:36px; max-width:60px; object-fit:contain; border:none; background:transparent;" alt="IOA India Logo" />
           </div>
 
           <div style="font-family:'Cinzel',serif; font-size:1.05rem; font-weight:800; color:#dc2626; letter-spacing:0.8px; margin:0.2rem 0;">
             ${escapeHTML(c.eventName)}
           </div>
           <div style="font-size:0.68rem; font-weight:700; color:#4b5563; text-transform:uppercase;">
-            RECOGNIZED BY UPRSA · AFFILIATED TO RSFI &amp; WORLD SKATE
+            RECOGNIZED BY UPRSA · UPRSA AFFILIATED TO : ROLLER SKATING FEDERATION OF INDIA (RSFI)
           </div>
 
           <div style="font-family:'Cinzel',serif; font-size:0.95rem; font-weight:800; color:#1e3a8a; letter-spacing:1px; margin:0.5rem 0; background:rgba(30,58,138,0.08); padding:4px 12px; border-radius:20px; display:inline-block;">
@@ -1677,20 +1701,28 @@ document.addEventListener("DOMContentLoaded", () => {
             <div>📅 Date: <strong style="color:#0f172a;">${escapeHTML(c.dateStr)}</strong></div>
           </div>
 
-          <!-- Two Race Result Boxes -->
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.6rem; margin-bottom:0.6rem;">
+          <!-- Race Result Boxes (Supports 1, 2, or 3 Races) -->
+          <div style="display:grid; grid-template-columns: repeat(${Math.min(Math.max(raceCount, 1), 3)}, 1fr); gap:0.6rem; margin-bottom:0.6rem;">
             <div style="background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; overflow:hidden; text-align:center;">
-              <div style="background:#f1f5f9; color:#0b192c; font-size:0.68rem; font-weight:800; padding:4px 8px; border-bottom:1px solid #cbd5e1; letter-spacing:0.5px;">RACE 1 RESULT</div>
+              <div style="background:#f1f5f9; color:#0b192c; font-size:0.68rem; font-weight:800; padding:4px 8px; border-bottom:1px solid #cbd5e1; letter-spacing:0.5px; text-transform:uppercase;">${escapeHTML(c.race1Title || 'RACE 1 RESULT')}</div>
               <div style="min-height:38px; padding:6px; font-size:0.95rem; font-weight:800; color:#0f172a; display:flex; align-items:center; justify-content:center;">
                 ${formattedR1 ? `<strong>${escapeHTML(formattedR1)}</strong>` : `<span style="color:#cbd5e1;">—</span>`}
               </div>
             </div>
+            ${raceCount >= 2 ? `
             <div style="background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; overflow:hidden; text-align:center;">
-              <div style="background:#f1f5f9; color:#0b192c; font-size:0.68rem; font-weight:800; padding:4px 8px; border-bottom:1px solid #cbd5e1; letter-spacing:0.5px;">RACE 2 RESULT</div>
+              <div style="background:#f1f5f9; color:#0b192c; font-size:0.68rem; font-weight:800; padding:4px 8px; border-bottom:1px solid #cbd5e1; letter-spacing:0.5px; text-transform:uppercase;">${escapeHTML(c.race2Title || 'RACE 2 RESULT')}</div>
               <div style="min-height:38px; padding:6px; font-size:0.95rem; font-weight:800; color:#0f172a; display:flex; align-items:center; justify-content:center;">
                 ${formattedR2 ? `<strong>${escapeHTML(formattedR2)}</strong>` : `<span style="color:#cbd5e1;">—</span>`}
               </div>
-            </div>
+            </div>` : ''}
+            ${raceCount >= 3 ? `
+            <div style="background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; overflow:hidden; text-align:center;">
+              <div style="background:#f1f5f9; color:#0b192c; font-size:0.68rem; font-weight:800; padding:4px 8px; border-bottom:1px solid #cbd5e1; letter-spacing:0.5px; text-transform:uppercase;">${escapeHTML(c.race3Title || 'RACE 3 RESULT')}</div>
+              <div style="min-height:38px; padding:6px; font-size:0.95rem; font-weight:800; color:#0f172a; display:flex; align-items:center; justify-content:center;">
+                ${formattedR3 ? `<strong>${escapeHTML(formattedR3)}</strong>` : `<span style="color:#cbd5e1;">—</span>`}
+              </div>
+            </div>` : ''}
           </div>
 
           <!-- 3 Bottom Executive Signatories (No Participant Badge) -->
@@ -1722,8 +1754,17 @@ document.addEventListener("DOMContentLoaded", () => {
       `;
     }
 
-    [certSkaterName, certFatherName, certSchoolClub, certDiscipline, certMobile, document.getElementById("certRace1Text"), document.getElementById("certRace2Text"), document.getElementById("certVenueText"), document.getElementById("certDateText")].forEach(input => {
-      if (input) input.oninput = renderCertificatePreview;
+    [
+      certSkaterName, certFatherName, certSchoolClub, certDiscipline, certMobile,
+      document.getElementById("certRaceCount"),
+      document.getElementById("certRace1Title"), document.getElementById("certRace2Title"), document.getElementById("certRace3Title"),
+      document.getElementById("certRace1Text"), document.getElementById("certRace2Text"), document.getElementById("certRace3Text"),
+      document.getElementById("certVenueText"), document.getElementById("certDateText")
+    ].forEach(input => {
+      if (input) {
+        input.oninput = renderCertificatePreview;
+        input.onchange = renderCertificatePreview;
+      }
     });
 
     async function fetchEventSheetRecords() {
@@ -1850,7 +1891,7 @@ document.addEventListener("DOMContentLoaded", () => {
         chk.onchange = updateSelectedCount;
       });
 
-      // Helper to extract Race 1 & Race 2 from record
+      // Helper to extract Race 1, Race 2 & Race 3 from record
       function populateSkaterInEditor(r) {
         if (!r) return;
         if (certSkaterName) certSkaterName.value = r.skaterName || r.name || '';
@@ -1861,20 +1902,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const elR1 = document.getElementById("certRace1Text");
         const elR2 = document.getElementById("certRace2Text");
+        const elR3 = document.getElementById("certRace3Text");
         const elVen = document.getElementById("certVenueText");
         const elDat = document.getElementById("certDateText");
 
         let r1 = r.race1 || r.rinkRace1 || r.rink1 || '';
         let r2 = r.race2 || r.rinkRace2 || r.rink2 || '';
-        if (!r1 && !r2 && (r.result || r.results)) {
+        let r3 = r.race3 || r.roadRace1 || r.rink3 || '';
+        if (!r1 && !r2 && !r3 && (r.result || r.results)) {
           const resStr = String(r.result || r.results || '');
           const parts = resStr.split(/,|\/|\||&|;|\n/).map(s => s.trim()).filter(Boolean);
-          if (parts.length >= 2) { r1 = parts[0]; r2 = parts[1]; }
+          if (parts.length >= 3) { r1 = parts[0]; r2 = parts[1]; r3 = parts[2]; }
+          else if (parts.length === 2) { r1 = parts[0]; r2 = parts[1]; }
           else if (parts.length === 1) { r1 = parts[0]; }
         }
 
         if (elR1) elR1.value = formatRaceRank(r1);
         if (elR2) elR2.value = formatRaceRank(r2);
+        if (elR3) elR3.value = formatRaceRank(r3);
         if (elVen && r.venue) elVen.value = r.venue;
         if (elDat && r.date) elDat.value = r.date;
       }
@@ -2035,16 +2080,33 @@ document.addEventListener("DOMContentLoaded", () => {
             continue;
           }
 
-          const formattedResult = formatResultString(r.result || r.rinkRace1);
+          let r1 = r.race1 || r.rinkRace1 || r.rink1 || '';
+          let r2 = r.race2 || r.rinkRace2 || r.rink2 || '';
+          let r3 = r.race3 || r.roadRace1 || r.rink3 || '';
+          if (!r1 && !r2 && !r3 && (r.result || r.results)) {
+            const parts = String(r.result || r.results || '').split(/,|\/|\||&|;|\n/).map(s => s.trim()).filter(Boolean);
+            if (parts.length >= 3) { r1 = parts[0]; r2 = parts[1]; r3 = parts[2]; }
+            else if (parts.length === 2) { r1 = parts[0]; r2 = parts[1]; }
+            else if (parts.length === 1) { r1 = parts[0]; }
+          }
 
+          const cData = getCertData();
           const certUrl = buildCertUrl({
-            skaterName: r.skaterName,
-            fatherName: r.fatherName,
-            schoolClub: r.schoolClub,
-            discipline: r.discipline,
-            resultText: formattedResult,
+            regNumber: r.regNumber || r.registrationNo || r.eventRegNo || r.rsamRegNo || "",
+            skaterName: r.skaterName || r.name,
+            fatherName: r.fatherName || r.father_name,
+            schoolClub: r.schoolClub || r.school_club,
+            discipline: r.discipline || r.category,
+            raceCount: cData.raceCount,
+            race1Title: cData.race1Title,
+            race2Title: cData.race2Title,
+            race3Title: cData.race3Title,
+            race1: formatRaceRank(r1),
+            race2: formatRaceRank(r2),
+            race3: formatRaceRank(r3),
             eventName: certSheetSelect ? certSheetSelect.value : "District Championship 2026",
-            dateStr: new Date().toLocaleDateString("en-IN", { day: 'numeric', month: 'long', year: 'numeric' })
+            dateStr: cData.dateStr,
+            venue: cData.venue
           });
 
           const msg = `🏅 *ROLLER SPORTS ASSOCIATION MORADABAD (RSAM)*\n` +
@@ -2055,8 +2117,7 @@ document.addEventListener("DOMContentLoaded", () => {
             `• Athlete: *${r.skaterName}*\n` +
             `• Father's Name: *${r.fatherName || '—'}*\n` +
             `• School/Club: *${r.schoolClub || '—'}*\n` +
-            `• Discipline: *${r.discipline || '—'}*\n` +
-            `• Result / Award: *${formattedResult}*\n\n` +
+            `• Discipline: *${r.discipline || '—'}*\n\n` +
             `🔗 *Click to View & Print Official RSAM Digital Certificate:*\n` +
             `${certUrl}\n\n` +
             `Best regards,\n*Roller Sports Association Moradabad (RSAM)*`;
@@ -3350,9 +3411,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     window.RSAM_ALL_PAYMENT_RECORDS = allRecords;
 
-    // Update filter counts
+    // 1. Filter by Event Sheet first for pill counts & table
+    const sheetFilteredRecords = allRecords.filter(r => {
+      if (activePaymentEventFilter !== "all" && r.sheetName !== activePaymentEventFilter) {
+        return false;
+      }
+      return true;
+    });
+
+    // Update filter counts based on selected event sheet
     let cntPending = 0, cntVerified = 0, cntRejected = 0;
-    allRecords.forEach(r => {
+    sheetFilteredRecords.forEach(r => {
       const st = String(r.paymentStatus || r.status || '').toUpperCase();
       if (st.includes('PENDING') || st === 'UPI_PENDING' || st === 'APPROVAL_PENDING') cntPending++;
       else if (st === 'REJECTED' || st === 'DECLINED') cntRejected++;
@@ -3364,7 +3433,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const cntVerifiedEl = document.getElementById("cntFilterVerified");
     const cntRejectedEl = document.getElementById("cntFilterRejected");
 
-    if (cntAllEl) cntAllEl.textContent = allRecords.length;
+    if (cntAllEl) cntAllEl.textContent = sheetFilteredRecords.length;
     if (cntPendingEl) cntPendingEl.textContent = cntPending;
     if (cntVerifiedEl) cntVerifiedEl.textContent = cntVerified;
     if (cntRejectedEl) cntRejectedEl.textContent = cntRejected;
@@ -3375,11 +3444,8 @@ document.addEventListener("DOMContentLoaded", () => {
       badgeEl.style.color = cntPending > 0 ? "#fbbf24" : "#34d399";
     }
 
-    // Filter records by Event Sheet & Status Filter
-    let filteredRecords = allRecords.filter(r => {
-      if (activePaymentEventFilter !== "all" && r.sheetName !== activePaymentEventFilter) {
-        return false;
-      }
+    // 2. Filter records by Status Filter
+    let filteredRecords = sheetFilteredRecords.filter(r => {
       const st = String(r.paymentStatus || r.status || '').toUpperCase();
       if (activePaymentFilter === "PENDING_APPROVAL") {
         return st.includes('PENDING') || st === 'UPI_PENDING' || st === 'APPROVAL_PENDING';
@@ -3649,6 +3715,187 @@ document.addEventListener("DOMContentLoaded", () => {
   const refreshPaymentsBtn = document.getElementById("refreshPaymentsBtn");
   if (refreshPaymentsBtn) {
     refreshPaymentsBtn.onclick = () => renderAdminPayments();
+  }
+
+  const generateChestBtn = document.getElementById("generateChestNumbersPdfBtn");
+  if (generateChestBtn) {
+    generateChestBtn.onclick = () => {
+      const allRecords = window.RSAM_ALL_PAYMENT_RECORDS || [];
+      const activeFilter = window.activePaymentEventFilter || "all";
+      
+      let targetRecords = allRecords;
+      if (activeFilter !== "all") {
+        targetRecords = allRecords.filter(r => r.sheetName === activeFilter);
+      }
+      
+      if (!targetRecords || targetRecords.length === 0) {
+        alert("No registration records found for the selected event sheet.");
+        return;
+      }
+
+      // Sort records by chest number / registration number if possible
+      targetRecords.sort((a, b) => {
+        const numA = parseInt(String(a.eventRegNo || a.chestNo || a.regNumber || 0).replace(/\D/g, ''), 10);
+        const numB = parseInt(String(b.eventRegNo || b.chestNo || b.regNumber || 0).replace(/\D/g, ''), 10);
+        return numA - numB;
+      });
+
+      const win = window.open("", "_blank");
+      if (!win) {
+        alert("Pop-up blocker prevented opening Chest Numbers PDF. Please allow pop-ups for this site.");
+        return;
+      }
+
+      const eventTitle = activeFilter !== "all" ? activeFilter : "Roller Skating Championship 2026";
+
+      win.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>Printable Chest Numbers — ${escapeHTML(eventTitle)}</title>
+          <style>
+            @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&display=swap');
+            * { box-sizing: border-box; margin: 0; padding: 0; }
+            body {
+              font-family: 'Outfit', sans-serif;
+              background: #f3f4f6;
+              color: #111827;
+              padding: 15px;
+            }
+            .no-print-bar {
+              background: #1e293b;
+              color: #fff;
+              padding: 12px 20px;
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              border-radius: 8px;
+              margin-bottom: 20px;
+            }
+            .btn-print {
+              background: #2563eb;
+              color: #fff;
+              border: none;
+              padding: 8px 18px;
+              border-radius: 6px;
+              font-weight: 700;
+              font-size: 14px;
+              cursor: pointer;
+            }
+            .chest-grid {
+              display: grid;
+              grid-template-columns: repeat(2, 1fr);
+              gap: 20px;
+            }
+            .chest-card {
+              background: #fff;
+              border: 4px solid #1e3a8a;
+              border-radius: 16px;
+              padding: 24px 16px 16px 16px;
+              text-align: center;
+              display: flex;
+              flex-direction: column;
+              justify-content: space-between;
+              align-items: center;
+              height: 280px;
+              box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+              page-break-inside: avoid;
+              position: relative;
+            }
+            .event-badge {
+              font-size: 11px;
+              font-weight: 800;
+              color: #dc2626;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+              margin-bottom: 4px;
+            }
+            .chest-number {
+              font-size: 84px;
+              font-weight: 900;
+              color: #0f172a;
+              line-height: 1;
+              letter-spacing: -1px;
+              margin: 8px 0;
+            }
+            .skater-name {
+              font-size: 16px;
+              font-weight: 700;
+              color: #1e293b;
+              text-transform: uppercase;
+              letter-spacing: 0.3px;
+              max-width: 90%;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+            }
+            .skater-sub {
+              font-size: 12px;
+              color: #64748b;
+              font-weight: 600;
+              margin-top: 2px;
+            }
+            .association-footer {
+              border-top: 2px solid #e2e8f0;
+              width: 100%;
+              padding-top: 8px;
+              margin-top: 8px;
+              font-size: 11px;
+              font-weight: 800;
+              color: #1e3a8a;
+              letter-spacing: 0.5px;
+              text-transform: uppercase;
+            }
+            @media print {
+              .no-print-bar { display: none !important; }
+              body { background: #fff; padding: 0; }
+              .chest-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+              }
+              .chest-card {
+                height: 4.8in;
+                border-width: 4px;
+                page-break-inside: avoid;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="no-print-bar">
+            <div>
+              <strong>🎽 Printable Chest Numbers PDF</strong> — ${escapeHTML(eventTitle)} (${targetRecords.length} Skaters)
+            </div>
+            <button class="btn-print" onclick="window.print()">🖨️ Print Chest Numbers (A4 Cards)</button>
+          </div>
+          <div class="chest-grid">
+            ${targetRecords.map((r, idx) => {
+              const chestNum = r.eventRegNo || r.chestNo || r.chestNumber || String(100 + idx);
+              const skaterName = r.skaterName || r.name || 'Athlete';
+              const catDiscipline = [r.discipline, r.ageGroup].filter(Boolean).join(' · ');
+              return `
+                <div class="chest-card">
+                  <div>
+                    <div class="event-badge">${escapeHTML(eventTitle)}</div>
+                    <div class="chest-number">${escapeHTML(chestNum)}</div>
+                  </div>
+                  <div>
+                    <div class="skater-name">${escapeHTML(skaterName)}</div>
+                    <div class="skater-sub">${escapeHTML(catDiscipline)}</div>
+                  </div>
+                  <div class="association-footer">
+                    Roller Sports Association Moradabad
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </body>
+        </html>
+      `);
+      win.document.close();
+    };
   }
 
   const closeLightboxBtn = document.getElementById("closeLightboxBtn");

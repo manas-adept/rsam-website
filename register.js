@@ -773,7 +773,26 @@ function formatDateDDMMMYYYY(dateStr) {
   return `${day}-${month}-${year}`;
 }
 
-
+      // Pre-check for duplicate registration for new registration mode
+      if (mode === "new") {
+        try {
+          const sheetUrl = (window.ENV_CONFIG && window.ENV_CONFIG.sheetUrl) || (typeof SHEET_URL !== 'undefined' ? SHEET_URL : '');
+          if (sheetUrl) {
+            const dupRes = await fetch(`${sheetUrl}?action=check_duplicate&skaterName=${encodeURIComponent(payload.skaterName)}&age=${encodeURIComponent(payload.age)}&mobile=${encodeURIComponent(payload.mobile)}`);
+            if (dupRes.ok) {
+              const dupData = await dupRes.json();
+              if (dupData && (dupData.exists || dupData.status === "duplicate")) {
+                const skaterInfo = dupData.skater || {};
+                alert(`⚠️ Duplicate Registration Not Allowed!\n\nA skater with Name: "${payload.skaterName}", Age: "${payload.age}", and Contact Number: "${payload.mobile}" is already registered with RSAM (Registration No: ${skaterInfo.regNumber || 'Existing'}).\n\nMultiple registrations for the same skater are not allowed. Please use Renewal / RSAM Reg No lookup instead.`);
+                syncSubmitBtnState();
+                return;
+              }
+            }
+          }
+        } catch (err) {
+          console.warn("[Duplicate Pre-check Warning]", err);
+        }
+      }
 
       // Populate Pre-Submission Confirmation Modal Summary
       const confirmModal = document.getElementById("confirmModal");

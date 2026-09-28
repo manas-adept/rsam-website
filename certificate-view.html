@@ -71,9 +71,9 @@
       width: 100%;
       max-width: 1080px;
       background: linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #f1f5f9 100%);
-      border: 8px solid var(--navy-dark);
-      outline: 2.5px solid var(--gold-foil);
-      outline-offset: -6px;
+      border: 8px double var(--gold-foil);
+      outline: 3px solid var(--navy-dark);
+      outline-offset: -8px;
       border-radius: 16px;
       padding: 2.2rem 2.8rem;
       position: relative;
@@ -102,8 +102,8 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 440px;
-      opacity: 0.05;
+      width: 480px;
+      opacity: 0.20;
       pointer-events: none;
       z-index: 0;
     }
@@ -183,9 +183,10 @@
       border: 1px solid rgba(30, 58, 138, 0.2);
     }
 
-    /* Modern Athlete Profile Card */
+    /* Modern Athlete Profile Card (Translucent for Watermark Visibility) */
     .cert-athlete-card {
-      background: rgba(255, 255, 255, 0.85);
+      background: rgba(255, 255, 255, 0.65);
+      backdrop-filter: blur(2px);
       border: 1px solid rgba(15, 23, 42, 0.12);
       border-radius: 12px;
       padding: 1.2rem 1.6rem;
@@ -226,7 +227,7 @@
       flex-wrap: wrap;
     }
     .equip-badge {
-      background: #f1f5f9;
+      background: rgba(241, 245, 249, 0.75);
       border: 1.5px solid #cbd5e1;
       color: #64748b;
       padding: 4px 12px;
@@ -238,7 +239,7 @@
       gap: 0.3rem;
     }
     .equip-badge.active {
-      background: rgba(30, 58, 138, 0.1);
+      background: rgba(30, 58, 138, 0.15);
       border-color: #1e3a8a;
       color: #1e3a8a;
       font-weight: 800;
@@ -249,7 +250,8 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: #f8fafc;
+      background: rgba(248, 250, 252, 0.65);
+      backdrop-filter: blur(2px);
       border: 1px solid #e2e8f0;
       padding: 0.6rem 1.2rem;
       border-radius: 8px;
@@ -258,7 +260,7 @@
       margin-bottom: 1rem;
     }
 
-    /* Two Race Results Boxes */
+    /* Race Results Boxes */
     .cert-race-boxes-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -266,7 +268,8 @@
       margin-bottom: 1.2rem;
     }
     .cert-race-box {
-      background: #ffffff;
+      background: rgba(255, 255, 255, 0.65);
+      backdrop-filter: blur(2px);
       border: 1.5px solid #cbd5e1;
       border-radius: 10px;
       overflow: hidden;
@@ -274,7 +277,7 @@
       text-align: center;
     }
     .race-box-title {
-      background: #f1f5f9;
+      background: rgba(241, 245, 249, 0.75);
       color: var(--navy-dark);
       font-size: 0.8rem;
       font-weight: 800;
@@ -332,10 +335,10 @@
       letter-spacing: 0.5px;
     }
 
-    /* Print Optimization Rules */
+    /* Print Optimization Rules (Strict A4 Page) */
     @media print {
       @page {
-        size: landscape;
+        size: A4 landscape;
         margin: 0;
       }
       body {
@@ -359,7 +362,7 @@
   <!-- Top Action Controls -->
   <div class="cert-actions-bar">
     <button type="button" class="btn-cert-action" onclick="window.print()">
-      <i class="fa-solid fa-print"></i> 🖨️ Print / Download PDF Certificate
+      <i class="fa-solid fa-print"></i> 🖨️ Print / Download PDF Certificate (A4 Page)
     </button>
     <a href="index.html" class="btn-cert-action" style="background:#4b5563;">
       <i class="fa-solid fa-house"></i> Home
@@ -382,12 +385,12 @@
 
     <div class="cert-content">
       
-      <!-- Top 4 Logos Row (No frame & border) -->
+      <!-- Top 4 Logos Row (Ordered: RSAM, UPRSA, RSFI, INDIA OLYMPICS) -->
       <div class="cert-header-logos">
-        <img src="assets/branding/logo_ioa_india.webp" class="cert-top-logo" alt="IOA India Logo" />
-        <img src="assets/branding/logo_rsfi_indiaskate.png" class="cert-top-logo" alt="RSFI IndiaSkate Logo" />
-        <img src="assets/branding/logo_uprsa.png" class="cert-top-logo" alt="UPRSA Logo" />
         <img src="assets/branding/logo_rsam.jpg" class="cert-top-logo" alt="RSAM Logo" />
+        <img src="assets/branding/logo_uprsa.png" class="cert-top-logo" alt="UPRSA Logo" />
+        <img src="assets/branding/logo_rsfi_indiaskate.png" class="cert-top-logo" alt="RSFI IndiaSkate Logo" />
+        <img src="assets/branding/logo_ioa_india.webp" class="cert-top-logo" alt="India Olympics Logo" />
       </div>
 
       <!-- Championship Title & Organizers -->
@@ -396,7 +399,7 @@
         <div class="cert-org-text">ORGANIZED BY : ROLLER SPORTS ASSOCIATION MORADABAD</div>
         <div class="cert-affiliation-text">
           RECOGNIZED BY : UTTAR PRADESH ROLLER SPORTS ASSOCIATION (UPRSA)<br/>
-          AFFILIATED TO : ROLLER SKATING FEDERATION OF INDIA (RSFI) · WORLD SKATE
+          UPRSA AFFILIATED TO : ROLLER SKATING FEDERATION OF INDIA (RSFI)
         </div>
         <div>
           <h2 class="cert-main-badge-heading" id="cHeaderHeading">Certificate Of Merit &amp; Performance</h2>
@@ -440,15 +443,19 @@
         <div>📅 Event Date: <strong id="cDate" style="color:#0f172a;">15th - 16th October 2026</strong></div>
       </div>
 
-      <!-- Two Race Results Boxes -->
-      <div class="cert-race-boxes-row">
-        <div class="cert-race-box">
-          <div class="race-box-title">RACE 1 RESULT</div>
+      <!-- Race Results Boxes (Supports 1, 2, or 3 Races) -->
+      <div class="cert-race-boxes-row" id="cRaceBoxesRow">
+        <div class="cert-race-box" id="cRaceBox1">
+          <div class="race-box-title" id="cRace1Title">RACE 1 RESULT</div>
           <div class="race-box-val" id="cRace1Val"></div>
         </div>
-        <div class="cert-race-box">
-          <div class="race-box-title">RACE 2 RESULT</div>
+        <div class="cert-race-box" id="cRaceBox2">
+          <div class="race-box-title" id="cRace2Title">RACE 2 RESULT</div>
           <div class="race-box-val" id="cRace2Val"></div>
+        </div>
+        <div class="cert-race-box" id="cRaceBox3" style="display:none;">
+          <div class="race-box-title" id="cRace3Title">RACE 3 RESULT</div>
+          <div class="race-box-val" id="cRace3Val"></div>
         </div>
       </div>
 
@@ -489,13 +496,14 @@
   </div>
 
   <script>
-    function generateCertSignatureSync(skaterName, regNo, race1, race2, discipline) {
+    function generateCertSignatureSync(skaterName, regNo, race1, race2, discipline, race3) {
       const salt = "RSAM_SECURE_VERIFIED_CERTIFICATE_HASH_SALT_2026";
       const str = [
         String(skaterName || "").trim().toLowerCase(),
         String(regNo || "").trim().toLowerCase(),
         String(race1 || "").trim().toLowerCase(),
         String(race2 || "").trim().toLowerCase(),
+        String(race3 || "").trim().toLowerCase(),
         String(discipline || "").trim().toLowerCase(),
         salt
       ].join("::");
@@ -544,14 +552,21 @@
       let eventTitle   = p.get("eventTitle") || p.get("eventName") || "4th District Championship 2026";
       let discipline   = p.get("discipline") || p.get("category") || "Quads";
       let rawResult    = p.get("result") || p.get("results") || "";
+
+      let raceCount    = parseInt(p.get("raceCount") || p.get("races") || "2", 10);
+      let race1Title   = p.get("race1Title") || p.get("r1Title") || "RACE 1 RESULT";
+      let race2Title   = p.get("race2Title") || p.get("r2Title") || "RACE 2 RESULT";
+      let race3Title   = p.get("race3Title") || p.get("r3Title") || "RACE 3 RESULT";
+
       let race1        = p.get("race1") || p.get("rink1") || "";
       let race2        = p.get("race2") || p.get("rink2") || "";
+      let race3        = p.get("race3") || p.get("rink3") || "";
       let date         = p.get("date") || "15th - 16th October 2026";
       let venue        = p.get("venue") || "Moradabad Sports Complex, Kanth Road, Moradabad";
       const sig        = p.get("sig") || "";
 
       // 1. Signature Integrity Check
-      const expectedSig = generateCertSignatureSync(skaterName, regNo, race1 || rawResult, race2, discipline);
+      const expectedSig = generateCertSignatureSync(skaterName, regNo, race1 || rawResult, race2, discipline, race3);
       let isVerifiedSig = (sig !== "" && sig === expectedSig);
       let isSheetFetched = false;
 
@@ -578,6 +593,7 @@
                   discipline = rec.discipline || discipline;
                   race1 = rec.rinkRace1 || rec.race1 || race1;
                   race2 = rec.rinkRace2 || rec.race2 || race2;
+                  race3 = rec.roadRace1 || rec.race3 || race3;
                   if (s.sheetName) eventTitle = s.sheetName;
                   isSheetFetched = true;
                   break;
@@ -627,25 +643,43 @@
       if (elQuad) elQuad.className = (discLower.includes("quad") || (!discLower.includes("adjustable") && !discLower.includes("toy") && !discLower.includes("inline"))) ? "equip-badge active" : "equip-badge", elQuad.textContent = (discLower.includes("quad") || (!discLower.includes("adjustable") && !discLower.includes("toy") && !discLower.includes("inline"))) ? "✓ Quads" : "Quads";
       if (elInline) elInline.className = (discLower.includes("inline") && !discLower.includes("toy")) ? "equip-badge active" : "equip-badge", elInline.textContent = (discLower.includes("inline") && !discLower.includes("toy")) ? "✓ Professional Inline" : "Professional Inline";
 
-      // If race1/race2 not individually specified, try splitting rawResult
-      if (rawResult && !race1 && !race2) {
+      // If race1/race2/race3 not individually specified, try splitting rawResult
+      if (rawResult && !race1 && !race2 && !race3) {
         const parts = rawResult.split(/,|\/|\||&|;|\n/).map(s => s.trim()).filter(Boolean);
-        if (parts.length >= 2) {
-          race1 = parts[0];
-          race2 = parts[1];
-        } else if (parts.length === 1) {
-          race1 = parts[0];
-        }
+        if (parts.length >= 3) { race1 = parts[0]; race2 = parts[1]; race3 = parts[2]; }
+        else if (parts.length === 2) { race1 = parts[0]; race2 = parts[1]; }
+        else if (parts.length === 1) { race1 = parts[0]; }
       }
+      if (race3 && raceCount < 3) raceCount = 3;
+
+      const raceBoxesRow = document.getElementById("cRaceBoxesRow");
+      if (raceBoxesRow) {
+        raceBoxesRow.style.gridTemplateColumns = `repeat(${Math.min(Math.max(raceCount, 1), 3)}, 1fr)`;
+      }
+
+      document.getElementById("cRace1Title").textContent = race1Title.toUpperCase();
+      document.getElementById("cRace2Title").textContent = race2Title.toUpperCase();
+      document.getElementById("cRace3Title").textContent = race3Title.toUpperCase();
+
+      const elBox1 = document.getElementById("cRaceBox1");
+      const elBox2 = document.getElementById("cRaceBox2");
+      const elBox3 = document.getElementById("cRaceBox3");
+
+      if (elBox1) elBox1.style.display = raceCount >= 1 ? "block" : "none";
+      if (elBox2) elBox2.style.display = raceCount >= 2 ? "block" : "none";
+      if (elBox3) elBox3.style.display = raceCount >= 3 ? "block" : "none";
 
       const formattedR1 = formatRaceRank(race1);
       const formattedR2 = formatRaceRank(race2);
+      const formattedR3 = formatRaceRank(race3);
 
       const elRace1 = document.getElementById("cRace1Val");
       const elRace2 = document.getElementById("cRace2Val");
+      const elRace3 = document.getElementById("cRace3Val");
 
       if (elRace1) elRace1.innerHTML = formattedR1 ? `<strong>${formattedR1}</strong>` : `<span style="color:#cbd5e1; font-size:1.5rem;">—</span>`;
       if (elRace2) elRace2.innerHTML = formattedR2 ? `<strong>${formattedR2}</strong>` : `<span style="color:#cbd5e1; font-size:1.5rem;">—</span>`;
+      if (elRace3) elRace3.innerHTML = formattedR3 ? `<strong>${formattedR3}</strong>` : `<span style="color:#cbd5e1; font-size:1.5rem;">—</span>`;
     });
   </script>
 </body>
