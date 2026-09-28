@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Great+Vibes&family=Cinzel:wght@600;700;800;900&family=Rajdhani:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
   <style>
     :root {
@@ -361,8 +362,11 @@
 
   <!-- Top Action Controls -->
   <div class="cert-actions-bar">
-    <button type="button" class="btn-cert-action" onclick="window.print()">
-      <i class="fa-solid fa-print"></i> 🖨️ Print / Download PDF Certificate (A4 Page)
+    <button type="button" class="btn-cert-action" onclick="downloadPdfCertificate()" style="background:#2563eb;">
+      <i class="fa-solid fa-file-pdf"></i> 📥 Download PDF File
+    </button>
+    <button type="button" class="btn-cert-action" onclick="window.print()" style="background:#0284c7;">
+      <i class="fa-solid fa-print"></i> 🖨️ Print / Save via Browser
     </button>
     <a href="index.html" class="btn-cert-action" style="background:#4b5563;">
       <i class="fa-solid fa-house"></i> Home
@@ -681,6 +685,30 @@
       if (elRace2) elRace2.innerHTML = formattedR2 ? `<strong>${formattedR2}</strong>` : `<span style="color:#cbd5e1; font-size:1.5rem;">—</span>`;
       if (elRace3) elRace3.innerHTML = formattedR3 ? `<strong>${formattedR3}</strong>` : `<span style="color:#cbd5e1; font-size:1.5rem;">—</span>`;
     });
+
+    function downloadPdfCertificate() {
+      const element = document.getElementById('certSheet');
+      if (!element) {
+        window.print();
+        return;
+      }
+      const skaterName = (document.getElementById('cSkaterName')?.textContent || 'Athlete').trim();
+      const cleanName = skaterName.replace(/[^a-zA-Z0-9]/g, '_');
+      const filename = `RSAM_Certificate_${cleanName}.pdf`;
+
+      if (window.html2pdf) {
+        const opt = {
+          margin: 0,
+          filename: filename,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true, logging: false },
+          jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+        };
+        html2pdf().set(opt).from(element).save();
+      } else {
+        window.print();
+      }
+    }
   </script>
 </body>
 </html>
