@@ -1557,6 +1557,8 @@ document.addEventListener("DOMContentLoaded", () => {
       return String(str).trim();
     }
 
+    const formatResultString = formatRaceRank;
+
     function generateCertSignatureSync(skaterName, regNo, race1, race2, discipline, race3) {
       const salt = "RSAM_SECURE_VERIFIED_CERTIFICATE_HASH_SALT_2026";
       const str = [
@@ -3717,186 +3719,197 @@ document.addEventListener("DOMContentLoaded", () => {
     refreshPaymentsBtn.onclick = () => renderAdminPayments();
   }
 
-  const generateChestBtn = document.getElementById("generateChestNumbersPdfBtn");
-  if (generateChestBtn) {
-    generateChestBtn.onclick = () => {
-      const allRecords = window.RSAM_ALL_PAYMENT_RECORDS || [];
-      const activeFilter = window.activePaymentEventFilter || "all";
-      
-      let targetRecords = allRecords;
-      if (activeFilter !== "all") {
-        targetRecords = allRecords.filter(r => r.sheetName === activeFilter);
-      }
-      
-      if (!targetRecords || targetRecords.length === 0) {
-        alert("No registration records found for the selected event sheet.");
-        return;
-      }
+  function handleGenerateChestNumbersPdf() {
+    const allRecords = window.RSAM_ALL_PAYMENT_RECORDS || [];
+    const activeFilter = window.activePaymentEventFilter || "all";
+    const certSelect = document.getElementById("certSheetSelect");
+    const certSelectedSheet = certSelect ? certSelect.value : "";
+    
+    let targetRecords = [];
+    let eventTitle = "Roller Skating Championship 2026";
 
-      // Sort records by chest number / registration number if possible
-      targetRecords.sort((a, b) => {
-        const numA = parseInt(String(a.eventRegNo || a.chestNo || a.regNumber || 0).replace(/\D/g, ''), 10);
-        const numB = parseInt(String(b.eventRegNo || b.chestNo || b.regNumber || 0).replace(/\D/g, ''), 10);
-        return numA - numB;
-      });
+    if (activeFilter !== "all") {
+      targetRecords = allRecords.filter(r => r.sheetName === activeFilter);
+      eventTitle = activeFilter;
+    } else if (certSelectedSheet) {
+      targetRecords = allRecords.filter(r => r.sheetName === certSelectedSheet);
+      eventTitle = certSelectedSheet;
+    }
 
-      const win = window.open("", "_blank");
-      if (!win) {
-        alert("Pop-up blocker prevented opening Chest Numbers PDF. Please allow pop-ups for this site.");
-        return;
-      }
+    if (!targetRecords || targetRecords.length === 0) {
+      targetRecords = allRecords;
+    }
+    
+    if (!targetRecords || targetRecords.length === 0) {
+      alert("No registration records found to generate chest numbers. Please click 'Fetch Payments' or 'Fetch Event Skaters & Results' first.");
+      return;
+    }
 
-      const eventTitle = activeFilter !== "all" ? activeFilter : "Roller Skating Championship 2026";
+    // Sort records by chest number / registration number if possible
+    targetRecords.sort((a, b) => {
+      const numA = parseInt(String(a.eventRegNo || a.chestNo || a.regNumber || 0).replace(/\D/g, ''), 10);
+      const numB = parseInt(String(b.eventRegNo || b.chestNo || b.regNumber || 0).replace(/\D/g, ''), 10);
+      return numA - numB;
+    });
 
-      win.document.write(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <meta charset="UTF-8">
-          <title>Printable Chest Numbers — ${escapeHTML(eventTitle)}</title>
-          <style>
-            @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&display=swap');
-            * { box-sizing: border-box; margin: 0; padding: 0; }
-            body {
-              font-family: 'Outfit', sans-serif;
-              background: #f3f4f6;
-              color: #111827;
-              padding: 15px;
-            }
-            .no-print-bar {
-              background: #1e293b;
-              color: #fff;
-              padding: 12px 20px;
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              border-radius: 8px;
-              margin-bottom: 20px;
-            }
-            .btn-print {
-              background: #2563eb;
-              color: #fff;
-              border: none;
-              padding: 8px 18px;
-              border-radius: 6px;
-              font-weight: 700;
-              font-size: 14px;
-              cursor: pointer;
-            }
+    const win = window.open("", "_blank");
+    if (!win) {
+      alert("Pop-up blocker prevented opening Chest Numbers PDF. Please allow pop-ups for this site.");
+      return;
+    }
+
+    win.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <title>Printable Chest Numbers — ${escapeHTML(eventTitle)}</title>
+        <style>
+          @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&display=swap');
+          * { box-sizing: border-box; margin: 0; padding: 0; }
+          body {
+            font-family: 'Outfit', sans-serif;
+            background: #f3f4f6;
+            color: #111827;
+            padding: 15px;
+          }
+          .no-print-bar {
+            background: #1e293b;
+            color: #fff;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 8px;
+            margin-bottom: 20px;
+          }
+          .btn-print {
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+          }
+          .chest-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+          }
+          .chest-card {
+            background: #fff;
+            border: 4px solid #1e3a8a;
+            border-radius: 16px;
+            padding: 24px 16px 16px 16px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            height: 280px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            page-break-inside: avoid;
+            position: relative;
+          }
+          .event-badge {
+            font-size: 11px;
+            font-weight: 800;
+            color: #dc2626;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+          }
+          .chest-number {
+            font-size: 84px;
+            font-weight: 900;
+            color: #0f172a;
+            line-height: 1;
+            letter-spacing: -1px;
+            margin: 8px 0;
+          }
+          .skater-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1e293b;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            max-width: 90%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+          .skater-sub {
+            font-size: 12px;
+            color: #64748b;
+            font-weight: 600;
+            margin-top: 2px;
+          }
+          .association-footer {
+            border-top: 2px solid #e2e8f0;
+            width: 100%;
+            padding-top: 8px;
+            margin-top: 8px;
+            font-size: 11px;
+            font-weight: 800;
+            color: #1e3a8a;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+          }
+          @media print {
+            .no-print-bar { display: none !important; }
+            body { background: #fff; padding: 0; }
             .chest-grid {
-              display: grid;
               grid-template-columns: repeat(2, 1fr);
-              gap: 20px;
+              gap: 15px;
             }
             .chest-card {
-              background: #fff;
-              border: 4px solid #1e3a8a;
-              border-radius: 16px;
-              padding: 24px 16px 16px 16px;
-              text-align: center;
-              display: flex;
-              flex-direction: column;
-              justify-content: space-between;
-              align-items: center;
-              height: 280px;
-              box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+              height: 4.8in;
+              border-width: 4px;
               page-break-inside: avoid;
-              position: relative;
             }
-            .event-badge {
-              font-size: 11px;
-              font-weight: 800;
-              color: #dc2626;
-              text-transform: uppercase;
-              letter-spacing: 0.5px;
-              margin-bottom: 4px;
-            }
-            .chest-number {
-              font-size: 84px;
-              font-weight: 900;
-              color: #0f172a;
-              line-height: 1;
-              letter-spacing: -1px;
-              margin: 8px 0;
-            }
-            .skater-name {
-              font-size: 16px;
-              font-weight: 700;
-              color: #1e293b;
-              text-transform: uppercase;
-              letter-spacing: 0.3px;
-              max-width: 90%;
-              overflow: hidden;
-              text-overflow: ellipsis;
-              white-space: nowrap;
-            }
-            .skater-sub {
-              font-size: 12px;
-              color: #64748b;
-              font-weight: 600;
-              margin-top: 2px;
-            }
-            .association-footer {
-              border-top: 2px solid #e2e8f0;
-              width: 100%;
-              padding-top: 8px;
-              margin-top: 8px;
-              font-size: 11px;
-              font-weight: 800;
-              color: #1e3a8a;
-              letter-spacing: 0.5px;
-              text-transform: uppercase;
-            }
-            @media print {
-              .no-print-bar { display: none !important; }
-              body { background: #fff; padding: 0; }
-              .chest-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 15px;
-              }
-              .chest-card {
-                height: 4.8in;
-                border-width: 4px;
-                page-break-inside: avoid;
-              }
-            }
-          </style>
-        </head>
-        <body>
-          <div class="no-print-bar">
-            <div>
-              <strong>🎽 Printable Chest Numbers PDF</strong> — ${escapeHTML(eventTitle)} (${targetRecords.length} Skaters)
-            </div>
-            <button class="btn-print" onclick="window.print()">🖨️ Print Chest Numbers (A4 Cards)</button>
+          }
+        </style>
+      </head>
+      <body>
+        <div class="no-print-bar">
+          <div>
+            <strong>🎽 Printable Chest Numbers PDF</strong> — ${escapeHTML(eventTitle)} (${targetRecords.length} Skaters)
           </div>
-          <div class="chest-grid">
-            ${targetRecords.map((r, idx) => {
-              const chestNum = r.eventRegNo || r.chestNo || r.chestNumber || String(100 + idx);
-              const skaterName = r.skaterName || r.name || 'Athlete';
-              const catDiscipline = [r.discipline, r.ageGroup].filter(Boolean).join(' · ');
-              return `
-                <div class="chest-card">
-                  <div>
-                    <div class="event-badge">${escapeHTML(eventTitle)}</div>
-                    <div class="chest-number">${escapeHTML(chestNum)}</div>
-                  </div>
-                  <div>
-                    <div class="skater-name">${escapeHTML(skaterName)}</div>
-                    <div class="skater-sub">${escapeHTML(catDiscipline)}</div>
-                  </div>
-                  <div class="association-footer">
-                    Roller Sports Association Moradabad
-                  </div>
+          <button class="btn-print" onclick="window.print()">🖨️ Print Chest Numbers (A4 Cards)</button>
+        </div>
+        <div class="chest-grid">
+          ${targetRecords.map((r, idx) => {
+            const chestNum = r.eventRegNo || r.chestNo || r.chestNumber || String(100 + idx);
+            const skaterName = r.skaterName || r.name || 'Athlete';
+            const catDiscipline = [r.discipline, r.ageGroup].filter(Boolean).join(' · ');
+            return `
+              <div class="chest-card">
+                <div>
+                  <div class="event-badge">${escapeHTML(eventTitle)}</div>
+                  <div class="chest-number">${escapeHTML(chestNum)}</div>
                 </div>
-              `;
-            }).join('')}
-          </div>
-        </body>
-        </html>
-      `);
-      win.document.close();
-    };
+                <div>
+                  <div class="skater-name">${escapeHTML(skaterName)}</div>
+                  <div class="skater-sub">${escapeHTML(catDiscipline)}</div>
+                </div>
+                <div class="association-footer">
+                  Roller Sports Association Moradabad
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </body>
+      </html>
+    `);
+    win.document.close();
   }
+
+  document.querySelectorAll(".btn-generate-chest-pdf, #generateChestNumbersPdfBtn, #generateChestNumbersPdfBtnCert").forEach(btn => {
+    btn.onclick = handleGenerateChestNumbersPdf;
+  });
 
   const closeLightboxBtn = document.getElementById("closeLightboxBtn");
   if (closeLightboxBtn) {
