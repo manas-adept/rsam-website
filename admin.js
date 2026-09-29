@@ -1624,9 +1624,9 @@ document.addEventListener("DOMContentLoaded", () => {
         date: c.dateStr || "15th - 16th October 2026",
         recUpRsa: c.recUpRsa ? "1" : "0",
         recRsfi: c.recRsfi ? "1" : "0",
-        recWorldSkate: c.recWorldSkate ? "1" : "0",
-        recIoc: c.recIoc ? "1" : "0",
-        recIoa: c.recIoa ? "1" : "0",
+        recCustom1: c.recCustom1 || "",
+        recCustom2: c.recCustom2 || "",
+        recCustom3: c.recCustom3 || "",
         sig: sig
       });
       return `${origin}/certificate-view.html?${params.toString()}`;
@@ -1645,9 +1645,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const recUpRsa = document.getElementById("certRecUpRsa");
       const recRsfi = document.getElementById("certRecRsfi");
-      const recWorldSkate = document.getElementById("certRecWorldSkate");
-      const recIoc = document.getElementById("certRecIoc");
-      const recIoa = document.getElementById("certRecIoa");
+      const custom1Check = document.getElementById("certRecCustom1Check");
+      const custom1Text = document.getElementById("certRecCustom1Text");
+      const custom2Check = document.getElementById("certRecCustom2Check");
+      const custom2Text = document.getElementById("certRecCustom2Text");
+      const custom3Check = document.getElementById("certRecCustom3Check");
+      const custom3Text = document.getElementById("certRecCustom3Text");
 
       return {
         skaterName: certSkaterName ? certSkaterName.value.trim() : "",
@@ -1667,9 +1670,9 @@ document.addEventListener("DOMContentLoaded", () => {
         eventName: certSheetSelect ? certSheetSelect.value : "4TH DISTRICT CHAMPIONSHIP 2026",
         recUpRsa: recUpRsa ? recUpRsa.checked : true,
         recRsfi: recRsfi ? recRsfi.checked : true,
-        recWorldSkate: recWorldSkate ? recWorldSkate.checked : false,
-        recIoc: recIoc ? recIoc.checked : false,
-        recIoa: recIoa ? recIoa.checked : false
+        recCustom1: (custom1Check && custom1Check.checked && custom1Text) ? custom1Text.value.trim() : "",
+        recCustom2: (custom2Check && custom2Check.checked && custom2Text) ? custom2Text.value.trim() : "",
+        recCustom3: (custom3Check && custom3Check.checked && custom3Text) ? custom3Text.value.trim() : ""
       };
     }
 
@@ -1686,77 +1689,60 @@ document.addEventListener("DOMContentLoaded", () => {
       const recLines = [];
       if (c.recUpRsa) recLines.push("RECOGNIZED BY UPRSA");
       if (c.recRsfi) recLines.push("UPRSA AFFILIATED TO : ROLLER SKATING FEDERATION OF INDIA (RSFI)");
-      if (c.recWorldSkate) recLines.push("AFFILIATED TO : WORLD SKATE");
-      if (c.recIoc) recLines.push("RECOGNIZED BY : INTERNATIONAL OLYMPIC COMMITTEE (IOC)");
-      if (c.recIoa) recLines.push("RECOGNIZED BY : INDIAN OLYMPIC ASSOCIATION (IOA)");
+      if (c.recCustom1) recLines.push(c.recCustom1.toUpperCase());
+      if (c.recCustom2) recLines.push(c.recCustom2.toUpperCase());
+      if (c.recCustom3) recLines.push(c.recCustom3.toUpperCase());
 
       const affStr = recLines.length > 0 ? recLines.join(" · ") : "RECOGNIZED BY UPRSA · UPRSA AFFILIATED TO : ROLLER SKATING FEDERATION OF INDIA (RSFI)";
 
       certPreviewWrap.innerHTML = `
         <div style="width:100%; aspect-ratio:1.414/1; background:linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #f1f5f9 100%); border-radius:12px; padding:1.4rem 2rem; color:#1f2937; font-family:'Outfit',sans-serif; text-align:center; position:relative; box-shadow:0 10px 30px rgba(0,0,0,0.5); display:flex; flex-direction:column; justify-content:space-between; box-sizing:border-box; overflow:hidden;">
           
-          <!-- Decorative Speed & Roller Skate SVG Frame -->
+          <!-- Royal Navy & Silver Metallic SVG Frame Overlay -->
           <svg style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:1;" viewBox="0 0 1000 707" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
             <defs>
-              <pattern id="adminChequeredFlag" width="16" height="16" patternUnits="userSpaceOnUse">
-                <rect width="8" height="8" fill="#0b192c" />
-                <rect x="8" width="8" height="8" fill="#ffffff" />
-                <rect y="8" width="8" height="8" fill="#ffffff" />
-                <rect x="8" y="8" width="8" height="8" fill="#0b192c" />
-              </pattern>
-              <linearGradient id="adminGoldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#d97706" />
-                <stop offset="50%" stop-color="#fbbf24" />
-                <stop offset="100%" stop-color="#b45309" />
-              </linearGradient>
               <linearGradient id="adminNavyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stop-color="#0b192c" />
-                <stop offset="100%" stop-color="#1e3a8a" />
+                <stop offset="50%" stop-color="#1e3a8a" />
+                <stop offset="100%" stop-color="#0b192c" />
+              </linearGradient>
+              <linearGradient id="adminSilverGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#94a3b8" />
+                <stop offset="50%" stop-color="#e2e8f0" />
+                <stop offset="100%" stop-color="#64748b" />
               </linearGradient>
             </defs>
-            <rect x="10" y="10" width="980" height="687" rx="10" fill="none" stroke="url(#adminGoldGrad)" stroke-width="4" />
-            <rect x="18" y="18" width="964" height="671" rx="8" fill="none" stroke="url(#adminNavyGrad)" stroke-width="2.5" />
-            <rect x="22" y="22" width="956" height="663" rx="6" fill="none" stroke="url(#adminGoldGrad)" stroke-width="1.2" stroke-dasharray="6,3" />
-            <rect x="140" y="10" width="720" height="6" fill="url(#adminChequeredFlag)" opacity="0.9" />
-            <rect x="140" y="691" width="720" height="6" fill="url(#adminChequeredFlag)" opacity="0.9" />
-            <g transform="translate(16, 16)">
-              <circle cx="24" cy="24" r="20" fill="url(#adminNavyGrad)" stroke="url(#adminGoldGrad)" stroke-width="2" />
-              <circle cx="24" cy="24" r="14" fill="url(#adminChequeredFlag)" />
+            <rect x="8" y="8" width="984" height="691" rx="8" fill="none" stroke="url(#adminNavyGrad)" stroke-width="6" />
+            <rect x="16" y="16" width="968" height="675" rx="6" fill="none" stroke="url(#adminSilverGrad)" stroke-width="2.5" />
+            <rect x="22" y="22" width="956" height="663" rx="4" fill="none" stroke="url(#adminNavyGrad)" stroke-width="1.2" stroke-dasharray="8,4" />
+            <g transform="translate(14, 14)">
+              <rect width="20" height="20" fill="url(#adminNavyGrad)" rx="3" />
+              <circle cx="10" cy="10" r="5" fill="url(#adminSilverGrad)" />
             </g>
-            <g transform="translate(944, 16)">
-              <circle cx="24" cy="24" r="20" fill="url(#adminNavyGrad)" stroke="url(#adminGoldGrad)" stroke-width="2" />
-              <circle cx="24" cy="24" r="14" fill="none" stroke="#fbbf24" stroke-width="2" />
-              <circle cx="24" cy="24" r="6" fill="#d97706" stroke="#ffffff" stroke-width="1" />
-              <line x1="24" y1="10" x2="24" y2="38" stroke="#fbbf24" stroke-width="1.5" />
-              <line x1="10" y1="24" x2="38" y2="24" stroke="#fbbf24" stroke-width="1.5" />
-              <circle cx="24" cy="24" r="3" fill="#0b192c" />
+            <g transform="translate(966, 14)">
+              <rect width="20" height="20" fill="url(#adminNavyGrad)" rx="3" />
+              <circle cx="10" cy="10" r="5" fill="url(#adminSilverGrad)" />
             </g>
-            <g transform="translate(16, 651)">
-              <circle cx="24" cy="24" r="20" fill="url(#adminNavyGrad)" stroke="url(#adminGoldGrad)" stroke-width="2" />
-              <circle cx="24" cy="24" r="14" fill="none" stroke="#fbbf24" stroke-width="2" />
-              <circle cx="24" cy="24" r="6" fill="#d97706" stroke="#ffffff" stroke-width="1" />
-              <line x1="24" y1="10" x2="24" y2="38" stroke="#fbbf24" stroke-width="1.5" />
-              <line x1="10" y1="24" x2="38" y2="24" stroke="#fbbf24" stroke-width="1.5" />
-              <circle cx="24" cy="24" r="3" fill="#0b192c" />
+            <g transform="translate(14, 673)">
+              <rect width="20" height="20" fill="url(#adminNavyGrad)" rx="3" />
+              <circle cx="10" cy="10" r="5" fill="url(#adminSilverGrad)" />
             </g>
-            <g transform="translate(944, 651)">
-              <circle cx="24" cy="24" r="20" fill="url(#adminNavyGrad)" stroke="url(#adminGoldGrad)" stroke-width="2" />
-              <circle cx="24" cy="24" r="14" fill="url(#adminChequeredFlag)" />
+            <g transform="translate(966, 673)">
+              <rect width="20" height="20" fill="url(#adminNavyGrad)" rx="3" />
+              <circle cx="10" cy="10" r="5" fill="url(#adminSilverGrad)" />
             </g>
-            <path d="M 12 160 L 12 540" stroke="url(#adminGoldGrad)" stroke-width="2.5" stroke-dasharray="16,8" />
-            <path d="M 988 160 L 988 540" stroke="url(#adminGoldGrad)" stroke-width="2.5" stroke-dasharray="16,8" />
           </svg>
 
           <!-- RSAM Transparent Watermark -->
           <img src="assets/branding/logo_rsam_transparent.png" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:380px; opacity:0.18; pointer-events:none; z-index:0;" alt="RSAM Watermark" />
 
           <div style="position:relative; z-index:2; height:100%; display:flex; flex-direction:column; justify-content:space-between;">
-            <!-- Top 4 Header Logos Bar (Equal Size, Transparent Background: RSAM, UPRSA, RSFI, IOA) -->
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.3rem; border-bottom:1.5px dashed rgba(15,23,42,0.12); padding-bottom:0.3rem; gap:0.4rem;">
-              <img src="assets/branding/logo_rsam_transparent.png" style="height:44px; max-height:46px; max-width:100px; object-fit:contain; border:none; background:transparent;" alt="RSAM Logo" />
-              <img src="assets/branding/logo_uprsa.png" style="height:44px; max-height:46px; max-width:100px; object-fit:contain; border:none; background:transparent;" alt="UPRSA Logo" />
-              <img src="assets/branding/logo_rsfi_indiaskate.png" style="height:44px; max-height:46px; max-width:100px; object-fit:contain; border:none; background:transparent;" alt="RSFI Logo" />
-              <img src="assets/branding/logo_ioa_india.webp" style="height:44px; max-height:46px; max-width:100px; object-fit:contain; border:none; background:transparent;" alt="IOA India Logo" />
+            <!-- Top 4 Header Logos Bar (Equal Size, Standout Transparent Logos: RSAM, UPRSA, RSFI, IOA) -->
+            <div style="display:flex; justify-content:space-around; align-items:center; margin-bottom:0.3rem; border-bottom:1.5px dashed rgba(15,23,42,0.15); padding:0.2rem 1rem 0.4rem 1rem; gap:0.8rem;">
+              <img src="assets/branding/logo_rsam_transparent.png" style="height:50px; max-height:52px; max-width:110px; object-fit:contain; border:none; background:transparent;" alt="RSAM Logo" />
+              <img src="assets/branding/logo_uprsa.png" style="height:48px; max-height:50px; max-width:110px; object-fit:contain; border:none; background:transparent;" alt="UPRSA Logo" />
+              <img src="assets/branding/logo_rsfi_indiaskate.png" style="height:48px; max-height:50px; max-width:110px; object-fit:contain; border:none; background:transparent;" alt="RSFI Logo" />
+              <img src="assets/branding/logo_ioa_india.webp" style="height:48px; max-height:50px; max-width:110px; object-fit:contain; border:none; background:transparent;" alt="IOA India Logo" />
             </div>
 
             <div style="font-family:'Cinzel',serif; font-size:1.45rem; font-weight:800; color:#dc2626; letter-spacing:0.8px; margin:0.1rem 0; text-transform:uppercase;">
@@ -1788,7 +1774,7 @@ document.addEventListener("DOMContentLoaded", () => {
                   <strong style="color:#0f172a; font-size:0.85rem;">${escapeHTML(c.schoolClub || 'KIDS SAVVY (ARYANS PANTHERS)')}</strong>
                 </div>
                 <div>
-                  <span style="color:#64748b; font-size:0.6rem; font-weight:700; display:block;">DISCIPLINE / EQUIPMENT</span>
+                  <span style="color:#64748b; font-size:0.6rem; font-weight:700; display:block;">DISCIPLINE / CATEGORY</span>
                   <strong style="color:#1e3a8a; font-size:0.85rem;">${escapeHTML(c.discipline || 'Quads')}</strong>
                 </div>
               </div>
@@ -1827,17 +1813,17 @@ document.addEventListener("DOMContentLoaded", () => {
             <!-- 3 Bottom Executive Signatories with Real Transparent Signatures -->
             <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:0.4rem; margin-top:0.3rem; border-top:1px solid #e5e7eb; padding-top:0.3rem; font-size:0.68rem; text-align:center;">
               <div>
-                <img src="assets/signatures/sig_ashok_singhal.png" style="height:36px; max-width:120px; object-fit:contain; margin-bottom:1px;" alt="Ashok Singhal Signature" />
+                <img src="assets/signatures/sig_ashok_singhal.png" style="height:38px; max-width:120px; object-fit:contain; margin-bottom:1px;" alt="Ashok Singhal Signature" />
                 <strong style="display:block; color:#dc2626; font-size:0.75rem;">ASHOK SINGHAL</strong>
                 <span style="color:#0b192c; font-weight:700; font-size:0.62rem;">PRESIDENT</span>
               </div>
               <div>
-                <img src="assets/signatures/sig_parmesh_charan.png" style="height:36px; max-width:120px; object-fit:contain; margin-bottom:1px;" alt="Parmesh Charan Signature" />
+                <img src="assets/signatures/sig_parmesh_charan.png" style="height:38px; max-width:120px; object-fit:contain; margin-bottom:1px;" alt="Parmesh Charan Signature" />
                 <strong style="display:block; color:#dc2626; font-size:0.75rem;">PARMESH CHARAN</strong>
                 <span style="color:#0b192c; font-weight:700; font-size:0.62rem;">TREASURER</span>
               </div>
               <div>
-                <img src="assets/signatures/sig_devendra_rana.png" style="height:36px; max-width:120px; object-fit:contain; margin-bottom:1px;" alt="Devendra Kumar Rana Signature" />
+                <img src="assets/signatures/sig_devendra_rana.png" style="height:38px; max-width:120px; object-fit:contain; margin-bottom:1px;" alt="Devendra Kumar Rana Signature" />
                 <strong style="display:block; color:#dc2626; font-size:0.75rem;">DEVENDRA KUMAR RANA</strong>
                 <span style="color:#0b192c; font-weight:700; font-size:0.62rem;">GEN. SECRETARY</span>
               </div>
@@ -1861,7 +1847,9 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("certRace1Text"), document.getElementById("certRace2Text"), document.getElementById("certRace3Text"),
       document.getElementById("certVenueText"), document.getElementById("certDateText"),
       document.getElementById("certRecUpRsa"), document.getElementById("certRecRsfi"),
-      document.getElementById("certRecWorldSkate"), document.getElementById("certRecIoc"), document.getElementById("certRecIoa")
+      document.getElementById("certRecCustom1Check"), document.getElementById("certRecCustom1Text"),
+      document.getElementById("certRecCustom2Check"), document.getElementById("certRecCustom2Text"),
+      document.getElementById("certRecCustom3Check"), document.getElementById("certRecCustom3Text")
     ].forEach(input => {
       if (input) {
         input.oninput = renderCertificatePreview;
