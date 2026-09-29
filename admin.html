@@ -311,13 +311,13 @@
             <div class="card-title-row" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
               <div>
                 <h3>🏅 Digital Certificate Generator &amp; Automated Broadcaster</h3>
-                <p class="card-desc" style="color:#9ca3af; margin:0.2rem 0 0 0; font-size:0.88rem;">Fetch event results directly from Google Sheets, preview official digital certificates (with 3 executive signatories), and broadcast certificates via WhatsApp or Email.</p>
+                <p class="card-desc" style="color:#9ca3af; margin:0.2rem 0 0 0; font-size:0.88rem;">Fetch event results directly from Google Sheets, customize landscape A4 certificates (with multi-select recognition sub-rows &amp; 3 executive signatures), and broadcast directly via WhatsApp or Email.</p>
               </div>
             </div>
 
-            <!-- Step 1: Google Sheet Event Selector & Fetch Bar -->
+            <!-- Step 1: Google Sheet Event Selector & Recognitions -->
             <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 1.2rem; margin-top: 1rem; margin-bottom: 1.5rem;">
-              <h4 style="color:#60a5fa; font-size:1.05rem; margin-bottom:0.8rem; font-family:'Rajdhani',sans-serif;">1. Select Event Sheet &amp; Fetch Athlete Results</h4>
+              <h4 style="color:#60a5fa; font-size:1.05rem; margin-bottom:0.8rem; font-family:'Rajdhani',sans-serif;">1. Select Event Sheet, Venue, Date &amp; Affiliation Settings</h4>
               
               <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; align-items:end;">
                 <div>
@@ -338,24 +338,62 @@
                 </div>
               </div>
 
-              <div style="margin-top: 1rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
-                <div style="color:#d1d5db; font-size:0.9rem;">
-                  Selected Certificate Recipients: <strong id="certSelectedCount" style="color:#f59e0b; font-size:1.1rem;">0</strong>
+              <!-- Multi-select Recognition Checkboxes & Auto Venue/Date -->
+              <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:1rem; margin-top:1rem;">
+                <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:0.8rem;">
+                  <label style="display:block; color:#fbbf24; font-size:0.82rem; font-weight:700; margin-bottom:0.5rem;">
+                    🏛️ Affiliations &amp; Recognitions to Include on Certificate (Multi-Select):
+                  </label>
+                  <div style="display:flex; flex-direction:column; gap:0.45rem; font-size:0.8rem; color:#d1d5db;">
+                    <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
+                      <input type="checkbox" id="certRecUpRsa" checked> RECOGNIZED BY UPRSA
+                    </label>
+                    <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
+                      <input type="checkbox" id="certRecRsfi" checked> UPRSA AFFILIATED TO : ROLLER SKATING FEDERATION OF INDIA (RSFI)
+                    </label>
+                    <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
+                      <input type="checkbox" id="certRecWorldSkate"> AFFILIATED TO : WORLD SKATE
+                    </label>
+                    <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
+                      <input type="checkbox" id="certRecIoc"> RECOGNIZED BY : INTERNATIONAL OLYMPIC COMMITTEE (IOC)
+                    </label>
+                    <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
+                      <input type="checkbox" id="certRecIoa"> RECOGNIZED BY : INDIAN OLYMPIC ASSOCIATION (IOA)
+                    </label>
+                  </div>
                 </div>
-                <div style="display:flex; gap:0.4rem; flex-wrap:wrap; align-items:center;">
-                  <button type="button" class="btn-dash-action btn-sm" id="certSelectAllBtn" style="font-size:0.75rem; padding:0.25rem 0.6rem; background:rgba(59,130,246,0.15); color:#60a5fa; border-color:rgba(59,130,246,0.3);">☑️ Select All</button>
-                  <button type="button" class="btn-dash-action btn-sm" id="certDeselectAllBtn" style="font-size:0.75rem; padding:0.25rem 0.6rem; background:rgba(239,68,68,0.15); color:#f87171; border-color:rgba(239,68,68,0.3);">🔲 Deselect All</button>
-                  <button type="button" class="btn-dash-action btn-sm" id="certInvertBtn" style="font-size:0.75rem; padding:0.25rem 0.6rem; background:rgba(245,158,11,0.15); color:#fbbf24; border-color:rgba(245,158,11,0.3);">🔄 Invert</button>
+
+                <div style="display:flex; flex-direction:column; gap:0.6rem; justify-content:center;">
+                  <div>
+                    <label style="display:block; color:#9ca3af; font-size:0.78rem; margin-bottom:0.2rem; font-weight:600;">📍 Event Venue (Auto-Fetched from Event)</label>
+                    <input type="text" id="certVenueText" value="Moradabad Sports Complex, Kanth Road, Moradabad" style="width:100%; background:#111827; border:1px solid rgba(255,255,255,0.2); color:#fff; padding:0.5rem; border-radius:6px; font-size:0.85rem;" />
+                  </div>
+                  <div>
+                    <label style="display:block; color:#9ca3af; font-size:0.78rem; margin-bottom:0.2rem; font-weight:600;">📅 Event Date (Auto-Fetched from Event)</label>
+                    <input type="text" id="certDateText" value="15th - 16th October 2026" style="width:100%; background:#111827; border:1px solid rgba(255,255,255,0.2); color:#fff; padding:0.5rem; border-radius:6px; font-size:0.85rem;" />
+                  </div>
                 </div>
               </div>
             </div>
 
-            <!-- Event Results Table & Preview Box -->
+            <!-- Event Results Table & Editor Grid -->
             <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap:1.5rem;">
               
               <!-- Left: Event Skaters Results Table -->
               <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:1.2rem;">
-                <h4 style="color:#34d399; font-size:0.95rem; margin:0 0 0.8rem 0;">📋 Event Results &amp; Recipient List</h4>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.8rem; flex-wrap:wrap; gap:0.5rem;">
+                  <h4 style="color:#34d399; font-size:0.95rem; margin:0;">📋 Event Results &amp; Recipient List</h4>
+                  <div style="color:#d1d5db; font-size:0.82rem;">
+                    Recipients: <strong id="certSelectedCount" style="color:#f59e0b; font-size:1rem;">0</strong>
+                  </div>
+                </div>
+
+                <div style="display:flex; gap:0.4rem; flex-wrap:wrap; align-items:center; margin-bottom:0.8rem;">
+                  <button type="button" class="btn-dash-action btn-sm" id="certSelectAllBtn" style="font-size:0.75rem; padding:0.25rem 0.6rem; background:rgba(59,130,246,0.15); color:#60a5fa; border-color:rgba(59,130,246,0.3);">☑️ Select All</button>
+                  <button type="button" class="btn-dash-action btn-sm" id="certDeselectAllBtn" style="font-size:0.75rem; padding:0.25rem 0.6rem; background:rgba(239,68,68,0.15); color:#f87171; border-color:rgba(239,68,68,0.3);">🔲 Deselect All</button>
+                  <button type="button" class="btn-dash-action btn-sm" id="certInvertBtn" style="font-size:0.75rem; padding:0.25rem 0.6rem; background:rgba(245,158,11,0.15); color:#fbbf24; border-color:rgba(245,158,11,0.3);">🔄 Invert</button>
+                </div>
+
                 <div id="certSkatersList" style="max-height:280px; overflow-y:auto; font-size:0.85rem; color:#d1d5db; margin-bottom:1rem;">
                   <p style="color:#9ca3af; text-align:center; padding:1.5rem;">Click "📥 Fetch Event Skaters &amp; Results" to load athlete records from Google Sheet.</p>
                 </div>
@@ -371,9 +409,9 @@
                 </div>
               </div>
 
-              <!-- Right: Single Certificate Editor & Live Preview -->
+              <!-- Right: Single Certificate Editor -->
               <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:1.2rem;">
-                <h4 style="color:#fbbf24; font-size:1rem; margin:0 0 0.8rem 0; font-family:'Rajdhani',sans-serif;">2. Selected Skater Certificate Editor &amp; Live Sample</h4>
+                <h4 style="color:#fbbf24; font-size:1rem; margin:0 0 0.8rem 0; font-family:'Rajdhani',sans-serif;">2. Selected Skater Details &amp; Race Results Editor</h4>
                 
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.6rem; margin-bottom:0.6rem;">
                   <div>
@@ -438,35 +476,36 @@
                   </div>
                 </div>
 
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.6rem; margin-bottom:0.8rem;">
-                  <div>
-                    <label style="display:block; color:#9ca3af; font-size:0.75rem; margin-bottom:0.2rem;">Venue (Placed 1st)</label>
-                    <input type="text" id="certVenueText" placeholder="e.g. Moradabad Sports Complex" style="width:100%; background:#111827; border:1px solid rgba(255,255,255,0.2); color:#fff; padding:0.5rem; border-radius:6px; font-size:0.85rem;" />
-                  </div>
-                  <div>
-                    <label style="display:block; color:#9ca3af; font-size:0.75rem; margin-bottom:0.2rem;">Event Date (Placed 2nd)</label>
-                    <input type="text" id="certDateText" placeholder="e.g. 15th - 16th October 2026" style="width:100%; background:#111827; border:1px solid rgba(255,255,255,0.2); color:#fff; padding:0.5rem; border-radius:6px; font-size:0.85rem;" />
-                  </div>
-                </div>
-
                 <div style="margin-bottom:0.8rem;">
                   <label style="display:block; color:#9ca3af; font-size:0.75rem; margin-bottom:0.2rem;">WhatsApp Mobile</label>
                   <input type="tel" id="certMobile" placeholder="e.g. 9971844191" style="width:100%; background:#111827; border:1px solid rgba(255,255,255,0.2); color:#fff; padding:0.5rem; border-radius:6px; font-size:0.85rem;" />
                 </div>
-
-                <!-- Single Action Buttons -->
-                <div style="display:flex; gap:0.6rem; margin-bottom:1rem;">
-                  <button type="button" class="btn-primary btn-sm" id="certPrintBtn" style="background:#2563eb; flex:1;">🖨️ Print / Download PDF</button>
-                  <button type="button" class="btn-dash-action btn-sm" id="certSingleWaBtn" style="background:rgba(16,185,129,0.2); color:#34d399; border-color:rgba(16,185,129,0.4);"><i class="fa-brands fa-whatsapp"></i> Send WA</button>
-                </div>
-
-                <!-- Live Preview Frame Container -->
-                <div id="certPreviewCardWrap" style="width:100%; box-shadow:0 10px 25px rgba(0,0,0,0.8); border-radius:10px; overflow:hidden;">
-                  <!-- Live SVG/HTML Certificate Injected Here -->
-                </div>
               </div>
 
             </div>
+
+            <!-- Full-Width Live Landscape A4 Certificate Preview Card -->
+            <div style="margin-top:1.5rem; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.15); border-radius:12px; padding:1.2rem;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.8rem;">
+                <h4 style="color:#fbbf24; font-size:1.05rem; margin:0; font-family:'Rajdhani',sans-serif;">
+                  📜 Live Landscape A4 Certificate Preview (Matches Hard Copy Print / PDF 100%)
+                </h4>
+                <div style="display:flex; gap:0.6rem;">
+                  <button type="button" class="btn-primary btn-sm" id="certPrintBtn" style="background:#2563eb;">
+                    <i class="fa-solid fa-print"></i> 🖨️ Open Fullscreen / Print Landscape PDF
+                  </button>
+                  <button type="button" class="btn-dash-action btn-sm" id="certSingleWaBtn" style="background:rgba(16,185,129,0.2); color:#34d399; border-color:rgba(16,185,129,0.4);">
+                    <i class="fa-brands fa-whatsapp"></i> Send WA Certificate
+                  </button>
+                </div>
+              </div>
+
+              <!-- Live Landscape Certificate Container -->
+              <div id="certPreviewCardWrap" style="width:100%; box-shadow:0 15px 35px rgba(0,0,0,0.8); border-radius:10px; overflow:hidden;">
+                <!-- Live SVG/HTML Certificate Injected Here -->
+              </div>
+            </div>
+
           </div>
         </div>
 

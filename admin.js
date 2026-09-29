@@ -1595,7 +1595,7 @@ document.addEventListener("DOMContentLoaded", () => {
         schoolClub: c.schoolClub || "",
         dob: c.dob || "",
         ageGroup: c.ageGroup || "",
-        eventTitle: c.eventName || (certSheetSelect ? certSheetSelect.value : "4th District Championship 2026"),
+        eventTitle: c.eventName || (certSheetSelect ? certSheetSelect.value : "4TH DISTRICT CHAMPIONSHIP 2026"),
         discipline: c.discipline || "Quads",
         raceCount: String(c.raceCount || 2),
         race1Title: c.race1Title || "Race 1 (200m)",
@@ -1609,6 +1609,11 @@ document.addEventListener("DOMContentLoaded", () => {
         rink3: c.race3 || "",
         venue: c.venue || "Moradabad Sports Complex, Kanth Road, Moradabad",
         date: c.dateStr || "15th - 16th October 2026",
+        recUpRsa: c.recUpRsa ? "1" : "0",
+        recRsfi: c.recRsfi ? "1" : "0",
+        recWorldSkate: c.recWorldSkate ? "1" : "0",
+        recIoc: c.recIoc ? "1" : "0",
+        recIoa: c.recIoa ? "1" : "0",
         sig: sig
       });
       return `${origin}/certificate-view.html?${params.toString()}`;
@@ -1625,6 +1630,12 @@ document.addEventListener("DOMContentLoaded", () => {
       const elVen = document.getElementById("certVenueText");
       const elDat = document.getElementById("certDateText");
 
+      const recUpRsa = document.getElementById("certRecUpRsa");
+      const recRsfi = document.getElementById("certRecRsfi");
+      const recWorldSkate = document.getElementById("certRecWorldSkate");
+      const recIoc = document.getElementById("certRecIoc");
+      const recIoa = document.getElementById("certRecIoa");
+
       return {
         skaterName: certSkaterName ? certSkaterName.value.trim() : "",
         fatherName: certFatherName ? certFatherName.value.trim() : "",
@@ -1640,7 +1651,12 @@ document.addEventListener("DOMContentLoaded", () => {
         venue: elVen && elVen.value.trim() ? elVen.value.trim() : "Moradabad Sports Complex, Kanth Road, Moradabad",
         dateStr: elDat && elDat.value.trim() ? elDat.value.trim() : "15th - 16th October 2026",
         mobile: certMobile ? certMobile.value.trim() : "",
-        eventName: certSheetSelect ? certSheetSelect.value : "4th District Championship 2026"
+        eventName: certSheetSelect ? certSheetSelect.value : "4TH DISTRICT CHAMPIONSHIP 2026",
+        recUpRsa: recUpRsa ? recUpRsa.checked : true,
+        recRsfi: recRsfi ? recRsfi.checked : true,
+        recWorldSkate: recWorldSkate ? recWorldSkate.checked : false,
+        recIoc: recIoc ? recIoc.checked : false,
+        recIoa: recIoa ? recIoa.checked : false
       };
     }
 
@@ -1654,103 +1670,172 @@ document.addEventListener("DOMContentLoaded", () => {
       const formattedR2 = formatRaceRank(c.race2);
       const formattedR3 = formatRaceRank(c.race3);
 
+      const recLines = [];
+      if (c.recUpRsa) recLines.push("RECOGNIZED BY UPRSA");
+      if (c.recRsfi) recLines.push("UPRSA AFFILIATED TO : ROLLER SKATING FEDERATION OF INDIA (RSFI)");
+      if (c.recWorldSkate) recLines.push("AFFILIATED TO : WORLD SKATE");
+      if (c.recIoc) recLines.push("RECOGNIZED BY : INTERNATIONAL OLYMPIC COMMITTEE (IOC)");
+      if (c.recIoa) recLines.push("RECOGNIZED BY : INDIAN OLYMPIC ASSOCIATION (IOA)");
+
+      const affStr = recLines.length > 0 ? recLines.join(" · ") : "RECOGNIZED BY UPRSA · UPRSA AFFILIATED TO : ROLLER SKATING FEDERATION OF INDIA (RSFI)";
+
       certPreviewWrap.innerHTML = `
-        <div style="background:linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); border:5px solid #0b192c; outline:2px solid #d97706; outline-offset:-4px; border-radius:12px; padding:1.2rem; color:#1f2937; font-family:'Outfit',sans-serif; text-align:center; position:relative; box-shadow:0 10px 30px rgba(0,0,0,0.5);">
-          <!-- Top 4 Logos Header Bar (Ordered: RSAM, UPRSA, RSFI, INDIA OLYMPICS) -->
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem; border-bottom:1px dashed #cbd5e1; padding-bottom:0.5rem; gap:0.4rem;">
-            <img src="assets/branding/logo_rsam.jpg" style="height:36px; max-width:60px; object-fit:contain; border:none; background:transparent;" alt="RSAM Logo" />
-            <img src="assets/branding/logo_uprsa.png" style="height:36px; max-width:60px; object-fit:contain; border:none; background:transparent;" alt="UPRSA Logo" />
-            <img src="assets/branding/logo_rsfi_indiaskate.png" style="height:36px; max-width:60px; object-fit:contain; border:none; background:transparent;" alt="RSFI Logo" />
-            <img src="assets/branding/logo_ioa_india.webp" style="height:36px; max-width:60px; object-fit:contain; border:none; background:transparent;" alt="IOA India Logo" />
-          </div>
+        <div style="width:100%; aspect-ratio:1.414/1; background:linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #f1f5f9 100%); border-radius:12px; padding:1.4rem 2rem; color:#1f2937; font-family:'Outfit',sans-serif; text-align:center; position:relative; box-shadow:0 10px 30px rgba(0,0,0,0.5); display:flex; flex-direction:column; justify-content:space-between; box-sizing:border-box; overflow:hidden;">
+          
+          <!-- Decorative Speed & Roller Skate SVG Frame -->
+          <svg style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:1;" viewBox="0 0 1000 707" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="adminChequeredFlag" width="16" height="16" patternUnits="userSpaceOnUse">
+                <rect width="8" height="8" fill="#0b192c" />
+                <rect x="8" width="8" height="8" fill="#ffffff" />
+                <rect y="8" width="8" height="8" fill="#ffffff" />
+                <rect x="8" y="8" width="8" height="8" fill="#0b192c" />
+              </pattern>
+              <linearGradient id="adminGoldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#d97706" />
+                <stop offset="50%" stop-color="#fbbf24" />
+                <stop offset="100%" stop-color="#b45309" />
+              </linearGradient>
+              <linearGradient id="adminNavyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#0b192c" />
+                <stop offset="100%" stop-color="#1e3a8a" />
+              </linearGradient>
+            </defs>
+            <rect x="10" y="10" width="980" height="687" rx="10" fill="none" stroke="url(#adminGoldGrad)" stroke-width="4" />
+            <rect x="18" y="18" width="964" height="671" rx="8" fill="none" stroke="url(#adminNavyGrad)" stroke-width="2.5" />
+            <rect x="22" y="22" width="956" height="663" rx="6" fill="none" stroke="url(#adminGoldGrad)" stroke-width="1.2" stroke-dasharray="6,3" />
+            <rect x="140" y="10" width="720" height="6" fill="url(#adminChequeredFlag)" opacity="0.9" />
+            <rect x="140" y="691" width="720" height="6" fill="url(#adminChequeredFlag)" opacity="0.9" />
+            <g transform="translate(16, 16)">
+              <circle cx="24" cy="24" r="20" fill="url(#adminNavyGrad)" stroke="url(#adminGoldGrad)" stroke-width="2" />
+              <circle cx="24" cy="24" r="14" fill="url(#adminChequeredFlag)" />
+            </g>
+            <g transform="translate(944, 16)">
+              <circle cx="24" cy="24" r="20" fill="url(#adminNavyGrad)" stroke="url(#adminGoldGrad)" stroke-width="2" />
+              <circle cx="24" cy="24" r="14" fill="none" stroke="#fbbf24" stroke-width="2" />
+              <circle cx="24" cy="24" r="6" fill="#d97706" stroke="#ffffff" stroke-width="1" />
+              <line x1="24" y1="10" x2="24" y2="38" stroke="#fbbf24" stroke-width="1.5" />
+              <line x1="10" y1="24" x2="38" y2="24" stroke="#fbbf24" stroke-width="1.5" />
+              <circle cx="24" cy="24" r="3" fill="#0b192c" />
+            </g>
+            <g transform="translate(16, 651)">
+              <circle cx="24" cy="24" r="20" fill="url(#adminNavyGrad)" stroke="url(#adminGoldGrad)" stroke-width="2" />
+              <circle cx="24" cy="24" r="14" fill="none" stroke="#fbbf24" stroke-width="2" />
+              <circle cx="24" cy="24" r="6" fill="#d97706" stroke="#ffffff" stroke-width="1" />
+              <line x1="24" y1="10" x2="24" y2="38" stroke="#fbbf24" stroke-width="1.5" />
+              <line x1="10" y1="24" x2="38" y2="24" stroke="#fbbf24" stroke-width="1.5" />
+              <circle cx="24" cy="24" r="3" fill="#0b192c" />
+            </g>
+            <g transform="translate(944, 651)">
+              <circle cx="24" cy="24" r="20" fill="url(#adminNavyGrad)" stroke="url(#adminGoldGrad)" stroke-width="2" />
+              <circle cx="24" cy="24" r="14" fill="url(#adminChequeredFlag)" />
+            </g>
+            <path d="M 12 160 L 12 540" stroke="url(#adminGoldGrad)" stroke-width="2.5" stroke-dasharray="16,8" />
+            <path d="M 988 160 L 988 540" stroke="url(#adminGoldGrad)" stroke-width="2.5" stroke-dasharray="16,8" />
+          </svg>
 
-          <div style="font-family:'Cinzel',serif; font-size:1.05rem; font-weight:800; color:#dc2626; letter-spacing:0.8px; margin:0.2rem 0;">
-            ${escapeHTML(c.eventName)}
-          </div>
-          <div style="font-size:0.68rem; font-weight:700; color:#4b5563; text-transform:uppercase;">
-            RECOGNIZED BY UPRSA · UPRSA AFFILIATED TO : ROLLER SKATING FEDERATION OF INDIA (RSFI)
-          </div>
+          <!-- RSAM Transparent Watermark -->
+          <img src="assets/branding/logo_rsam_transparent.png" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:380px; opacity:0.18; pointer-events:none; z-index:0;" alt="RSAM Watermark" />
 
-          <div style="font-family:'Cinzel',serif; font-size:0.95rem; font-weight:800; color:#1e3a8a; letter-spacing:1px; margin:0.5rem 0; background:rgba(30,58,138,0.08); padding:4px 12px; border-radius:20px; display:inline-block;">
-            OFFICIAL CERTIFICATE OF MERIT &amp; PERFORMANCE
-          </div>
-
-          <!-- Athlete Card -->
-          <div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:0.8rem; margin:0.6rem 0; text-align:left; font-size:0.82rem;">
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.4rem;">
-              <div>
-                <span style="color:#64748b; font-size:0.65rem; font-weight:700; display:block;">ATHLETE NAME</span>
-                <strong style="color:#0f172a; font-size:0.95rem;">${escapeHTML(c.skaterName || 'SKATER NAME')}</strong>
-              </div>
-              <div>
-                <span style="color:#64748b; font-size:0.65rem; font-weight:700; display:block;">FATHER / PARENT NAME</span>
-                <strong style="color:#0f172a; font-size:0.95rem;">${escapeHTML(c.fatherName || 'FATHER NAME')}</strong>
-              </div>
-              <div style="grid-column:span 2;">
-                <span style="color:#64748b; font-size:0.65rem; font-weight:700; display:block;">SCHOOL / CLUB</span>
-                <strong style="color:#0f172a;">${escapeHTML(c.schoolClub || 'SCHOOL/CLUB')}</strong>
-              </div>
-              <div>
-                <span style="color:#64748b; font-size:0.65rem; font-weight:700; display:block;">DISCIPLINE / CATEGORY</span>
-                <strong style="color:#1e3a8a;">${escapeHTML(c.discipline || 'Quads')}</strong>
-              </div>
+          <div style="position:relative; z-index:2; height:100%; display:flex; flex-direction:column; justify-content:space-between;">
+            <!-- Top 4 Header Logos Bar (Equal Size, Transparent Background: RSAM, UPRSA, RSFI, IOA) -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.3rem; border-bottom:1.5px dashed rgba(15,23,42,0.12); padding-bottom:0.3rem; gap:0.4rem;">
+              <img src="assets/branding/logo_rsam_transparent.png" style="height:44px; max-height:46px; max-width:100px; object-fit:contain; border:none; background:transparent;" alt="RSAM Logo" />
+              <img src="assets/branding/logo_uprsa.png" style="height:44px; max-height:46px; max-width:100px; object-fit:contain; border:none; background:transparent;" alt="UPRSA Logo" />
+              <img src="assets/branding/logo_rsfi_indiaskate.png" style="height:44px; max-height:46px; max-width:100px; object-fit:contain; border:none; background:transparent;" alt="RSFI Logo" />
+              <img src="assets/branding/logo_ioa_india.webp" style="height:44px; max-height:46px; max-width:100px; object-fit:contain; border:none; background:transparent;" alt="IOA India Logo" />
             </div>
-          </div>
 
-          <!-- Venue (First) and Date (Second) -->
-          <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:0.5rem 0.8rem; border-radius:6px; font-size:0.75rem; color:#334155; display:flex; justify-content:space-between; margin-bottom:0.6rem;">
-            <div>📍 Venue: <strong style="color:#0f172a;">${escapeHTML(c.venue)}</strong></div>
-            <div>📅 Date: <strong style="color:#0f172a;">${escapeHTML(c.dateStr)}</strong></div>
-          </div>
-
-          <!-- Race Result Boxes (Supports 1, 2, or 3 Races) -->
-          <div style="display:grid; grid-template-columns: repeat(${Math.min(Math.max(raceCount, 1), 3)}, 1fr); gap:0.6rem; margin-bottom:0.6rem;">
-            <div style="background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; overflow:hidden; text-align:center;">
-              <div style="background:#f1f5f9; color:#0b192c; font-size:0.68rem; font-weight:800; padding:4px 8px; border-bottom:1px solid #cbd5e1; letter-spacing:0.5px; text-transform:uppercase;">${escapeHTML(c.race1Title || 'RACE 1 RESULT')}</div>
-              <div style="min-height:38px; padding:6px; font-size:0.95rem; font-weight:800; color:#0f172a; display:flex; align-items:center; justify-content:center;">
-                ${formattedR1 ? `<strong>${escapeHTML(formattedR1)}</strong>` : `<span style="color:#cbd5e1;">—</span>`}
-              </div>
+            <div style="font-family:'Cinzel',serif; font-size:1.45rem; font-weight:800; color:#dc2626; letter-spacing:0.8px; margin:0.1rem 0; text-transform:uppercase;">
+              ${escapeHTML(c.eventName)}
             </div>
-            ${raceCount >= 2 ? `
-            <div style="background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; overflow:hidden; text-align:center;">
-              <div style="background:#f1f5f9; color:#0b192c; font-size:0.68rem; font-weight:800; padding:4px 8px; border-bottom:1px solid #cbd5e1; letter-spacing:0.5px; text-transform:uppercase;">${escapeHTML(c.race2Title || 'RACE 2 RESULT')}</div>
-              <div style="min-height:38px; padding:6px; font-size:0.95rem; font-weight:800; color:#0f172a; display:flex; align-items:center; justify-content:center;">
-                ${formattedR2 ? `<strong>${escapeHTML(formattedR2)}</strong>` : `<span style="color:#cbd5e1;">—</span>`}
-              </div>
-            </div>` : ''}
-            ${raceCount >= 3 ? `
-            <div style="background:#fff; border:1.5px solid #cbd5e1; border-radius:8px; overflow:hidden; text-align:center;">
-              <div style="background:#f1f5f9; color:#0b192c; font-size:0.68rem; font-weight:800; padding:4px 8px; border-bottom:1px solid #cbd5e1; letter-spacing:0.5px; text-transform:uppercase;">${escapeHTML(c.race3Title || 'RACE 3 RESULT')}</div>
-              <div style="min-height:38px; padding:6px; font-size:0.95rem; font-weight:800; color:#0f172a; display:flex; align-items:center; justify-content:center;">
-                ${formattedR3 ? `<strong>${escapeHTML(formattedR3)}</strong>` : `<span style="color:#cbd5e1;">—</span>`}
-              </div>
-            </div>` : ''}
-          </div>
+            <div style="font-size:0.65rem; font-weight:700; color:#4b5563; text-transform:uppercase; margin-bottom:0.2rem;">
+              ${escapeHTML(affStr)}
+            </div>
 
-          <!-- 3 Bottom Executive Signatories (No Participant Badge) -->
-          <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:0.4rem; margin-top:0.8rem; border-top:1px solid #e5e7eb; padding-top:0.5rem; font-size:0.68rem; text-align:center;">
             <div>
-              <div style="font-family:'Great Vibes',cursive; font-size:1.1rem; color:#0b192c; font-weight:700;">Ashok Singhal</div>
-              <strong style="display:block; color:#0b192c; font-size:0.68rem;">ASHOK SINGHAL</strong>
-              <span style="color:#6b7280; font-size:0.6rem;">PRESIDENT</span>
+              <div style="font-family:'Cinzel',serif; font-size:1.15rem; font-weight:800; color:#1e3a8a; letter-spacing:1px; margin:0.2rem 0; background:rgba(30,58,138,0.08); padding:3px 14px; border-radius:20px; display:inline-block; border:1px solid rgba(30,58,138,0.2);">
+                OFFICIAL CERTIFICATE OF MERIT &amp; PERFORMANCE
+              </div>
             </div>
-            <div>
-              <div style="font-family:'Great Vibes',cursive; font-size:1.1rem; color:#0b192c; font-weight:700;">Parmesh Charan</div>
-              <strong style="display:block; color:#0b192c; font-size:0.68rem;">PARMESH CHARAN</strong>
-              <span style="color:#6b7280; font-size:0.6rem;">TREASURER</span>
-            </div>
-            <div>
-              <div style="font-family:'Great Vibes',cursive; font-size:1.1rem; color:#0b192c; font-weight:700;">Devendra Rana</div>
-              <strong style="display:block; color:#0b192c; font-size:0.68rem;">DEVENDRA KUMAR RANA</strong>
-              <span style="color:#6b7280; font-size:0.6rem;">GEN. SECRETARY</span>
-            </div>
-          </div>
 
-          <!-- Standalone URL Link -->
-          <div style="margin-top:0.6rem; padding-top:0.4rem; border-top:1px dashed #d1d5db;">
-            <a href="${escapeHTML(certUrl)}" target="_blank" style="color:#2563eb; font-size:0.75rem; text-decoration:underline; font-weight:600;">
-              🔗 Open Fullscreen Shareable Certificate (certificate-view.html)
-            </a>
+            <!-- Translucent Athlete Card -->
+            <div style="background:rgba(255,255,255,0.68); backdrop-filter:blur(2px); border:1px solid rgba(15,23,42,0.12); border-radius:8px; padding:0.6rem 1rem; margin:0.3rem 0; text-align:left; font-size:0.82rem;">
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.3rem 1rem;">
+                <div>
+                  <span style="color:#64748b; font-size:0.6rem; font-weight:700; display:block;">SKATER / ATHLETE NAME</span>
+                  <strong style="color:#0f172a; font-size:0.95rem;">${escapeHTML(c.skaterName || 'CHAITANYA GARG')}</strong>
+                </div>
+                <div>
+                  <span style="color:#64748b; font-size:0.6rem; font-weight:700; display:block;">FATHER / PARENT NAME</span>
+                  <strong style="color:#0f172a; font-size:0.95rem;">${escapeHTML(c.fatherName || 'MANAS GARG')}</strong>
+                </div>
+                <div>
+                  <span style="color:#64748b; font-size:0.6rem; font-weight:700; display:block;">SCHOOL / CLUB</span>
+                  <strong style="color:#0f172a; font-size:0.85rem;">${escapeHTML(c.schoolClub || 'KIDS SAVVY (ARYANS PANTHERS)')}</strong>
+                </div>
+                <div>
+                  <span style="color:#64748b; font-size:0.6rem; font-weight:700; display:block;">DISCIPLINE / EQUIPMENT</span>
+                  <strong style="color:#1e3a8a; font-size:0.85rem;">${escapeHTML(c.discipline || 'Quads')}</strong>
+                </div>
+              </div>
+            </div>
+
+            <!-- Venue (First) and Date (Second) -->
+            <div style="background:rgba(248,250,252,0.65); backdrop-filter:blur(2px); border:1px solid #e2e8f0; padding:0.35rem 0.8rem; border-radius:6px; font-size:0.75rem; color:#334155; display:flex; justify-content:space-between; margin-bottom:0.3rem;">
+              <div>📍 Venue: <strong style="color:#0f172a;">${escapeHTML(c.venue)}</strong></div>
+              <div>📅 Event Date: <strong style="color:#0f172a;">${escapeHTML(c.dateStr)}</strong></div>
+            </div>
+
+            <!-- Race Result Boxes (Supports 1, 2, or 3 Races) -->
+            <div style="display:grid; grid-template-columns: repeat(${Math.min(Math.max(raceCount, 1), 3)}, 1fr); gap:0.5rem; margin-bottom:0.3rem;">
+              <div style="background:rgba(255,255,255,0.7); border:1.5px solid #cbd5e1; border-radius:6px; overflow:hidden; text-align:center;">
+                <div style="background:rgba(241,245,249,0.85); color:#0b192c; font-size:0.65rem; font-weight:800; padding:3px 6px; border-bottom:1px solid #cbd5e1; letter-spacing:0.5px; text-transform:uppercase;">${escapeHTML(c.race1Title || 'RACE 1 RESULT')}</div>
+                <div style="min-height:34px; padding:4px; font-size:0.9rem; font-weight:800; color:#0f172a; display:flex; align-items:center; justify-content:center;">
+                  ${formattedR1 ? `<strong>${escapeHTML(formattedR1)}</strong>` : `<span style="color:#cbd5e1;">—</span>`}
+                </div>
+              </div>
+              ${raceCount >= 2 ? `
+              <div style="background:rgba(255,255,255,0.7); border:1.5px solid #cbd5e1; border-radius:6px; overflow:hidden; text-align:center;">
+                <div style="background:rgba(241,245,249,0.85); color:#0b192c; font-size:0.65rem; font-weight:800; padding:3px 6px; border-bottom:1px solid #cbd5e1; letter-spacing:0.5px; text-transform:uppercase;">${escapeHTML(c.race2Title || 'RACE 2 RESULT')}</div>
+                <div style="min-height:34px; padding:4px; font-size:0.9rem; font-weight:800; color:#0f172a; display:flex; align-items:center; justify-content:center;">
+                  ${formattedR2 ? `<strong>${escapeHTML(formattedR2)}</strong>` : `<span style="color:#cbd5e1;">—</span>`}
+                </div>
+              </div>` : ''}
+              ${raceCount >= 3 ? `
+              <div style="background:rgba(255,255,255,0.7); border:1.5px solid #cbd5e1; border-radius:6px; overflow:hidden; text-align:center;">
+                <div style="background:rgba(241,245,249,0.85); color:#0b192c; font-size:0.65rem; font-weight:800; padding:3px 6px; border-bottom:1px solid #cbd5e1; letter-spacing:0.5px; text-transform:uppercase;">${escapeHTML(c.race3Title || 'RACE 3 RESULT')}</div>
+                <div style="min-height:34px; padding:4px; font-size:0.9rem; font-weight:800; color:#0f172a; display:flex; align-items:center; justify-content:center;">
+                  ${formattedR3 ? `<strong>${escapeHTML(formattedR3)}</strong>` : `<span style="color:#cbd5e1;">—</span>`}
+                </div>
+              </div>` : ''}
+            </div>
+
+            <!-- 3 Bottom Executive Signatories with Real Transparent Signatures -->
+            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:0.4rem; margin-top:0.3rem; border-top:1px solid #e5e7eb; padding-top:0.3rem; font-size:0.68rem; text-align:center;">
+              <div>
+                <img src="assets/signatures/sig_ashok_singhal.png" style="height:36px; max-width:120px; object-fit:contain; margin-bottom:1px;" alt="Ashok Singhal Signature" />
+                <strong style="display:block; color:#dc2626; font-size:0.75rem;">ASHOK SINGHAL</strong>
+                <span style="color:#0b192c; font-weight:700; font-size:0.62rem;">PRESIDENT</span>
+              </div>
+              <div>
+                <img src="assets/signatures/sig_parmesh_charan.png" style="height:36px; max-width:120px; object-fit:contain; margin-bottom:1px;" alt="Parmesh Charan Signature" />
+                <strong style="display:block; color:#dc2626; font-size:0.75rem;">PARMESH CHARAN</strong>
+                <span style="color:#0b192c; font-weight:700; font-size:0.62rem;">TREASURER</span>
+              </div>
+              <div>
+                <img src="assets/signatures/sig_devendra_rana.png" style="height:36px; max-width:120px; object-fit:contain; margin-bottom:1px;" alt="Devendra Kumar Rana Signature" />
+                <strong style="display:block; color:#dc2626; font-size:0.75rem;">DEVENDRA KUMAR RANA</strong>
+                <span style="color:#0b192c; font-weight:700; font-size:0.62rem;">GEN. SECRETARY</span>
+              </div>
+            </div>
+
+            <!-- Standalone URL Link -->
+            <div style="margin-top:0.3rem; padding-top:0.2rem; border-top:1px dashed #d1d5db;">
+              <a href="${escapeHTML(certUrl)}" target="_blank" style="color:#2563eb; font-size:0.75rem; text-decoration:underline; font-weight:600;">
+                🔗 Open Fullscreen Shareable Certificate (certificate-view.html)
+              </a>
+            </div>
           </div>
         </div>
       `;
@@ -1761,7 +1846,9 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("certRaceCount"),
       document.getElementById("certRace1Title"), document.getElementById("certRace2Title"), document.getElementById("certRace3Title"),
       document.getElementById("certRace1Text"), document.getElementById("certRace2Text"), document.getElementById("certRace3Text"),
-      document.getElementById("certVenueText"), document.getElementById("certDateText")
+      document.getElementById("certVenueText"), document.getElementById("certDateText"),
+      document.getElementById("certRecUpRsa"), document.getElementById("certRecRsfi"),
+      document.getElementById("certRecWorldSkate"), document.getElementById("certRecIoc"), document.getElementById("certRecIoa")
     ].forEach(input => {
       if (input) {
         input.oninput = renderCertificatePreview;
@@ -1810,6 +1897,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (fetched && sheetsData.length > 0) {
         cachedSheets = sheetsData;
+        window.RSAM_CACHED_SHEETS = cachedSheets;
 
         // Update dropdown dynamically if new sheets are found
         if (certSheetSelect) {
@@ -3719,8 +3807,32 @@ document.addEventListener("DOMContentLoaded", () => {
     refreshPaymentsBtn.onclick = () => renderAdminPayments();
   }
 
-  function handleGenerateChestNumbersPdf() {
-    const allRecords = window.RSAM_ALL_PAYMENT_RECORDS || [];
+  async function handleGenerateChestNumbersPdf() {
+    let allRecords = window.RSAM_ALL_PAYMENT_RECORDS || [];
+    
+    // Fallback to cached certificate sheets if payment records empty
+    if ((!allRecords || allRecords.length === 0) && window.RSAM_CACHED_SHEETS && Array.isArray(window.RSAM_CACHED_SHEETS)) {
+      allRecords = window.RSAM_CACHED_SHEETS.flatMap(s => (s.records || []).map(r => ({ ...r, sheetName: s.sheetName })));
+    }
+
+    // Auto-fetch if still uninitialized
+    if (!allRecords || allRecords.length === 0) {
+      notify("⏳ Fetching skater registration records for chest numbers PDF...", "info");
+      const baseUrl = getAdminApiBaseUrl();
+      try {
+        const res = await fetch(`${baseUrl}/api/fetch-contacts`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && Array.isArray(data.sheets) && data.sheets.length > 0) {
+            window.RSAM_CACHED_SHEETS = data.sheets;
+            allRecords = data.sheets.flatMap(s => (s.records || []).map(r => ({ ...r, sheetName: s.sheetName })));
+          }
+        }
+      } catch (e) {
+        console.warn("[Chest Numbers Fetch Error]", e);
+      }
+    }
+
     const activeFilter = window.activePaymentEventFilter || "all";
     const certSelect = document.getElementById("certSheetSelect");
     const certSelectedSheet = certSelect ? certSelect.value : "";
@@ -3732,7 +3844,7 @@ document.addEventListener("DOMContentLoaded", () => {
       targetRecords = allRecords.filter(r => r.sheetName === activeFilter);
       eventTitle = activeFilter;
     } else if (certSelectedSheet) {
-      targetRecords = allRecords.filter(r => r.sheetName === certSelectedSheet);
+      targetRecords = allRecords.filter(r => r.sheetName === certSelectedSheet || (r.sheetName && r.sheetName.includes(certSelectedSheet)));
       eventTitle = certSelectedSheet;
     }
 

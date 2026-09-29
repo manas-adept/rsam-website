@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RSAM Official Digital Certificate of Merit &amp; Participation</title>
+  <title>RSAM Official Digital Certificate of Merit &amp; Performance</title>
   
   <!-- Google Fonts & FontAwesome -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -27,7 +27,7 @@
 
     body {
       margin: 0;
-      padding: 2rem 1rem;
+      padding: 1.5rem 1rem;
       background: #0f172a;
       font-family: 'Outfit', sans-serif;
       color: var(--text-dark);
@@ -40,9 +40,9 @@
 
     /* Print Controls Bar */
     .cert-actions-bar {
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.2rem;
       display: flex;
-      gap: 1rem;
+      gap: 0.8rem;
       flex-wrap: wrap;
       justify-content: center;
     }
@@ -50,14 +50,14 @@
       background: #2563eb;
       color: #fff;
       border: none;
-      padding: 0.75rem 1.8rem;
-      border-radius: 10px;
+      padding: 0.65rem 1.4rem;
+      border-radius: 8px;
       font-weight: 700;
-      font-size: 1rem;
+      font-size: 0.92rem;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 0.6rem;
+      gap: 0.5rem;
       box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
       transition: all 0.2s ease;
       text-decoration: none;
@@ -67,35 +67,47 @@
       box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6);
     }
 
-    /* Main Certificate Sheet Frame */
+    /* Verification Ribbon Bar */
+    .cert-verify-ribbon {
+      margin-bottom: 0.8rem;
+      font-size: 0.82rem;
+      font-weight: 700;
+      padding: 4px 14px;
+      border-radius: 20px;
+      border: 1px solid rgba(22, 163, 74, 0.3);
+      background: rgba(22, 163, 74, 0.1);
+      color: #15803d;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    /* Main Certificate Landscape Outer Container (Strict A4 Aspect Ratio 1.414) */
     .cert-container {
       width: 100%;
-      max-width: 1080px;
+      max-width: 1060px;
+      aspect-ratio: 1.414 / 1;
       background: linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #f1f5f9 100%);
-      border: 8px double var(--gold-foil);
-      outline: 3px solid var(--navy-dark);
-      outline-offset: -8px;
-      border-radius: 16px;
-      padding: 2.2rem 2.8rem;
+      border-radius: 12px;
+      padding: 1.6rem 2.2rem;
       position: relative;
       box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
 
-    /* Top Multicolor Accent Bar */
-    .cert-top-bar {
+    /* SVG Speed & Roller Skate Frame Overlay */
+    .cert-svg-frame {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
-      height: 7px;
-      display: flex;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
     }
-    .cert-top-bar span { flex: 1; height: 100%; }
-    .bar-b { background: #0077c8; }
-    .bar-y { background: #f4c430; }
-    .bar-g { background: #76a035; }
-    .bar-lg { background: #88c148; }
 
     /* Background RSAM Watermark */
     .cert-watermark {
@@ -103,8 +115,8 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 480px;
-      opacity: 0.20;
+      width: 440px;
+      opacity: 0.18;
       pointer-events: none;
       z-index: 0;
     }
@@ -112,22 +124,26 @@
     .cert-content {
       position: relative;
       z-index: 2;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
 
-    /* Header Logos Grid (No Frame & Border) */
+    /* Header Logos Row (4 Equal Height Transparent Logos) */
     .cert-header-logos {
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 1rem;
-      margin-bottom: 0.8rem;
+      margin-bottom: 0.4rem;
       border-bottom: 1.5px dashed rgba(15, 23, 42, 0.12);
-      padding-bottom: 0.8rem;
+      padding-bottom: 0.4rem;
     }
     .cert-top-logo {
-      height: 44px;
-      max-height: 48px;
-      max-width: 100px;
+      height: 52px;
+      max-height: 55px;
+      max-width: 120px;
       object-fit: contain;
       border: none !important;
       outline: none !important;
@@ -140,45 +156,46 @@
     /* Championship Title & Organizers */
     .cert-title-block {
       text-align: center;
-      margin-bottom: 1.2rem;
+      margin-bottom: 0.4rem;
     }
     .cert-event-title {
       font-family: 'Cinzel', serif;
-      font-size: 2.1rem;
+      font-size: 1.85rem;
       font-weight: 800;
       color: var(--red-accent);
-      margin: 0 0 0.3rem 0;
+      margin: 0 0 0.2rem 0;
       letter-spacing: 0.8px;
       text-transform: uppercase;
-      line-height: 1.2;
+      line-height: 1.15;
     }
     .cert-org-text {
-      font-size: 0.88rem;
+      font-size: 0.82rem;
       font-weight: 800;
       color: var(--navy-dark);
       text-transform: uppercase;
       letter-spacing: 1px;
-      margin-bottom: 0.2rem;
+      margin-bottom: 0.15rem;
     }
     .cert-affiliation-text {
-      font-size: 0.72rem;
+      font-size: 0.68rem;
       font-weight: 700;
       color: #4b5563;
       text-transform: uppercase;
       letter-spacing: 0.4px;
-      line-height: 1.45;
+      line-height: 1.4;
     }
+
     .cert-main-badge-heading {
       font-family: 'Cinzel', serif;
-      font-size: 1.6rem;
+      font-size: 1.35rem;
       font-weight: 800;
       color: var(--navy-blue);
       text-align: center;
-      margin: 0.8rem 0;
+      margin: 0.3rem auto 0.5rem auto;
       text-transform: uppercase;
-      letter-spacing: 1.5px;
+      letter-spacing: 1.2px;
       background: linear-gradient(135deg, rgba(30, 58, 138, 0.08), rgba(217, 119, 6, 0.08));
-      padding: 6px 18px;
+      padding: 4px 18px;
       border-radius: 30px;
       display: inline-block;
       border: 1px solid rgba(30, 58, 138, 0.2);
@@ -186,19 +203,19 @@
 
     /* Modern Athlete Profile Card (Translucent for Watermark Visibility) */
     .cert-athlete-card {
-      background: rgba(255, 255, 255, 0.65);
+      background: rgba(255, 255, 255, 0.68);
       backdrop-filter: blur(2px);
       border: 1px solid rgba(15, 23, 42, 0.12);
-      border-radius: 12px;
-      padding: 1.2rem 1.6rem;
-      margin-bottom: 1.2rem;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+      border-radius: 10px;
+      padding: 0.8rem 1.2rem;
+      margin-bottom: 0.5rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
     }
     .athlete-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 0.8rem 1.5rem;
-      font-size: 0.95rem;
+      gap: 0.4rem 1.2rem;
+      font-size: 0.88rem;
       color: #334155;
     }
     .athlete-field {
@@ -206,15 +223,15 @@
       flex-direction: column;
     }
     .field-label {
-      font-size: 0.72rem;
+      font-size: 0.65rem;
       font-weight: 700;
       color: #64748b;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      margin-bottom: 2px;
+      margin-bottom: 1px;
     }
     .field-value {
-      font-size: 1.1rem;
+      font-size: 1.02rem;
       font-weight: 800;
       color: #0f172a;
       text-transform: uppercase;
@@ -223,17 +240,17 @@
     /* Discipline Badges Row */
     .equip-badges-row {
       display: flex;
-      gap: 0.6rem;
-      margin-top: 0.8rem;
+      gap: 0.5rem;
+      margin-top: 0.4rem;
       flex-wrap: wrap;
     }
     .equip-badge {
       background: rgba(241, 245, 249, 0.75);
       border: 1.5px solid #cbd5e1;
       color: #64748b;
-      padding: 4px 12px;
+      padding: 2px 10px;
       border-radius: 20px;
-      font-size: 0.82rem;
+      font-size: 0.76rem;
       font-weight: 700;
       display: inline-flex;
       align-items: center;
@@ -254,89 +271,90 @@
       background: rgba(248, 250, 252, 0.65);
       backdrop-filter: blur(2px);
       border: 1px solid #e2e8f0;
-      padding: 0.6rem 1.2rem;
+      padding: 0.4rem 1rem;
       border-radius: 8px;
-      font-size: 0.88rem;
+      font-size: 0.82rem;
       color: #334155;
-      margin-bottom: 1rem;
+      margin-bottom: 0.5rem;
     }
 
-    /* Race Results Boxes */
+    /* Race Results Boxes Grid */
     .cert-race-boxes-row {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.2rem;
-      margin-bottom: 1.2rem;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.8rem;
+      margin-bottom: 0.5rem;
     }
     .cert-race-box {
-      background: rgba(255, 255, 255, 0.65);
+      background: rgba(255, 255, 255, 0.7);
       backdrop-filter: blur(2px);
       border: 1.5px solid #cbd5e1;
-      border-radius: 10px;
+      border-radius: 8px;
       overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
       text-align: center;
     }
     .race-box-title {
-      background: rgba(241, 245, 249, 0.75);
+      background: rgba(241, 245, 249, 0.85);
       color: var(--navy-dark);
-      font-size: 0.8rem;
+      font-size: 0.72rem;
       font-weight: 800;
-      padding: 6px 12px;
+      padding: 4px 8px;
       border-bottom: 1.5px solid #cbd5e1;
-      letter-spacing: 1px;
+      letter-spacing: 0.8px;
       text-transform: uppercase;
     }
     .race-box-val {
-      min-height: 54px;
-      padding: 10px 14px;
+      min-height: 42px;
+      padding: 6px 10px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.15rem;
+      font-size: 1rem;
       font-weight: 800;
       color: #0f172a;
     }
 
-    /* Bottom 3 Executive Signatories Layout */
+    /* Bottom 3 Executive Signatories Layout with Signature Images */
     .cert-signatories-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      margin-top: 1rem;
-      padding-top: 0.8rem;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.8rem;
+      margin-top: 0.4rem;
+      padding-top: 0.4rem;
       border-top: 1.5px solid #e2e8f0;
     }
     .signatory-col {
       text-align: center;
-      flex: 1;
-    }
-    .signatory-sig {
-      font-family: 'Great Vibes', cursive;
-      font-size: 2.2rem;
-      color: #0f172a;
-      line-height: 1;
-      height: 42px;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-end;
+    }
+    .signatory-img {
+      height: 42px;
+      max-width: 140px;
+      object-fit: contain;
+      margin-bottom: 2px;
+      filter: drop-shadow(0 1px 1px rgba(0,0,0,0.1));
     }
     .signatory-name {
-      font-size: 0.92rem;
+      font-size: 0.82rem;
       font-weight: 800;
       color: var(--red-accent);
-      margin-top: 4px;
+      margin-top: 2px;
       text-transform: uppercase;
+      letter-spacing: 0.3px;
     }
     .signatory-title {
-      font-size: 0.75rem;
+      font-size: 0.68rem;
       font-weight: 700;
       color: var(--navy-dark);
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
 
-    /* Print Optimization Rules (Strict A4 Page) */
+    /* Print Optimization Rules (Strict A4 Landscape Page) */
     @media print {
       @page {
         size: A4 landscape;
@@ -346,14 +364,16 @@
         background: #fff !important;
         padding: 0 !important;
       }
-      .cert-actions-bar {
+      .cert-actions-bar, .cert-verify-ribbon {
         display: none !important;
       }
       .cert-container {
-        border-width: 6px !important;
-        box-shadow: none !important;
-        max-width: 100% !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        max-width: none !important;
         border-radius: 0 !important;
+        box-shadow: none !important;
+        aspect-ratio: auto !important;
       }
     }
   </style>
@@ -363,35 +383,97 @@
   <!-- Top Action Controls -->
   <div class="cert-actions-bar">
     <button type="button" class="btn-cert-action" onclick="downloadPdfCertificate()" style="background:#2563eb;">
-      <i class="fa-solid fa-file-pdf"></i> 📥 Download PDF File
+      <i class="fa-solid fa-file-pdf"></i> 📥 Download Landscape PDF
     </button>
     <button type="button" class="btn-cert-action" onclick="window.print()" style="background:#0284c7;">
-      <i class="fa-solid fa-print"></i> 🖨️ Print / Save via Browser
+      <i class="fa-solid fa-print"></i> 🖨️ Print Landscape A4
     </button>
     <a href="index.html" class="btn-cert-action" style="background:#4b5563;">
       <i class="fa-solid fa-house"></i> Home
     </a>
   </div>
 
-  <!-- Certificate Outer Sheet Container -->
-  <div class="cert-container" id="certSheet">
-    
-    <!-- Top Color Bar -->
-    <div class="cert-top-bar">
-      <span class="bar-b"></span>
-      <span class="bar-y"></span>
-      <span class="bar-g"></span>
-      <span class="bar-lg"></span>
-    </div>
+  <div class="cert-verify-ribbon" id="certVerifyBadge">
+    <i class="fa-solid fa-shield-check"></i> <span>RSAM DIGITALLY VERIFIED &amp; READ-ONLY CERTIFICATE</span>
+  </div>
 
-    <!-- Central RSAM Watermark -->
-    <img src="https://res.cloudinary.com/igjmhsju/image/upload/v1788797466/rsam_website/branding/rsam-logo.png" class="cert-watermark" alt="RSAM Watermark" />
+  <!-- Certificate Outer Landscape Sheet Container -->
+  <div class="cert-container" id="certSheet">
+
+    <!-- Decorative Speed, Finishing Flags & Roller Skate Wheel SVG Border Frame -->
+    <svg class="cert-svg-frame" viewBox="0 0 1000 707" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="chequeredFlag" width="16" height="16" patternUnits="userSpaceOnUse">
+          <rect width="8" height="8" fill="#0b192c" />
+          <rect x="8" width="8" height="8" fill="#ffffff" />
+          <rect y="8" width="8" height="8" fill="#ffffff" />
+          <rect x="8" y="8" width="8" height="8" fill="#0b192c" />
+        </pattern>
+        <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#d97706" />
+          <stop offset="50%" stop-color="#fbbf24" />
+          <stop offset="100%" stop-color="#b45309" />
+        </linearGradient>
+        <linearGradient id="navyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#0b192c" />
+          <stop offset="100%" stop-color="#1e3a8a" />
+        </linearGradient>
+      </defs>
+
+      <!-- Outer Double Border Frame -->
+      <rect x="10" y="10" width="980" height="687" rx="10" fill="none" stroke="url(#goldGrad)" stroke-width="4" />
+      <rect x="18" y="18" width="964" height="671" rx="8" fill="none" stroke="url(#navyGrad)" stroke-width="2.5" />
+      <rect x="22" y="22" width="956" height="663" rx="6" fill="none" stroke="url(#goldGrad)" stroke-width="1.2" stroke-dasharray="6,3" />
+
+      <!-- Top & Bottom Chequered Speed Ribbons -->
+      <rect x="140" y="10" width="720" height="6" fill="url(#chequeredFlag)" opacity="0.9" />
+      <rect x="140" y="691" width="720" height="6" fill="url(#chequeredFlag)" opacity="0.9" />
+
+      <!-- Corner 1: Top-Left - Chequered Flag Badge -->
+      <g transform="translate(16, 16)">
+        <circle cx="24" cy="24" r="20" fill="url(#navyGrad)" stroke="url(#goldGrad)" stroke-width="2" />
+        <circle cx="24" cy="24" r="14" fill="url(#chequeredFlag)" />
+      </g>
+
+      <!-- Corner 2: Top-Right - Roller Skate Wheel & Bearing Badge -->
+      <g transform="translate(944, 16)">
+        <circle cx="24" cy="24" r="20" fill="url(#navyGrad)" stroke="url(#goldGrad)" stroke-width="2" />
+        <circle cx="24" cy="24" r="14" fill="none" stroke="#fbbf24" stroke-width="2" />
+        <circle cx="24" cy="24" r="6" fill="#d97706" stroke="#ffffff" stroke-width="1" />
+        <line x1="24" y1="10" x2="24" y2="38" stroke="#fbbf24" stroke-width="1.5" />
+        <line x1="10" y1="24" x2="38" y2="24" stroke="#fbbf24" stroke-width="1.5" />
+        <circle cx="24" cy="24" r="3" fill="#0b192c" />
+      </g>
+
+      <!-- Corner 3: Bottom-Left - Roller Skate Wheel & Bearing Badge -->
+      <g transform="translate(16, 651)">
+        <circle cx="24" cy="24" r="20" fill="url(#navyGrad)" stroke="url(#goldGrad)" stroke-width="2" />
+        <circle cx="24" cy="24" r="14" fill="none" stroke="#fbbf24" stroke-width="2" />
+        <circle cx="24" cy="24" r="6" fill="#d97706" stroke="#ffffff" stroke-width="1" />
+        <line x1="24" y1="10" x2="24" y2="38" stroke="#fbbf24" stroke-width="1.5" />
+        <line x1="10" y1="24" x2="38" y2="24" stroke="#fbbf24" stroke-width="1.5" />
+        <circle cx="24" cy="24" r="3" fill="#0b192c" />
+      </g>
+
+      <!-- Corner 4: Bottom-Right - Chequered Flag Badge -->
+      <g transform="translate(944, 651)">
+        <circle cx="24" cy="24" r="20" fill="url(#navyGrad)" stroke="url(#goldGrad)" stroke-width="2" />
+        <circle cx="24" cy="24" r="14" fill="url(#chequeredFlag)" />
+      </g>
+
+      <!-- Side Speed Motion Streaks -->
+      <path d="M 12 160 L 12 540" stroke="url(#goldGrad)" stroke-width="2.5" stroke-dasharray="16,8" />
+      <path d="M 988 160 L 988 540" stroke="url(#goldGrad)" stroke-width="2.5" stroke-dasharray="16,8" />
+    </svg>
+    
+    <!-- Central Transparent RSAM Watermark Logo -->
+    <img src="assets/branding/logo_rsam_transparent.png" class="cert-watermark" alt="RSAM Watermark" />
 
     <div class="cert-content">
       
-      <!-- Top 4 Logos Row (Ordered: RSAM, UPRSA, RSFI, INDIA OLYMPICS) -->
+      <!-- Top 4 Header Logos Row (Equal Size, Transparent Background: RSAM, UPRSA, RSFI, IOA) -->
       <div class="cert-header-logos">
-        <img src="assets/branding/logo_rsam.jpg" class="cert-top-logo" alt="RSAM Logo" />
+        <img src="assets/branding/logo_rsam_transparent.png" class="cert-top-logo" alt="RSAM Logo" />
         <img src="assets/branding/logo_uprsa.png" class="cert-top-logo" alt="UPRSA Logo" />
         <img src="assets/branding/logo_rsfi_indiaskate.png" class="cert-top-logo" alt="RSFI IndiaSkate Logo" />
         <img src="assets/branding/logo_ioa_india.webp" class="cert-top-logo" alt="India Olympics Logo" />
@@ -399,49 +481,50 @@
 
       <!-- Championship Title & Organizers -->
       <div class="cert-title-block">
-        <h1 class="cert-event-title" id="cEventTitle">4th District Championship 2026</h1>
+        <h1 class="cert-event-title" id="cEventTitle">4TH DISTRICT CHAMPIONSHIP 2026</h1>
         <div class="cert-org-text">ORGANIZED BY : ROLLER SPORTS ASSOCIATION MORADABAD</div>
-        <div class="cert-affiliation-text">
-          RECOGNIZED BY : UTTAR PRADESH ROLLER SPORTS ASSOCIATION (UPRSA)<br/>
-          UPRSA AFFILIATED TO : ROLLER SKATING FEDERATION OF INDIA (RSFI)
-        </div>
-        <div>
-          <h2 class="cert-main-badge-heading" id="cHeaderHeading">Certificate Of Merit &amp; Performance</h2>
+        <div class="cert-affiliation-text" id="cAffiliationsBlock">
+          RECOGNIZED BY UPRSA · UPRSA AFFILIATED TO : ROLLER SKATING FEDERATION OF INDIA (RSFI)
         </div>
       </div>
 
-      <!-- Modern Athlete Profile Card -->
+      <div style="text-align:center;">
+        <div class="cert-main-badge-heading">
+          OFFICIAL CERTIFICATE OF MERIT &amp; PERFORMANCE
+        </div>
+      </div>
+
+      <!-- Athlete Profile Translucent Card -->
       <div class="cert-athlete-card">
         <div class="athlete-grid">
           <div class="athlete-field">
-            <span class="field-label">Athlete Name</span>
+            <span class="field-label">SKATER / ATHLETE NAME</span>
             <span class="field-value" id="cSkaterName">CHAITANYA GARG</span>
           </div>
           <div class="athlete-field">
-            <span class="field-label">Father's / Parent's Name</span>
+            <span class="field-label">FATHER / PARENT NAME</span>
             <span class="field-value" id="cFatherName">MANAS GARG</span>
           </div>
-          <div class="athlete-field" style="grid-column: span 2;">
-            <span class="field-label">School / Institution / Club</span>
-            <span class="field-value" id="cSchoolClub">KIDS SAVVY (ARYANS PANTHERS)</span>
+          <div class="athlete-field">
+            <span class="field-label">SCHOOL / CLUB</span>
+            <span class="field-value" id="cSchoolClub" style="font-size:0.92rem;">KIDS SAVVY (ARYANS PANTHERS)</span>
           </div>
           <div class="athlete-field">
-            <span class="field-label">Date of Birth &amp; Age Group</span>
-            <span class="field-value"><span id="cDob">30/01/2020</span> (<span id="cAgeGroup">4-6 yrs</span>)</span>
+            <span class="field-label">DOB &amp; AGE GROUP</span>
+            <span class="field-value" style="font-size:0.92rem;"><span id="cDob">30/01/2020</span> · <span id="cAgeGroup">4-6 yrs</span></span>
           </div>
-          <div class="athlete-field">
-            <span class="field-label">Equipment Category</span>
-            <div class="equip-badges-row">
-              <span class="equip-badge" id="chkAdjustable">Adjustable</span>
-              <span class="equip-badge" id="chkInlineToy">Inline Toy</span>
-              <span class="equip-badge active" id="chkQuads">✓ Quads</span>
-              <span class="equip-badge" id="chkInline">Professional Inline</span>
-            </div>
-          </div>
+        </div>
+
+        <!-- Equipment & Discipline Badges -->
+        <div class="equip-badges-row">
+          <span class="equip-badge" id="chkAdjustable">Adjustable</span>
+          <span class="equip-badge" id="chkInlineToy">Inline Toy</span>
+          <span class="equip-badge active" id="chkQuads">✓ Quads</span>
+          <span class="equip-badge" id="chkInline">Professional Inline</span>
         </div>
       </div>
 
-      <!-- Date & Venue Bar (Venue placed FIRST, then Event Date) -->
+      <!-- Venue (First) and Date (Second) Meta Bar -->
       <div class="cert-meta-bar">
         <div>📍 Venue: <strong id="cVenue" style="color:#0f172a;">Moradabad Sports Complex, Kanth Road, Moradabad</strong></div>
         <div>📅 Event Date: <strong id="cDate" style="color:#0f172a;">15th - 16th October 2026</strong></div>
@@ -450,50 +533,36 @@
       <!-- Race Results Boxes (Supports 1, 2, or 3 Races) -->
       <div class="cert-race-boxes-row" id="cRaceBoxesRow">
         <div class="cert-race-box" id="cRaceBox1">
-          <div class="race-box-title" id="cRace1Title">RACE 1 RESULT</div>
-          <div class="race-box-val" id="cRace1Val"></div>
+          <div class="race-box-title" id="cRace1Title">RACE 1 (200M)</div>
+          <div class="race-box-val" id="cRace1Val"><strong>🥇 1st Position</strong></div>
         </div>
         <div class="cert-race-box" id="cRaceBox2">
-          <div class="race-box-title" id="cRace2Title">RACE 2 RESULT</div>
-          <div class="race-box-val" id="cRace2Val"></div>
+          <div class="race-box-title" id="cRace2Title">RACE 2 (500M)</div>
+          <div class="race-box-val" id="cRace2Val"><strong>🥈 2nd Position</strong></div>
         </div>
         <div class="cert-race-box" id="cRaceBox3" style="display:none;">
-          <div class="race-box-title" id="cRace3Title">RACE 3 RESULT</div>
-          <div class="race-box-val" id="cRace3Val"></div>
+          <div class="race-box-title" id="cRace3Title">RACE 3 (1000M)</div>
+          <div class="race-box-val" id="cRace3Val"><span style="color:#cbd5e1;">—</span></div>
         </div>
       </div>
 
-      <!-- Bottom 3 Signatories Row -->
+      <!-- Bottom 3 Executive Signatories Row with Actual Signature Images -->
       <div class="cert-signatories-row">
-        
-        <!-- Signatory 1: President -->
         <div class="signatory-col">
-          <div class="signatory-sig">Ashok Singhal</div>
+          <img src="assets/signatures/sig_ashok_singhal.png" class="signatory-img" alt="Ashok Singhal Signature" />
           <div class="signatory-name">ASHOK SINGHAL</div>
           <div class="signatory-title">PRESIDENT</div>
         </div>
-
-        <!-- Signatory 2: Treasurer -->
         <div class="signatory-col">
-          <div class="signatory-sig">Parmesh Charan</div>
+          <img src="assets/signatures/sig_parmesh_charan.png" class="signatory-img" alt="Parmesh Charan Signature" />
           <div class="signatory-name">PARMESH CHARAN</div>
           <div class="signatory-title">TREASURER</div>
         </div>
-
-        <!-- Signatory 3: General Secretary -->
         <div class="signatory-col">
-          <div class="signatory-sig">Devendra Rana</div>
+          <img src="assets/signatures/sig_devendra_rana.png" class="signatory-img" alt="Devendra Kumar Rana Signature" />
           <div class="signatory-name">DEVENDRA KUMAR RANA</div>
           <div class="signatory-title">GEN. SECRETARY</div>
         </div>
-
-      </div>
-
-      <!-- Digital Verification & Tamper-Proof Stamp -->
-      <div style="margin-top:0.8rem; text-align:center; border-top:1px dashed #e2e8f0; padding-top:0.5rem;" id="certVerifyBadgeWrap">
-        <span id="certVerifyBadge" style="font-size:0.75rem; font-weight:700; color:#15803d; background:rgba(22,163,74,0.1); padding:4px 14px; border-radius:20px; border:1px solid rgba(22,163,74,0.3); display:inline-flex; align-items:center; gap:6px;">
-          <i class="fa-solid fa-shield-check"></i> <span>RSAM DIGITALLY VERIFIED &amp; READ-ONLY CERTIFICATE</span>
-        </span>
       </div>
 
     </div>
@@ -525,7 +594,7 @@
 
     function formatRaceRank(str) {
       if (!str) return "";
-      const s = str.trim().toLowerCase();
+      const s = String(str).trim().toLowerCase();
       if (s.includes("participant") || s.includes("participation") || s === "-" || s === "n/a" || s === "null" || s === "none") {
         return "";
       }
@@ -540,7 +609,7 @@
       }
       if (s.includes("4th")) return "4th Position";
       if (s.includes("5th")) return "5th Position";
-      return str.trim();
+      return String(str).trim();
     }
 
     // URL Query Parameter Dynamic Auto-Filler & Security Verifier
@@ -553,14 +622,14 @@
       let schoolClub   = p.get("schoolClub") || p.get("school") || "KIDS SAVVY (ARYANS PANTHERS)";
       let dob          = p.get("dob") || "30/01/2020";
       let ageGroup     = p.get("ageGroup") || "4-6 yrs";
-      let eventTitle   = p.get("eventTitle") || p.get("eventName") || "4th District Championship 2026";
+      let eventTitle   = p.get("eventTitle") || p.get("eventName") || "4TH DISTRICT CHAMPIONSHIP 2026";
       let discipline   = p.get("discipline") || p.get("category") || "Quads";
       let rawResult    = p.get("result") || p.get("results") || "";
 
       let raceCount    = parseInt(p.get("raceCount") || p.get("races") || "2", 10);
-      let race1Title   = p.get("race1Title") || p.get("r1Title") || "RACE 1 RESULT";
-      let race2Title   = p.get("race2Title") || p.get("r2Title") || "RACE 2 RESULT";
-      let race3Title   = p.get("race3Title") || p.get("r3Title") || "RACE 3 RESULT";
+      let race1Title   = p.get("race1Title") || p.get("r1Title") || "RACE 1 (200M)";
+      let race2Title   = p.get("race2Title") || p.get("r2Title") || "RACE 2 (500M)";
+      let race3Title   = p.get("race3Title") || p.get("r3Title") || "RACE 3 (1000M)";
 
       let race1        = p.get("race1") || p.get("rink1") || "";
       let race2        = p.get("race2") || p.get("rink2") || "";
@@ -568,6 +637,26 @@
       let date         = p.get("date") || "15th - 16th October 2026";
       let venue        = p.get("venue") || "Moradabad Sports Complex, Kanth Road, Moradabad";
       const sig        = p.get("sig") || "";
+
+      // Recognition Multi-select flags
+      let recUpRsa     = p.get("recUpRsa") !== "0";
+      let recRsfi      = p.get("recRsfi") !== "0";
+      let recWorldSkate = p.get("recWorldSkate") === "1";
+      let recIoc       = p.get("recIoc") === "1";
+      let recIoa       = p.get("recIoa") === "1";
+
+      // Rebuild Recognition Lines dynamically
+      const recLines = [];
+      if (recUpRsa) recLines.push("RECOGNIZED BY UPRSA");
+      if (recRsfi) recLines.push("UPRSA AFFILIATED TO : ROLLER SKATING FEDERATION OF INDIA (RSFI)");
+      if (recWorldSkate) recLines.push("AFFILIATED TO : WORLD SKATE");
+      if (recIoc) recLines.push("RECOGNIZED BY : INTERNATIONAL OLYMPIC COMMITTEE (IOC)");
+      if (recIoa) recLines.push("RECOGNIZED BY : INDIAN OLYMPIC ASSOCIATION (IOA)");
+
+      const affBlock = document.getElementById("cAffiliationsBlock");
+      if (affBlock) {
+        affBlock.innerHTML = recLines.length > 0 ? recLines.join(" · ") : "RECOGNIZED BY UPRSA · UPRSA AFFILIATED TO : ROLLER SKATING FEDERATION OF INDIA (RSFI)";
+      }
 
       // 1. Signature Integrity Check
       const expectedSig = generateCertSignatureSync(skaterName, regNo, race1 || rawResult, race2, discipline, race3);
@@ -702,7 +791,7 @@
           filename: filename,
           image: { type: 'jpeg', quality: 0.98 },
           html2canvas: { scale: 2, useCORS: true, logging: false },
-          jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+          jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
         };
         html2pdf().set(opt).from(element).save();
       } else {
