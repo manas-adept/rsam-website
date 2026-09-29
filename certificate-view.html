@@ -108,14 +108,14 @@
       z-index: 1;
     }
 
-    /* Background RSAM Watermark */
+    /* Background RSAM Watermark (Slightly more visible through translucent boxes) */
     .cert-watermark {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
       width: 440px;
-      opacity: 0.16;
+      opacity: 0.22;
       pointer-events: none;
       z-index: 0;
     }
@@ -129,7 +129,7 @@
       justify-content: space-between;
     }
 
-    /* Header Logos Row (Centered, Prominent, Standout Sizing) */
+    /* Header Logos Row (Centered, Prominent, Visually Equal Sizes) */
     .cert-header-logos {
       display: flex;
       justify-content: space-around;
@@ -140,8 +140,8 @@
       border-bottom: 1.5px stroke rgba(15, 23, 42, 0.12);
     }
     .cert-top-logo {
-      height: 68px;
-      max-height: 72px;
+      height: 58px;
+      max-height: 62px;
       max-width: 140px;
       object-fit: contain;
       border: none !important;
@@ -151,6 +151,12 @@
       border-radius: 0 !important;
       padding: 0 !important;
       filter: drop-shadow(0 2px 4px rgba(0,0,0,0.06));
+    }
+    /* RSAM circular logo visually scaled to match rectangular logos */
+    .cert-top-logo-rsam {
+      height: 74px;
+      max-height: 76px;
+      max-width: 150px;
     }
 
     /* Championship Title & Organizers */
@@ -203,7 +209,7 @@
 
     /* Modern Athlete Profile Card (Translucent for Watermark Visibility) */
     .cert-athlete-card {
-      background: rgba(255, 255, 255, 0.75);
+      background: rgba(255, 255, 255, 0.42);
       backdrop-filter: blur(2px);
       border: 1px solid rgba(15, 23, 42, 0.12);
       border-radius: 10px;
@@ -231,18 +237,19 @@
       margin-bottom: 1px;
     }
     .field-value {
-      font-size: 1.05rem;
+      font-size: 0.98rem;
       font-weight: 800;
       color: #0f172a;
       text-transform: uppercase;
+      font-family: 'Outfit', sans-serif;
     }
 
-    /* Date & Venue Bar */
+    /* Date & Venue Bar (Translucent) */
     .cert-meta-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: rgba(248, 250, 252, 0.7);
+      background: rgba(248, 250, 252, 0.42);
       backdrop-filter: blur(2px);
       border: 1px solid #e2e8f0;
       padding: 0.4rem 1rem;
@@ -252,7 +259,7 @@
       margin-bottom: 0.4rem;
     }
 
-    /* Race Results Boxes Grid */
+    /* Race Results Boxes Grid (Translucent) */
     .cert-race-boxes-row {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -260,7 +267,7 @@
       margin-bottom: 0.4rem;
     }
     .cert-race-box {
-      background: rgba(255, 255, 255, 0.75);
+      background: rgba(255, 255, 255, 0.42);
       backdrop-filter: blur(2px);
       border: 1.5px solid #cbd5e1;
       border-radius: 8px;
@@ -269,7 +276,7 @@
       text-align: center;
     }
     .race-box-title {
-      background: rgba(241, 245, 249, 0.9);
+      background: rgba(241, 245, 249, 0.65);
       color: var(--navy-dark);
       font-size: 0.72rem;
       font-weight: 800;
@@ -310,7 +317,7 @@
       display: flex;
       align-items: flex-end;
       justify-content: center;
-      margin-bottom: 3px;
+      margin-bottom: -5px;
     }
     .signatory-img {
       height: 45px;
@@ -383,6 +390,12 @@
     <!-- Elegant Royal Navy & Silver SVG Border Frame -->
     <svg class="cert-svg-frame" viewBox="0 0 1000 707" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
       <defs>
+        <pattern id="svgChequeredFlag" width="16" height="16" patternUnits="userSpaceOnUse">
+          <rect width="8" height="8" fill="#0b192c" />
+          <rect x="8" width="8" height="8" fill="#ffffff" />
+          <rect y="8" width="8" height="8" fill="#ffffff" />
+          <rect x="8" y="8" width="8" height="8" fill="#0b192c" />
+        </pattern>
         <linearGradient id="navyFrameGrad" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stop-color="#0b192c" />
           <stop offset="50%" stop-color="#1e3a8a" />
@@ -399,6 +412,10 @@
       <rect x="10" y="10" width="980" height="687" rx="10" fill="none" stroke="url(#navyFrameGrad)" stroke-width="5" />
       <rect x="18" y="18" width="964" height="671" rx="8" fill="none" stroke="url(#silverGrad)" stroke-width="2" />
       <rect x="22" y="22" width="956" height="663" rx="6" fill="none" stroke="url(#navyFrameGrad)" stroke-width="1.2" stroke-dasharray="8,4" />
+
+      <!-- Top & Bottom Chequered Flag Pattern Borders -->
+      <rect x="140" y="10" width="720" height="6" fill="url(#svgChequeredFlag)" opacity="0.9" rx="2" />
+      <rect x="140" y="691" width="720" height="6" fill="url(#svgChequeredFlag)" opacity="0.9" rx="2" />
 
       <!-- Corner Brackets -->
       <g transform="translate(14, 14)">
@@ -422,7 +439,7 @@
       
       <!-- Top 4 Header Logos Row (Prominent Standout Logos: RSAM, UPRSA, RSFI, IOA) -->
       <div class="cert-header-logos">
-        <img src="assets/branding/logo_rsam_transparent.png" class="cert-top-logo" alt="RSAM Logo" />
+        <img src="assets/branding/logo_rsam_transparent.png" class="cert-top-logo cert-top-logo-rsam" alt="RSAM Logo" />
         <img src="assets/branding/logo_uprsa.png" class="cert-top-logo" alt="UPRSA Logo" />
         <img src="assets/branding/logo_rsfi_indiaskate.png" class="cert-top-logo" alt="RSFI IndiaSkate Logo" />
         <img src="assets/branding/logo_ioa_india.webp" class="cert-top-logo" alt="India Olympics Logo" />
@@ -439,11 +456,11 @@
 
       <div style="text-align:center;">
         <div class="cert-main-badge-heading">
-          OFFICIAL CERTIFICATE OF MERIT &amp; PERFORMANCE
+          CERTIFICATE OF MERIT &amp; PARTICIPATION
         </div>
       </div>
 
-      <!-- Athlete Profile Translucent Card (Includes Explicit Discipline Header) -->
+      <!-- Athlete Profile Translucent Card (Uniform Styling for All 5 Fields) -->
       <div class="cert-athlete-card">
         <div class="athlete-grid">
           <div class="athlete-field">
@@ -451,20 +468,20 @@
             <span class="field-value" id="cSkaterName">CHAITANYA GARG</span>
           </div>
           <div class="athlete-field">
-            <span class="field-label">FATHER / PARENT NAME</span>
+            <span class="field-label">FATHER / PARENT'S NAME</span>
             <span class="field-value" id="cFatherName">MANAS GARG</span>
           </div>
           <div class="athlete-field">
             <span class="field-label">SCHOOL / CLUB</span>
-            <span class="field-value" id="cSchoolClub" style="font-size:0.92rem;">KIDS SAVVY (ARYANS PANTHERS)</span>
+            <span class="field-value" id="cSchoolClub">KIDS SAVVY (ARYANS PANTHERS)</span>
           </div>
           <div class="athlete-field">
             <span class="field-label">DOB &amp; AGE GROUP</span>
-            <span class="field-value" style="font-size:0.92rem;"><span id="cDob">30/01/2020</span> · <span id="cAgeGroup">4-6 yrs</span></span>
+            <span class="field-value"><span id="cDob">30/01/2020</span> · <span id="cAgeGroup">4-6 YRS</span></span>
           </div>
-          <div class="athlete-field" style="grid-column: span 2; background: rgba(30, 58, 138, 0.06); padding: 5px 10px; border-radius: 6px; border: 1px solid rgba(30, 58, 138, 0.15);">
-            <span class="field-label" style="color:#1e3a8a; font-weight:800;">DISCIPLINE / CATEGORY</span>
-            <span class="field-value" id="cDisciplineVal" style="color:#1e3a8a; font-size:1.05rem;">QUADS</span>
+          <div class="athlete-field">
+            <span class="field-label">DISCIPLINE / CATEGORY</span>
+            <span class="field-value" id="cDisciplineVal">QUADS</span>
           </div>
         </div>
       </div>

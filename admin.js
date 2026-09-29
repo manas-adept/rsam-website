@@ -1698,9 +1698,15 @@ document.addEventListener("DOMContentLoaded", () => {
       certPreviewWrap.innerHTML = `
         <div style="width:100%; aspect-ratio:1.414/1; background:linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #f1f5f9 100%); border-radius:12px; padding:1.4rem 2rem; color:#1f2937; font-family:'Outfit',sans-serif; text-align:center; position:relative; box-shadow:0 10px 30px rgba(0,0,0,0.5); display:flex; flex-direction:column; justify-content:space-between; box-sizing:border-box; overflow:hidden;">
           
-          <!-- Royal Navy & Silver Metallic SVG Frame Overlay -->
+          <!-- Royal Navy & Silver Metallic SVG Frame Overlay with Top/Bottom Chequered Flags -->
           <svg style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:1;" viewBox="0 0 1000 707" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
             <defs>
+              <pattern id="adminChequeredFlag" width="16" height="16" patternUnits="userSpaceOnUse">
+                <rect width="8" height="8" fill="#0b192c" />
+                <rect x="8" width="8" height="8" fill="#ffffff" />
+                <rect y="8" width="8" height="8" fill="#ffffff" />
+                <rect x="8" y="8" width="8" height="8" fill="#0b192c" />
+              </pattern>
               <linearGradient id="adminNavyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stop-color="#0b192c" />
                 <stop offset="50%" stop-color="#1e3a8a" />
@@ -1715,6 +1721,11 @@ document.addEventListener("DOMContentLoaded", () => {
             <rect x="8" y="8" width="984" height="691" rx="8" fill="none" stroke="url(#adminNavyGrad)" stroke-width="6" />
             <rect x="16" y="16" width="968" height="675" rx="6" fill="none" stroke="url(#adminSilverGrad)" stroke-width="2.5" />
             <rect x="22" y="22" width="956" height="663" rx="4" fill="none" stroke="url(#adminNavyGrad)" stroke-width="1.2" stroke-dasharray="8,4" />
+            
+            <!-- Top & Bottom Chequered Flag Pattern Borders -->
+            <rect x="140" y="10" width="720" height="6" fill="url(#adminChequeredFlag)" opacity="0.9" rx="2" />
+            <rect x="140" y="691" width="720" height="6" fill="url(#adminChequeredFlag)" opacity="0.9" rx="2" />
+
             <g transform="translate(14, 14)">
               <rect width="20" height="20" fill="url(#adminNavyGrad)" rx="3" />
               <circle cx="10" cy="10" r="5" fill="url(#adminSilverGrad)" />
@@ -1734,12 +1745,12 @@ document.addEventListener("DOMContentLoaded", () => {
           </svg>
 
           <!-- RSAM Transparent Watermark -->
-          <img src="assets/branding/logo_rsam_transparent.png" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:380px; opacity:0.18; pointer-events:none; z-index:0;" alt="RSAM Watermark" />
+          <img src="assets/branding/logo_rsam_transparent.png" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:380px; opacity:0.22; pointer-events:none; z-index:0;" alt="RSAM Watermark" />
 
           <div style="position:relative; z-index:2; height:100%; display:flex; flex-direction:column; justify-content:space-between;">
-            <!-- Top 4 Header Logos Bar (Equal Size, Standout Transparent Logos: RSAM, UPRSA, RSFI, IOA) -->
+            <!-- Top 4 Header Logos Bar (Standout Transparent Logos: RSAM enlarged visually, UPRSA, RSFI, IOA) -->
             <div style="display:flex; justify-content:space-around; align-items:center; margin-bottom:0.3rem; border-bottom:1.5px dashed rgba(15,23,42,0.15); padding:0.2rem 1rem 0.4rem 1rem; gap:0.8rem;">
-              <img src="assets/branding/logo_rsam_transparent.png" style="height:50px; max-height:52px; max-width:110px; object-fit:contain; border:none; background:transparent;" alt="RSAM Logo" />
+              <img src="assets/branding/logo_rsam_transparent.png" style="height:60px; max-height:64px; max-width:125px; object-fit:contain; border:none; background:transparent;" alt="RSAM Logo" />
               <img src="assets/branding/logo_uprsa.png" style="height:48px; max-height:50px; max-width:110px; object-fit:contain; border:none; background:transparent;" alt="UPRSA Logo" />
               <img src="assets/branding/logo_rsfi_indiaskate.png" style="height:48px; max-height:50px; max-width:110px; object-fit:contain; border:none; background:transparent;" alt="RSFI Logo" />
               <img src="assets/branding/logo_ioa_india.webp" style="height:48px; max-height:50px; max-width:110px; object-fit:contain; border:none; background:transparent;" alt="IOA India Logo" />
@@ -1754,19 +1765,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
             <div>
               <div style="font-family:'Cinzel',serif; font-size:1.15rem; font-weight:800; color:#1e3a8a; letter-spacing:1px; margin:0.2rem 0; background:rgba(30,58,138,0.08); padding:3px 14px; border-radius:20px; display:inline-block; border:1px solid rgba(30,58,138,0.2);">
-                OFFICIAL CERTIFICATE OF MERIT &amp; PERFORMANCE
+                CERTIFICATE OF MERIT &amp; PARTICIPATION
               </div>
             </div>
 
-            <!-- Translucent Athlete Card -->
-            <div style="background:rgba(255,255,255,0.68); backdrop-filter:blur(2px); border:1px solid rgba(15,23,42,0.12); border-radius:8px; padding:0.6rem 1rem; margin:0.3rem 0; text-align:left; font-size:0.82rem;">
+            <!-- Translucent Athlete Card (Uniform Field Styles) -->
+            <div style="background:rgba(255,255,255,0.42); backdrop-filter:blur(2px); border:1px solid rgba(15,23,42,0.12); border-radius:8px; padding:0.6rem 1rem; margin:0.3rem 0; text-align:left; font-size:0.82rem;">
               <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.3rem 1rem;">
                 <div>
                   <span style="color:#64748b; font-size:0.6rem; font-weight:700; display:block;">SKATER / ATHLETE NAME</span>
                   <strong style="color:#0f172a; font-size:0.95rem;">${escapeHTML(c.skaterName || 'CHAITANYA GARG')}</strong>
                 </div>
                 <div>
-                  <span style="color:#64748b; font-size:0.6rem; font-weight:700; display:block;">FATHER / PARENT NAME</span>
+                  <span style="color:#64748b; font-size:0.6rem; font-weight:700; display:block;">FATHER / PARENT'S NAME</span>
                   <strong style="color:#0f172a; font-size:0.95rem;">${escapeHTML(c.fatherName || 'MANAS GARG')}</strong>
                 </div>
                 <div>
@@ -1774,56 +1785,66 @@ document.addEventListener("DOMContentLoaded", () => {
                   <strong style="color:#0f172a; font-size:0.85rem;">${escapeHTML(c.schoolClub || 'KIDS SAVVY (ARYANS PANTHERS)')}</strong>
                 </div>
                 <div>
+                  <span style="color:#64748b; font-size:0.6rem; font-weight:700; display:block;">DOB &amp; AGE GROUP</span>
+                  <strong style="color:#0f172a; font-size:0.85rem;">${escapeHTML(c.dob || '30/01/2020')} ${c.ageGroup ? '· ' + escapeHTML(c.ageGroup) : ''}</strong>
+                </div>
+                <div style="grid-column: span 2;">
                   <span style="color:#64748b; font-size:0.6rem; font-weight:700; display:block;">DISCIPLINE / CATEGORY</span>
-                  <strong style="color:#1e3a8a; font-size:0.85rem;">${escapeHTML(c.discipline || 'Quads')}</strong>
+                  <strong style="color:#0f172a; font-size:0.95rem;">${escapeHTML(c.discipline || 'Quads')}</strong>
                 </div>
               </div>
             </div>
 
             <!-- Venue (First) and Date (Second) -->
-            <div style="background:rgba(248,250,252,0.65); backdrop-filter:blur(2px); border:1px solid #e2e8f0; padding:0.35rem 0.8rem; border-radius:6px; font-size:0.75rem; color:#334155; display:flex; justify-content:space-between; margin-bottom:0.3rem;">
+            <div style="background:rgba(248,250,252,0.42); backdrop-filter:blur(2px); border:1px solid #e2e8f0; padding:0.35rem 0.8rem; border-radius:6px; font-size:0.75rem; color:#334155; display:flex; justify-content:space-between; margin-bottom:0.3rem;">
               <div>📍 Venue: <strong style="color:#0f172a;">${escapeHTML(c.venue)}</strong></div>
               <div>📅 Event Date: <strong style="color:#0f172a;">${escapeHTML(c.dateStr)}</strong></div>
             </div>
 
             <!-- Race Result Boxes (Supports 1, 2, or 3 Races) -->
             <div style="display:grid; grid-template-columns: repeat(${Math.min(Math.max(raceCount, 1), 3)}, 1fr); gap:0.5rem; margin-bottom:0.3rem;">
-              <div style="background:rgba(255,255,255,0.7); border:1.5px solid #cbd5e1; border-radius:6px; overflow:hidden; text-align:center;">
-                <div style="background:rgba(241,245,249,0.85); color:#0b192c; font-size:0.65rem; font-weight:800; padding:3px 6px; border-bottom:1px solid #cbd5e1; letter-spacing:0.5px; text-transform:uppercase;">${escapeHTML(c.race1Title || 'RACE 1 RESULT')}</div>
+              <div style="background:rgba(255,255,255,0.42); backdrop-filter:blur(2px); border:1.5px solid #cbd5e1; border-radius:6px; overflow:hidden; text-align:center;">
+                <div style="background:rgba(241,245,249,0.65); color:#0b192c; font-size:0.65rem; font-weight:800; padding:3px 6px; border-bottom:1px solid #cbd5e1; letter-spacing:0.5px; text-transform:uppercase;">${escapeHTML(c.race1Title || 'RACE 1 RESULT')}</div>
                 <div style="min-height:34px; padding:4px; font-size:0.9rem; font-weight:800; color:#0f172a; display:flex; align-items:center; justify-content:center;">
                   ${formattedR1 ? `<strong>${escapeHTML(formattedR1)}</strong>` : `<span style="color:#cbd5e1;">—</span>`}
                 </div>
               </div>
               ${raceCount >= 2 ? `
-              <div style="background:rgba(255,255,255,0.7); border:1.5px solid #cbd5e1; border-radius:6px; overflow:hidden; text-align:center;">
-                <div style="background:rgba(241,245,249,0.85); color:#0b192c; font-size:0.65rem; font-weight:800; padding:3px 6px; border-bottom:1px solid #cbd5e1; letter-spacing:0.5px; text-transform:uppercase;">${escapeHTML(c.race2Title || 'RACE 2 RESULT')}</div>
+              <div style="background:rgba(255,255,255,0.42); backdrop-filter:blur(2px); border:1.5px solid #cbd5e1; border-radius:6px; overflow:hidden; text-align:center;">
+                <div style="background:rgba(241,245,249,0.65); color:#0b192c; font-size:0.65rem; font-weight:800; padding:3px 6px; border-bottom:1px solid #cbd5e1; letter-spacing:0.5px; text-transform:uppercase;">${escapeHTML(c.race2Title || 'RACE 2 RESULT')}</div>
                 <div style="min-height:34px; padding:4px; font-size:0.9rem; font-weight:800; color:#0f172a; display:flex; align-items:center; justify-content:center;">
                   ${formattedR2 ? `<strong>${escapeHTML(formattedR2)}</strong>` : `<span style="color:#cbd5e1;">—</span>`}
                 </div>
               </div>` : ''}
               ${raceCount >= 3 ? `
-              <div style="background:rgba(255,255,255,0.7); border:1.5px solid #cbd5e1; border-radius:6px; overflow:hidden; text-align:center;">
-                <div style="background:rgba(241,245,249,0.85); color:#0b192c; font-size:0.65rem; font-weight:800; padding:3px 6px; border-bottom:1px solid #cbd5e1; letter-spacing:0.5px; text-transform:uppercase;">${escapeHTML(c.race3Title || 'RACE 3 RESULT')}</div>
+              <div style="background:rgba(255,255,255,0.42); backdrop-filter:blur(2px); border:1.5px solid #cbd5e1; border-radius:6px; overflow:hidden; text-align:center;">
+                <div style="background:rgba(241,245,249,0.65); color:#0b192c; font-size:0.65rem; font-weight:800; padding:3px 6px; border-bottom:1px solid #cbd5e1; letter-spacing:0.5px; text-transform:uppercase;">${escapeHTML(c.race3Title || 'RACE 3 RESULT')}</div>
                 <div style="min-height:34px; padding:4px; font-size:0.9rem; font-weight:800; color:#0f172a; display:flex; align-items:center; justify-content:center;">
                   ${formattedR3 ? `<strong>${escapeHTML(formattedR3)}</strong>` : `<span style="color:#cbd5e1;">—</span>`}
                 </div>
               </div>` : ''}
             </div>
 
-            <!-- 3 Bottom Executive Signatories with Real Transparent Signatures -->
+            <!-- 3 Bottom Executive Signatories with Lowered Signatures (-5px margin) -->
             <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:0.4rem; margin-top:0.3rem; border-top:1px solid #e5e7eb; padding-top:0.3rem; font-size:0.68rem; text-align:center;">
               <div>
-                <img src="assets/signatures/sig_ashok_singhal.png" style="height:38px; max-width:120px; object-fit:contain; margin-bottom:1px;" alt="Ashok Singhal Signature" />
+                <div style="height:40px; display:flex; align-items:flex-end; justify-content:center; margin-bottom:-5px;">
+                  <img src="assets/signatures/sig_ashok_singhal.png" style="height:38px; max-width:120px; object-fit:contain;" alt="Ashok Singhal Signature" />
+                </div>
                 <strong style="display:block; color:#dc2626; font-size:0.75rem;">ASHOK SINGHAL</strong>
                 <span style="color:#0b192c; font-weight:700; font-size:0.62rem;">PRESIDENT</span>
               </div>
               <div>
-                <img src="assets/signatures/sig_parmesh_charan.png" style="height:38px; max-width:120px; object-fit:contain; margin-bottom:1px;" alt="Parmesh Charan Signature" />
+                <div style="height:40px; display:flex; align-items:flex-end; justify-content:center; margin-bottom:-5px;">
+                  <img src="assets/signatures/sig_parmesh_charan.png" style="height:38px; max-width:120px; object-fit:contain;" alt="Parmesh Charan Signature" />
+                </div>
                 <strong style="display:block; color:#dc2626; font-size:0.75rem;">PARMESH CHARAN</strong>
                 <span style="color:#0b192c; font-weight:700; font-size:0.62rem;">TREASURER</span>
               </div>
               <div>
-                <img src="assets/signatures/sig_devendra_rana.png" style="height:38px; max-width:120px; object-fit:contain; margin-bottom:1px;" alt="Devendra Kumar Rana Signature" />
+                <div style="height:40px; display:flex; align-items:flex-end; justify-content:center; margin-bottom:-5px;">
+                  <img src="assets/signatures/sig_devendra_rana.png" style="height:38px; max-width:120px; object-fit:contain;" alt="Devendra Kumar Rana Signature" />
+                </div>
                 <strong style="display:block; color:#dc2626; font-size:0.75rem;">DEVENDRA KUMAR RANA</strong>
                 <span style="color:#0b192c; font-weight:700; font-size:0.62rem;">GEN. SECRETARY</span>
               </div>
@@ -3880,6 +3901,10 @@ document.addEventListener("DOMContentLoaded", () => {
         <style>
           @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&display=swap');
           * { box-sizing: border-box; margin: 0; padding: 0; }
+          @page {
+            size: A4 landscape;
+            margin: 0.3in;
+          }
           body {
             font-family: 'Outfit', sans-serif;
             background: #f3f4f6;
@@ -3915,56 +3940,49 @@ document.addEventListener("DOMContentLoaded", () => {
             background: #fff;
             border: 4px solid #1e3a8a;
             border-radius: 16px;
-            padding: 24px 16px 16px 16px;
+            padding: 16px 20px;
             text-align: center;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             align-items: center;
-            height: 280px;
+            height: 320px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
             page-break-inside: avoid;
             position: relative;
           }
           .event-badge {
-            font-size: 11px;
+            font-size: 13px;
             font-weight: 800;
             color: #dc2626;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
           }
           .chest-number {
-            font-size: 84px;
+            font-size: 125px;
             font-weight: 900;
             color: #0f172a;
-            line-height: 1;
-            letter-spacing: -1px;
-            margin: 8px 0;
+            line-height: 0.95;
+            letter-spacing: -2px;
+            margin: 2px 0;
           }
           .skater-name {
-            font-size: 16px;
-            font-weight: 700;
+            font-size: 22px;
+            font-weight: 900;
             color: #1e293b;
             text-transform: uppercase;
-            letter-spacing: 0.3px;
-            max-width: 90%;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-          }
-          .skater-sub {
-            font-size: 12px;
-            color: #64748b;
-            font-weight: 600;
-            margin-top: 2px;
+            letter-spacing: 0.5px;
+            line-height: 1.25;
+            margin-top: 4px;
+            word-break: break-word;
           }
           .association-footer {
-            border-top: 2px solid #e2e8f0;
+            border-top: 2px solid #cbd5e1;
             width: 100%;
-            padding-top: 8px;
-            margin-top: 8px;
-            font-size: 11px;
+            padding-top: 6px;
+            margin-top: 6px;
+            font-size: 12px;
             font-weight: 800;
             color: #1e3a8a;
             letter-spacing: 0.5px;
@@ -3978,7 +3996,7 @@ document.addEventListener("DOMContentLoaded", () => {
               gap: 15px;
             }
             .chest-card {
-              height: 4.8in;
+              height: 3.4in;
               border-width: 4px;
               page-break-inside: avoid;
             }
@@ -3988,24 +4006,22 @@ document.addEventListener("DOMContentLoaded", () => {
       <body>
         <div class="no-print-bar">
           <div>
-            <strong>🎽 Printable Chest Numbers PDF</strong> — ${escapeHTML(eventTitle)} (${targetRecords.length} Skaters)
+            <strong>🎽 Printable Chest Numbers PDF (Landscape Layout)</strong> — ${escapeHTML(eventTitle)} (${targetRecords.length} Skaters)
           </div>
-          <button class="btn-print" onclick="window.print()">🖨️ Print Chest Numbers (A4 Cards)</button>
+          <button class="btn-print" onclick="window.print()">🖨️ Print Chest Numbers (Landscape A4)</button>
         </div>
         <div class="chest-grid">
           ${targetRecords.map((r, idx) => {
             const chestNum = r.eventRegNo || r.chestNo || r.chestNumber || String(100 + idx);
             const skaterName = r.skaterName || r.name || 'Athlete';
-            const catDiscipline = [r.discipline, r.ageGroup].filter(Boolean).join(' · ');
             return `
               <div class="chest-card">
-                <div>
+                <div style="width:100%;">
                   <div class="event-badge">${escapeHTML(eventTitle)}</div>
                   <div class="chest-number">${escapeHTML(chestNum)}</div>
                 </div>
-                <div>
+                <div style="width:100%;">
                   <div class="skater-name">${escapeHTML(skaterName)}</div>
-                  <div class="skater-sub">${escapeHTML(catDiscipline)}</div>
                 </div>
                 <div class="association-footer">
                   Roller Sports Association Moradabad
