@@ -1205,7 +1205,8 @@ document.addEventListener("DOMContentLoaded", () => {
             <th style="padding:0.4rem;">Role</th>
             <th style="padding:0.4rem;">Name</th>
             <th style="padding:0.4rem;">Mobile</th>
-            <th style="padding:0.4rem;">Reg No / Candidates</th>
+            <th style="padding:0.4rem;">Chest No (Event)</th>
+            <th style="padding:0.4rem;">RSAM Reg No</th>
             <th style="padding:0.4rem;">Discipline</th>
           </tr>
         </thead>
@@ -1218,7 +1219,8 @@ document.addEventListener("DOMContentLoaded", () => {
               <td style="padding:0.35rem;"><span style="background:${r.role === 'Coach' ? 'rgba(245,158,11,0.2)' : 'rgba(59,130,246,0.2)'}; color:${r.role === 'Coach' ? '#fbbf24' : '#60a5fa'}; padding:2px 6px; border-radius:4px; font-size:0.75rem;">${r.role}</span></td>
               <td style="padding:0.35rem;"><strong>${r.name}</strong></td>
               <td style="padding:0.35rem;"><code>${r.mobile}</code></td>
-              <td style="padding:0.35rem; color:${r.role === 'Coach' ? '#fbbf24' : '#f59e0b'};">${r.role === 'Coach' ? `👔 ${r.candidates ? r.candidates.length : 0} Candidates` : (r.data.regNumber || '—')}</td>
+              <td style="padding:0.35rem; color:#fbbf24; font-weight:700;">${r.role === 'Coach' ? `👔 ${r.candidates ? r.candidates.length : 0} Candidates` : (r.data.eventRegNo || r.data.chestNo || '—')}</td>
+              <td style="padding:0.35rem; color:#60a5fa; font-size:0.8rem;"><code>${r.data.regNumber || '—'}</code></td>
               <td style="padding:0.35rem;">${r.data.discipline || '—'}</td>
             </tr>
           `).join('')}
@@ -1440,28 +1442,39 @@ document.addEventListener("DOMContentLoaded", () => {
           if (progressStatus) progressStatus.textContent = `Sending ${i + 1} of ${recipients.length}: ${r.name} (${r.mobile})...`;
           if (progressBar) progressBar.style.width = `${pct}%`;
 
-          // Candidate list formatting for coach (includes Chest Number)
-          const chestNoVal = r.data.eventRegNo || r.data.chestNo || r.data.chestNumber || r.data.bib || 'N/A';
+          // Candidate list formatting for coach & skater (includes both Chest Number and RSAM Registration Number)
+          const chestNoVal = r.data.eventRegNo || r.data.chestNo || r.data.chestNumber || r.data.bib || '';
+          const rsamRegVal = r.data.regNumber || r.data.rsamRegNo || '';
+
           let skaterListStr = "";
           if (r.role === "Coach") {
             if (r.candidates && r.candidates.length > 0) {
               skaterListStr = r.candidates.map(c => {
-                const cChest = c.eventRegNo || c.chestNo || c.chestNumber || c.bib || 'N/A';
-                return `• ${c.skaterName || 'Athlete'} - Reg: ${c.regNumber || 'N/A'} (Chest No: ${cChest})`;
+                const cChest = c.eventRegNo || c.chestNo || c.chestNumber || c.bib || '';
+                const cRsam = c.regNumber || c.rsamRegNo || '';
+                const chestStr = cChest ? ` (Chest No: ${cChest})` : '';
+                const regStr = cRsam ? ` - Reg: ${cRsam}` : '';
+                return `• ${c.skaterName || 'Athlete'}${regStr}${chestStr}`;
               }).join('\n');
             } else {
-              skaterListStr = `• ${r.data.skaterName || 'Athlete'} - Reg: ${r.data.regNumber || 'N/A'} (Chest No: ${chestNoVal})`;
+              const chestStr = chestNoVal ? ` (Chest No: ${chestNoVal})` : '';
+              const regStr = rsamRegVal ? ` - Reg: ${rsamRegVal}` : '';
+              skaterListStr = `• ${r.data.skaterName || 'Athlete'}${regStr}${chestStr}`;
             }
           } else {
-            skaterListStr = `• ${r.data.skaterName || r.name} - Reg: ${r.data.regNumber || 'N/A'} (Chest No: ${chestNoVal})`;
+            const chestStr = chestNoVal ? ` (Chest No: ${chestNoVal})` : '';
+            const regStr = rsamRegVal ? ` - Reg: ${rsamRegVal}` : '';
+            skaterListStr = `• ${r.data.skaterName || r.name}${regStr}${chestStr}`;
           }
 
           let parsedMsg = rawTemplate
-            .replace(/{chestNo}/g, chestNoVal)
+            .replace(/{chestNo}/g, chestNoVal || 'N/A')
+            .replace(/{eventRegNo}/g, chestNoVal || 'N/A')
+            .replace(/{rsamRegNo}/g, rsamRegVal || 'N/A')
             .replace(/{skaterList}/g, skaterListStr)
             .replace(/{skaterName} - {regNumber}/g, skaterListStr)
             .replace(/{skaterName}/g, r.data.skaterName || r.name)
-            .replace(/{regNumber}/g, r.data.regNumber || 'N/A')
+            .replace(/{regNumber}/g, rsamRegVal || 'N/A')
             .replace(/{discipline}/g, r.data.discipline || 'N/A')
             .replace(/{coachName}/g, r.name || r.data.coachName || 'Coach')
             .replace(/{coachMobile}/g, r.mobile)

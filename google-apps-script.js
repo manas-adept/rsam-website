@@ -157,14 +157,31 @@ function doGet(e) {
           
           idx = headers.findIndex(h => {
             if (candidate === "age") return (h === "age" || h === "age (yrs)" || h === "age (years)") || (h.includes("age") && !h.includes("group"));
+            if ((candidate === "reg no" || candidate === "reg number" || candidate === "registration no") && h.includes("event reg")) {
+              return false;
+            }
             return h.includes(candidate);
           });
           if (idx !== -1) return idx;
         }
         return fallbackIdx;
       }
-      const eventRegIdx   = findHeaderIndex(["event reg no", "chest no", "chest number", "bib"], 1);
-      const regIdx        = findHeaderIndex(["rsam reg", "reg no", "reg. no", "reg number", "registration no"], 2);
+
+      let eventRegIdx = findHeaderIndex(["event reg no", "event reg", "chest no", "chest number", "bib"], -1);
+      if (eventRegIdx === -1 && headers[1] && (headers[1].includes("event") || headers[1].includes("chest") || headers[1].includes("bib"))) {
+        eventRegIdx = 1;
+      }
+      
+      let regIdx = findHeaderIndex(["rsam reg no", "rsam reg", "annual reg no", "registration no", "reg number", "reg no"], -1);
+      if (regIdx === -1) {
+        if (headers[2] && (headers[2].includes("rsam") || headers[2].includes("reg"))) {
+          regIdx = 2;
+        } else if (headers[1] && (headers[1].includes("rsam") || (headers[1].includes("reg") && !headers[1].includes("event")))) {
+          regIdx = 1;
+        } else {
+          regIdx = 2;
+        }
+      }
       const nameIdx       = findHeaderIndex(["skater name", "name"], 4);
       const dobIdx        = findHeaderIndex(["date of birth", "dob"], 5);
       const ageIdx        = findHeaderIndex(["age (yrs)", "age (years)", "age"], 6);
