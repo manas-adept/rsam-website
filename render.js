@@ -1103,10 +1103,6 @@ function renderConnect() {
       <button class="connect-tab" id="connectTab" onclick="if(window.openConnect) window.openConnect();" aria-label="Toggle contact panel" aria-expanded="false">
         <span class="connect-tab__label">Contact Us</span>
       </button>
-
-      <div class="visitor-tab" title="Total RSAM Website Visitors">
-        <span class="visitor-tab__label"><span class="visitor-count-num topVisitorCount" id="visitorCount">0</span> visitors</span>
-      </div>
     </div>
 
     <!-- Sliding Floating Contact Panel -->
