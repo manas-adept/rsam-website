@@ -299,10 +299,20 @@ function renderNavbar() {
         ? `href="event-register.html?eventId=${ev.id}"`
         : `href="index.html#events" onclick="openImageLightbox('${evImgSrc}', '${escapeHTML(ev.title)}')"`;
 
+      let deadlineStr = "";
+      if (ev.showDeadlineOnTicker && ev.deadline) {
+        let rawDl = String(ev.deadline);
+        if (rawDl.includes("T")) {
+          const dParts = rawDl.split("T")[0].split("-");
+          if (dParts.length === 3) rawDl = `${dParts[2]}/${dParts[1]}/${dParts[0]}`;
+        }
+        deadlineStr = ` · <span style="color:#fbbf24; font-weight:800;">⏳ Deadline: ${rawDl}</span>`;
+      }
+
       return `
         <a ${clickHandler} class="ticker-item">
           <span class="ticker-badge">⚡ ANNOUNCEMENT</span>
-          <span><strong>${ev.title}</strong> — ${ev.date} · Venue: <strong>${ev.location}</strong></span>
+          <span><strong>${ev.title}</strong> — ${ev.date} · Venue: <strong>${ev.location}</strong>${deadlineStr}</span>
           <span class="ticker-link-btn">${ctaLabel}</span>
         </a>
       `;

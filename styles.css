@@ -4517,3 +4517,132 @@ body[data-theme="light"] {
   box-shadow: 0 8px 25px rgba(224, 28, 46, 0.6);
 }
 
+/* Social Follow & Subscribe Popup Modal */
+.social-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  opacity: 0;
+  animation: fadeInSocialModal 0.3s forwards ease-out;
+}
+.social-popup-overlay[hidden] {
+  display: none !important;
+}
+@keyframes fadeInSocialModal {
+  to { opacity: 1; }
+}
+.social-popup-card {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  padding: 2.2rem 1.8rem;
+  max-width: 440px;
+  width: 100%;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+  transform: translateY(20px);
+  animation: slideUpSocialModal 0.35s forwards ease-out;
+}
+@keyframes slideUpSocialModal {
+  to { transform: translateY(0); }
+}
+.social-popup-close {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  background: rgba(255,255,255,0.1);
+  border: none;
+  color: #9ca3af;
+  font-size: 1.6rem;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.social-popup-close:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+}
+.social-popup-logo {
+  height: 65px;
+  margin-bottom: 0.8rem;
+}
+.social-popup-header h3 {
+  color: #fff;
+  font-size: 1.35rem;
+  margin: 0 0 0.5rem 0;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+}
+.social-popup-header p {
+  color: #9ca3af;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  margin: 0 0 1.4rem 0;
+}
+.social-popup-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-bottom: 1.2rem;
+}
+.btn-social-follow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.75rem 1.2rem;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+.btn-instagram {
+  background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045);
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(253, 29, 29, 0.3);
+}
+.btn-instagram:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(253, 29, 29, 0.5);
+}
+.btn-youtube {
+  background: #ff0000;
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3);
+}
+.btn-youtube:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 0, 0, 0.5);
+}
+.social-popup-footer {
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding-top: 0.8rem;
+}
+.btn-social-dismiss {
+  background: transparent;
+  border: none;
+  color: #6b7280;
+  font-size: 0.82rem;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.btn-social-dismiss:hover {
+  color: #9ca3af;
+}
+

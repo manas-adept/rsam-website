@@ -1642,6 +1642,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const elR3Title = document.getElementById("certRace3Title");
       const elVen = document.getElementById("certVenueText");
       const elDat = document.getElementById("certDateText");
+      const certDob = document.getElementById("certDob");
+      const certAgeGroup = document.getElementById("certAgeGroup");
 
       const recUpRsa = document.getElementById("certRecUpRsa");
       const recRsfi = document.getElementById("certRecRsfi");
@@ -1657,6 +1659,8 @@ document.addEventListener("DOMContentLoaded", () => {
         fatherName: certFatherName ? certFatherName.value.trim() : "",
         schoolClub: certSchoolClub ? certSchoolClub.value.trim() : "",
         discipline: certDiscipline ? certDiscipline.value.trim() : "",
+        dob: certDob ? certDob.value.trim() : "",
+        ageGroup: certAgeGroup ? certAgeGroup.value.trim() : "",
         raceCount: elRCount ? parseInt(elRCount.value, 10) : 2,
         race1Title: elR1Title ? elR1Title.value.trim() : "Race 1 (200m)",
         race2Title: elR2Title ? elR2Title.value.trim() : "Race 2 (500m)",
@@ -2005,11 +2009,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Helper to extract Race 1, Race 2 & Race 3 from record
       function populateSkaterInEditor(r) {
-        if (!r) return;
+        const certDob = document.getElementById("certDob");
+        const certAgeGroup = document.getElementById("certAgeGroup");
+
         if (certSkaterName) certSkaterName.value = r.skaterName || r.name || '';
         if (certFatherName) certFatherName.value = r.fatherName || r.father_name || '';
         if (certSchoolClub) certSchoolClub.value = r.schoolClub || r.school_club || '';
         if (certDiscipline) certDiscipline.value = r.discipline || r.category || '';
+        if (certDob)        certDob.value        = r.dob || r.dateOfBirth || r.birth_date || '';
+        if (certAgeGroup)   certAgeGroup.value   = r.ageGroup || r.age_group || r.category || '';
         if (certMobile)     certMobile.value     = r.mobile || r.phone || '';
 
         const elR1 = document.getElementById("certRace1Text");
@@ -2621,10 +2629,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
       <div class="modal-section-card">
         <h4 class="modal-sec-title">Visibility &amp; Status Controls</h4>
-        <div class="form-row">
+        <div class="form-row" style="flex-wrap:wrap; gap:1.2rem;">
           <label style="display:flex; align-items:center; gap:0.5rem; color:#fff; cursor:pointer;">
             <input type="checkbox" id="mEvShowTicker" ${ev.showOnTicker ? 'checked' : ''} />
             <span>Display on banner</span>
+          </label>
+          <label style="display:flex; align-items:center; gap:0.5rem; color:#fff; cursor:pointer;">
+            <input type="checkbox" id="mEvShowDeadlineTicker" ${ev.showDeadlineOnTicker ? 'checked' : ''} />
+            <span>Display Deadline on Ticker</span>
           </label>
           <label style="display:flex; align-items:center; gap:0.5rem; color:#fff; cursor:pointer;">
             <input type="checkbox" id="mEvActiveReg" ${ev.isRegistrationActive ? 'checked' : ''} />
@@ -3135,6 +3147,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const isRegActive = document.getElementById("mEvActiveReg").checked;
         const isTickerShow = document.getElementById("mEvShowTicker").checked;
+        const isShowDeadlineTicker = document.getElementById("mEvShowDeadlineTicker") ? document.getElementById("mEvShowDeadlineTicker").checked : false;
         const feeTypeVal = document.getElementById("mEvFeeType").value;
 
         let deadlineVal = document.getElementById("mEvDeadline").value.trim();
@@ -3174,6 +3187,7 @@ document.addEventListener("DOMContentLoaded", () => {
           description: document.getElementById("mEvDesc").value.trim(),
           body: document.getElementById("mEvDesc").value.trim(),
           showOnTicker: isTickerShow,
+          showDeadlineOnTicker: isShowDeadlineTicker,
           isRegistrationActive: isRegActive,
           archived: document.getElementById("mEvArchived") ? document.getElementById("mEvArchived").checked : false
         };
@@ -3442,7 +3456,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!fileId && match2) fileId = match2[1];
 
     if (fileId) {
-      return `https://drive.google.com/uc?export=view&id=${fileId}`;
+      return `https://lh3.googleusercontent.com/d/${fileId}=s1200`;
     }
     return url;
   }
@@ -3589,10 +3603,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const isRejected = rawSt === 'REJECTED' || rawSt === 'DECLINED';
       
       let statusBadgeHTML = isPending
-        ? `<span style="background:rgba(245,158,11,0.2); color:#fbbf24; border:1px solid rgba(245,158,11,0.4); padding:4px 10px; border-radius:12px; font-size:0.75rem; font-weight:700;">⏳ Pending Approval</span>`
+        ? `<span style="background:rgba(245,158,11,0.18); color:#fbbf24; border:1px solid rgba(245,158,11,0.4); padding:3px 8px; border-radius:12px; font-size:0.75rem; font-weight:700;"><i class="fa-solid fa-clock"></i> Pending Approval</span>`
         : (isRejected 
-          ? `<span style="background:rgba(239,68,68,0.2); color:#f87171; border:1px solid rgba(239,68,68,0.4); padding:4px 10px; border-radius:12px; font-size:0.75rem; font-weight:700;">🔴 Rejected</span>`
-          : `<span style="background:rgba(16,185,129,0.2); color:#34d399; border:1px solid rgba(16,185,129,0.4); padding:4px 10px; border-radius:12px; font-size:0.75rem; font-weight:700;">🟢 Approved / Paid</span>`);
+          ? `<span style="background:rgba(239,68,68,0.18); color:#f87171; border:1px solid rgba(239,68,68,0.4); padding:3px 8px; border-radius:12px; font-size:0.75rem; font-weight:700;"><i class="fa-solid fa-circle-xmark"></i> Rejected</span>`
+          : `<span style="background:rgba(16,185,129,0.18); color:#34d399; border:1px solid rgba(16,185,129,0.4); padding:3px 8px; border-radius:12px; font-size:0.75rem; font-weight:700;"><i class="fa-solid fa-circle-check"></i> Approved / Paid</span>`);
 
       const regNo = r.regNumber || r.registrationNo || r.eventRegNo || `R26-${idx+1}`;
       const name = r.skaterName || r.name || 'Athlete';
@@ -3625,62 +3639,67 @@ document.addEventListener("DOMContentLoaded", () => {
 
       rowsHTML += `
         <tr style="border-bottom:1px solid rgba(255,255,255,0.06); transition:background 0.2s;">
-          <td style="padding:0.85rem 1rem; color:#60a5fa; font-weight:700; font-size:0.88rem; white-space:nowrap;">
+          <td style="padding:0.55rem 0.75rem; color:#60a5fa; font-weight:700; font-size:0.85rem; white-space:nowrap;">
             ${regNo}
           </td>
-          <td style="padding:0.85rem 1rem;">
-            <strong style="color:#fff; display:block; font-size:0.92rem;">${escapeHTML(name)}</strong>
-            <small style="color:#9ca3af;">📱 ${mob}</small>
+          <td style="padding:0.55rem 0.75rem;">
+            <strong style="color:#fff; display:block; font-size:0.88rem;">${escapeHTML(name)}</strong>
+            <small style="color:#9ca3af; font-size:0.78rem;"><i class="fa-solid fa-phone" style="font-size:0.7rem;"></i> ${mob}</small>
           </td>
-          <td style="padding:0.85rem 1rem; color:#d1d5db; font-size:0.85rem;">
+          <td style="padding:0.55rem 0.75rem; color:#d1d5db; font-size:0.82rem;">
             ${escapeHTML(r.discipline || 'Skating')}
-            <div style="font-size:0.75rem; color:#9ca3af;">${cleanAgeGroup}</div>
+            <div style="font-size:0.72rem; color:#9ca3af;">${cleanAgeGroup}</div>
           </td>
-          <td style="padding:0.85rem 1rem; font-size:0.85rem;">
-            <strong style="color:#34d399; font-size:0.92rem; display:block;">${amt}</strong>
-            <div style="font-size:0.78rem; color:#60a5fa; font-weight:600; font-family:monospace; margin-top:2px;">UTR: ${escapeHTML(utrVal)}</div>
+          <td style="padding:0.55rem 0.75rem; font-size:0.82rem;">
+            <strong style="color:#34d399; font-size:0.88rem; display:block;">${amt}</strong>
+            <div style="font-size:0.75rem; color:#60a5fa; font-weight:600; font-family:monospace; margin-top:1px;">UTR: ${escapeHTML(utrVal)}</div>
           </td>
-          <td style="padding:0.85rem 1rem; text-align:center;">
+          <td style="padding:0.55rem 0.75rem; text-align:center;">
             ${screenshot && screenshot !== '—' ? `
-              <button type="button" class="btn-dash-action view-screenshot-btn" data-img="${encodeURIComponent(screenshot)}" style="font-size:0.78rem; padding:4px 10px; background:rgba(59,130,246,0.15); color:#93c5fd; border:1px solid rgba(59,130,246,0.3);">
-                📷 View Receipt
+              <button type="button" class="btn-dash-action view-screenshot-btn" data-img="${encodeURIComponent(screenshot)}" style="font-size:0.75rem; padding:3px 8px; background:rgba(59,130,246,0.15); color:#93c5fd; border:1px solid rgba(59,130,246,0.3);">
+                <i class="fa-solid fa-receipt"></i> View Receipt
               </button>
-            ` : `<span style="color:#6b7280; font-size:0.78rem;">No Image</span>`}
+            ` : `<span style="color:#6b7280; font-size:0.75rem;">No Image</span>`}
           </td>
-          <td style="padding:0.85rem 1rem; text-align:center;">
+          <td style="padding:0.55rem 0.75rem; text-align:center;">
             ${statusBadgeHTML}
           </td>
-          <td style="padding:0.85rem 1rem; text-align:right; white-space:nowrap;">
+          <td style="padding:0.55rem 0.75rem; text-align:right; white-space:nowrap;">
             ${isPending ? `
-              <button type="button" class="approve-payment-btn" data-reg="${regNo}" data-sheet="${r.sheetName}" style="background:#10b981; color:#fff; border:none; padding:6px 14px; border-radius:6px; font-weight:700; font-size:0.82rem; cursor:pointer; margin-right:4px;">
-                ✓ Approve
+              <button type="button" class="approve-payment-btn" data-reg="${regNo}" data-sheet="${r.sheetName}" style="background:#10b981; color:#fff; border:none; padding:4px 10px; border-radius:6px; font-weight:700; font-size:0.78rem; cursor:pointer; margin-right:4px;">
+                <i class="fa-solid fa-check"></i> Approve
               </button>
-              <button type="button" class="reject-payment-btn" data-reg="${regNo}" data-sheet="${r.sheetName}" style="background:rgba(239,68,68,0.2); color:#f87171; border:1px solid rgba(239,68,68,0.4); padding:5px 10px; border-radius:6px; font-weight:600; font-size:0.82rem; cursor:pointer;">
-                ✕ Reject
+              <button type="button" class="reject-payment-btn" data-reg="${regNo}" data-sheet="${r.sheetName}" style="background:rgba(239,68,68,0.2); color:#f87171; border:1px solid rgba(239,68,68,0.4); padding:4px 8px; border-radius:6px; font-weight:600; font-size:0.78rem; cursor:pointer;">
+                <i class="fa-solid fa-xmark"></i> Reject
               </button>
             ` : (isRejected ? `
-              <button type="button" class="approve-payment-btn" data-reg="${regNo}" data-sheet="${r.sheetName}" style="background:rgba(16,185,129,0.2); color:#34d399; border:1px solid rgba(16,185,129,0.4); padding:4px 10px; border-radius:6px; font-weight:600; font-size:0.78rem; cursor:pointer;">
-                Re-Approve
+              <button type="button" class="approve-payment-btn" data-reg="${regNo}" data-sheet="${r.sheetName}" style="background:rgba(16,185,129,0.2); color:#34d399; border:1px solid rgba(16,185,129,0.4); padding:4px 8px; border-radius:6px; font-weight:600; font-size:0.75rem; cursor:pointer;">
+                <i class="fa-solid fa-rotate-left"></i> Re-Approve
               </button>
             ` : `
-              <span style="color:#34d399; font-size:0.8rem; font-weight:600;">✓ Pass Issued</span>
+              <span style="color:#34d399; font-size:0.78rem; font-weight:600;"><i class="fa-solid fa-check-double"></i> Pass Issued</span>
             `)}
           </td>
         </tr>
       `;
     });
 
+    tableWrap.style.maxHeight = "480px";
+    tableWrap.style.overflowY = "auto";
+    tableWrap.style.borderRadius = "10px";
+    tableWrap.style.border = "1px solid rgba(255,255,255,0.1)";
+
     tableWrap.innerHTML = `
-      <table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.9rem;">
+      <table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.85rem; position:relative;">
         <thead>
-          <tr style="background:rgba(255,255,255,0.04); border-bottom:1px solid rgba(255,255,255,0.1); color:#9ca3af; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em;">
-            <th style="padding:0.75rem 1rem;">Reg. ID</th>
-            <th style="padding:0.75rem 1rem;">Athlete &amp; Contact</th>
-            <th style="padding:0.75rem 1rem;">Event / Category</th>
-            <th style="padding:0.75rem 1rem;">Amount &amp; UTR</th>
-            <th style="padding:0.75rem 1rem; text-align:center;">Screenshot</th>
-            <th style="padding:0.75rem 1rem; text-align:center;">Payment Status</th>
-            <th style="padding:0.75rem 1rem; text-align:right;">Admin Action</th>
+          <tr style="background:#0f172a; position:sticky; top:0; z-index:10; border-bottom:1.5px solid rgba(255,255,255,0.12); color:#9ca3af; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.05em; box-shadow:0 2px 4px rgba(0,0,0,0.3);">
+            <th style="padding:0.6rem 0.75rem; background:#0f172a;">Reg. ID</th>
+            <th style="padding:0.6rem 0.75rem; background:#0f172a;">Athlete &amp; Contact</th>
+            <th style="padding:0.6rem 0.75rem; background:#0f172a;">Event / Category</th>
+            <th style="padding:0.6rem 0.75rem; background:#0f172a;">Amount &amp; UTR</th>
+            <th style="padding:0.6rem 0.75rem; text-align:center; background:#0f172a;">Screenshot</th>
+            <th style="padding:0.6rem 0.75rem; text-align:center; background:#0f172a;">Payment Status</th>
+            <th style="padding:0.6rem 0.75rem; text-align:right; background:#0f172a;">Admin Action</th>
           </tr>
         </thead>
         <tbody>
@@ -3946,7 +3965,7 @@ document.addEventListener("DOMContentLoaded", () => {
             flex-direction: column;
             justify-content: space-between;
             align-items: center;
-            height: 320px;
+            height: 340px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
             page-break-inside: avoid;
             position: relative;
@@ -3960,10 +3979,10 @@ document.addEventListener("DOMContentLoaded", () => {
             margin-bottom: 2px;
           }
           .chest-number {
-            font-size: 125px;
+            font-size: 160px;
             font-weight: 900;
             color: #0f172a;
-            line-height: 0.95;
+            line-height: 0.9;
             letter-spacing: -2px;
             margin: 2px 0;
           }

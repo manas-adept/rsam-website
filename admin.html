@@ -332,10 +332,10 @@
 
                 <div style="display:flex; gap:0.6rem; flex-wrap:wrap; margin-top:0.4rem;">
                   <button type="button" class="btn-dash-action" id="fetchCertRecordsBtn" style="flex:1; padding:0.65rem; justify-content:center;">
-                    <i class="fa-solid fa-arrows-rotate"></i> 📥 Fetch Event Skaters &amp; Results
+                    <i class="fa-solid fa-arrows-rotate"></i> 📥 Fetch
                   </button>
                   <button type="button" class="btn-dash-action btn-generate-chest-pdf" id="generateChestNumbersPdfBtnCert" style="background:linear-gradient(135deg, rgba(139,92,246,0.3) 0%, rgba(124,58,237,0.3) 100%); color:#d8b4fe; border:1.5px solid #a855f7; font-weight:700;">
-                    <i class="fa-solid fa-id-badge"></i> 🎽 Generate Printable Chest Numbers PDF
+                    <i class="fa-solid fa-id-badge"></i> 🎽 Chest Numbers PDF
                   </button>
                 </div>
               </div>
@@ -437,6 +437,17 @@
                   <div>
                     <label style="display:block; color:#9ca3af; font-size:0.75rem; margin-bottom:0.2rem;">Discipline / Equipment</label>
                     <input type="text" id="certDiscipline" placeholder="e.g. Quads" style="width:100%; background:#111827; border:1px solid rgba(255,255,255,0.2); color:#fff; padding:0.5rem; border-radius:6px; font-size:0.85rem;" />
+                  </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.6rem; margin-bottom:0.6rem;">
+                  <div>
+                    <label style="display:block; color:#9ca3af; font-size:0.75rem; margin-bottom:0.2rem;">Date of Birth (DOB)</label>
+                    <input type="text" id="certDob" placeholder="e.g. 30/01/2020" style="width:100%; background:#111827; border:1px solid rgba(255,255,255,0.2); color:#fff; padding:0.5rem; border-radius:6px; font-size:0.85rem;" />
+                  </div>
+                  <div>
+                    <label style="display:block; color:#9ca3af; font-size:0.75rem; margin-bottom:0.2rem;">Age Group</label>
+                    <input type="text" id="certAgeGroup" placeholder="e.g. 4-6 YRS" style="width:100%; background:#111827; border:1px solid rgba(255,255,255,0.2); color:#fff; padding:0.5rem; border-radius:6px; font-size:0.85rem;" />
                   </div>
                 </div>
 
@@ -587,7 +598,7 @@
               </div>
               <div style="display:flex; gap:0.6rem; align-items:center; flex-wrap:wrap;">
                 <button type="button" class="btn-dash-action" id="generateChestNumbersPdfBtn" style="background:rgba(139,92,246,0.25); color:#a78bfa; border:1px solid rgba(139,92,246,0.4);">
-                  <i class="fa-solid fa-id-badge"></i> 🎽 Generate Printable Chest Numbers PDF
+                  <i class="fa-solid fa-id-badge"></i> 🎽 Chest Numbers PDF
                 </button>
                 <button type="button" class="btn-dash-action" id="refreshPaymentsBtn">
                   <i class="fa-solid fa-arrows-rotate"></i> Refresh Payments

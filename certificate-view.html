@@ -81,16 +81,26 @@
       gap: 0.4rem;
     }
 
+    /* Scale Wrapper to Freeze Certificate Canvas Across Devices */
+    .cert-scale-wrapper {
+      width: 1050px;
+      height: 742px;
+      border-radius: 12px;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
+      transform-origin: top center;
+      transition: transform 0.15s ease;
+      margin: 0 auto;
+    }
+
     /* Main Certificate Landscape Outer Container (Strict A4 Aspect Ratio 1.414) */
     .cert-container {
-      width: 100%;
-      max-width: 1080px;
+      width: 1050px;
+      height: 742px;
       aspect-ratio: 1.414 / 1;
       background: linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #f1f5f9 100%);
       border-radius: 12px;
       padding: 1.8rem 2.4rem;
       position: relative;
-      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
       overflow: hidden;
       display: flex;
       flex-direction: column;
@@ -384,8 +394,9 @@
     <i class="fa-solid fa-shield-check"></i> <span>RSAM DIGITALLY VERIFIED &amp; READ-ONLY CERTIFICATE</span>
   </div>
 
-  <!-- Certificate Outer Landscape Sheet Container -->
-  <div class="cert-container" id="certSheet">
+  <!-- Certificate Outer Scale Wrapper & Landscape Sheet Container -->
+  <div class="cert-scale-wrapper" id="certScaleWrap">
+    <div class="cert-container" id="certSheet">
 
     <!-- Elegant Royal Navy & Silver SVG Border Frame -->
     <svg class="cert-svg-frame" viewBox="0 0 1000 707" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
@@ -535,6 +546,7 @@
 
     </div>
   </div>
+  </div>
 
   <script>
     function generateCertSignatureSync(skaterName, regNo, race1, race2, discipline, race3) {
@@ -580,8 +592,25 @@
       return String(str).trim();
     }
 
+    function scaleCertToFit() {
+      const wrap = document.getElementById("certScaleWrap");
+      if (!wrap) return;
+      const screenWidth = window.innerWidth;
+      const targetWidth = 1050;
+      if (screenWidth < 1090) {
+        const scale = Math.max((screenWidth - 24) / targetWidth, 0.32);
+        wrap.style.transform = `scale(${scale})`;
+        wrap.style.marginBottom = `-${(742 - (742 * scale))}px`;
+      } else {
+        wrap.style.transform = "none";
+        wrap.style.marginBottom = "0px";
+      }
+    }
+    window.addEventListener("resize", scaleCertToFit);
+
     // URL Query Parameter Dynamic Auto-Filler & Security Verifier
     document.addEventListener("DOMContentLoaded", async () => {
+      scaleCertToFit();
       const p = new URLSearchParams(window.location.search);
       
       let regNo        = p.get("regNo") || p.get("regNumber") || p.get("reg") || "";
@@ -646,16 +675,16 @@
                          (regNo && String(r.eventRegNo).padStart(3,'0') === regNo);
                 });
                 if (rec) {
-                  skaterName = rec.skaterName || skaterName;
-                  fatherName = rec.fatherName || fatherName;
-                  schoolClub = rec.schoolClub || schoolClub;
-                  dob = rec.dob || dob;
-                  ageGroup = rec.ageGroup || ageGroup;
-                  discipline = rec.discipline || discipline;
-                  race1 = rec.rinkRace1 || rec.race1 || race1;
-                  race2 = rec.rinkRace2 || rec.race2 || race2;
-                  race3 = rec.roadRace1 || rec.race3 || race3;
-                  if (s.sheetName) eventTitle = s.sheetName;
+                  if (!p.has("skaterName") && !p.has("name")) skaterName = rec.skaterName || skaterName;
+                  if (!p.has("fatherName") && !p.has("parent")) fatherName = rec.fatherName || fatherName;
+                  if (!p.has("schoolClub") && !p.has("school")) schoolClub = rec.schoolClub || schoolClub;
+                  if (!p.has("dob")) dob = rec.dob || dob;
+                  if (!p.has("ageGroup")) ageGroup = rec.ageGroup || ageGroup;
+                  if (!p.has("discipline") && !p.has("category")) discipline = rec.discipline || discipline;
+                  if (!p.has("race1") && !p.has("rink1")) race1 = rec.rinkRace1 || rec.race1 || race1;
+                  if (!p.has("race2") && !p.has("rink2")) race2 = rec.rinkRace2 || rec.race2 || race2;
+                  if (!p.has("race3") && !p.has("rink3")) race3 = rec.roadRace1 || rec.race3 || race3;
+                  if (s.sheetName && !p.has("eventTitle") && !p.has("eventName")) eventTitle = s.sheetName;
                   isSheetFetched = true;
                   break;
                 }

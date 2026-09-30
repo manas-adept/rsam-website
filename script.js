@@ -693,10 +693,37 @@ document.addEventListener('rsam:ready', () => {
   initCylinderGalleryCarousel();
   initImageLightbox();
   initBackToTop();
+  initSocialPopup();
   document.querySelectorAll('.hl-carousel').forEach(initHlCarousel);
 });
 
 document.addEventListener('rsam:rendered', () => {
   document.querySelectorAll('.hl-carousel').forEach(initHlCarousel);
   initBackToTop();
+  initSocialPopup();
 });
+
+function initSocialPopup() {
+  const modal = document.getElementById("socialPopupModal");
+  if (!modal) return;
+  const isDismissed = localStorage.getItem("RSAM_SOCIAL_POPUP_DISMISSED");
+  if (isDismissed === "true") return;
+
+  setTimeout(() => {
+    modal.hidden = false;
+  }, 2500);
+
+  const closeBtn = document.getElementById("socialPopupClose");
+  const dismissBtn = document.getElementById("socialPopupDismiss");
+
+  const closeModal = () => {
+    modal.hidden = true;
+    localStorage.setItem("RSAM_SOCIAL_POPUP_DISMISSED", "true");
+  };
+
+  if (closeBtn) closeBtn.onclick = closeModal;
+  if (dismissBtn) dismissBtn.onclick = closeModal;
+  modal.onclick = (e) => {
+    if (e.target === modal) closeModal();
+  };
+}
