@@ -12,7 +12,7 @@ const OFFICIALS = {
       designation:      "President",
       designationClass: "president",
       degrees:          "",
-      photo:            "https://res.cloudinary.com/igjmhsju/image/upload/v1788797466/rsam_website/branding/rsam-logo.png",
+      photo:            "https://res.cloudinary.com/igjmhsju/image/upload/v1788797450/rsam_website/officials/refree_dummy.png",
       category:         "executive"
     },
     {
@@ -36,7 +36,7 @@ const OFFICIALS = {
       designation:      "Technical / Media Person",
       designationClass: "technical",
       degrees:          "B.Tech",
-      photo:            "https://res.cloudinary.com/igjmhsju/image/upload/v1788797435/rsam_website/officials/manas.jpg",
+      photo:            "https://res.cloudinary.com/igjmhsju/image/upload/v1788797441/rsam_website/officials/manasq.jpg",
       category:         "executive"
     }
   ],
