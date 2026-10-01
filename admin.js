@@ -980,14 +980,28 @@ document.addEventListener("DOMContentLoaded", () => {
     const currentVal = sourceSelect.value;
     let optionsHTML = '';
 
+    const evtSheets = fetchedBroadcastData.filter(s => !s.sheetName.toLowerCase().includes("registrations"));
+
+    optionsHTML += `<optgroup label="── 📊 Direct Sheet Contacts ──">`;
     fetchedBroadcastData.forEach((s) => {
       const isReg = s.sheetName.toLowerCase().includes("registrations");
       const icon = isReg ? '🔄' : '🎟️';
       const label = isReg ? `Annual Skater Registrations (${s.sheetName})` : `Event Specific (${s.sheetName})`;
       optionsHTML += `<option value="sheet:${s.sheetName}">${icon} ${label} [${s.count} records]</option>`;
     });
+    optionsHTML += `</optgroup>`;
 
+    if (evtSheets.length > 0) {
+      optionsHTML += `<optgroup label="── ⚠️ Unregistered for Event (Annual vs Event Comparison) ──">`;
+      evtSheets.forEach((eSheet) => {
+        optionsHTML += `<option value="unregistered:${eSheet.sheetName}">⚠️ Annually Registered (NOT Registered for ${eSheet.sheetName})</option>`;
+      });
+      optionsHTML += `</optgroup>`;
+    }
+
+    optionsHTML += `<optgroup label="── 📢 All Contacts ──">`;
     optionsHTML += `<option value="general">📢 General Broadcast (All Unique Contacts across all sheets)</option>`;
+    optionsHTML += `</optgroup>`;
 
     sourceSelect.innerHTML = optionsHTML;
     if (currentVal && sourceSelect.querySelector(`option[value="${currentVal}"]`)) {
@@ -1107,8 +1121,45 @@ document.addEventListener("DOMContentLoaded", () => {
     const includeCoaches = document.getElementById("bcFilterCoaches") ? document.getElementById("bcFilterCoaches").checked : true;
 
     let records = [];
+    let isUnregisteredFilter = false;
 
-    if (source.startsWith("sheet:")) {
+    if (source.startsWith("unregistered:")) {
+      isUnregisteredFilter = true;
+      const targetEvtSheetName = source.replace("unregistered:", "");
+      const annSheet = fetchedBroadcastData.find(s => s.sheetName.toLowerCase().includes("registrations")) || fetchedBroadcastData[0];
+      const evtSheet = fetchedBroadcastData.find(s => s.sheetName === targetEvtSheetName);
+
+      const annRecords = annSheet ? (annSheet.records || []) : [];
+      const evtRecords = evtSheet ? (evtSheet.records || []) : [];
+
+      const evtRegNumbers = new Set();
+      const evtMobilesAndNames = new Set();
+
+      evtRecords.forEach(e => {
+        const rsam = String(e.rsamRegNo || e.regNumber || "").trim().toUpperCase();
+        if (rsam && rsam.length >= 3) {
+          evtRegNumbers.add(rsam);
+        }
+        const mob = String(e.mobile || "").replace(/\D/g, "").slice(-10);
+        const name = String(e.skaterName || e.name || "").trim().toLowerCase();
+        if (mob && name) {
+          evtMobilesAndNames.add(`${mob}_${name}`);
+        }
+      });
+
+      records = annRecords.filter(r => {
+        const rsam = String(r.regNumber || r.rsamRegNo || "").trim().toUpperCase();
+        if (rsam && evtRegNumbers.has(rsam)) {
+          return false;
+        }
+        const mob = String(r.mobile || "").replace(/\D/g, "").slice(-10);
+        const name = String(r.skaterName || r.name || "").trim().toLowerCase();
+        if (mob && name && evtMobilesAndNames.has(`${mob}_${name}`)) {
+          return false;
+        }
+        return true;
+      });
+    } else if (source.startsWith("sheet:")) {
       const sheetName = source.replace("sheet:", "");
       const matchedSheet = fetchedBroadcastData.find(s => s.sheetName === sheetName);
       if (matchedSheet) records = matchedSheet.records || [];
@@ -1137,6 +1188,7 @@ document.addEventListener("DOMContentLoaded", () => {
             role: "Skater",
             name: r.skaterName || "Athlete",
             mobile: skaterMob,
+            isUnregistered: isUnregisteredFilter,
             data: r
           });
         }
@@ -1152,6 +1204,7 @@ document.addEventListener("DOMContentLoaded", () => {
             name: r.coachName || "Coach",
             mobile: coachMob,
             candidates: candidates.length > 0 ? candidates : [r],
+            isUnregistered: isUnregisteredFilter,
             data: r
           });
         }
@@ -1219,8 +1272,8 @@ document.addEventListener("DOMContentLoaded", () => {
               <td style="padding:0.35rem;"><span style="background:${r.role === 'Coach' ? 'rgba(245,158,11,0.2)' : 'rgba(59,130,246,0.2)'}; color:${r.role === 'Coach' ? '#fbbf24' : '#60a5fa'}; padding:2px 6px; border-radius:4px; font-size:0.75rem;">${r.role}</span></td>
               <td style="padding:0.35rem;"><strong>${r.name}</strong></td>
               <td style="padding:0.35rem;"><code>${r.mobile}</code></td>
-              <td style="padding:0.35rem; color:#fbbf24; font-weight:700;">${r.role === 'Coach' ? `👔 ${r.candidates ? r.candidates.length : 0} Candidates` : (r.data.eventRegNo || r.data.chestNo || '—')}</td>
-              <td style="padding:0.35rem; color:#60a5fa; font-size:0.8rem;"><code>${r.data.regNumber || '—'}</code></td>
+              <td style="padding:0.35rem; color:#fbbf24; font-weight:700;">${r.role === 'Coach' ? `👔 ${r.candidates ? r.candidates.length : 0} ${r.isUnregistered ? 'Unregistered ' : ''}Candidates` : (r.data.eventRegNo || r.data.chestNo ? (r.data.eventRegNo || r.data.chestNo) : (r.isUnregistered ? '<span style="color:#f59e0b; font-weight:600;">⚠️ Not Registered</span>' : '—'))}</td>
+              <td style="padding:0.35rem; color:#60a5fa; font-size:0.8rem;"><code>${r.data.regNumber || r.data.rsamRegNo || '—'}</code></td>
               <td style="padding:0.35rem;">${r.data.discipline || '—'}</td>
             </tr>
           `).join('')}
@@ -1265,6 +1318,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const btnTplSkater = document.getElementById("btnTplSkater");
     const btnTplCoach = document.getElementById("btnTplCoach");
+    const btnTplUnregistered = document.getElementById("btnTplUnregistered");
 
     if (btnTplSkater) {
       btnTplSkater.onclick = () => {
@@ -1279,6 +1333,14 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!msgText) return;
         msgText.value = `Dear {coachName},\n\nThank you for believing in RSAM and following candidates with their respective registration numbers have registered with us so far. Please see below their details.\n\n{skaterList}\n\nBest regards,\nRoller Skating Association of Moradabad (RSAM)`;
         notify("✓ Coach candidates report template loaded.");
+      };
+    }
+
+    if (btnTplUnregistered) {
+      btnTplUnregistered.onclick = () => {
+        if (!msgText) return;
+        msgText.value = `Dear {skaterName},\n\nReminder: You are registered annually with RSAM (Reg No: {regNumber}), but you have not registered for the upcoming championship yet. Please submit your event entry soon.\n\nIf Coach:\nDear {coachName},\n\nThe following athletes under your guidance are registered annually with RSAM, but have NOT registered for the upcoming event yet:\n\n{skaterList}\n\nPlease ensure their event entries are submitted before the registration deadline.\n\nBest regards,\nRoller Sports Association Moradabad (RSAM)`;
+        notify("✓ Event entry reminder template loaded.");
       };
     }
 
