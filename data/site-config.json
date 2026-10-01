@@ -220,7 +220,7 @@
       "designation": "President",
       "designationClass": "president",
       "degrees": "",
-      "photo": "https://res.cloudinary.com/igjmhsju/image/upload/v1788797450/rsam_website/officials/refree_dummy.png",
+      "photo": "https://res.cloudinary.com/igjmhsju/image/upload/v1790855940/ashok_singhal_qxhfet.jpg",
       "category": "executive"
     },
     {
@@ -285,14 +285,6 @@
       "designationClass": "member",
       "degrees": "",
       "photo": "https://res.cloudinary.com/igjmhsju/image/upload/v1788797457/rsam_website/officials/refree_vipin.jpg",
-      "category": "referee"
-    },
-    {
-      "name": "Sachin Nainwal",
-      "designation": "District Referee",
-      "designationClass": "member",
-      "degrees": "",
-      "photo": "https://res.cloudinary.com/igjmhsju/image/upload/v1788797454/rsam_website/officials/refree_sachinnainwal.jpg",
       "category": "referee"
     },
     {
@@ -373,5 +365,5 @@
       }
     ]
   },
-  "lastUpdated": "2026-09-28T14:50:27.818Z"
+  "lastUpdated": "2026-10-01T12:00:10.991Z"
 }
