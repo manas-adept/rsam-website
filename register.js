@@ -1180,29 +1180,54 @@ function formatDateDDMMMYYYY(dateStr) {
       submitBtn.querySelector(".submit-text").hidden = true;
       submitBtn.querySelector(".submit-spinner").hidden = false;
 
-      let assignedRegNo = payloadData.regNumber;
-      if (!assignedRegNo) {
-        const now = new Date();
-        const yy = String(now.getFullYear()).slice(-2);
-        const mm = String(now.getMonth() + 1).padStart(2, '0');
-        const dd = String(now.getDate()).padStart(2, '0');
-        const dateKey = `${yy}${mm}${dd}`;
-        const randomSeq = String(Math.floor(100 + Math.random() * 900));
-        assignedRegNo = `R${dateKey}${randomSeq}`;
-      }
-      payloadData.regNumber = assignedRegNo;
-
       try {
-        // 1. Submit to Google Apps Script Sheet IMMEDIATELY WITH regNumber, paymentId, and all proof files
-        const sheetPromise = fetch(SHEET_URL, {
-          method:  "POST",
-          headers: { "Content-Type": "text/plain" },
-          body:    JSON.stringify(payloadData),
-          mode:    "no-cors",
-        }).catch(sheetErr => console.warn("Google Sheet submission fetch warning:", sheetErr));
+        let assignedRegNo = payloadData.regNumber;
+        if (!assignedRegNo) {
+          const now = new Date();
+          const yy = String(now.getFullYear()).slice(-2);
+          const mm = String(now.getMonth() + 1).padStart(2, '0');
+          const dd = String(now.getDate()).padStart(2, '0');
+          const dateKey = `${yy}${mm}${dd}`;
+          const randomSeq = String(Math.floor(100 + Math.random() * 900));
+          assignedRegNo = `R${dateKey}${randomSeq}`;
+        }
+        payloadData.regNumber = assignedRegNo;
 
-        // 2. Submit to local OpenWA WhatsApp Server Backend if available
-        if (OPENWA_SERVER_URL) {
+        let isSheetRecorded = false;
+
+        try {
+          // 1. Submit to Google Apps Script Sheet FIRST & AWAIT verification that entry is recorded in Google Sheet
+          const sheetRes = await fetch(SHEET_URL, {
+            method:  "POST",
+            headers: { "Content-Type": "text/plain" },
+            body:    JSON.stringify(payloadData),
+            redirect: "follow"
+          });
+
+          if (sheetRes && sheetRes.ok) {
+            try {
+              const resText = await sheetRes.text();
+              const resData = JSON.parse(resText);
+              if (resData && (resData.status === "ok" || resData.regNumber)) {
+                isSheetRecorded = true;
+                if (resData.regNumber) {
+                  assignedRegNo = resData.regNumber;
+                  payloadData.regNumber = assignedRegNo;
+                }
+              } else if (resData && resData.status === "error") {
+                console.error("Google Sheet submission returned error:", resData);
+                alert(resData.message || "⚠️ Registration Error: Entry could not be saved in Google Sheet.");
+              }
+            } catch (parseErr) {
+              isSheetRecorded = true;
+            }
+          }
+        } catch (sheetErr) {
+          console.error("Google Sheet submission fetch error:", sheetErr);
+        }
+
+        // 2. Submit to WhatsApp Server Backend ONLY AFTER Google Sheet entry is recorded & verified!
+        if (isSheetRecorded && OPENWA_SERVER_URL) {
           try {
             const waRes = await fetch(OPENWA_SERVER_URL, {
               method: "POST",
@@ -1222,9 +1247,14 @@ function formatDateDDMMMYYYY(dateStr) {
           } catch (waErr) {
             console.warn("Direct OpenWA notification trigger error:", waErr);
           }
+        } else if (!isSheetRecorded) {
+          console.warn("WhatsApp notification skipped: Registration entry was NOT recorded in Google Sheet.");
+          alert("⚠️ Registration Error: Your details could not be verified in Google Sheet. No WhatsApp message was sent. Please retry or contact RSAM support.");
+          submitBtn.disabled = false;
+          submitBtn.querySelector(".submit-text").hidden = false;
+          submitBtn.querySelector(".submit-spinner").hidden = true;
+          return;
         }
-
-        await sheetPromise;
 
         // Show success modal then reload after 6s
         submitBtn.disabled = false;

@@ -3807,33 +3807,33 @@ document.addEventListener("DOMContentLoaded", () => {
         renderAdminPayments();
         notify(`✓ Payment for ${regNo} marked as VERIFIED! Syncing with sheet in background...`);
 
-        // 3. Issue background requests asynchronously without blocking UI
+        // 3. Sync payment status update with Google Sheet FIRST, then trigger WhatsApp notification
         const scriptUrl = (window.ENV_CONFIG && window.ENV_CONFIG.sheetUrl) || "https://script.google.com/macros/s/AKfycbyrxUIvQMXOzaBFNKwle-kOC0xMlc0ezufhIRXSyyid3Zx6Rhk9SKMZhNIoBBB290Xw/exec";
-        fetch(`${scriptUrl}?action=update_payment_status&regNumber=${encodeURIComponent(regNo)}&sheetName=${encodeURIComponent(sheetName || rec.sheetName || '')}&paymentStatus=VERIFIED&skaterName=${encodeURIComponent(rec.skaterName || rec.name || '')}`, { mode: 'no-cors' }).catch(() => {});
-
-        try {
-          const baseUrl = getAdminApiBaseUrl();
-          fetch(`${baseUrl}/api/approve-payment`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              regNumber: regNo,
-              sheetName: sheetName || rec.sheetName,
-              action: "approve",
-              skaterName: rec.skaterName || rec.name || 'Athlete',
-              mobile: rec.mobile || rec.phone || '',
-              coachMobile: rec.coachMobile || '',
-              coachName: rec.coachName || '',
-              eventName: rec.eventName || rec.eventTitle || sheetName || 'District Championship 2026',
-              eventRegNo: rec.eventRegNo || rec.chestNo || (regNo ? String(100 + (Number(String(regNo).replace(/\D/g, "").slice(-3)) % 900)) : '100'),
-              discipline: rec.discipline || '',
-              ageGroup: rec.ageGroup || cleanAgeGroup || '',
-              schoolClub: rec.schoolClub || '',
-              dob: rec.dob || '',
-              email: rec.email || ''
-            })
-          }).catch(() => {});
-        } catch (e) {}
+        fetch(`${scriptUrl}?action=update_payment_status&regNumber=${encodeURIComponent(regNo)}&sheetName=${encodeURIComponent(sheetName || rec.sheetName || '')}&paymentStatus=VERIFIED&skaterName=${encodeURIComponent(rec.skaterName || rec.name || '')}`)
+          .then(() => {
+            const baseUrl = getAdminApiBaseUrl();
+            return fetch(`${baseUrl}/api/approve-payment`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                regNumber: regNo,
+                sheetName: sheetName || rec.sheetName,
+                action: "approve",
+                skaterName: rec.skaterName || rec.name || 'Athlete',
+                mobile: rec.mobile || rec.phone || '',
+                coachMobile: rec.coachMobile || '',
+                coachName: rec.coachName || '',
+                eventName: rec.eventName || rec.eventTitle || sheetName || 'District Championship 2026',
+                eventRegNo: rec.eventRegNo || rec.chestNo || (regNo ? String(100 + (Number(String(regNo).replace(/\D/g, "").slice(-3)) % 900)) : '100'),
+                discipline: rec.discipline || '',
+                ageGroup: rec.ageGroup || cleanAgeGroup || '',
+                schoolClub: rec.schoolClub || '',
+                dob: rec.dob || '',
+                email: rec.email || ''
+              })
+            });
+          })
+          .catch((err) => console.warn("[Admin Payment Approval Sync Error]", err));
       };
     });
 

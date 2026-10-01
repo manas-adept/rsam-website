@@ -997,21 +997,40 @@ document.addEventListener("DOMContentLoaded", async () => {
     evtSubmitBtn.querySelector(".submit-text").hidden = true;
     evtSubmitBtn.querySelector(".submit-spinner").hidden = false;
 
+    let isRecordedInSheet = false;
+
     try {
-      // POST to Google Apps Script (Appends to District Championship 2026 sheet tab)
-      await fetch(SHEET_URL, {
+      // 1. POST to Google Apps Script first & AWAIT verification that event entry is appended to sheet
+      const sheetRes = await fetch(SHEET_URL, {
         method: "POST",
         headers: { "Content-Type": "text/plain" },
         body: JSON.stringify(payload),
-        mode: "no-cors"
+        redirect: "follow"
       });
+
+      if (sheetRes && sheetRes.ok) {
+        try {
+          const resText = await sheetRes.text();
+          const resData = JSON.parse(resText);
+          if (resData && (resData.status === "ok" || resData.eventRegNo || resData.regNumber)) {
+            isRecordedInSheet = true;
+            if (resData.eventRegNo) payload.eventRegNo = resData.eventRegNo;
+            if (resData.regNumber) payload.regNumber = resData.regNumber;
+          } else if (resData && resData.status === "error") {
+            console.error("[Google Sheet Event Post Return Error]", resData);
+            alert(resData.message || "⚠️ Event Registration Error: Could not record entry in Google Sheet.");
+          }
+        } catch (jsonErr) {
+          isRecordedInSheet = true;
+        }
+      }
     } catch (e) {
       console.error("[Google Sheet Event Post Error]", e);
     }
 
-    if (OPENWA_SERVER_URL) {
+    // 2. Dispatch WhatsApp notification ONLY AFTER Google Sheet entry is recorded & verified!
+    if (isRecordedInSheet && OPENWA_SERVER_URL) {
       try {
-        // POST to Local Backend Server for PDF pass & WhatsApp notification
         await fetch(OPENWA_SERVER_URL, {
           method: "POST",
           headers: {
@@ -1023,6 +1042,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       } catch (e) {
         console.warn("[Backend Event Webhook Warning]", e);
       }
+    } else if (!isRecordedInSheet) {
+      console.warn("WhatsApp notification skipped: Event entry was NOT recorded in Google Sheet.");
+      alert("⚠️ Event Registration Error: Details could not be saved to Google Sheet. No WhatsApp pass was sent. Please retry or contact RSAM support.");
+      evtSubmitBtn.disabled = false;
+      evtSubmitBtn.querySelector(".submit-text").hidden = false;
+      evtSubmitBtn.querySelector(".submit-spinner").hidden = true;
+      return;
     }
 
     const evtSuccess = document.getElementById("evtSuccess");
