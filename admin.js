@@ -1632,6 +1632,59 @@ document.addEventListener("DOMContentLoaded", () => {
       return `${origin}/certificate-view.html?${params.toString()}`;
     }
 
+    function formatDobDdMmmYyyy(str) {
+      if (!str) return "N/A";
+      str = String(str).trim();
+      if (!str || str === "—" || str === "N/A" || str === "null" || str === "undefined") return "N/A";
+
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+      if (str.includes("GMT") || str.includes("Standard Time") || /^\w{3} \w{3} \d{1,2}/.test(str)) {
+        const d = new Date(str);
+        if (!isNaN(d.getTime())) {
+          const day = String(d.getDate()).padStart(2, '0');
+          const month = months[d.getMonth()];
+          const year = d.getFullYear();
+          return `${day}-${month}-${year}`;
+        }
+      }
+
+      if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
+        const d = new Date(str);
+        if (!isNaN(d.getTime())) {
+          const day = String(d.getUTCDate()).padStart(2, '0');
+          const month = months[d.getUTCMonth()];
+          const year = d.getUTCFullYear();
+          return `${day}-${month}-${year}`;
+        }
+      }
+
+      const parts = str.split(/[\/\-\.]/).map(s => s.trim());
+      if (parts.length === 3) {
+        let p0 = parseInt(parts[0], 10);
+        let p1 = parseInt(parts[1], 10);
+        let p2 = parseInt(parts[2], 10);
+
+        if (parts[2].length === 4 && !isNaN(p0) && !isNaN(p1) && !isNaN(p2)) {
+          if (p1 >= 1 && p1 <= 12 && p0 >= 1 && p0 <= 31) {
+            const day = String(p0).padStart(2, '0');
+            const month = months[p1 - 1];
+            return `${day}-${month}-${p2}`;
+          }
+        }
+      }
+
+      const d = new Date(str);
+      if (!isNaN(d.getTime())) {
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = months[d.getMonth()];
+        const year = d.getFullYear();
+        return `${day}-${month}-${year}`;
+      }
+
+      return str;
+    }
+
     function getCertData() {
       const elR1 = document.getElementById("certRace1Text");
       const elR2 = document.getElementById("certRace2Text");
@@ -1659,7 +1712,7 @@ document.addEventListener("DOMContentLoaded", () => {
         fatherName: certFatherName ? certFatherName.value.trim() : "",
         schoolClub: certSchoolClub ? certSchoolClub.value.trim() : "",
         discipline: certDiscipline ? certDiscipline.value.trim() : "",
-        dob: certDob ? certDob.value.trim() : "",
+        dob: certDob ? formatDobDdMmmYyyy(certDob.value.trim()) : "",
         ageGroup: certAgeGroup ? certAgeGroup.value.trim() : "",
         raceCount: elRCount ? parseInt(elRCount.value, 10) : 2,
         race1Title: elR1Title ? elR1Title.value.trim() : "Race 1 (200m)",
@@ -1790,7 +1843,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
                 <div>
                   <span style="color:#64748b; font-size:0.6rem; font-weight:700; display:block;">DOB &amp; AGE GROUP</span>
-                  <strong style="color:#0f172a; font-size:0.85rem;">${escapeHTML(c.dob || '30/01/2020')} ${c.ageGroup ? '· ' + escapeHTML(c.ageGroup) : ''}</strong>
+                  <strong style="color:#0f172a; font-size:0.85rem;">${escapeHTML(formatDobDdMmmYyyy(c.dob) || '30-Jan-2020')} ${c.ageGroup ? '· ' + escapeHTML(c.ageGroup) : ''}</strong>
                 </div>
                 <div style="grid-column: span 2;">
                   <span style="color:#64748b; font-size:0.6rem; font-weight:700; display:block;">DISCIPLINE / CATEGORY</span>
@@ -2016,7 +2069,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (certFatherName) certFatherName.value = r.fatherName || r.father_name || '';
         if (certSchoolClub) certSchoolClub.value = r.schoolClub || r.school_club || '';
         if (certDiscipline) certDiscipline.value = r.discipline || r.category || '';
-        if (certDob)        certDob.value        = r.dob || r.dateOfBirth || r.birth_date || '';
+        if (certDob)        certDob.value        = formatDobDdMmmYyyy(r.dob || r.dateOfBirth || r.birth_date || '');
         if (certAgeGroup)   certAgeGroup.value   = r.ageGroup || r.age_group || r.category || '';
         if (certMobile)     certMobile.value     = r.mobile || r.phone || '';
 
@@ -2581,6 +2634,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
       <div class="modal-section-card">
         <h4 class="modal-sec-title">Dates &amp; Venue Timeline</h4>
+        <div style="background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.3); border-radius:8px; padding:0.55rem 0.8rem; margin-bottom:0.8rem; color:#93c5fd; font-size:0.8rem; display:flex; align-items:center; gap:0.5rem;">
+          <i class="fa-solid fa-clock"></i> <span><strong>Default Site Timezone: IST (India Standard Time / UTC+05:30)</strong> — All deadlines, start &amp; end times operate in IST.</span>
+        </div>
         <div class="form-row">
           <div class="form-group"><label>Start Date &amp; Time</label><input type="datetime-local" id="mEvStartDT" value="${formatForDatetimeLocal(ev.startDateTime)}" /></div>
           <div class="form-group"><label>End Date &amp; Time</label><input type="datetime-local" id="mEvEndDT" value="${formatForDatetimeLocal(ev.endDateTime)}" /></div>
