@@ -244,7 +244,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const renewSpinner    = document.getElementById("renewSpinner");
   const renewAlert      = document.getElementById("renewAlert");
 
+  let currentMode = "new";
+
   function setMode(mode) {
+    currentMode = mode;
     if (mode === "renew") {
       if (tabNewReg) tabNewReg.classList.remove("active");
       if (tabRenewReg) tabRenewReg.classList.add("active");
@@ -774,7 +777,7 @@ function formatDateDDMMMYYYY(dateStr) {
 }
 
       // Pre-check for duplicate registration for new registration mode
-      if (mode === "new") {
+      if (currentMode === "new") {
         try {
           const sheetUrl = (window.ENV_CONFIG && window.ENV_CONFIG.sheetUrl) || (typeof SHEET_URL !== 'undefined' ? SHEET_URL : '');
           if (sheetUrl) {
