@@ -12,6 +12,7 @@ const SHEET_URL = getEnv().sheetUrl;
 const BACKEND_DOMAIN = getEnv().backendUrl;
 const OPENWA_SERVER_URL = getEnv().openwaServerUrl;
 const OPENWA_API_KEY    = "rsam_whatsapp_secret_key_2026";
+let currentMode = "new";
 
 function escapeHTML(str) {
   if (typeof str !== 'string') return str || '';
@@ -243,8 +244,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const renewLookupBtn  = document.getElementById("renewLookupBtn");
   const renewSpinner    = document.getElementById("renewSpinner");
   const renewAlert      = document.getElementById("renewAlert");
-
-  let currentMode = "new";
 
   function setMode(mode) {
     currentMode = mode;
