@@ -1229,6 +1229,22 @@ document.addEventListener("DOMContentLoaded", () => {
     if (countEl) {
       countEl.textContent = `${selectedRecipientIndices.size} of ${recipients.length}`;
     }
+
+    const toggleBtn = document.getElementById("bcToggleAllBtn");
+    if (toggleBtn && recipients.length > 0) {
+      const isAllSelected = (selectedRecipientIndices.size === recipients.length);
+      if (isAllSelected) {
+        toggleBtn.innerHTML = `🔲 Deselect All`;
+        toggleBtn.style.background = `rgba(239,68,68,0.15)`;
+        toggleBtn.style.color = `#f87171`;
+        toggleBtn.style.borderColor = `rgba(239,68,68,0.3)`;
+      } else {
+        toggleBtn.innerHTML = `☑️ Select All`;
+        toggleBtn.style.background = `rgba(59,130,246,0.15)`;
+        toggleBtn.style.color = `#60a5fa`;
+        toggleBtn.style.borderColor = `rgba(59,130,246,0.3)`;
+      }
+    }
   }
 
   function renderRecipientPreviewList(resetSelection = false) {
@@ -1385,21 +1401,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     checkWaBotStatus();
 
-    const selectAllBtn = document.getElementById("bcSelectAllBtn");
-    const deselectAllBtn = document.getElementById("bcDeselectAllBtn");
+    const toggleAllBtn = document.getElementById("bcToggleAllBtn");
     const invertBtn = document.getElementById("bcInvertBtn");
 
-    if (selectAllBtn) {
-      selectAllBtn.onclick = () => {
+    if (toggleAllBtn) {
+      toggleAllBtn.onclick = () => {
         const recipients = getFilteredRecipients();
-        resetRecipientSelection(recipients.length);
-        renderRecipientPreviewList(false);
-      };
-    }
-
-    if (deselectAllBtn) {
-      deselectAllBtn.onclick = () => {
-        selectedRecipientIndices.clear();
+        if (selectedRecipientIndices.size === recipients.length) {
+          selectedRecipientIndices.clear();
+        } else {
+          resetRecipientSelection(recipients.length);
+        }
         renderRecipientPreviewList(false);
       };
     }
