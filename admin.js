@@ -1875,10 +1875,8 @@ document.addEventListener("DOMContentLoaded", () => {
             </g>
           </svg>
 
-          <!-- RSAM Transparent Watermark & Left/Right Dummy Skater Background Watermarks -->
+          <!-- RSAM Transparent Watermark -->
           <img src="assets/branding/logo_rsam_transparent.png" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:380px; opacity:0.22; pointer-events:none; z-index:0;" alt="RSAM Watermark" />
-          <img src="assets/branding/skater_dummy_left.svg" style="position:absolute; top:52%; left:5%; transform:translateY(-50%); width:210px; height:285px; opacity:0.16; pointer-events:none; z-index:0;" alt="Left Dummy Skater" />
-          <img src="assets/branding/skater_dummy_right.svg" style="position:absolute; top:52%; right:5%; transform:translateY(-50%); width:210px; height:285px; opacity:0.16; pointer-events:none; z-index:0;" alt="Right Dummy Skater" />
 
           <div style="position:relative; z-index:2; height:100%; display:flex; flex-direction:column; justify-content:space-between;">
             <!-- Top 4 Header Logos Bar (Standout Transparent Logos: RSAM enlarged visually, UPRSA, RSFI, IOA) -->
@@ -1889,17 +1887,26 @@ document.addEventListener("DOMContentLoaded", () => {
               <img src="assets/branding/logo_ioa_india.webp" style="height:48px; max-height:50px; max-width:110px; object-fit:contain; border:none; background:transparent;" alt="IOA India Logo" />
             </div>
 
-            <div style="font-family:'Cinzel',serif; font-size:1.45rem; font-weight:800; color:#dc2626; letter-spacing:0.8px; margin:0.1rem 0; text-transform:uppercase;">
-              ${escapeHTML(c.eventName)}
-            </div>
-            <div style="font-size:0.65rem; font-weight:700; color:#4b5563; text-transform:uppercase; margin-bottom:0.2rem;">
-              ${escapeHTML(affStr)}
-            </div>
-
-            <div>
-              <div style="font-family:'Cinzel',serif; font-size:1.15rem; font-weight:800; color:#1e3a8a; letter-spacing:1px; margin:0.2rem 0; background:rgba(30,58,138,0.08); padding:3px 14px; border-radius:20px; display:inline-block; border:1px solid rgba(30,58,138,0.2);">
-                CERTIFICATE OF MERIT &amp; PARTICIPATION
+            <!-- Event Title Block & Merit Badge Flanked by Large Skater Illustrations -->
+            <div style="display:flex; align-items:center; justify-content:center; gap:0.5rem; width:100%; margin:0.1rem 0;">
+              <!-- Left Skater Image (Large, close to title, extending to athlete box) -->
+              <img src="assets/branding/skater_left.png" style="height:105px; width:auto; max-width:100px; object-fit:contain; opacity:0.92; flex-shrink:0;" alt="Skater Left" />
+              
+              <!-- Center Title & Badge Container -->
+              <div style="flex:1; text-align:center;">
+                <div style="font-family:'Cinzel',serif; font-size:1.35rem; font-weight:800; color:#dc2626; letter-spacing:0.8px; text-transform:uppercase; line-height:1.15;">
+                  ${escapeHTML(c.eventName)}
+                </div>
+                <div style="font-size:0.62rem; font-weight:700; color:#4b5563; text-transform:uppercase; margin-top:0.15rem; margin-bottom:0.2rem;">
+                  ${escapeHTML(affStr)}
+                </div>
+                <div style="font-family:'Cinzel',serif; font-size:1.1rem; font-weight:800; color:#1e3a8a; letter-spacing:1px; background:rgba(30,58,138,0.08); padding:3px 12px; border-radius:20px; display:inline-block; border:1px solid rgba(30,58,138,0.2);">
+                  CERTIFICATE OF MERIT &amp; PARTICIPATION
+                </div>
               </div>
+
+              <!-- Right Skater Image (Large, close to title, extending to athlete box) -->
+              <img src="assets/branding/skater_right.png" style="height:105px; width:auto; max-width:100px; object-fit:contain; opacity:0.92; flex-shrink:0;" alt="Skater Right" />
             </div>
 
             <!-- Translucent Athlete Card (Uniform Field Styles) -->
