@@ -780,37 +780,75 @@ document.addEventListener("DOMContentLoaded", async () => {
     const amountStr = parseFloat(baseFeeAmount).toFixed(2);
     const noteStr = `RSAM ${payload.regNumber || payload.skaterName || 'Registration'}`.slice(0, 30);
 
+    const upiQueryParams = `pa=${encodeURIComponent(vpa)}&pn=${encodeURIComponent(payeeName)}&am=${amountStr}&cu=INR&tn=${encodeURIComponent(noteStr)}`;
     const rawUpiUri = `upi://pay?pa=${vpa}&pn=${payeeName}&am=${amountStr}&cu=INR&tn=${noteStr}`;
-    const upiUri = `upi://pay?pa=${encodeURIComponent(vpa)}&pn=${encodeURIComponent(payeeName)}&am=${amountStr}&cu=INR&tn=${encodeURIComponent(noteStr)}`;
+    const upiUri = `upi://pay?${upiQueryParams}`;
+    const gpayUri = `intent://pay?${upiQueryParams}#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end`;
+    const phonepeUri = `intent://pay?${upiQueryParams}#Intent;scheme=upi;package=com.phonepe.app;end`;
+    const paytmUri = `intent://pay?${upiQueryParams}#Intent;scheme=upi;package=net.one97.paytm;end`;
+    const amazonPayUri = `intent://pay?${upiQueryParams}#Intent;scheme=upi;package=in.amazon.mShop.android.shopping;end`;
+
     const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(rawUpiUri)}`;
 
     let selectedScreenshotBase64 = "";
 
     upiModal.innerHTML = `
-      <div style="background:#111827; border:2px solid #e01c2e; border-radius:16px; width:100%; max-width:500px; padding:1.5rem; color:#fff; box-shadow:0 20px 25px -5px rgba(0,0,0,0.6); font-family:sans-serif; text-align:center; position:relative; margin:auto;">
+      <div style="background:#111827; border:2px solid #e01c2e; border-radius:16px; width:100%; max-width:520px; padding:1.5rem; color:#fff; box-shadow:0 20px 25px -5px rgba(0,0,0,0.6); font-family:sans-serif; text-align:center; position:relative; margin:auto;">
         <button type="button" id="upiCloseBtn" style="position:absolute; top:12px; right:16px; background:none; border:none; color:#9ca3af; font-size:1.8rem; cursor:pointer; line-height:1;">&times;</button>
         
         <div style="display:inline-flex; align-items:center; gap:0.4rem; background:rgba(16,185,129,0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3); padding:4px 12px; border-radius:20px; font-size:0.8rem; font-weight:700; text-transform:uppercase; margin-bottom:0.8rem;">
-          ⚡ Direct UPI QR Transfer (0% Gateway Fee)
+          ⚡ Direct UPI Transfer (0% Gateway Fee)
         </div>
         
         <h3 style="margin:0 0 0.4rem 0; font-size:1.35rem; color:#f3f4f6;">Pay via UPI (GPay / PhonePe / Paytm)</h3>
         <p style="margin:0 0 1rem 0; color:#9ca3af; font-size:0.88rem;">Pay <strong>₹${amountStr}</strong> directly to <strong>${escapeHTML(payeeName)}</strong></p>
         
-        <div style="display:flex; flex-direction:column; gap:0.6rem; margin-bottom:1.2rem;">
-          <a href="${upiUri}" class="btn-primary" style="display:flex; align-items:center; justify-content:center; gap:0.6rem; background:#2563eb; color:#fff; text-decoration:none; padding:0.8rem 1rem; border-radius:10px; font-weight:700; font-size:1rem; box-shadow:0 4px 12px rgba(37,99,235,0.4);">
-            📱 Open Installed UPI App &rarr;
+        <!-- Direct UPI App Selection Buttons -->
+        <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:0.9rem; margin-bottom:1.2rem; text-align:left;">
+          <div style="color:#d1d5db; font-size:0.82rem; font-weight:700; margin-bottom:0.6rem;">📱 Select Your UPI App to Pay Directly:</div>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.6rem; margin-bottom:0.6rem;">
+            <!-- GPay Button -->
+            <a href="${gpayUri}" class="upi-app-btn" style="display:flex; align-items:center; justify-content:center; gap:0.5rem; background:#ffffff; color:#1f2937; padding:0.65rem; border-radius:10px; font-weight:800; font-size:0.9rem; text-decoration:none; box-shadow:0 3px 8px rgba(0,0,0,0.3); border:1px solid #e5e7eb;">
+              <span style="font-family:sans-serif;"><span style="color:#4285F4">G</span><span style="color:#EA4335">P</span><span style="color:#FBBC05">a</span><span style="color:#34A853">y</span></span>
+            </a>
+
+            <!-- PhonePe Button -->
+            <a href="${phonepeUri}" class="upi-app-btn" style="display:flex; align-items:center; justify-content:center; gap:0.5rem; background:#5f259f; color:#ffffff; padding:0.65rem; border-radius:10px; font-weight:800; font-size:0.9rem; text-decoration:none; box-shadow:0 3px 8px rgba(95,37,159,0.4);">
+              <span>📱 PhonePe</span>
+            </a>
+
+            <!-- Paytm Button -->
+            <a href="${paytmUri}" class="upi-app-btn" style="display:flex; align-items:center; justify-content:center; gap:0.5rem; background:#002e6e; color:#ffffff; border:1px solid #00baf2; padding:0.65rem; border-radius:10px; font-weight:800; font-size:0.9rem; text-decoration:none; box-shadow:0 3px 8px rgba(0,186,242,0.3);">
+              <span style="color:#00baf2;">Paytm</span>
+            </a>
+
+            <!-- Amazon Pay Button -->
+            <a href="${amazonPayUri}" class="upi-app-btn" style="display:flex; align-items:center; justify-content:center; gap:0.5rem; background:#232f3e; color:#ff9900; border:1px solid #ff9900; padding:0.65rem; border-radius:10px; font-weight:800; font-size:0.9rem; text-decoration:none; box-shadow:0 3px 8px rgba(255,153,0,0.3);">
+              <span>amazon <span style="color:#fff;">pay</span></span>
+            </a>
+          </div>
+
+          <!-- Generic / Any UPI App Button -->
+          <a href="${upiUri}" class="upi-app-btn" style="display:flex; align-items:center; justify-content:center; gap:0.5rem; background:#2563eb; color:#ffffff; padding:0.65rem; border-radius:10px; font-weight:700; font-size:0.88rem; text-decoration:none; box-shadow:0 4px 10px rgba(37,99,235,0.4);">
+            ⚡ Open Any Other UPI App / BHIM &rarr;
           </a>
         </div>
 
+        <!-- QR Code Section -->
         <div style="background:#fff; border-radius:12px; padding:1rem; display:inline-block; margin-bottom:1rem; box-shadow:0 4px 6px -1px rgba(0,0,0,0.2);">
           <img src="${qrCodeUrl}" alt="UPI Payment QR Code" style="width:190px; height:190px; display:block; margin:auto;" />
           <div style="color:#374151; font-size:0.75rem; margin-top:0.4rem; font-weight:600;">Scan with GPay / PhonePe / Paytm / BHIM</div>
         </div>
 
-        <div style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:0.8rem; text-align:left; margin-bottom:1.2rem; font-size:0.85rem;">
-          <div style="color:#d1d5db; margin-bottom:0.25rem;">📌 <strong>Payee VPA:</strong> <span style="color:#60a5fa; user-select:all; font-weight:600;">${vpa}</span></div>
-          <div style="color:#d1d5db;">💳 <strong>Payable Amount:</strong> <span style="color:#34d399; font-weight:700;">₹${amountStr}</span> <small style="color:#9ca3af;">(Direct Bank Account)</small></div>
+        <!-- Payee VPA Details & 1-Click Copy -->
+        <div style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:0.8rem; text-align:left; margin-bottom:1.2rem; font-size:0.85rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+          <div>
+            <div style="color:#d1d5db; margin-bottom:0.25rem;">📌 <strong>Payee VPA:</strong> <span style="color:#60a5fa; user-select:all; font-weight:700;">${escapeHTML(vpa)}</span></div>
+            <div style="color:#d1d5db;">💳 <strong>Payable Amount:</strong> <span style="color:#34d399; font-weight:700;">₹${amountStr}</span> <small style="color:#9ca3af;">(Direct Bank Account)</small></div>
+          </div>
+          <button type="button" id="copyVpaBtn" style="background:rgba(59,130,246,0.2); color:#60a5fa; border:1px solid rgba(59,130,246,0.4); padding:0.35rem 0.75rem; border-radius:6px; font-size:0.78rem; font-weight:700; cursor:pointer;">
+            📋 Copy VPA
+          </button>
         </div>
 
         <div style="background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.3); border-radius:12px; padding:1rem; text-align:left;">
@@ -845,6 +883,26 @@ document.addEventListener("DOMContentLoaded", async () => {
       closeBtn.onclick = () => {
         upiModal.hidden = true;
         if (onCancelCallback) onCancelCallback();
+      };
+    }
+
+    const copyVpaBtn = document.getElementById("copyVpaBtn");
+    if (copyVpaBtn) {
+      copyVpaBtn.onclick = () => {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(vpa).then(() => {
+            copyVpaBtn.innerHTML = "✓ Copied!";
+            copyVpaBtn.style.background = "rgba(16,185,129,0.2)";
+            copyVpaBtn.style.color = "#34d399";
+            copyVpaBtn.style.borderColor = "rgba(16,185,129,0.4)";
+            setTimeout(() => {
+              copyVpaBtn.innerHTML = "📋 Copy VPA";
+              copyVpaBtn.style.background = "rgba(59,130,246,0.2)";
+              copyVpaBtn.style.color = "#60a5fa";
+              copyVpaBtn.style.borderColor = "rgba(59,130,246,0.4)";
+            }, 2000);
+          }).catch(e => console.warn("VPA copy failed:", e));
+        }
       };
     }
 
