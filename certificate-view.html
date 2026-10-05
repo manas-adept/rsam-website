@@ -138,6 +138,31 @@
       z-index: 0;
     }
 
+    /* Left & Right Dummy Skater Background Watermarks */
+    .cert-skater-watermark-left {
+      position: absolute;
+      top: 52%;
+      left: 6%;
+      transform: translateY(-50%);
+      width: 230px;
+      height: 310px;
+      opacity: 0.16;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .cert-skater-watermark-right {
+      position: absolute;
+      top: 52%;
+      right: 6%;
+      transform: translateY(-50%);
+      width: 230px;
+      height: 310px;
+      opacity: 0.16;
+      pointer-events: none;
+      z-index: 0;
+    }
+
     .cert-content {
       position: relative;
       z-index: 2;
@@ -451,8 +476,10 @@
       </g>
     </svg>
     
-    <!-- Central Transparent RSAM Watermark Logo -->
+    <!-- Central Transparent RSAM Watermark Logo & Left/Right Dummy Skater Background Watermarks -->
     <img src="assets/branding/logo_rsam_transparent.png" class="cert-watermark" alt="RSAM Watermark" />
+    <img src="assets/branding/skater_dummy_left.svg" class="cert-skater-watermark-left" alt="Left Dummy Skater" />
+    <img src="assets/branding/skater_dummy_right.svg" class="cert-skater-watermark-right" alt="Right Dummy Skater" />
 
     <div class="cert-content">
       

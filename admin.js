@@ -1875,8 +1875,10 @@ document.addEventListener("DOMContentLoaded", () => {
             </g>
           </svg>
 
-          <!-- RSAM Transparent Watermark -->
+          <!-- RSAM Transparent Watermark & Left/Right Dummy Skater Background Watermarks -->
           <img src="assets/branding/logo_rsam_transparent.png" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:380px; opacity:0.22; pointer-events:none; z-index:0;" alt="RSAM Watermark" />
+          <img src="assets/branding/skater_dummy_left.svg" style="position:absolute; top:52%; left:5%; transform:translateY(-50%); width:210px; height:285px; opacity:0.16; pointer-events:none; z-index:0;" alt="Left Dummy Skater" />
+          <img src="assets/branding/skater_dummy_right.svg" style="position:absolute; top:52%; right:5%; transform:translateY(-50%); width:210px; height:285px; opacity:0.16; pointer-events:none; z-index:0;" alt="Right Dummy Skater" />
 
           <div style="position:relative; z-index:2; height:100%; display:flex; flex-direction:column; justify-content:space-between;">
             <!-- Top 4 Header Logos Bar (Standout Transparent Logos: RSAM enlarged visually, UPRSA, RSFI, IOA) -->

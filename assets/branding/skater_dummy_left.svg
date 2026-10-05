@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 400" width="100%" height="100%">
+  <defs>
+    <linearGradient id="skaterNavyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b192c" stop-opacity="0.85" />
+      <stop offset="50%" stop-color="#1e3a8a" stop-opacity="0.75" />
+      <stop offset="100%" stop-color="#2563eb" stop-opacity="0.65" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Speed lines background effect -->
+  <g stroke="url(#skaterNavyGrad)" stroke-width="2" stroke-linecap="round" opacity="0.4">
+    <line x1="20" y1="120" x2="120" y2="120" stroke-dasharray="10 15" />
+    <line x1="10" y1="180" x2="140" y2="180" stroke-dasharray="15 20" />
+    <line x1="30" y1="240" x2="160" y2="240" stroke-dasharray="8 12" />
+    <line x1="15" y1="300" x2="150" y2="300" stroke-dasharray="12 18" />
+  </g>
+
+  <!-- Speed Skater Silhouette Facing Right -->
+  <g fill="url(#skaterNavyGrad)">
+    <!-- Helmet & Head -->
+    <path d="M195 85 C 215 75, 235 85, 240 100 C 242 108, 230 115, 215 115 C 195 115, 185 100, 195 85 Z" />
+    <path d="M235 95 L255 98 L240 106 Z" /> <!-- Helmet visor/tip -->
+    
+    <!-- Torso leaning forward -->
+    <path d="M185 110 Q 140 125, 120 160 Q 110 180, 130 195 Q 165 190, 205 140 Q 215 125, 185 110 Z" />
+    
+    <!-- Back Arm swinging back -->
+    <path d="M125 150 Q 80 140, 50 165 Q 45 170, 55 175 Q 85 155, 130 165 Z" />
+    
+    <!-- Front Arm tucked / forward -->
+    <path d="M190 135 Q 210 150, 225 170 Q 230 175, 220 180 Q 205 160, 180 145 Z" />
+    
+    <!-- Lead Leg (Right Leg extended forward) -->
+    <path d="M135 190 Q 170 215, 200 250 Q 215 270, 225 305 L205 315 Q 195 280, 180 260 Q 155 230, 125 200 Z" />
+    <!-- Skate Boot Right -->
+    <path d="M220 300 L250 320 L245 332 L200 325 Z" />
+    <!-- Wheels Right -->
+    <circle cx="208" cy="333" r="8" />
+    <circle cx="223" cy="334" r="8" />
+    <circle cx="238" cy="335" r="8" />
+    <circle cx="253" cy="336" r="8" />
+
+    <!-- Push Leg (Left Leg extended back) -->
+    <path d="M120 185 Q 90 205, 65 240 Q 45 270, 25 300 L42 310 Q 60 280, 80 252 Q 105 220, 130 195 Z" />
+    <!-- Skate Boot Left -->
+    <path d="M20 295 L42 305 L35 318 L10 310 Z" />
+    <!-- Wheels Left -->
+    <circle cx="12" cy="316" r="8" />
+    <circle cx="25" cy="320" r="8" />
+    <circle cx="38" cy="324" r="8" />
+    <circle cx="50" cy="327" r="8" />
+  </g>
+</svg>
