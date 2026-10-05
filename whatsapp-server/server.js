@@ -1616,8 +1616,60 @@ app.post('/api/verify-utr', async (req, res) => {
     }
 
     const used = getUsedUtrs();
-    const isDuplicate = used.some(item => item.utr === cleanUtr);
+    const normSkater = String(skaterName || '').trim().toLowerCase();
+
+    // Check if duplicate for a DIFFERENT skater
+    const isDuplicate = used.some(item => {
+      if (item.utr !== cleanUtr) return false;
+      const existingSkater = String(item.skaterName || '').trim().toLowerCase();
+      // If same skater, allow re-submission
+      if (normSkater && existingSkater && (normSkater === existingSkater || normSkater.includes(existingSkater) || existingSkater.includes(normSkater))) {
+        return false;
+      }
+      return true;
+    });
+
     if (isDuplicate) {
+      // Cross-check with live Google Sheets to verify if it actually exists in Google Sheets
+      try {
+        const sheetUrl = process.env.SHEET_URL || "https://script.google.com/macros/s/AKfycbyrxUIvQMXOzaBFNKwle-kOC0xMlc0ezufhIRXSyyid3Zx6Rhk9SKMZhNIoBBB290Xw/exec";
+        const fetchRes = await fetch(`${sheetUrl}?action=fetch_all_contacts`, { redirect: 'follow' });
+        if (fetchRes.ok) {
+          const sheetData = await fetchRes.json();
+          if (sheetData && Array.isArray(sheetData.sheets)) {
+            let foundInSheet = false;
+            let foundSkaterName = '';
+            sheetData.sheets.forEach(s => {
+              (s.records || []).forEach(r => {
+                const rUtr = String(r.upiUtr || r.paymentId || r.razorpayPaymentId || '').replace(/\D/g, '');
+                if (rUtr && rUtr.includes(cleanUtr)) {
+                  foundInSheet = true;
+                  foundSkaterName = r.skaterName || r.name || '';
+                }
+              });
+            });
+
+            // If not found in Google Sheets at all, purge stale cache and allow
+            if (!foundInSheet) {
+              console.log(`[UTR Check] UTR ${cleanUtr} was in local cache but NOT found in Google Sheets. Purging stale entry.`);
+              const updatedList = used.filter(item => item.utr !== cleanUtr);
+              fs.writeFileSync(USED_UTRS_FILE, JSON.stringify(updatedList, null, 2), 'utf8');
+              saveUsedUtr(cleanUtr, skaterName || 'Athlete');
+              return res.json({ valid: true, message: 'UTR format and uniqueness verified successfully!' });
+            } else {
+              // Found in sheet! Allow if it belongs to the same skater
+              const normFoundSkater = String(foundSkaterName).trim().toLowerCase();
+              if (normSkater && normFoundSkater && (normSkater === normFoundSkater || normSkater.includes(normFoundSkater) || normFoundSkater.includes(normSkater))) {
+                saveUsedUtr(cleanUtr, skaterName || 'Athlete');
+                return res.json({ valid: true, message: 'UTR format and uniqueness verified successfully!' });
+              }
+            }
+          }
+        }
+      } catch (sheetErr) {
+        console.warn('[UTR Verification Sheet Cross-Check Error]:', sheetErr.message);
+      }
+
       return res.json({ valid: false, message: 'This 12-digit UPI UTR has already been submitted for another registration!' });
     }
 
@@ -1640,6 +1692,22 @@ app.post('/api/verify-utr', async (req, res) => {
 
   } catch (err) {
     return res.status(500).json({ valid: false, message: err.message });
+  }
+});
+
+app.post('/api/clear-utr-cache', (req, res) => {
+  try {
+    const { utr } = req.body || {};
+    if (utr) {
+      const clean = String(utr).replace(/\D/g, '');
+      const list = getUsedUtrs().filter(item => item.utr !== clean);
+      fs.writeFileSync(USED_UTRS_FILE, JSON.stringify(list, null, 2), 'utf8');
+      return res.json({ success: true, message: `Cleared UTR ${clean} from cache.` });
+    }
+    fs.writeFileSync(USED_UTRS_FILE, JSON.stringify([], null, 2), 'utf8');
+    return res.json({ success: true, message: 'Cleared all UTRs from cache.' });
+  } catch (e) {
+    return res.status(500).json({ success: false, error: e.message });
   }
 });
 
