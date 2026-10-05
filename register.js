@@ -947,17 +947,19 @@ function formatDateDDMMMYYYY(dateStr) {
         const vpa = envConfig.upiVpa || "9045865056@ybl";
         const payeeName = envConfig.upiPayeeName || "Roller Sports Association Moradabad";
         const amountStr = parseFloat(baseFeeAmount).toFixed(2);
-        const noteStr = `RSAM Annual ${payload.skaterName || 'Reg'}`.slice(0, 30);
+        const noteStr = `RSAM Annual ${payload.skaterName || 'Reg'}`.replace(/[^a-zA-Z0-9 ]/g, "").slice(0, 30);
 
         const upiQueryParams = `pa=${encodeURIComponent(vpa)}&pn=${encodeURIComponent(payeeName)}&am=${amountStr}&cu=INR&tn=${encodeURIComponent(noteStr)}`;
         const rawUpiUri = `upi://pay?pa=${vpa}&pn=${payeeName}&am=${amountStr}&cu=INR&tn=${noteStr}`;
         const upiUri = `upi://pay?${upiQueryParams}`;
-        const gpayUri = `intent://pay?${upiQueryParams}#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end`;
-        const phonepeUri = `intent://pay?${upiQueryParams}#Intent;scheme=upi;package=com.phonepe.app;end`;
-        const paytmUri = `intent://pay?${upiQueryParams}#Intent;scheme=upi;package=net.one97.paytm;end`;
-        const amazonPayUri = `intent://pay?${upiQueryParams}#Intent;scheme=upi;package=in.amazon.mShop.android.shopping;end`;
 
         const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(rawUpiUri)}`;
+
+        // Device auto-detection (iOS vs Android vs Desktop)
+        const ua = navigator.userAgent || "";
+        const isIOS = /iPhone|iPad|iPod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        const isAndroid = /Android/i.test(ua);
+        const deviceType = isIOS ? "ios" : (isAndroid ? "android" : "desktop");
 
         let selectedScreenshotBase64 = "";
 
@@ -974,37 +976,45 @@ function formatDateDDMMMYYYY(dateStr) {
             
             <!-- Direct UPI App Selection Buttons -->
             <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:0.9rem; margin-bottom:1.2rem; text-align:left;">
-              <div style="color:#d1d5db; font-size:0.82rem; font-weight:700; margin-bottom:0.6rem;">📱 Select Your UPI App to Pay Directly:</div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem;">
+                <div style="color:#d1d5db; font-size:0.82rem; font-weight:700;">📱 Select Your UPI App:</div>
+                <div style="font-size:0.72rem; color:#9ca3af; background:rgba(255,255,255,0.08); padding:2px 8px; border-radius:12px;">
+                  Detected: <strong style="color:#60a5fa; text-transform:uppercase;">${deviceType}</strong>
+                </div>
+              </div>
+
               <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.6rem; margin-bottom:0.6rem;">
                 <!-- GPay Button -->
-                <a href="${gpayUri}" class="upi-app-btn" style="display:flex; align-items:center; justify-content:center; gap:0.5rem; background:#ffffff; color:#1f2937; padding:0.65rem; border-radius:10px; font-weight:800; font-size:0.9rem; text-decoration:none; box-shadow:0 3px 8px rgba(0,0,0,0.3); border:1px solid #e5e7eb;">
+                <button type="button" class="upi-app-btn" data-app="GPay" style="display:flex; align-items:center; justify-content:center; gap:0.5rem; background:#ffffff; color:#1f2937; padding:0.65rem; border-radius:10px; font-weight:800; font-size:0.9rem; border:1px solid #e5e7eb; cursor:pointer; width:100%;">
                   <span style="font-family:sans-serif;"><span style="color:#4285F4">G</span><span style="color:#EA4335">P</span><span style="color:#FBBC05">a</span><span style="color:#34A853">y</span></span>
-                </a>
+                </button>
 
                 <!-- PhonePe Button -->
-                <a href="${phonepeUri}" class="upi-app-btn" style="display:flex; align-items:center; justify-content:center; gap:0.5rem; background:#5f259f; color:#ffffff; padding:0.65rem; border-radius:10px; font-weight:800; font-size:0.9rem; text-decoration:none; box-shadow:0 3px 8px rgba(95,37,159,0.4);">
+                <button type="button" class="upi-app-btn" data-app="PhonePe" style="display:flex; align-items:center; justify-content:center; gap:0.5rem; background:#5f259f; color:#ffffff; padding:0.65rem; border-radius:10px; font-weight:800; font-size:0.9rem; border:none; cursor:pointer; width:100%;">
                   <span>📱 PhonePe</span>
-                </a>
+                </button>
 
                 <!-- Paytm Button -->
-                <a href="${paytmUri}" class="upi-app-btn" style="display:flex; align-items:center; justify-content:center; gap:0.5rem; background:#002e6e; color:#ffffff; border:1px solid #00baf2; padding:0.65rem; border-radius:10px; font-weight:800; font-size:0.9rem; text-decoration:none; box-shadow:0 3px 8px rgba(0,186,242,0.3);">
+                <button type="button" class="upi-app-btn" data-app="Paytm" style="display:flex; align-items:center; justify-content:center; gap:0.5rem; background:#002e6e; color:#ffffff; border:1px solid #00baf2; padding:0.65rem; border-radius:10px; font-weight:800; font-size:0.9rem; cursor:pointer; width:100%;">
                   <span style="color:#00baf2;">Paytm</span>
-                </a>
+                </button>
 
                 <!-- Amazon Pay Button -->
-                <a href="${amazonPayUri}" class="upi-app-btn" style="display:flex; align-items:center; justify-content:center; gap:0.5rem; background:#232f3e; color:#ff9900; border:1px solid #ff9900; padding:0.65rem; border-radius:10px; font-weight:800; font-size:0.9rem; text-decoration:none; box-shadow:0 3px 8px rgba(255,153,0,0.3);">
+                <button type="button" class="upi-app-btn" data-app="AmazonPay" style="display:flex; align-items:center; justify-content:center; gap:0.5rem; background:#232f3e; color:#ff9900; border:1px solid #ff9900; padding:0.65rem; border-radius:10px; font-weight:800; font-size:0.9rem; cursor:pointer; width:100%;">
                   <span>amazon <span style="color:#fff;">pay</span></span>
-                </a>
+                </button>
               </div>
 
               <!-- Generic / Any UPI App Button -->
-              <a href="${upiUri}" class="upi-app-btn" style="display:flex; align-items:center; justify-content:center; gap:0.5rem; background:#2563eb; color:#ffffff; padding:0.65rem; border-radius:10px; font-weight:700; font-size:0.88rem; text-decoration:none; box-shadow:0 4px 10px rgba(37,99,235,0.4);">
-                ⚡ Open Any Other UPI App / BHIM &rarr;
-              </a>
+              <button type="button" class="upi-app-btn" data-app="UPI" style="display:flex; align-items:center; justify-content:center; gap:0.5rem; background:#2563eb; color:#ffffff; padding:0.65rem; border-radius:10px; font-weight:700; font-size:0.88rem; border:none; cursor:pointer; width:100%;">
+                ⚡ Open Any Installed UPI App / BHIM &rarr;
+              </button>
+
+              <div id="upiLaunchStatus" style="margin-top:0.6rem; font-size:0.8rem; line-height:1.4; color:#9ca3af; text-align:center; padding:0.4rem; background:rgba(0,0,0,0.3); border-radius:6px;" hidden></div>
             </div>
 
             <!-- QR Code Section -->
-            <div style="background:#fff; border-radius:12px; padding:1rem; display:inline-block; margin-bottom:1rem; box-shadow:0 4px 6px -1px rgba(0,0,0,0.2);">
+            <div id="upiQrCodeCard" style="background:#fff; border-radius:12px; padding:1rem; display:inline-block; margin-bottom:1rem; box-shadow:0 4px 6px -1px rgba(0,0,0,0.2); transition:all 0.3s ease;">
               <img src="${qrCodeUrl}" alt="UPI Payment QR Code" style="width:190px; height:190px; display:block; margin:auto;" />
               <div style="color:#374151; font-size:0.75rem; margin-top:0.4rem; font-weight:600;">Scan with GPay / PhonePe / Paytm / BHIM</div>
             </div>
@@ -1074,6 +1084,70 @@ function formatDateDDMMMYYYY(dateStr) {
             }
           };
         }
+
+        const statusBox = document.getElementById("upiLaunchStatus");
+        const qrCard = document.getElementById("upiQrCodeCard");
+
+        // Device-Specific UPI Link Map
+        function getUpiTargetUri(app, device) {
+          if (device === "android") {
+            if (app === "GPay") return `intent://pay?${upiQueryParams}#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end`;
+            if (app === "PhonePe") return `intent://pay?${upiQueryParams}#Intent;scheme=upi;package=com.phonepe.app;end`;
+            if (app === "Paytm") return `intent://pay?${upiQueryParams}#Intent;scheme=upi;package=net.one97.paytm;end`;
+            if (app === "AmazonPay") return `intent://pay?${upiQueryParams}#Intent;scheme=upi;package=in.amazon.mShop.android.shopping;end`;
+            return upiUri;
+          }
+          if (device === "ios") {
+            if (app === "GPay") return `gpay://upi/pay?${upiQueryParams}`;
+            if (app === "PhonePe") return `phonepe://pay?${upiQueryParams}`;
+            if (app === "Paytm") return `paytmmp://pay?${upiQueryParams}`;
+            if (app === "AmazonPay") return `amazonpay://pay?${upiQueryParams}`;
+            return upiUri;
+          }
+          return upiUri;
+        }
+
+        // Smart click listeners for UPI App buttons tailored for the detected device
+        document.querySelectorAll("#upiQrModal .upi-app-btn").forEach(btn => {
+          btn.onclick = () => {
+            const app = btn.getAttribute("data-app") || "UPI";
+            const targetUri = getUpiTargetUri(app, deviceType);
+
+            // Copy VPA to clipboard automatically
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+              navigator.clipboard.writeText(vpa).catch(e => console.warn(e));
+            }
+
+            if (deviceType === "ios" || deviceType === "android") {
+              if (statusBox) {
+                statusBox.hidden = false;
+                statusBox.style.color = "#34d399";
+                statusBox.innerHTML = `🚀 Launching ${escapeHTML(app)} on ${deviceType.toUpperCase()}... Payee VPA <strong>${escapeHTML(vpa)}</strong> copied to clipboard!`;
+              }
+
+              // On iOS, if custom scheme fails, fallback to universal upiUri
+              if (deviceType === "ios" && app !== "UPI") {
+                const timer = setTimeout(() => {
+                  window.location.href = upiUri;
+                }, 800);
+                window.location.href = targetUri;
+              } else {
+                window.location.href = targetUri;
+              }
+            } else {
+              // Desktop environment: prevent top-level navigation error ("Address is invalid")
+              if (statusBox) {
+                statusBox.hidden = false;
+                statusBox.style.color = "#60a5fa";
+                statusBox.innerHTML = `📱 Direct app links require a mobile phone with ${escapeHTML(app)} installed.<br>Payee VPA <strong>${escapeHTML(vpa)}</strong> has been <strong>copied to your clipboard</strong>! Please scan the QR code below using your mobile app.`;
+              }
+              if (qrCard) {
+                qrCard.style.border = "3px solid #3b82f6";
+                qrCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+              }
+            }
+          };
+        });
 
         const utrInput = document.getElementById("upiUtrInput");
         const screenshotInput = document.getElementById("upiScreenshotInput");
