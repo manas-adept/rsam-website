@@ -18,7 +18,7 @@
       "startDateTime": "2026-10-11T08:00",
       "endDateTime": "2026-10-11T15:00",
       "deadline": "2026-10-08T23:59:00+05:30",
-      "location": "Springfields School, New Moradabad",
+      "location": "TBD",
       "feeType": "online",
       "payToOrganizer": false,
       "baseFee": 500,
@@ -28,7 +28,6 @@
       "description": "Official 4th District Championship cum State trial for all age groups & disciplines in Moradabad.",
       "body": "Official 4th District Championship cum State trial for all age groups & disciplines in Moradabad.",
       "showOnTicker": true,
-      "showDeadlineOnTicker": true,
       "isRegistrationActive": true,
       "archived": false
     },
@@ -221,7 +220,7 @@
       "designation": "President",
       "designationClass": "president",
       "degrees": "",
-      "photo": "https://res.cloudinary.com/igjmhsju/image/upload/v1790855940/ashok_singhal_qxhfet.jpg",
+      "photo": "https://res.cloudinary.com/igjmhsju/image/upload/v1788797450/rsam_website/officials/refree_dummy.png",
       "category": "executive"
     },
     {
@@ -286,6 +285,14 @@
       "designationClass": "member",
       "degrees": "",
       "photo": "https://res.cloudinary.com/igjmhsju/image/upload/v1788797457/rsam_website/officials/refree_vipin.jpg",
+      "category": "referee"
+    },
+    {
+      "name": "Sachin Nainwal",
+      "designation": "District Referee",
+      "designationClass": "member",
+      "degrees": "",
+      "photo": "https://res.cloudinary.com/igjmhsju/image/upload/v1788797454/rsam_website/officials/refree_sachinnainwal.jpg",
       "category": "referee"
     },
     {
@@ -366,5 +373,5 @@
       }
     ]
   },
-  "lastUpdated": "2026-10-05T09:41:19.971Z"
+  "lastUpdated": "2026-10-05T13:34:46.205Z"
 }
