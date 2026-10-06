@@ -18,7 +18,7 @@
       "startDateTime": "2026-10-11T08:00",
       "endDateTime": "2026-10-11T15:00",
       "deadline": "2026-10-08T23:59:00+05:30",
-      "location": "TBD",
+      "location": "Springfields School, New Moradabad",
       "feeType": "online",
       "payToOrganizer": false,
       "baseFee": 500,
@@ -28,6 +28,7 @@
       "description": "Official 4th District Championship cum State trial for all age groups & disciplines in Moradabad.",
       "body": "Official 4th District Championship cum State trial for all age groups & disciplines in Moradabad.",
       "showOnTicker": true,
+      "showDeadlineOnTicker": true,
       "isRegistrationActive": true,
       "archived": false
     },
@@ -373,5 +374,5 @@
       }
     ]
   },
-  "lastUpdated": "2026-10-05T14:42:38.055Z"
+  "lastUpdated": "2026-10-06T17:04:38.328Z"
 }
