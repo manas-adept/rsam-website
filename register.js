@@ -360,6 +360,7 @@ document.addEventListener("DOMContentLoaded", () => {
           form.dob.value = formatToInputDate(s.dob);
           form.dob.dispatchEvent(new Event("change"));
         }
+        if (form.gender && s.gender) form.gender.value = s.gender;
         if (form.schoolClub) {
           const schoolVal = s.schoolClub || s.school || s.club || "";
           if (schoolVal) form.schoolClub.value = schoolVal;
@@ -597,8 +598,8 @@ document.getElementById("regForm").addEventListener("submit", async (e) => {
   /* Comprehensive validation */
   let valid = true;
 
-  // 1. Text / Date / Textarea required inputs
-  form.querySelectorAll("input[required]:not([type='file']), textarea[required]").forEach(el => {
+  // 1. Text / Date / Textarea / Select required inputs
+  form.querySelectorAll("input[required]:not([type='file']), textarea[required], select[required]").forEach(el => {
     if (!el.value.trim()) {
       el.classList.add("invalid");
       valid = false;
@@ -745,6 +746,7 @@ document.getElementById("regForm").addEventListener("submit", async (e) => {
         dob:          form.dob.value,
         age:          ageInput.value,
         ageGroup:     ageGroupInput ? ageGroupInput.value : getAgeGroup(ageInput.value),
+        gender:       form.gender ? form.gender.value : "",
         schoolClub:   form.schoolClub ? form.schoolClub.value.trim() : "",
         coachName:    coachNameVal,
         coachMobile:  coachMobileVal,

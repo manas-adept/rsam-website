@@ -186,6 +186,7 @@ function doGet(e) {
       const dobIdx        = findHeaderIndex(["date of birth", "dob"], 5);
       const ageIdx        = findHeaderIndex(["age (yrs)", "age (years)", "age"], 6);
       const ageGroupIdx   = findHeaderIndex(["age group", "agegroup", "category"], 7);
+      const genderIdx     = findHeaderIndex(["gender", "sex"], -1);
       const schoolClubIdx = findHeaderIndex(["school", "club", "institution"], 8);
       const coachNameIdx   = findHeaderIndex(["coach name", "coach's name"], 9);
       const coachMobileIdx = findHeaderIndex(["coach mobile", "coach contact", "coach phone"], 10);
@@ -234,6 +235,7 @@ function doGet(e) {
         dob: String(data[i][dobIdx] || ""),
         age: rawAge,
         ageGroup: rawAgeGroup,
+        gender: genderIdx !== -1 ? String(data[i][genderIdx] || "") : "",
         schoolClub: String(data[i][schoolClubIdx] || ""),
         coachName: String(data[i][coachNameIdx] || ""),
         coachMobile: String(data[i][coachMobileIdx] || "").replace(/^'/, ""),
@@ -525,6 +527,7 @@ function doPost(e) {
           "Date of Birth",
           "Age",
           "Age Group",
+          "Gender",
           "School / Club Name",
           "Coach Name",
           "Coach Contact Number",
@@ -562,6 +565,7 @@ function doPost(e) {
         formatDateDDMMMYY(data.dob),
         data.age,
         data.ageGroup || "N/A",
+        data.gender || "N/A",
         data.schoolClub || "N/A",
         data.coachName || "N/A",
         "'" + (data.coachMobile || "N/A"),
@@ -631,6 +635,7 @@ function doPost(e) {
         "Date of Birth",
         "Age",
         "Age Group",
+        "Gender",
         "School / Club Name",
         "Coach Name",
         "Coach Contact Number",
@@ -679,6 +684,7 @@ function doPost(e) {
       formatDateDDMMMYY(data.dob),
       data.age,
       data.ageGroup || "N/A",
+      data.gender || "N/A",
       data.schoolClub || "N/A",
       data.coachName || "N/A",
       "'" + (data.coachMobile || "N/A"),
@@ -799,7 +805,7 @@ function sendRegistrationConfirmationEmail(data, regNumber, photoUrl, eventRegNo
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.08);"><td style="padding: 10px 0; color: #94a3b8; width: 40%;">Athlete Name:</td><td style="padding: 10px 0; font-weight: bold; color: #ffffff;">${skaterName}</td></tr>
             ${isEvent ? `<tr style="border-bottom: 1px solid rgba(255,255,255,0.08);"><td style="padding: 10px 0; color: #94a3b8;">Championship Event:</td><td style="padding: 10px 0; font-weight: bold; color: #cc001b;">${eventTitle}</td></tr>` : ''}
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.08);"><td style="padding: 10px 0; color: #94a3b8;">Discipline:</td><td style="padding: 10px 0; font-weight: bold; color: #ffffff;">${discipline}</td></tr>
-            <tr style="border-bottom: 1px solid rgba(255,255,255,0.08);"><td style="padding: 10px 0; color: #94a3b8;">Date of Birth &amp; Age:</td><td style="padding: 10px 0; font-weight: bold; color: #ffffff;">${formattedDob} (Age: ${data.age || 'N/A'} yrs / Group: ${ageGroup})</td></tr>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.08);"><td style="padding: 10px 0; color: #94a3b8;">Date of Birth &amp; Age:</td><td style="padding: 10px 0; font-weight: bold; color: #ffffff;">${formattedDob} (Age: ${data.age || 'N/A'} yrs / Group: ${ageGroup} / Gender: ${data.gender || 'N/A'})</td></tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.08);"><td style="padding: 10px 0; color: #94a3b8;">School / Club:</td><td style="padding: 10px 0; font-weight: bold; color: #ffffff;">${data.schoolClub || 'N/A'}</td></tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.08);"><td style="padding: 10px 0; color: #94a3b8;">Coach Details:</td><td style="padding: 10px 0; font-weight: bold; color: #ffffff;">${data.coachName || 'N/A'} (${data.coachMobile || 'N/A'})</td></tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.08);"><td style="padding: 10px 0; color: #94a3b8;">Payment Reference:</td><td style="padding: 10px 0; color: #34d399; font-weight: bold;">${paymentId} (₹${amountPaid})</td></tr>

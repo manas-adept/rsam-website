@@ -1541,23 +1541,46 @@ document.addEventListener("DOMContentLoaded", () => {
             skaterListStr = `• ${r.data.skaterName || r.name}${regStr}${chestStr}`;
           }
 
-          let parsedMsg = rawTemplate
+          let parsedMsg = rawTemplate;
+
+          // 1. Dynamic replacement for all keys present in r.data
+          if (r.data && typeof r.data === "object") {
+            Object.keys(r.data).forEach(key => {
+              const val = r.data[key];
+              if (val !== undefined && val !== null && val !== "") {
+                const regExp = new RegExp(`{${key}}`, 'gi');
+                parsedMsg = parsedMsg.replace(regExp, String(val));
+              }
+            });
+          }
+
+          // 2. Explicit aliases and fallback replacements for all standard spreadsheet keys & special variables
+          parsedMsg = parsedMsg
             .replace(/{chestNo}/g, chestNoVal || 'N/A')
+            .replace(/{chestNumber}/g, chestNoVal || 'N/A')
             .replace(/{eventRegNo}/g, chestNoVal || 'N/A')
             .replace(/{rsamRegNo}/g, rsamRegVal || 'N/A')
+            .replace(/{regNumber}/g, rsamRegVal || 'N/A')
             .replace(/{skaterList}/g, skaterListStr)
             .replace(/{skaterName} - {regNumber}/g, skaterListStr)
-            .replace(/{skaterName}/g, r.data.skaterName || r.name)
-            .replace(/{regNumber}/g, rsamRegVal || 'N/A')
-            .replace(/{discipline}/g, r.data.discipline || 'N/A')
-            .replace(/{coachName}/g, r.name || r.data.coachName || 'Coach')
-            .replace(/{coachMobile}/g, r.mobile)
+            .replace(/{skaterName}/g, r.data.skaterName || r.name || 'Athlete')
             .replace(/{dob}/g, r.data.dob || 'N/A')
+            .replace(/{age}/g, r.data.age || 'N/A')
             .replace(/{ageGroup}/g, r.data.ageGroup || 'N/A')
+            .replace(/{gender}/g, r.data.gender || 'N/A')
             .replace(/{schoolClub}/g, r.data.schoolClub || 'N/A')
-            .replace(/{mobile}/g, r.mobile)
+            .replace(/{coachName}/g, r.name || r.data.coachName || 'Coach')
+            .replace(/{coachMobile}/g, r.mobile || r.data.coachMobile || 'N/A')
+            .replace(/{fatherName}/g, r.data.fatherName || 'N/A')
+            .replace(/{motherName}/g, r.data.motherName || 'N/A')
+            .replace(/{address}/g, r.data.address || 'N/A')
+            .replace(/{mobile}/g, r.mobile || r.data.mobile || 'N/A')
             .replace(/{email}/g, r.data.email || 'N/A')
-            .replace(/{aadhaar}/g, r.data.aadhaar || 'N/A');
+            .replace(/{aadhaar}/g, r.data.aadhaar || 'N/A')
+            .replace(/{discipline}/g, r.data.discipline || 'N/A')
+            .replace(/{paymentId}/g, r.data.paymentId || r.data.upiUtr || 'N/A')
+            .replace(/{paymentStatus}/g, r.data.paymentStatus || r.data.status || 'N/A')
+            .replace(/{amountPaid}/g, r.data.amountPaid || 'N/A');
 
           try {
             const apiKey = (window.ENV_CONFIG && window.ENV_CONFIG.apiKey) || "rsam_whatsapp_secret_key_2026";
