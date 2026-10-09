@@ -4101,6 +4101,39 @@ document.addEventListener("DOMContentLoaded", () => {
       return numA - numB;
     });
 
+    // Prompt user for number of extra blank / dummy chest numbers to generate
+    const promptAns = prompt(
+      `🎽 Chest Numbers PDF Generator — ${eventTitle}\n\nRegistered Skaters: ${targetRecords.length}\n\nHow many extra BLANK / DUMMY chest numbers would you like to generate?\n(Enter a number like 4 or 8 to create extra blank cards for writing names by hand later, or 0 for none):`,
+      "0"
+    );
+    if (promptAns === null) return; // User cancelled prompt
+
+    let dummyCount = parseInt(promptAns.trim(), 10);
+    if (isNaN(dummyCount) || dummyCount < 0) dummyCount = 0;
+
+    // Calculate maximum existing chest number to prevent any overlapping
+    let maxChestNum = 99;
+    targetRecords.forEach((r, idx) => {
+      const rawVal = r.eventRegNo || r.chestNo || r.chestNumber || String(100 + idx);
+      const num = parseInt(String(rawVal).replace(/\D/g, ''), 10);
+      if (!isNaN(num) && num > maxChestNum) {
+        maxChestNum = num;
+      }
+    });
+
+    // Create shallow copy of records to append dummy chest numbers without mutating global caches
+    const pdfRecords = [...targetRecords];
+
+    for (let k = 1; k <= dummyCount; k++) {
+      const dummyChestNum = String(maxChestNum + k);
+      pdfRecords.push({
+        eventRegNo: dummyChestNum,
+        chestNo: dummyChestNum,
+        skaterName: "",
+        isDummy: true
+      });
+    }
+
     const win = window.open("", "_blank");
     if (!win) {
       alert("Pop-up blocker prevented opening Chest Numbers PDF. Please allow pop-ups for this site.");
@@ -4108,8 +4141,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     let pagesHTML = '';
-    for (let i = 0; i < targetRecords.length; i += 4) {
-      const group = targetRecords.slice(i, i + 4);
+    for (let i = 0; i < pdfRecords.length; i += 4) {
+      const group = pdfRecords.slice(i, i + 4);
       pagesHTML += `
         <div class="chest-page">
           <!-- Paper Knife Grid Crop Marks (Edge ticks for ruler alignment) -->
@@ -4133,7 +4166,11 @@ document.addEventListener("DOMContentLoaded", () => {
         if (g < group.length) {
           const r = group[g];
           const chestNum = r.eventRegNo || r.chestNo || r.chestNumber || String(100 + (i + g));
-          const skaterName = r.skaterName || r.name || 'Athlete';
+          const skaterName = r.isDummy ? '' : (r.skaterName || r.name || 'Athlete');
+          const nameHTML = r.isDummy 
+            ? `<div class="skater-name dummy-name-line">&nbsp;</div>`
+            : `<div class="skater-name">${escapeHTML(skaterName)}</div>`;
+
           pagesHTML += `
             <div class="chest-card">
               <div style="width:100%;">
@@ -4141,7 +4178,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div class="chest-number">${escapeHTML(chestNum)}</div>
               </div>
               <div style="width:100%; margin-top: auto;">
-                <div class="skater-name">${escapeHTML(skaterName)}</div>
+                ${nameHTML}
                 <div class="association-footer">
                   Roller Sports Association Moradabad
                 </div>
@@ -4274,6 +4311,11 @@ document.addEventListener("DOMContentLoaded", () => {
             word-break: break-word;
             max-height: 38px;
             overflow: hidden;
+          }
+          .dummy-name-line {
+            border-bottom: 2px dashed #94a3b8;
+            min-height: 20px;
+            margin: 2px 12px 2px 12px;
           }
           .association-footer {
             border-top: 1.5px solid #e2e8f0;
