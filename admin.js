@@ -4107,6 +4107,44 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    let pagesHTML = '';
+    for (let i = 0; i < targetRecords.length; i += 2) {
+      const pair = targetRecords.slice(i, i + 2);
+      pagesHTML += `<div class="chest-page">`;
+      pair.forEach((r, subIdx) => {
+        const chestNum = r.eventRegNo || r.chestNo || r.chestNumber || String(100 + (i + subIdx));
+        const skaterName = r.skaterName || r.name || 'Athlete';
+        pagesHTML += `
+          <div class="chest-card-wrapper">
+            <!-- Cut Mark Corner Ticks (Crop Marks) -->
+            <div class="cut-tick cut-tick-tl"></div>
+            <div class="cut-tick cut-tick-tr"></div>
+            <div class="cut-tick cut-tick-bl"></div>
+            <div class="cut-tick cut-tick-br"></div>
+            <div class="cut-label-top">✂️ CUT ALONG DASHED LINE</div>
+            <div class="cut-label-bottom">✂️ CUT ALONG DASHED LINE</div>
+
+            <div class="chest-card">
+              <div style="width:100%;">
+                <div class="event-badge">${escapeHTML(eventTitle)}</div>
+                <div class="chest-number">${escapeHTML(chestNum)}</div>
+              </div>
+              <div style="width:100%;">
+                <div class="skater-name">${escapeHTML(skaterName)}</div>
+              </div>
+              <div class="association-footer">
+                Roller Sports Association Moradabad
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      if (pair.length === 1) {
+        pagesHTML += `<div class="chest-card-wrapper" style="visibility: hidden;"></div>`;
+      }
+      pagesHTML += `</div>`;
+    }
+
     win.document.write(`
       <!DOCTYPE html>
       <html>
@@ -4118,13 +4156,15 @@ document.addEventListener("DOMContentLoaded", () => {
           * { box-sizing: border-box; margin: 0; padding: 0; }
           @page {
             size: A4 landscape;
-            margin: 0.3in;
+            margin: 10mm;
           }
           body {
             font-family: 'Outfit', sans-serif;
-            background: #f3f4f6;
+            background: #cbd5e1;
             color: #111827;
             padding: 15px;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
           }
           .no-print-bar {
             background: #1e293b;
@@ -4135,37 +4175,131 @@ document.addEventListener("DOMContentLoaded", () => {
             align-items: center;
             border-radius: 8px;
             margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
           }
           .btn-print {
             background: #2563eb;
             color: #fff;
             border: none;
-            padding: 8px 18px;
+            padding: 10px 22px;
             border-radius: 6px;
             font-weight: 700;
             font-size: 14px;
             cursor: pointer;
+            box-shadow: 0 2px 6px rgba(37,99,235,0.3);
+            transition: all 0.2s ease;
           }
-          .chest-grid {
+          .btn-print:hover {
+            background: #1d4ed8;
+          }
+
+          /* Container for each page (2 chest numbers per A4 landscape page) */
+          .chest-page {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
+            gap: 16mm;
+            width: 100%;
+            height: 180mm;
+            margin-bottom: 25px;
+            page-break-after: always;
+            box-sizing: border-box;
           }
+          .chest-page:last-child {
+            page-break-after: auto;
+            margin-bottom: 0;
+          }
+
+          /* Outer Card Wrapper with Equal Cut Margins & Ticks */
+          .chest-card-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: #ffffff;
+            border: 2px dashed #475569;
+            border-radius: 12px;
+            padding: 14px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+          }
+
+          /* Cut Mark Corner Ticks (Crop Marks) */
+          .cut-tick {
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            pointer-events: none;
+            z-index: 10;
+          }
+          .cut-tick-tl {
+            top: -6px; left: -6px;
+            border-top: 3px solid #0f172a;
+            border-left: 3px solid #0f172a;
+          }
+          .cut-tick-tr {
+            top: -6px; right: -6px;
+            border-top: 3px solid #0f172a;
+            border-right: 3px solid #0f172a;
+          }
+          .cut-tick-bl {
+            bottom: -6px; left: -6px;
+            border-bottom: 3px solid #0f172a;
+            border-left: 3px solid #0f172a;
+          }
+          .cut-tick-br {
+            bottom: -6px; right: -6px;
+            border-bottom: 3px solid #0f172a;
+            border-right: 3px solid #0f172a;
+          }
+
+          /* Scissors Cut Tag */
+          .cut-label-top {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ffffff;
+            padding: 0 8px;
+            font-size: 10px;
+            font-weight: 800;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            z-index: 11;
+          }
+          .cut-label-bottom {
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ffffff;
+            padding: 0 8px;
+            font-size: 10px;
+            font-weight: 800;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            z-index: 11;
+          }
+
+          /* Inner Card Container */
           .chest-card {
-            background: #fff;
             border: 4px solid #1e3a8a;
-            border-radius: 16px;
+            border-radius: 10px;
             padding: 16px 20px;
             text-align: center;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             align-items: center;
-            height: 340px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            page-break-inside: avoid;
-            position: relative;
+            height: 100%;
+            box-sizing: border-box;
+            background: #ffffff;
+            overflow: hidden;
           }
+
           .event-badge {
             font-size: 13px;
             font-weight: 800;
@@ -4175,12 +4309,12 @@ document.addEventListener("DOMContentLoaded", () => {
             margin-bottom: 2px;
           }
           .chest-number {
-            font-size: 160px;
+            font-size: 145px;
             font-weight: 900;
             color: #0f172a;
             line-height: 0.9;
             letter-spacing: -2px;
-            margin: 2px 0;
+            margin: 4px 0;
           }
           .skater-name {
             font-size: 22px;
@@ -4188,7 +4322,7 @@ document.addEventListener("DOMContentLoaded", () => {
             color: #1e293b;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            line-height: 1.25;
+            line-height: 1.2;
             margin-top: 4px;
             word-break: break-word;
           }
@@ -4203,17 +4337,21 @@ document.addEventListener("DOMContentLoaded", () => {
             letter-spacing: 0.5px;
             text-transform: uppercase;
           }
+
           @media print {
             .no-print-bar { display: none !important; }
-            body { background: #fff; padding: 0; }
-            .chest-grid {
-              grid-template-columns: repeat(2, 1fr);
-              gap: 15px;
+            body { background: #fff; padding: 0; margin: 0; }
+            .chest-page {
+              margin-bottom: 0;
+              height: 185mm;
+              gap: 12mm;
+              page-break-after: always;
             }
-            .chest-card {
-              height: 3.4in;
-              border-width: 4px;
-              page-break-inside: avoid;
+            .chest-page:last-child {
+              page-break-after: auto;
+            }
+            .chest-card-wrapper {
+              box-shadow: none;
             }
           }
         </style>
@@ -4223,28 +4361,9 @@ document.addEventListener("DOMContentLoaded", () => {
           <div>
             <strong>🎽 Printable Chest Numbers PDF (Landscape Layout)</strong> — ${escapeHTML(eventTitle)} (${targetRecords.length} Skaters)
           </div>
-          <button class="btn-print" onclick="window.print()">🖨️ Print Chest Numbers (Landscape A4)</button>
+          <button class="btn-print" onclick="window.print()">🖨️ Print / Save PDF (Landscape A4)</button>
         </div>
-        <div class="chest-grid">
-          ${targetRecords.map((r, idx) => {
-            const chestNum = r.eventRegNo || r.chestNo || r.chestNumber || String(100 + idx);
-            const skaterName = r.skaterName || r.name || 'Athlete';
-            return `
-              <div class="chest-card">
-                <div style="width:100%;">
-                  <div class="event-badge">${escapeHTML(eventTitle)}</div>
-                  <div class="chest-number">${escapeHTML(chestNum)}</div>
-                </div>
-                <div style="width:100%;">
-                  <div class="skater-name">${escapeHTML(skaterName)}</div>
-                </div>
-                <div class="association-footer">
-                  Roller Sports Association Moradabad
-                </div>
-              </div>
-            `;
-          }).join('')}
-        </div>
+        ${pagesHTML}
       </body>
       </html>
     `);
