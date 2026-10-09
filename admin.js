@@ -4108,41 +4108,52 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     let pagesHTML = '';
-    for (let i = 0; i < targetRecords.length; i += 2) {
-      const pair = targetRecords.slice(i, i + 2);
-      pagesHTML += `<div class="chest-page">`;
-      pair.forEach((r, subIdx) => {
-        const chestNum = r.eventRegNo || r.chestNo || r.chestNumber || String(100 + (i + subIdx));
-        const skaterName = r.skaterName || r.name || 'Athlete';
-        pagesHTML += `
-          <div class="chest-card-wrapper">
-            <!-- Cut Mark Corner Ticks (Crop Marks) -->
-            <div class="cut-tick cut-tick-tl"></div>
-            <div class="cut-tick cut-tick-tr"></div>
-            <div class="cut-tick cut-tick-bl"></div>
-            <div class="cut-tick cut-tick-br"></div>
-            <div class="cut-label-top">✂️ CUT ALONG DASHED LINE</div>
-            <div class="cut-label-bottom">✂️ CUT ALONG DASHED LINE</div>
+    for (let i = 0; i < targetRecords.length; i += 4) {
+      const group = targetRecords.slice(i, i + 4);
+      pagesHTML += `
+        <div class="chest-page">
+          <!-- Paper Knife Grid Crop Marks (Edge ticks for ruler alignment) -->
+          <div class="crop-mark crop-v-top"></div>
+          <div class="crop-mark crop-v-bottom"></div>
+          <div class="crop-mark crop-h-left"></div>
+          <div class="crop-mark crop-h-right"></div>
+          <div class="crop-mark crop-tl-h"></div>
+          <div class="crop-mark crop-tl-v"></div>
+          <div class="crop-mark crop-tr-h"></div>
+          <div class="crop-mark crop-tr-v"></div>
+          <div class="crop-mark crop-bl-h"></div>
+          <div class="crop-mark crop-bl-v"></div>
+          <div class="crop-mark crop-br-h"></div>
+          <div class="crop-mark crop-br-v"></div>
 
+          <div class="chest-grid">
+      `;
+
+      for (let g = 0; g < 4; g++) {
+        if (g < group.length) {
+          const r = group[g];
+          const chestNum = r.eventRegNo || r.chestNo || r.chestNumber || String(100 + (i + g));
+          const skaterName = r.skaterName || r.name || 'Athlete';
+          pagesHTML += `
             <div class="chest-card">
               <div style="width:100%;">
                 <div class="event-badge">${escapeHTML(eventTitle)}</div>
                 <div class="chest-number">${escapeHTML(chestNum)}</div>
               </div>
-              <div style="width:100%;">
+              <div style="width:100%; margin-top: auto;">
                 <div class="skater-name">${escapeHTML(skaterName)}</div>
-              </div>
-              <div class="association-footer">
-                Roller Sports Association Moradabad
+                <div class="association-footer">
+                  Roller Sports Association Moradabad
+                </div>
               </div>
             </div>
-          </div>
-        `;
-      });
-      if (pair.length === 1) {
-        pagesHTML += `<div class="chest-card-wrapper" style="visibility: hidden;"></div>`;
+          `;
+        } else {
+          pagesHTML += `<div class="chest-card" style="visibility: hidden;"></div>`;
+        }
       }
-      pagesHTML += `</div>`;
+
+      pagesHTML += `</div></div>`;
     }
 
     win.document.write(`
@@ -4156,13 +4167,13 @@ document.addEventListener("DOMContentLoaded", () => {
           * { box-sizing: border-box; margin: 0; padding: 0; }
           @page {
             size: A4 landscape;
-            margin: 10mm;
+            margin: 6mm;
           }
           body {
             font-family: 'Outfit', sans-serif;
             background: #cbd5e1;
             color: #111827;
-            padding: 15px;
+            padding: 10px;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
           }
@@ -4193,165 +4204,143 @@ document.addEventListener("DOMContentLoaded", () => {
             background: #1d4ed8;
           }
 
-          /* Container for each page (2 chest numbers per A4 landscape page) */
+          /* Container for each page (4 chest numbers per A4 landscape page in 2x2 grid) */
           .chest-page {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16mm;
+            position: relative;
             width: 100%;
-            height: 180mm;
+            height: 192mm;
+            background: #ffffff;
+            padding: 7mm;
             margin-bottom: 25px;
             page-break-after: always;
             box-sizing: border-box;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
           }
           .chest-page:last-child {
             page-break-after: auto;
             margin-bottom: 0;
           }
 
-          /* Outer Card Wrapper with Equal Cut Margins & Ticks */
-          .chest-card-wrapper {
-            position: relative;
+          /* 2x2 Grid Container */
+          .chest-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 0px;
             width: 100%;
             height: 100%;
-            background: #ffffff;
-            border: 2px dashed #475569;
-            border-radius: 12px;
-            padding: 14px;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            border: 1px dashed #cbd5e1; /* Subtle grid outline for cutting */
           }
 
-          /* Cut Mark Corner Ticks (Crop Marks) */
-          .cut-tick {
-            position: absolute;
-            width: 18px;
-            height: 18px;
-            pointer-events: none;
-            z-index: 10;
-          }
-          .cut-tick-tl {
-            top: -6px; left: -6px;
-            border-top: 3px solid #0f172a;
-            border-left: 3px solid #0f172a;
-          }
-          .cut-tick-tr {
-            top: -6px; right: -6px;
-            border-top: 3px solid #0f172a;
-            border-right: 3px solid #0f172a;
-          }
-          .cut-tick-bl {
-            bottom: -6px; left: -6px;
-            border-bottom: 3px solid #0f172a;
-            border-left: 3px solid #0f172a;
-          }
-          .cut-tick-br {
-            bottom: -6px; right: -6px;
-            border-bottom: 3px solid #0f172a;
-            border-right: 3px solid #0f172a;
-          }
-
-          /* Scissors Cut Tag */
-          .cut-label-top {
-            position: absolute;
-            top: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #ffffff;
-            padding: 0 8px;
-            font-size: 10px;
-            font-weight: 800;
-            color: #475569;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            z-index: 11;
-          }
-          .cut-label-bottom {
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #ffffff;
-            padding: 0 8px;
-            font-size: 10px;
-            font-weight: 800;
-            color: #475569;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            z-index: 11;
-          }
-
-          /* Inner Card Container */
+          /* Individual Chest Card Cell in 2x2 grid */
           .chest-card {
-            border: 4px solid #1e3a8a;
-            border-radius: 10px;
-            padding: 16px 20px;
+            border: 1px dashed #cbd5e1;
+            padding: 10px 14px;
             text-align: center;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             align-items: center;
-            height: 100%;
             box-sizing: border-box;
             background: #ffffff;
             overflow: hidden;
+            height: 100%;
           }
 
           .event-badge {
-            font-size: 13px;
+            font-size: 11px;
             font-weight: 800;
             color: #dc2626;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            line-height: 1;
             margin-bottom: 2px;
           }
           .chest-number {
-            font-size: 145px;
+            font-size: 105px; /* Extremely huge font size to be seen from far */
             font-weight: 900;
             color: #0f172a;
-            line-height: 0.9;
+            line-height: 0.85;
             letter-spacing: -2px;
-            margin: 4px 0;
+            margin: 2px 0;
           }
           .skater-name {
-            font-size: 22px;
+            font-size: 16px;
             font-weight: 900;
             color: #1e293b;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            line-height: 1.2;
-            margin-top: 4px;
+            line-height: 1.15;
             word-break: break-word;
+            max-height: 38px;
+            overflow: hidden;
           }
           .association-footer {
-            border-top: 2px solid #cbd5e1;
+            border-top: 1.5px solid #e2e8f0;
             width: 100%;
-            padding-top: 6px;
-            margin-top: 6px;
-            font-size: 12px;
+            padding-top: 4px;
+            margin-top: 4px;
+            font-size: 10px;
             font-weight: 800;
             color: #1e3a8a;
             letter-spacing: 0.5px;
             text-transform: uppercase;
           }
 
+          /* Paper Knife Cut Marks (Solid black tick marks at sheet edges for ruler alignment) */
+          .crop-mark {
+            position: absolute;
+            background: #000000;
+            pointer-events: none;
+            z-index: 30;
+          }
+          /* Vertical knife cut marks (Top & Bottom center line) */
+          .crop-v-top {
+            top: 0; left: 50%;
+            width: 2px; height: 6mm;
+            transform: translateX(-50%);
+          }
+          .crop-v-bottom {
+            bottom: 0; left: 50%;
+            width: 2px; height: 6mm;
+            transform: translateX(-50%);
+          }
+          /* Horizontal knife cut marks (Left & Right center line) */
+          .crop-h-left {
+            top: 50%; left: 0;
+            width: 6mm; height: 2px;
+            transform: translateY(-50%);
+          }
+          .crop-h-right {
+            top: 50%; right: 0;
+            width: 6mm; height: 2px;
+            transform: translateY(-50%);
+          }
+          /* 4 Outer Corner Knife Cut Marks */
+          .crop-tl-h { top: 7mm; left: 0; width: 6mm; height: 2px; }
+          .crop-tl-v { top: 0; left: 7mm; width: 2px; height: 6mm; }
+
+          .crop-tr-h { top: 7mm; right: 0; width: 6mm; height: 2px; }
+          .crop-tr-v { top: 0; right: 7mm; width: 2px; height: 6mm; }
+
+          .crop-bl-h { bottom: 7mm; left: 0; width: 6mm; height: 2px; }
+          .crop-bl-v { bottom: 0; left: 7mm; width: 2px; height: 6mm; }
+
+          .crop-br-h { bottom: 7mm; right: 0; width: 6mm; height: 2px; }
+          .crop-br-v { bottom: 0; right: 7mm; width: 2px; height: 6mm; }
+
           @media print {
             .no-print-bar { display: none !important; }
             body { background: #fff; padding: 0; margin: 0; }
             .chest-page {
               margin-bottom: 0;
-              height: 185mm;
-              gap: 12mm;
+              height: 196mm;
+              padding: 6mm;
               page-break-after: always;
+              box-shadow: none;
             }
             .chest-page:last-child {
               page-break-after: auto;
-            }
-            .chest-card-wrapper {
-              box-shadow: none;
             }
           }
         </style>
@@ -4359,7 +4348,7 @@ document.addEventListener("DOMContentLoaded", () => {
       <body>
         <div class="no-print-bar">
           <div>
-            <strong>🎽 Printable Chest Numbers PDF (Landscape Layout)</strong> — ${escapeHTML(eventTitle)} (${targetRecords.length} Skaters)
+            <strong>🎽 Printable Chest Numbers PDF (4 Cards / A4 Landscape)</strong> — ${escapeHTML(eventTitle)} (${targetRecords.length} Skaters)
           </div>
           <button class="btn-print" onclick="window.print()">🖨️ Print / Save PDF (Landscape A4)</button>
         </div>
