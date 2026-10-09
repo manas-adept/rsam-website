@@ -1667,7 +1667,21 @@ document.addEventListener("DOMContentLoaded", () => {
             lastErrorMsg = err.message;
           }
 
-          await new Promise(res => setTimeout(res, 800));
+          // Anti-Ban Safety Protection for WhatsApp Account:
+          // 1. Every 20 messages, insert a 45-second batch cooldown pause
+          if (i > 0 && i % 20 === 0 && i < recipients.length - 1) {
+            const coolDownSecs = 45;
+            for (let c = coolDownSecs; c > 0; c--) {
+              if (progressStatus) progressStatus.textContent = `☕ Safety Batch Cooldown (${i}/${recipients.length} sent): Pausing ${c}s to protect WhatsApp account from ban...`;
+              await new Promise(res => setTimeout(res, 1000));
+            }
+          } else if (i < recipients.length - 1) {
+            // 2. Randomized 5 to 10 second human-like delay between messages
+            const randomDelayMs = Math.floor(Math.random() * 5000) + 5000;
+            const waitSecs = (randomDelayMs / 1000).toFixed(1);
+            if (progressStatus) progressStatus.textContent = `⏳ Safe Delivery (${i + 1}/${recipients.length}): Waiting ${waitSecs}s to simulate human typing & protect account...`;
+            await new Promise(res => setTimeout(res, randomDelayMs));
+          }
         }
 
         const failSuffix = lastErrorMsg ? ` (Last Error: ${lastErrorMsg})` : '';
@@ -2428,7 +2442,21 @@ document.addEventListener("DOMContentLoaded", () => {
             sentCount++;
           }
 
-          await new Promise(res => setTimeout(res, 600));
+          // Anti-Ban Safety Protection for WhatsApp Account:
+          // 1. Every 20 messages, insert a 45-second batch cooldown pause
+          if (i > 0 && i % 20 === 0 && i < selectedRecords.length - 1) {
+            const coolDownSecs = 45;
+            for (let c = coolDownSecs; c > 0; c--) {
+              bulkWaBtn.innerHTML = `☕ Safety Cooldown (${i}/${selectedRecords.length} sent): Pausing ${c}s...`;
+              await new Promise(res => setTimeout(res, 1000));
+            }
+          } else if (i < selectedRecords.length - 1) {
+            // 2. Randomized 5 to 10 second human-like delay between messages
+            const randomDelayMs = Math.floor(Math.random() * 5000) + 5000;
+            const waitSecs = (randomDelayMs / 1000).toFixed(1);
+            bulkWaBtn.innerHTML = `⏳ Safe Delivery (${i + 1}/${selectedRecords.length}): Waiting ${waitSecs}s...`;
+            await new Promise(res => setTimeout(res, randomDelayMs));
+          }
         }
 
         notify(`🚀 Certificate WhatsApp Broadcast complete! ${sentCount} sent, ${failCount} failed.`, "success");
