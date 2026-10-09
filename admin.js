@@ -69,6 +69,59 @@ function formatDeadlineForDisplay(deadlineStr, fallbackStr) {
   return String(val);
 }
 
+function formatDobDdMmmYyyy(str) {
+  if (!str) return "N/A";
+  str = String(str).trim();
+  if (!str || str === "—" || str === "N/A" || str === "null" || str === "undefined") return "N/A";
+
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+  if (str.includes("GMT") || str.includes("Standard Time") || /^\w{3} \w{3} \d{1,2}/.test(str)) {
+    const d = new Date(str);
+    if (!isNaN(d.getTime())) {
+      const day = String(d.getDate()).padStart(2, '0');
+      const month = months[d.getMonth()];
+      const year = d.getFullYear();
+      return `${day}-${month}-${year}`;
+    }
+  }
+
+  if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
+    const d = new Date(str);
+    if (!isNaN(d.getTime())) {
+      const day = String(d.getUTCDate()).padStart(2, '0');
+      const month = months[d.getUTCMonth()];
+      const year = d.getUTCFullYear();
+      return `${day}-${month}-${year}`;
+    }
+  }
+
+  const parts = str.split(/[\/\-\.]/).map(s => s.trim());
+  if (parts.length === 3) {
+    let p0 = parseInt(parts[0], 10);
+    let p1 = parseInt(parts[1], 10);
+    let p2 = parseInt(parts[2], 10);
+
+    if (parts[2].length === 4 && !isNaN(p0) && !isNaN(p1) && !isNaN(p2)) {
+      if (p1 >= 1 && p1 <= 12 && p0 >= 1 && p0 <= 31) {
+        const day = String(p0).padStart(2, '0');
+        const month = months[p1 - 1];
+        return `${day}-${month}-${p2}`;
+      }
+    }
+  }
+
+  const d = new Date(str);
+  if (!isNaN(d.getTime())) {
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = months[d.getMonth()];
+    const year = d.getFullYear();
+    return `${day}-${month}-${year}`;
+  }
+
+  return str;
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const SESSION_KEY = "RSAM_ADMIN_SESSION";
 
@@ -1543,10 +1596,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
           let parsedMsg = rawTemplate;
 
+          const formattedDob = formatDobDdMmmYyyy(r.data.dob || r.data.dateOfBirth);
+
           // 1. Dynamic replacement for all keys present in r.data
           if (r.data && typeof r.data === "object") {
             Object.keys(r.data).forEach(key => {
-              const val = r.data[key];
+              let val = r.data[key];
+              if (key.toLowerCase() === "dob" || key.toLowerCase() === "dateofbirth") {
+                val = formatDobDdMmmYyyy(val);
+              }
               if (val !== undefined && val !== null && val !== "") {
                 const regExp = new RegExp(`{${key}}`, 'gi');
                 parsedMsg = parsedMsg.replace(regExp, String(val));
@@ -1564,7 +1622,8 @@ document.addEventListener("DOMContentLoaded", () => {
             .replace(/{skaterList}/g, skaterListStr)
             .replace(/{skaterName} - {regNumber}/g, skaterListStr)
             .replace(/{skaterName}/g, r.data.skaterName || r.name || 'Athlete')
-            .replace(/{dob}/g, r.data.dob || 'N/A')
+            .replace(/{dob}/g, formattedDob || 'N/A')
+            .replace(/{dateOfBirth}/g, formattedDob || 'N/A')
             .replace(/{age}/g, r.data.age || 'N/A')
             .replace(/{ageGroup}/g, r.data.ageGroup || 'N/A')
             .replace(/{gender}/g, r.data.gender || 'N/A')
@@ -1727,59 +1786,6 @@ document.addEventListener("DOMContentLoaded", () => {
         sig: sig
       });
       return `${origin}/certificate-view.html?${params.toString()}`;
-    }
-
-    function formatDobDdMmmYyyy(str) {
-      if (!str) return "N/A";
-      str = String(str).trim();
-      if (!str || str === "—" || str === "N/A" || str === "null" || str === "undefined") return "N/A";
-
-      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-      if (str.includes("GMT") || str.includes("Standard Time") || /^\w{3} \w{3} \d{1,2}/.test(str)) {
-        const d = new Date(str);
-        if (!isNaN(d.getTime())) {
-          const day = String(d.getDate()).padStart(2, '0');
-          const month = months[d.getMonth()];
-          const year = d.getFullYear();
-          return `${day}-${month}-${year}`;
-        }
-      }
-
-      if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
-        const d = new Date(str);
-        if (!isNaN(d.getTime())) {
-          const day = String(d.getUTCDate()).padStart(2, '0');
-          const month = months[d.getUTCMonth()];
-          const year = d.getUTCFullYear();
-          return `${day}-${month}-${year}`;
-        }
-      }
-
-      const parts = str.split(/[\/\-\.]/).map(s => s.trim());
-      if (parts.length === 3) {
-        let p0 = parseInt(parts[0], 10);
-        let p1 = parseInt(parts[1], 10);
-        let p2 = parseInt(parts[2], 10);
-
-        if (parts[2].length === 4 && !isNaN(p0) && !isNaN(p1) && !isNaN(p2)) {
-          if (p1 >= 1 && p1 <= 12 && p0 >= 1 && p0 <= 31) {
-            const day = String(p0).padStart(2, '0');
-            const month = months[p1 - 1];
-            return `${day}-${month}-${p2}`;
-          }
-        }
-      }
-
-      const d = new Date(str);
-      if (!isNaN(d.getTime())) {
-        const day = String(d.getDate()).padStart(2, '0');
-        const month = months[d.getMonth()];
-        const year = d.getFullYear();
-        return `${day}-${month}-${year}`;
-      }
-
-      return str;
     }
 
     function getCertData() {
