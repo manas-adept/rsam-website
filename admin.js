@@ -4168,7 +4168,7 @@ document.addEventListener("DOMContentLoaded", () => {
           const chestNum = r.eventRegNo || r.chestNo || r.chestNumber || String(100 + (i + g));
           const skaterName = r.isDummy ? '' : (r.skaterName || r.name || 'Athlete');
           const nameHTML = r.isDummy 
-            ? `<div class="skater-name dummy-name-line">&nbsp;</div>`
+            ? `<div class="skater-name-dummy">&nbsp;</div>`
             : `<div class="skater-name">${escapeHTML(skaterName)}</div>`;
 
           pagesHTML += `
@@ -4263,15 +4263,15 @@ document.addEventListener("DOMContentLoaded", () => {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             grid-template-rows: repeat(2, 1fr);
-            gap: 0px;
+            gap: 8mm;
             width: 100%;
             height: 100%;
-            border: 1px dashed #cbd5e1; /* Subtle grid outline for cutting */
           }
 
-          /* Individual Chest Card Cell in 2x2 grid */
+          /* Individual Chest Card Cell in 2x2 grid with Prominent Solid Border */
           .chest-card {
-            border: 1px dashed #cbd5e1;
+            border: 4px solid #1e3a8a;
+            border-radius: 12px;
             padding: 10px 14px;
             text-align: center;
             display: flex;
@@ -4294,7 +4294,7 @@ document.addEventListener("DOMContentLoaded", () => {
             margin-bottom: 2px;
           }
           .chest-number {
-            font-size: 105px; /* Extremely huge font size to be seen from far */
+            font-size: 110px; /* Extremely huge font size to be seen from far */
             font-weight: 900;
             color: #0f172a;
             line-height: 0.85;
@@ -4312,10 +4312,9 @@ document.addEventListener("DOMContentLoaded", () => {
             max-height: 38px;
             overflow: hidden;
           }
-          .dummy-name-line {
-            border-bottom: 2px dashed #94a3b8;
-            min-height: 20px;
-            margin: 2px 12px 2px 12px;
+          .skater-name-dummy {
+            min-height: 22px;
+            visibility: hidden;
           }
           .association-footer {
             border-top: 1.5px solid #e2e8f0;
