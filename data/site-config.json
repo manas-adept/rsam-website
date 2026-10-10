@@ -17,7 +17,7 @@
       "date": "11th October 2026",
       "startDateTime": "2026-10-11T08:00",
       "endDateTime": "2026-10-11T15:00",
-      "deadline": "2026-10-08T23:59:00+05:30",
+      "deadline": "2026-10-10T23:59:00+05:30",
       "location": "Springfields School, New Moradabad",
       "feeType": "online",
       "payToOrganizer": false,
@@ -374,5 +374,5 @@
       }
     ]
   },
-  "lastUpdated": "2026-10-06T17:09:54.678Z"
+  "lastUpdated": "2026-10-10T06:07:29.894Z"
 }
