@@ -4294,26 +4294,27 @@ document.addEventListener("DOMContentLoaded", () => {
             margin-bottom: 2px;
           }
           .chest-number {
-            font-size: 110px; /* Extremely huge font size to be seen from far */
+            font-size: 200px; /* Huge 200px triple-digit font size for maximum far-away visibility */
             font-weight: 900;
             color: #0f172a;
-            line-height: 0.85;
-            letter-spacing: -2px;
-            margin: 2px 0;
+            line-height: 0.8;
+            letter-spacing: -5px;
+            margin: 0;
+            padding: 0;
           }
           .skater-name {
-            font-size: 16px;
+            font-size: 28px; /* High-visibility 28px skater name font size */
             font-weight: 900;
             color: #1e293b;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            line-height: 1.15;
+            line-height: 1.1;
             word-break: break-word;
-            max-height: 38px;
+            max-height: 64px;
             overflow: hidden;
           }
           .skater-name-dummy {
-            min-height: 22px;
+            min-height: 32px;
             visibility: hidden;
           }
           .association-footer {
