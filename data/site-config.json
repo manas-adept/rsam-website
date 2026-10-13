@@ -17,8 +17,8 @@
       "date": "11th October 2026",
       "startDateTime": "2026-10-11T08:00",
       "endDateTime": "2026-10-11T15:00",
-      "deadline": "2026-10-10T23:59:00+05:30",
-      "location": "Springfields School, New Moradabad",
+      "deadline": "2026-10-08T23:59:00+05:30",
+      "location": "TBD",
       "feeType": "online",
       "payToOrganizer": false,
       "baseFee": 500,
@@ -28,7 +28,6 @@
       "description": "Official 4th District Championship cum State trial for all age groups & disciplines in Moradabad.",
       "body": "Official 4th District Championship cum State trial for all age groups & disciplines in Moradabad.",
       "showOnTicker": true,
-      "showDeadlineOnTicker": true,
       "isRegistrationActive": true,
       "archived": false
     },
@@ -221,7 +220,7 @@
       "designation": "President",
       "designationClass": "president",
       "degrees": "",
-      "photo": "https://res.cloudinary.com/igjmhsju/image/upload/v1790855940/ashok_singhal_qxhfet.jpg",
+      "photo": "https://res.cloudinary.com/igjmhsju/image/upload/v1788797450/rsam_website/officials/refree_dummy.png",
       "category": "executive"
     },
     {
@@ -346,10 +345,16 @@
   },
   "ticker": "🚀 Welcome to Roller Sports Association Moradabad (RSAM) | Annual Registrations & District Championship 2026 Entries Now Open! | Certified Track & Roller Skating Excellence",
   "gallery": {
-    "cloudinaryBasePath": "rsam_website/events",
-    "defaultItemsPerPage": 20,
-    "autoOptimizeAfterDays": 7,
     "folders": [
+      {
+        "folderId": "4th_district_cum_trial_2026",
+        "cloudinarySubfolder": "4th_district_cum_trial_2026",
+        "title": "4th District Championship / Trial",
+        "category": "District Championship",
+        "date": "October 11, 2026",
+        "location": "Springfields School, New Moradabad",
+        "description": "Shots captured from the event, showcasing the thrill, excitement and the adrenaline rush."
+      },
       {
         "folderId": "lko_uprsa_7th_2026",
         "cloudinarySubfolder": "rsam_website/events/lko_uprsa_7th_2026",
@@ -374,5 +379,5 @@
       }
     ]
   },
-  "lastUpdated": "2026-10-10T06:07:29.894Z"
+  "lastUpdated": "2026-10-13T14:24:56.483Z"
 }
