@@ -347,6 +347,15 @@
   "gallery": {
     "folders": [
       {
+        "folderId": "4th_district_cum_trial_2026",
+        "cloudinarySubfolder": "4th_district_cum_trial_2026",
+        "title": "4th District Championship / Trial",
+        "category": "District Championship",
+        "date": "Oct 11, 2026",
+        "location": "Springfields School, New Moradabad",
+        "description": "4th District Championship cum State Trial is organized in Springfields School, New Moradabad."
+      },
+      {
         "folderId": "12th_state_championship_devaswom_2026",
         "cloudinarySubfolder": "12th_state_championship_devaswom_2026",
         "title": "12th State Championship 2026",
@@ -379,5 +388,5 @@
       }
     ]
   },
-  "lastUpdated": "2026-10-28T16:02:33.516Z"
+  "lastUpdated": "2026-10-28T16:04:11.981Z"
 }
