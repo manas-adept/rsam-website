@@ -27,8 +27,8 @@
       "image": "https://res.cloudinary.com/igjmhsju/image/upload/v1788882417/event-selection-trial-rsfi-2026.jpg",
       "description": "Official 4th District Championship cum State trial for all age groups & disciplines in Moradabad.",
       "body": "Official 4th District Championship cum State trial for all age groups & disciplines in Moradabad.",
-      "showOnTicker": true,
-      "isRegistrationActive": true,
+      "showOnTicker": false,
+      "isRegistrationActive": false,
       "archived": false
     },
     {
@@ -347,24 +347,22 @@
   "gallery": {
     "folders": [
       {
-        "folderId": "12th_state_championship_devaswom_2026",
-        "cloudinarySubfolder": "12th_state_championship_devaswom_2026",
-        "title": "12th State Championship 2026",
-        "category": "State Championship",
-        "date": "22 Oct - 25 Oct 2026",
-        "location": "Devaswom Skating Track, Noida",
-        "description": "12th State Championship 2026",
-        "displayOrder": 1
-      },
-      {
         "folderId": "4th_district_cum_trial_2026",
         "cloudinarySubfolder": "4th_district_cum_trial_2026",
         "title": "4th District Championship / Trial",
         "category": "District Championship",
         "date": "Oct 11, 2026",
         "location": "Springfields School, New Moradabad",
-        "description": "4th District Championship cum State Trial is organized in Springfields School, New Moradabad.",
-        "displayOrder": 2
+        "description": "4th District Championship cum State Trial is organized in Springfields School, New Moradabad."
+      },
+      {
+        "folderId": "12th_state_championship_devaswom_2026",
+        "cloudinarySubfolder": "12th_state_championship_devaswom_2026",
+        "title": "12th State Championship 2026",
+        "category": "State Championship",
+        "date": "22 Oct - 25 Oct 2026",
+        "location": "Devaswom Skating Track, Noida",
+        "description": "12th State Championship 2026"
       },
       {
         "folderId": "lko_uprsa_7th_2026",
@@ -374,7 +372,7 @@
         "location": "Central Academy, Lucknow",
         "category": "State Championship",
         "enabled": true,
-        "displayOrder": 3,
+        "displayOrder": 1,
         "description": "High-octane moments and victory celebrations from the UPRSA State Championship in Lucknow."
       },
       {
@@ -385,10 +383,10 @@
         "location": "DMR Hospital, Moradabad",
         "category": "Felicitation",
         "enabled": true,
-        "displayOrder": 4,
+        "displayOrder": 2,
         "description": "Special felicitation ceremony hosted at DMR Hospital honoring state championship medalists."
       }
     ]
   },
-  "lastUpdated": "2026-10-28T16:04:40.518Z"
+  "lastUpdated": "2026-10-28T16:04:57.381Z"
 }
