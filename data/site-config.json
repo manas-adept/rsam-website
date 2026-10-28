@@ -347,13 +347,13 @@
   "gallery": {
     "folders": [
       {
-        "folderId": "4th_district_cum_trial_2026",
-        "cloudinarySubfolder": "4th_district_cum_trial_2026",
-        "title": "4th District Championship / Trial",
-        "category": "District Championship",
-        "date": "October 11, 2026",
-        "location": "Springfields School, New Moradabad",
-        "description": "Shots captured from the event, showcasing the thrill, excitement and the adrenaline rush."
+        "folderId": "12th_state_championship_devaswom_2026",
+        "cloudinarySubfolder": "12th_state_championship_devaswom_2026",
+        "title": "12th State Championship 2026",
+        "category": "State Championship",
+        "date": "22 Oct - 25 Oct 2026",
+        "location": "Devaswom Skating Track, Noida",
+        "description": "12th State Championship 2026"
       },
       {
         "folderId": "lko_uprsa_7th_2026",
@@ -379,5 +379,5 @@
       }
     ]
   },
-  "lastUpdated": "2026-10-13T14:25:02.424Z"
+  "lastUpdated": "2026-10-28T16:02:31.044Z"
 }
